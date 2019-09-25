@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <div th:replace="fragments/header :: header"></div>
+    <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE"></title>
+
+    <div th:replace="fragments/styles :: styles"></div>
+
+</head>
+<body id="page-top">
+<div th:replace="fragments/nav-menu :: nav-menu"></div>
+<div id="wrapper">
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+    <div layout:fragment="content"></div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>
