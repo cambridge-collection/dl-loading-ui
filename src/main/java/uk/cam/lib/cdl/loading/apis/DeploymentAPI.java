@@ -2,21 +2,28 @@ package uk.cam.lib.cdl.loading.apis;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import uk.cam.lib.cdl.loading.model.Instance;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class DeploymentAPI extends WebAPI {
 
     private URL deploymentURL;
+    private final String cacheName = "deploymentInstances";
 
     public DeploymentAPI(URL deploymentURL) {
         this.deploymentURL = deploymentURL;
     }
 
+    @Cacheable(cacheName)
     public List<Instance> getInstances() {
 
         try {
@@ -37,6 +44,12 @@ public class DeploymentAPI extends WebAPI {
         }
 
         return null;
+    }
+
+    @CacheEvict(allEntries = true, value = {cacheName})
+    @Scheduled(fixedDelay = 5 * 60 * 1000, initialDelay = 500) // Every 5 mins
+    public void reportCacheEvict() {
+        System.out.println("Flush Cache " + DateFormat.getInstance().format(new Date()));
     }
 
 }
