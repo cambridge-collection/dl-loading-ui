@@ -1,15 +1,16 @@
 package uk.cam.lib.cdl.loading.model;
 
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.validation.annotation.Validated;
-import javax.validation.constraints.*;
+
+import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 /**
  * Instance
  */
 @Validated
-public class Instance   {
+public class Instance implements Comparable<Instance> {
   @JsonProperty("instanceId")
   private String instanceId = null;
 
@@ -69,7 +70,7 @@ public class Instance   {
         this.url=url;
     }
 
-  @Override
+    @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
@@ -110,4 +111,9 @@ public class Instance   {
     }
     return o.toString().replace("\n", "\n    ");
   }
+
+    @Override
+    public int compareTo(Instance instance) {
+        return this.getInstanceId().compareTo(instance.getInstanceId());
+    }
 }

@@ -1,0 +1,13 @@
+{
+    "properties": [
+        {
+            "name": "spring.application.static.path",
+            "type": "java.lang.String",
+            "description": "Path to static content, e.g. js and css."
+        },
+        {
+            "name": "deployment.api.url",
+            "type": "java.lang.String",
+            "description": "Base URL for the Deployment API."
+        }
+    ] }
