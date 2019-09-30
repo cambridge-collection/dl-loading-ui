@@ -33,9 +33,10 @@
                                 <span class="text-xs font-weight-bold text-primary text-uppercase mb-1">Recently
                                     created
                                     packages
-                                </span><p th:object="${tags[__${tags.size()-1}__]}">
-                                The last package created was
-                                <span class="h5 mb-0 font-weight-bold text-gray-800">
+                                </span>
+                                <p th:object="${tags[__${tags.size()-1}__]}">
+                                    The last package created was
+                                    <span class="h5 mb-0 font-weight-bold text-gray-800">
                                     <span th:text="*{name}"></span>
                                 </span> on <span class="h5 mb-0 font-weight-bold text-gray-800">
                                     <span th:text="*{date.toLocalDate()}"></span>
@@ -74,7 +75,7 @@
                                     </thead>
                                     <tbody>
                                     <tr th:each="instance : ${instances}">
-                                        <td th:text="${instance.instanceId}">1</td>
+                                        <td th:text="${instance.instanceId}"></td>
                                         <td>
                                             <select class="custom-select">
                                                 <option th:each="tag : ${tags}" th:value="${tag.name}"
@@ -87,23 +88,24 @@
                                     </tr>
                                     </tbody>
                                 </table>
-                            </div></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
-
         </div>
     </div>
-</div>
-<!-- /.container-fluid -->
+    <!-- /.container-fluid -->
 
-<!-- Sticky Footer -->
-<footer class="sticky-footer">
-    <div class="container my-auto">
-        <div class="copyright text-center my-auto">
-            <span>Created by Cambridge University Library</span>
+    <!-- Sticky Footer -->
+    <footer class="sticky-footer">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>Created by Cambridge University Library</span>
+            </div>
         </div>
-    </div>
-</footer>
+    </footer>
 
 </div>
 <!-- /.content-wrapper -->
