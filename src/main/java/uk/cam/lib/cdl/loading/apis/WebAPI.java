@@ -22,10 +22,10 @@ public abstract class WebAPI {
             con.setRequestMethod("GET");
             con.setRequestProperty("Accept", "application/json");
 
-            if (username!=null && password!=null) {
+            if (username != null && password != null) {
                 String userpass = username + ":" + password;
                 String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
-                con.setRequestProperty ("Authorization", basicAuth);
+                con.setRequestProperty("Authorization", basicAuth);
             }
 
             Integer code = con.getResponseCode();
@@ -45,7 +45,8 @@ public abstract class WebAPI {
         } finally {
             try {
                 con.disconnect();
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
         return null;

@@ -11,7 +11,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BitbucketAPI extends WebAPI{
+public class BitbucketAPI extends WebAPI {
 
     private URL apiURL;
     private URL tagsURL;
@@ -20,7 +20,7 @@ public class BitbucketAPI extends WebAPI{
 
     public BitbucketAPI(URL apiURL, String tagsURL, String username, String password) throws MalformedURLException {
         this.apiURL = apiURL;
-        this.tagsURL = new URL(apiURL,tagsURL);
+        this.tagsURL = new URL(apiURL, tagsURL);
         this.username = username;
         this.password = password;
     }
@@ -34,10 +34,10 @@ public class BitbucketAPI extends WebAPI{
             JSONArray values = parent.getJSONArray("values");
 
             List<Tag> tags = new ArrayList<Tag>();
-            for (int i=0; i<values.length(); i++) {
+            for (int i = 0; i < values.length(); i++) {
                 JSONObject o = values.getJSONObject(i);
                 String name = o.getString("name");
-                DateTime date = new DateTime( o.getString("date"));
+                DateTime date = new DateTime(o.getString("date"));
                 String message = o.getString("message");
                 Tag t = new Tag(name, date, message);
                 tags.add(t);

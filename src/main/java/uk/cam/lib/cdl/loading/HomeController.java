@@ -56,6 +56,7 @@ public class HomeController {
     @RequestMapping(method = RequestMethod.GET, value = "/deploy.html")
     public String deploy(Model model) {
 
+        /* TODO Some form of caching */
         List<Instance> instances = deploymentAPI.getInstances();
         List<Tag> tags = bitbucketAPI.getTags();
         Collections.sort(tags);
