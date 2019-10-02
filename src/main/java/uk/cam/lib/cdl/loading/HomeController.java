@@ -11,8 +11,6 @@ import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
 import uk.cam.lib.cdl.loading.model.Instance;
 import uk.cam.lib.cdl.loading.model.Tag;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,9 +26,8 @@ public class HomeController {
     @Autowired
     private BitbucketAPI bitbucketAPI;
 
-    @RequestMapping(method = RequestMethod.GET, value = { "/", "/index.html"} )
+    @RequestMapping(method = RequestMethod.GET, value = {"/", "/index.html"})
     public String index(Model model) {
-
         model.addAttribute("appName", appName);
         return "home";
     }
@@ -41,22 +38,15 @@ public class HomeController {
         return "blank";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/login.html")
+    @RequestMapping(method = RequestMethod.GET, value = "/login/login.html")
     public String login(Model model) {
 
         return "login";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/charts.html")
-    public String charts(Model model) {
-
-        return "charts";
-    }
-
     @RequestMapping(method = RequestMethod.GET, value = "/deploy.html")
     public String deploy(Model model) {
 
-        /* TODO Some form of caching */
         List<Instance> instances = deploymentAPI.getInstances();
         List<Tag> tags = bitbucketAPI.getTags();
         Collections.sort(tags);
@@ -67,23 +57,16 @@ public class HomeController {
         return "deploy";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/forgot-password.html")
+    @RequestMapping(method = RequestMethod.GET, value = "/login/forgot-password.html")
     public String forgotPassword(Model model) {
 
         return "forgot-password";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/register.html")
+    @RequestMapping(method = RequestMethod.GET, value = "/login/register.html")
     public String register(Model model) {
 
         return "register";
     }
-
-    @RequestMapping(method = RequestMethod.GET, value = "/tables.html")
-    public String tables(Model model) {
-
-        return "tables";
-    }
-
 
 }
