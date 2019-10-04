@@ -2,6 +2,8 @@ package uk.cam.lib.cdl.loading.apis;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -46,9 +48,62 @@ public class DeploymentAPI extends WebAPI {
         return null;
     }
 
+    @Cacheable(cacheName)
+    /** TODO validate input **/
+    public Instance getInstance(String instanceId) {
+
+        try {
+
+            URL url = new URL(deploymentURL + "instances/"+instanceId);
+            String json = this.requestGETJSON(url);
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(json, new TypeReference<Instance>() {
+            });
+
+
+        } catch (MalformedURLException e) {
+            System.err.println("Invalid URL for DeploymentAPI.  Look at your application.properties.");
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("Problem connecting to the DeploymentAPI");
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    /**
+     * TODO validate input
+     **/
+    public boolean setInstance(Instance instance) {
+
+        try {
+
+            URL url = new URL(deploymentURL + "instances/" + instance.getInstanceId());
+
+            // Build the POST request
+            JSONObject postJSON = new JSONObject();
+            postJSON.put("displayOrder", instance.getDisplayOrder());
+            postJSON.put("instanceId", instance.getInstanceId());
+            postJSON.put("url", instance.getUrl());
+            postJSON.put("version", instance.getVersion());
+
+            return this.requestPOSTJSON(url, postJSON);
+
+        } catch (MalformedURLException e) {
+            System.err.println("Invalid URL for DeploymentAPI.  Look at your application.properties.");
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     @CacheEvict(allEntries = true, value = {cacheName})
     @Scheduled(fixedDelay = 5 * 60 * 1000, initialDelay = 500) // Every 5 mins
-    public void reportCacheEvict() {
+    public void cacheEvict() {
         System.out.println("Flush Cache " + DateFormat.getInstance().format(new Date()));
     }
 
