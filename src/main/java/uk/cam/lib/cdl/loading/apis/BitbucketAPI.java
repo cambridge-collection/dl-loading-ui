@@ -63,7 +63,7 @@ public class BitbucketAPI extends WebAPI {
 
     @CacheEvict(allEntries = true, value = {cacheName})
     @Scheduled(fixedDelay = 5 * 60 * 1000, initialDelay = 500) // Every 5 mins
-    public void reportCacheEvict() {
+    public void cacheEvict() {
         System.out.println("Flush Cache " + DateFormat.getInstance().format(new Date()));
     }
 

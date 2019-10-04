@@ -123,7 +123,7 @@ public class Instance implements Comparable<Instance> {
         sb.append("class Instance {\n");
 
         sb.append("    displayOrder: ").append(toIndentedString(displayOrder)).append("\n");
-        sb.append("    instanceId: ").append(toIndentedString(Integer.valueOf(instanceId))).append("\n");
+        sb.append("    instanceId: ").append(toIndentedString(instanceId)).append("\n");
         sb.append("    version: ").append(toIndentedString(version)).append("\n");
         sb.append("    url: ").append(toIndentedString(url)).append("\n");
         sb.append("}");

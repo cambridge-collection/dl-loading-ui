@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,9 @@ import java.io.PrintWriter;
 
 @Component
 public class MyBasicAuthenticationEntryPoint extends BasicAuthenticationEntryPoint {
+
+    @Value("${dl-loading-ui.auth.realm}")
+    private String realm;
 
     @Override
     public void commence
@@ -24,7 +28,7 @@ public class MyBasicAuthenticationEntryPoint extends BasicAuthenticationEntryPoi
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        setRealmName("dl-loading-ui");
+        setRealmName(realm);
         super.afterPropertiesSet();
     }
 }

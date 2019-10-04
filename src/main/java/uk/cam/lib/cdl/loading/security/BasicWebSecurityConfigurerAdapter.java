@@ -19,10 +19,10 @@ public class BasicWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdap
     @Autowired
     private MyBasicAuthenticationEntryPoint authenticationEntryPoint;
 
-    @Value("${dl-loading-ui.basic.username}")
+    @Value("${dl-loading-ui.auth.basic.username}")
     private String basicUsername;
 
-    @Value("${dl-loading-ui.basic.password}")
+    @Value("${dl-loading-ui.auth.basic.password}")
     private String basicPassword;
 
     @Autowired
@@ -34,7 +34,8 @@ public class BasicWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdap
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
+        http.csrf().disable()
+            .authorizeRequests()
             .antMatchers("/js").permitAll()
             .antMatchers("/css").permitAll()
             .antMatchers("/img").permitAll()
