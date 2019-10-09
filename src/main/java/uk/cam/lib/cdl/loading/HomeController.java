@@ -1,8 +1,10 @@
 package uk.cam.lib.cdl.loading;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +21,6 @@ import java.util.List;
 @Controller
 public class HomeController {
 
-    @Value("${spring.application.name}")
-    String appName;
-
     @Autowired
     private DeploymentAPI deploymentAPI;
 
@@ -30,7 +29,14 @@ public class HomeController {
 
     @RequestMapping(method = RequestMethod.GET, value = {"/", "/index.html"})
     public String index(Model model) {
-        model.addAttribute("appName", appName);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = "Unknown";
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            username = authentication.getName();
+        }
+        model.addAttribute("username", username);
+
         return "home";
     }
 

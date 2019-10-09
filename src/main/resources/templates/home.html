@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:layout="http://www.w3.org/1999/xhtml"
+<html xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml"
       layout:decorate="~{fragments/main-layout}">
 <head>
     <!-- TODO: fix the flash of unstyled content that happens if these styles are not included here -->
@@ -21,7 +21,7 @@
         </ol>
 
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Welcome to the CDL Content Loader</h1>
+            <h1 class="h3 mb-0 text-gray-800">Welcome, <span th:text="${username}"></span></h1>
         </div>
         <div class="row bg-dark col-lg-7">
 
