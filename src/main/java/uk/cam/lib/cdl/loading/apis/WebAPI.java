@@ -1,6 +1,7 @@
 package uk.cam.lib.cdl.loading.apis;
 
-import org.springframework.boot.configurationprocessor.json.JSONObject;
+
+import org.json.JSONObject;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -13,7 +14,7 @@ public abstract class WebAPI {
         return requestPOSTJSON(url, json, null, null);
     }
 
-    private boolean requestPOSTJSON(URL url, JSONObject json, String username, String password) {
+    boolean requestPOSTJSON(URL url, JSONObject json, String username, String password) {
 
         HttpURLConnection con = null;
         try {
@@ -23,7 +24,7 @@ public abstract class WebAPI {
             con.setRequestProperty("Accept", "application/json");
             con.setDoOutput(true);
 
-            try(OutputStream os = con.getOutputStream()) {
+            try (OutputStream os = con.getOutputStream()) {
                 byte[] input = json.toString().getBytes("utf-8");
                 os.write(input, 0, input.length);
             }
@@ -58,17 +59,22 @@ public abstract class WebAPI {
         return false;
     }
 
-    String requestGETJSON(URL url) {
-        return requestGETJSON(url, null, null);
+
+    String requestGET(URL url) {
+        return requestGET(url, "text/plain; charset=\"utf-8\"", null, null);
     }
 
-    String requestGETJSON(URL url, String username, String password) {
+    String requestGET(URL url, String mimeType) {
+        return requestGET(url, mimeType, null, null);
+    }
+
+    String requestGET(URL url, String mimeType, String username, String password) {
 
         HttpURLConnection con = null;
         try {
             con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
-            con.setRequestProperty("Accept", "application/json");
+            con.setRequestProperty("Accept", mimeType);
 
             if (username != null && password != null) {
                 String userpass = username + ":" + password;
@@ -100,7 +106,7 @@ public abstract class WebAPI {
         return null;
     }
 
-    protected String getContent(HttpURLConnection con, Integer code) throws IOException {
+    private String getContent(HttpURLConnection con, Integer code) throws IOException {
         Reader streamReader;
 
         if (code > 299) {

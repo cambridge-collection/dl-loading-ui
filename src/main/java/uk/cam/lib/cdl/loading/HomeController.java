@@ -12,7 +12,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.BitbucketAPI;
 import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
+import uk.cam.lib.cdl.loading.model.Deployment;
 import uk.cam.lib.cdl.loading.model.Instance;
+import uk.cam.lib.cdl.loading.model.Status;
 import uk.cam.lib.cdl.loading.model.Tag;
 
 import java.util.Collections;
@@ -107,7 +109,7 @@ public class HomeController {
             attributes.addFlashAttribute("error", "There was an error deploying your version.");
 
         }
-        return new RedirectView("/deploy/deploy.html");
+        return new RedirectView("/deploy/status/" + instanceId + "/");
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/login/forgot-password.html")
@@ -120,6 +122,32 @@ public class HomeController {
     public String register(Model model) {
 
         return "register";
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/deploy/status/{instanceId}")
+    public String deployStatus(Model model, @PathVariable("instanceId") String instanceId) {
+
+        Deployment deployment = new Deployment();
+        Instance instance = deploymentAPI.getInstance(instanceId);
+        Status status = deploymentAPI.getStatus(instanceId);
+        deployment.setInstanceRequest(instance);
+        deployment.setInstanceStatus(status);
+
+        if (status == null | status.getCurrentCollectionsVersion() == null || status.getCurrentItemsVersion() == null) {
+            model.addAttribute("error", "There was an error getting the status information for this instance.");
+        }
+        if (instance == null) {
+            model.addAttribute("error", "There was an error getting details for this instance.");
+        }
+        if (instance.getVersion().equals(status.getCurrentCollectionsVersion()) &&
+            instance.getVersion().equals(status.getCurrentItemsVersion())) {
+            deployment.setDeploymentComplete(true);
+        } else {
+            deployment.setDeploymentComplete(false);
+        }
+
+        model.addAttribute("deployment", deployment);
+        return "deploy-status";
     }
 
 }
