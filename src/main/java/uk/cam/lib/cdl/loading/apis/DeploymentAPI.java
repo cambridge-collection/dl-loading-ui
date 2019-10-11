@@ -31,7 +31,7 @@ public class DeploymentAPI extends WebAPI {
         try {
 
             URL url = new URL(deploymentURL + "instances");
-            String json = this.requestGET(url,"application/json");
+            String json = this.requestGET(url, "application/json");
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, new TypeReference<List<Instance>>() {
             });
@@ -55,7 +55,7 @@ public class DeploymentAPI extends WebAPI {
         try {
 
             URL url = new URL(deploymentURL + "instances/" + instanceId);
-            String json = this.requestGET(url,"application/json");
+            String json = this.requestGET(url, "application/json");
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, new TypeReference<Instance>() {
             });
@@ -100,7 +100,7 @@ public class DeploymentAPI extends WebAPI {
     }
 
     @CacheEvict(allEntries = true, value = {cacheName})
-    @Scheduled(fixedDelay = 5 * 60 * 1000, initialDelay = 500) // Every 5 mins
+    @Scheduled(fixedDelay = 1 * 60 * 1000, initialDelay = 500) // Every 1 min
     public void cacheEvict() {
         System.out.println("Flush Cache " + DateFormat.getInstance().format(new Date()));
     }
@@ -111,7 +111,7 @@ public class DeploymentAPI extends WebAPI {
         try {
 
             URL url = new URL(deploymentURL + "instances/" + instanceId + "/status");
-            String json = this.requestGET(url,"application/json");
+            String json = this.requestGET(url, "application/json");
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, new TypeReference<Status>() {
             });

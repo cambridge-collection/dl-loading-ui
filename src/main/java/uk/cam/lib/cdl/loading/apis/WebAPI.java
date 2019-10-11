@@ -110,7 +110,9 @@ public abstract class WebAPI {
         Reader streamReader;
 
         if (code > 299) {
-            streamReader = new InputStreamReader(con.getErrorStream());
+            System.err.println("Error in API: Response Code: " + code);
+            System.err.println("Con: " + con.getErrorStream());
+            streamReader = new InputStreamReader(con.getInputStream());
         } else {
             streamReader = new InputStreamReader(con.getInputStream());
         }

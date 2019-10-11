@@ -16,7 +16,7 @@
         <!-- Breadcrumbs-->
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="#">Home</a>
+                <a href="/">Home</a>
             </li>
             <li class="breadcrumb-item active">Deploy</li>
         </ol>
@@ -67,7 +67,11 @@
             <!-- Cards -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Current Status</h6>
+                    <div class="row">
+                        <h6 class="m-0 font-weight-bold text-primary col">Current Status</h6>
+                        <div class="text-sm-right col"><a class="text-gray-500" href="/deploy/cache/refresh">Refresh
+                            Table</a></div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="card mb-3">
