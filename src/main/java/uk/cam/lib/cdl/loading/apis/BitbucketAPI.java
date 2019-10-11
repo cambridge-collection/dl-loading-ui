@@ -1,9 +1,8 @@
 package uk.cam.lib.cdl.loading.apis;
 
 import org.joda.time.DateTime;
-import org.springframework.boot.configurationprocessor.json.JSONArray;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,7 +35,7 @@ public class BitbucketAPI extends WebAPI {
         try {
             URL url = new URL(tagsURL.toString());
 
-            String json = this.requestGETJSON(url, username, password);
+            String json = this.requestGET(url, "application/json", username, password);
             JSONObject parent = new JSONObject(json);
             JSONArray values = parent.getJSONArray("values");
 
@@ -53,8 +52,6 @@ public class BitbucketAPI extends WebAPI {
 
         } catch (MalformedURLException e) {
             System.err.println("Invalid URL.  Look at your application.properties.");
-            e.printStackTrace();
-        } catch (JSONException e) {
             e.printStackTrace();
         }
 

@@ -2,12 +2,12 @@ package uk.cam.lib.cdl.loading.apis;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import uk.cam.lib.cdl.loading.model.Instance;
+import uk.cam.lib.cdl.loading.model.Status;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -31,7 +31,7 @@ public class DeploymentAPI extends WebAPI {
         try {
 
             URL url = new URL(deploymentURL + "instances");
-            String json = this.requestGETJSON(url);
+            String json = this.requestGET(url,"application/json");
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, new TypeReference<List<Instance>>() {
             });
@@ -54,8 +54,8 @@ public class DeploymentAPI extends WebAPI {
 
         try {
 
-            URL url = new URL(deploymentURL + "instances/"+instanceId);
-            String json = this.requestGETJSON(url);
+            URL url = new URL(deploymentURL + "instances/" + instanceId);
+            String json = this.requestGET(url,"application/json");
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, new TypeReference<Instance>() {
             });
@@ -94,8 +94,6 @@ public class DeploymentAPI extends WebAPI {
         } catch (MalformedURLException e) {
             System.err.println("Invalid URL for DeploymentAPI.  Look at your application.properties.");
             e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
 
         return false;
@@ -107,4 +105,26 @@ public class DeploymentAPI extends WebAPI {
         System.out.println("Flush Cache " + DateFormat.getInstance().format(new Date()));
     }
 
+
+    public Status getStatus(String instanceId) {
+
+        try {
+
+            URL url = new URL(deploymentURL + "instances/" + instanceId + "/status");
+            String json = this.requestGET(url,"application/json");
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(json, new TypeReference<Status>() {
+            });
+
+
+        } catch (MalformedURLException e) {
+            System.err.println("Invalid URL for DeploymentAPI.  Look at your application.properties.");
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("Problem connecting to the DeploymentAPI");
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }
