@@ -80,6 +80,14 @@ public class HomeController {
         return "deploy";
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/deploy/cache/refresh")
+    public String deployRefreshCache(Model model, @ModelAttribute("message") String message,
+                                     @ModelAttribute("error") String error) {
+
+        deploymentAPI.cacheEvict();
+        return deploy(model, message, error);
+    }
+
     /**
      * Updates the table to trigger a deployment next puppet run.
      *
