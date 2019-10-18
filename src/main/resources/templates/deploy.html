@@ -143,19 +143,21 @@
                     <b><span id="confirmChangeInstanceId"></span></b>.
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
                     <form method="POST" th:id="confirmDeployForm" th:object="${DeployForm}" action="#">
                         <input type="hidden" name="version" value=""/>
                         <button type="submit" value="value" class="btn btn-primary">Deploy</button>
-
                     </form>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
 
 </div>
-<!-- /.content-wrapper -->
 
+<!-- /.content-wrapper -->
+<div id="page_js" layout:fragment="page_js">
+    <script type="text/javascript" src="/js/deploy.js"></script>
+</div>
 </body>
 </html>

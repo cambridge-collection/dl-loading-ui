@@ -112,11 +112,8 @@ public abstract class WebAPI {
         if (code > 299) {
             System.err.println("Error in API: Response Code: " + code);
             System.err.println("Con: " + con.getErrorStream());
-            streamReader = new InputStreamReader(con.getInputStream());
-        } else {
-            streamReader = new InputStreamReader(con.getInputStream());
         }
-
+        streamReader = new InputStreamReader(con.getInputStream());
         BufferedReader in = new BufferedReader(streamReader);
         String inputLine;
         StringBuilder content = new StringBuilder();
