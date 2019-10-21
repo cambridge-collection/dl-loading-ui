@@ -6,7 +6,7 @@ $(document).ready(function () {
     previewWindow.hide();
 
     $('#filetree_container').fileTree({
-        root: '/home/jlf44/projects/mdiv-data-source/data/',
+        root: gitSourceDataPath,
         script: '/edit/filetree/list'
 
     }, function (file) {
