@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
-import uk.cam.lib.cdl.loading.model.Tag;
+import uk.cam.lib.cdl.loading.model.deployment.Tag;
 
 import java.net.MalformedURLException;
 import java.net.URL;

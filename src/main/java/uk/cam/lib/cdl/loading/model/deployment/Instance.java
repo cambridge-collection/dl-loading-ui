@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.model;
+package uk.cam.lib.cdl.loading.model.deployment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.validation.annotation.Validated;

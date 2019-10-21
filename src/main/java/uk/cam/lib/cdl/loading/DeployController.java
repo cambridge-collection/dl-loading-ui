@@ -9,10 +9,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.BitbucketAPI;
 import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
-import uk.cam.lib.cdl.loading.model.Deployment;
-import uk.cam.lib.cdl.loading.model.Instance;
-import uk.cam.lib.cdl.loading.model.Status;
-import uk.cam.lib.cdl.loading.model.Tag;
+import uk.cam.lib.cdl.loading.model.deployment.Deployment;
+import uk.cam.lib.cdl.loading.model.deployment.Instance;
+import uk.cam.lib.cdl.loading.model.deployment.Status;
+import uk.cam.lib.cdl.loading.model.deployment.Tag;
 
 import java.util.Collections;
 import java.util.List;

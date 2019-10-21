@@ -9,9 +9,6 @@
     <link href="/webjars/startbootstrap-sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
 
     <!-- page styles -->
-    <link href="/webjars/prismjs/themes/prism.css" rel="stylesheet"/>
-    <link href="/js/jquery-filetree/jqueryFileTree.css" rel="stylesheet">
-</head>
 </head>
 <body>
 <div id="content-wrapper" layout:fragment="content">
@@ -26,10 +23,10 @@
         </ol>
 
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800 ml-3">Advanced Content Editor</h1>
+            <h1 class="h3 mb-0 text-gray-800 ml-3">Content Editor</h1>
         </div>
 
-        <div class="col-lg-8">
+        <div class="col-xl-11">
             <div class="mb-4">
                 <div th:if="${message}">
                     <div class="alert alert-success" role="alert">
@@ -46,49 +43,105 @@
             <!-- Cards -->
             <div class="card shadow mb-4">
                 <div class="card-body list-unstyled">
-                    Here you can browse and edit the content for your digital library.<br>
+                    Here you can browse and edit the content for your digital library.<br><br>
                     <ul>
-                        <li>To edit the metadata for an individual book or item within the library have a look at the
-                            'items' folder.
+                        <li>You can view and edit the files directly through the <a
+                            href="/edit/advanced-edit.html">advanced
+                            content editor</a>.
                         </li>
-                        <li>To edit which items are in which collections, have a look at the 'collections'
-                            folder.
-                        </li>
-                        <li>If you want to change the website text describing a collection, the news page,
-                            homepage carousel or any other website content have a look in the 'pages' folder.
-                        </li>
-                        <li>For changing which collections are in your library, and settings and styling that affect the
-                            library as a whole look in the files ending '.dl-dataset.json' and 'ui.json'.
+                        <li>For advanced users, you can also get access through <a
+                            href="https://git-scm.com/book/en/v2/Getting-Started-What-is-Git%3F">git</a>.
                         </li>
                     </ul>
                 </div>
+            </div>
+
+            <div>
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-dark float-left">My Workspace</h6>
+                    </div>
+                    <div class="card-body">
 
 
-            </div>
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-dark float-left">Browse your content</h6>
-                            <a href="#"><i class="fas fa-fw fa-plus float-right"></i></a>
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-dark float-left">My Collections</h6>
+                            </div>
+                            <div class="card-body row">
+                                <tr th:each="collection: ${collections}">
+                                    <div class="col-xl-3 col-md-6 mb-4">
+                                        <div class="card border-left-primary shadow h-100 py-2">
+                                            <div class="card-body" style="height: 200px; position:relative">
+                                                <div class="row no-gutters align-items-top">
+                                                    <div class="col mr-2">
+                                                        <div
+                                                            class="text-s text-primary font-weight-bold text-uppercase mb-1">
+                                                            <a th:href="'/edit/collection/'+${collection.name.urlSlug}"
+                                                               th:text="${collection.name.shortName}"></a></div>
+                                                        <div class="text-xs mb-0 text-gray-800 text-left"
+                                                             th:text="${collection.description.shortDescription}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <i class="fas fa-images fa-2x text-gray-300"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="row align-items-end float-right" style="position:
+                                                absolute; bottom: 0; right:7px;">
+                                                    <div class="col-auto">
+                                                        <a th:href="'/edit/collection/'+${collection.name.urlSlug}">
+                                                            <i class="fas fa-arrow-alt-circle-right fa-2x"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </tr>
+                                <div class="col-xl-3 col-md-6 mb-4">
+                                    <div class="card shadow h-100 py-2">
+                                        <div class="card-body" style="height: 200px; position:relative">
+                                            <div class="row no-gutters align-items-top">
+                                                <div class="col mr-2">
+                                                    <div
+                                                        class="text-s font-weight-bold text-uppercase mb-1">
+                                                        <a class="text-gray-800" href="/edit/addcollection/"
+                                                        >Add
+                                                            Collection</a></div>
+                                                    <div class="text-xs mb-0 text-gray-800 text-left">
+                                                        Add a new collection.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row align-items-end float-right" style="position:
+                                                absolute; bottom: 0; right:7px;">
+                                                <div class="col-auto">
+                                                    <a href="/edit/addcollection/">
+                                                        <i class="fas fa-plus fa-2x"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div id="filetree_container"></div>
+
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-dark float-left">My Items</h6>
+                            </div>
+                            <div class="card-body">
+                                To be implemented...
+                            </div>
                         </div>
+
                     </div>
                 </div>
-                <div class="col" id="previewWindow">
-                    <div class="card-header p-0 m-0">
-                        <h6 id="selectedFileHeader" class="m-0 font-weight-bold text-dark"></h6>
-                    </div>
-                    <div class="card-body p-0 m-0">
-                        <div class="card shadow p-0 m-0">
-                            <div></div>
-                            <pre><code id="previewFile" class="language-json"></code></pre>
-                        </div>
-                    </div>
-                </div>
             </div>
+
         </div>
     </div>
     <!-- /.container-fluid -->
@@ -166,17 +219,13 @@
             </div>
         </div>
     </div>
+
+
 </div>
 <!-- /.content-wrapper -->
 
 <div id="page_js" layout:fragment="page_js">
-    <script src="/js/jquery-filetree/jqueryFileTree.js"></script>
-    <script type="text/javascript" src="/js/edit.js"></script>
-    <script src="/webjars/json5/dist/index.min.js"></script>
-    <script src="/webjars/prismjs/prism.js"></script>
-    <script src="/webjars/prismjs/components/prism-json.min.js"></script>
-    <script src="/webjars/prismjs/components/prism-json5.min.js"></script>
-    <script src="/webjars/prismjs/plugins/autoloader/prism-autoloader.min.js"></script>
 </div>
+
 </body>
 </html>
