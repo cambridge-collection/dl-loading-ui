@@ -26,7 +26,7 @@
             <h1 class="h3 mb-0 text-gray-800 ml-3">Content Editor</h1>
         </div>
 
-        <div class="col-xl-11">
+        <div class="col-xl-11" style="max-width: 1000px">
             <div class="mb-4">
                 <div th:if="${message}">
                     <div class="alert alert-success" role="alert">
@@ -154,72 +154,6 @@
             </div>
         </div>
     </footer>
-
-    <div class="modal fade" id="confirmChangeModal" tabindex="-1" role="dialog" aria-labelledby="confirmChangeModal"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmChangeLabel">Deploy a new version?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">This will deploy the package <b><span
-                    id="confirmChangePackageName"></span></b> to
-                    <b><span id="confirmChangeInstanceId"></span></b>.
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <form method="POST" th:id="confirmDeployForm" th:object="${DeployForm}" action="#">
-                        <input type="hidden" name="version" value=""/>
-                        <button type="submit" value="value" class="btn btn-primary">Deploy</button>
-
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="fileSelectModal" tabindex="-1" role="dialog" aria-labelledby="fileSelectModal"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="fileSelectLabel">What do you want to do with this file?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">File: <b><span
-                    id="fileSelectFileName"></span></b>.
-                </div>
-                <div class="modal-footer">
-                    <form method="POST" th:id="confirmPreviewFile">
-                        <input id="previewFilePath" type="hidden" name="filepath" value=""/>
-                        <button type="submit" value="value" class="btn btn-primary">
-                            Preview
-                        </button>
-                    </form>
-                    <form method="POST" th:id="confirmDownloadFile" action="/edit/download">
-                        <input type="hidden" name="filepath" value=""/>
-                        <button type="submit" value="value" class="btn btn-primary">Download
-                        </button>
-                    </form>
-                    <form method="POST" th:id="confirmRenameFile" action="/edit/rename">
-                        <input type="hidden" name="filepath" value=""/>
-                        <button type="submit" value="value" class="btn btn-primary">Rename</button>
-                    </form>
-                    <form method="POST" th:id="confirmDeleteFile" action="/edit/delete">
-                        <input type="hidden" name="filepath" value=""/>
-                        <button type="submit" value="value" class="btn btn-danger">Delete</button>
-                    </form>
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
 </div>
 <!-- /.content-wrapper -->

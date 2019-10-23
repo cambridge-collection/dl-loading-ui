@@ -20,11 +20,14 @@ import java.util.List;
 @Controller
 public class DeployController {
 
-    @Autowired
-    private DeploymentAPI deploymentAPI;
+    private final DeploymentAPI deploymentAPI;
+    private final BitbucketAPI bitbucketAPI;
 
     @Autowired
-    private BitbucketAPI bitbucketAPI;
+    public DeployController(DeploymentAPI deploymentAPI, BitbucketAPI bitbucketAPI) {
+        this.deploymentAPI = deploymentAPI;
+        this.bitbucketAPI = bitbucketAPI;
+    }
 
     /**
      * Displays the deployment page with the table.

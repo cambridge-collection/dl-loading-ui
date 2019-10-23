@@ -35,4 +35,25 @@ public class Dataset {
     public void setCollections(List<Id> collections) {
         this.collections = collections;
     }
+
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("class Dataset {\n");
+        sb.append("    @type: ").append(toIndentedString(type)).append("\n");
+        sb.append("    name: ").append(toIndentedString(name)).append("\n");
+        sb.append("    collections: ").append(toIndentedString(collections)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(java.lang.Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
 }

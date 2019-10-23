@@ -1,11 +1,10 @@
 package uk.cam.lib.cdl.loading;
 
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.commons.io.FilenameUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -13,11 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,54 +29,11 @@ import java.util.Objects;
 @Controller
 public class EditController {
 
-    @Value("${git.sourcedata.checkout.path}")
-    String gitSourcePath;
-
-    @Value("${git.sourcedata.checkout.subpath.data}")
-    String gitSourceDataSubpath;
-
-    @Value("${git.sourcedata.url}")
-    String gitSourceURL;
-
-    @Value("${git.sourcedata.url.username}")
-    String gitSourceURLUserame;
-
-    @Value("${git.sourcedata.url.password}")
-    String gitSourceURLPassword;
+    private final EditAPI editAPI;
 
     @Autowired
-    private EditAPI editAPI;
-
-    private Git git;
-    private String gitSourceDataPath;
-
-    @PostConstruct
-    private void setupRepo() {
-        try {
-            File dir = new File(gitSourcePath);
-            if (dir.exists()) {
-
-                git = Git.init().setDirectory(dir).call();
-
-            } else {
-
-                git = Git.cloneRepository()
-                    .setURI(gitSourceURL)
-                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitSourceURLUserame,
-                        gitSourceURLPassword))
-                    .setDirectory(new File(gitSourcePath))
-                    .call();
-
-            }
-
-        } catch (GitAPIException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @PostConstruct
-    private void setupPath() {
-        gitSourceDataPath = gitSourcePath + gitSourceDataSubpath;
+    public EditController(EditAPI editAPI) {
+        this.editAPI = editAPI;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/edit/edit.html")
@@ -89,11 +46,15 @@ public class EditController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/edit/collection/{collectionUrlSlug}")
-    public String editCollection(Model model, @PathVariable("collectionUrlSlug") String collectionUrlSlug) {
+    public String editCollection(Model model, @PathVariable("collectionUrlSlug") String collectionUrlSlug,
+                                 @RequestParam(required = false) String message,
+                                 @RequestParam(required = false) String error) {
 
         Collection collection = editAPI.getCollection(collectionUrlSlug);
+        model.addAttribute("thumbnailURL", editAPI.getDataLocalPath() + collection.getThumbnailURL());
         model.addAttribute("collection", collection);
-        model.addAttribute("gitSourceDataPath", gitSourceDataPath);
+        model.addAttribute("error", error);
+        model.addAttribute("message", message);
 
         return "edit-collection";
     }
@@ -101,7 +62,7 @@ public class EditController {
     @RequestMapping(method = RequestMethod.GET, value = "/edit/advanced-edit.html")
     public String editAdvanced(Model model) {
 
-        model.addAttribute("gitSourceDataPath", gitSourceDataPath);
+        model.addAttribute("gitSourceDataPath", editAPI.getDataLocalPath());
         return "advanced-edit";
     }
 
@@ -112,7 +73,7 @@ public class EditController {
         File parent = new File(dir);
 
         // Allow access to git dir checkout only.
-        if (!parent.exists() || !parent.toPath().toAbsolutePath().startsWith(gitSourceDataPath)) {
+        if (!parent.exists() || !parent.toPath().toAbsolutePath().startsWith(editAPI.getDataLocalPath())) {
             throw new BadRequestException(new Exception("Dir needs to be subdir of git file source."));
         }
 
@@ -149,7 +110,7 @@ public class EditController {
         File file = new File(filepath);
 
         // Allow access to git dir checkout only.
-        if (!file.exists() || !file.toPath().toAbsolutePath().startsWith(gitSourceDataPath)) {
+        if (!file.exists() || !file.toPath().toAbsolutePath().startsWith(editAPI.getDataLocalPath())) {
             throw new BadRequestException(new Exception("Dir needs to be subdir of git file source."));
         }
 
@@ -172,7 +133,7 @@ public class EditController {
         File file = new File(filepath);
 
         // Allow access to git dir checkout only.
-        if (!file.exists() || !file.toPath().toAbsolutePath().startsWith(gitSourceDataPath)) {
+        if (!file.exists() || !file.toPath().toAbsolutePath().startsWith(editAPI.getDataLocalPath())) {
             throw new BadRequestException(new Exception("File needs to be subdir of git file source."));
         }
 
@@ -219,6 +180,50 @@ public class EditController {
     public String editUpload(Model model, @RequestParam String filepath)
         throws BadRequestException, FileNotFoundException {
         return "";
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/edit/collection/{collectionId}/update")
+    public RedirectView updateCollection(RedirectAttributes attributes,
+                                         @PathVariable String collectionId,
+                                         @ModelAttribute Collection collection) throws BadRequestException {
+
+        if (collection.getName() == null || collection.getName().getUrlSlug() == null) {
+            throw new BadRequestException(new Exception());
+        }
+
+        Collection existingCollection = editAPI.getCollection(collectionId);
+        if (existingCollection == null) {
+            throw new BadRequestException(new Exception("Unknown collection with id: " + collectionId));
+        }
+
+        // Set fixed values we don't want to allow editing for.
+        collection.getName().setUrlSlug(collectionId);
+        collection.setType(existingCollection.getType());
+        collection.setFilepath(existingCollection.getFilepath());
+        collection.setItems(existingCollection.getItems());
+        collection.setItemIds(existingCollection.getItemIds());
+
+        try {
+
+            // Write out file
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
+            writer.writeValue(new File(editAPI.getDataLocalPath() + collection.getFilepath()), collection);
+
+            // Git Commit and push to remote repo.
+            boolean success = editAPI.pushGitChanges();
+            if (success) {
+                attributes.addAttribute("message", "Collection Updated.");
+            } else {
+                throw new IOException("Git push failed");
+            }
+
+        } catch (IOException e) {
+            attributes.addAttribute("error", "There was a problem updating the collection.");
+            e.printStackTrace();
+        }
+        return new RedirectView("/edit/collection/" + collectionId + "/");
     }
 
 }

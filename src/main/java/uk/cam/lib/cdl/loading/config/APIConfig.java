@@ -3,58 +3,39 @@ package uk.cam.lib.cdl.loading.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import uk.cam.lib.cdl.loading.apis.BitbucketAPI;
 import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
-import uk.cam.lib.cdl.loading.apis.EditAPI;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 @Configuration
+@EnableScheduling
 public class APIConfig {
 
-    @Value("${deployment.api.url}")
-    URL deploymentURL;
+    private final DeploymentAPI deploymentAPI;
+    private final BitbucketAPI bbAPI;
 
-    @Value("${git.bitbucket.api.url}")
-    URL gitURL;
+    public APIConfig(@Value("${deployment.api.url}") URL deploymentURL,
+                     @Value("${git.bitbucket.api.url}") URL gitURL,
+                     @Value("${git.bitbucket.api.url.part.tags}") String tagsURL,
+                     @Value("${git.bitbucket.api.username}") String gitUsername,
+                     @Value("${git.bitbucket.api.password}") String gitPassword
+    ) throws MalformedURLException {
+        this.deploymentAPI = new DeploymentAPI(deploymentURL);
+        this.bbAPI = new BitbucketAPI(gitURL, tagsURL, gitUsername, gitPassword);
+    }
 
-    @Value("${git.bitbucket.api.url.part.tags}")
-    String tagsURL;
-
-    @Value("${git.bitbucket.api.username}")
-    String gitUsername;
-
-    @Value("${git.bitbucket.api.password}")
-    String gitPassword;
-
-    @Value("${git.sourcedata.dl-dataset.filename}")
-    String dlDatasetFilename;
-
-    @Value("${git.sourcedata.checkout.path}")
-    String dataPathStart;
-
-    @Value("${git.sourcedata.checkout.subpath.data}")
-    String dataPathDir;
 
     @Bean
     public DeploymentAPI deploymentAPI() {
-        DeploymentAPI dao = new DeploymentAPI(deploymentURL);
-        return dao;
+        return deploymentAPI;
     }
 
     @Bean
-    public BitbucketAPI bitbucketAPI() throws MalformedURLException {
-        BitbucketAPI bb = new BitbucketAPI(gitURL, tagsURL, gitUsername, gitPassword);
-        return bb;
+    public BitbucketAPI bitbucketAPI() {
+        return bbAPI;
     }
-
-    @Bean
-    public EditAPI editAPI() throws IOException {
-        EditAPI edit = new EditAPI(dataPathStart + dataPathDir, dlDatasetFilename);
-        return edit;
-    }
-
 
 }
