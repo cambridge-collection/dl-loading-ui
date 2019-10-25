@@ -19,9 +19,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /*
 TODO This should be refactored out to talk to a external API.
@@ -37,7 +35,8 @@ public class EditAPI {
     private File datasetFile;
     private Dataset dataset;
     private List<Collection> collections = new ArrayList<Collection>();
-    private HashMap<String, Collection> collectionMap = new HashMap<>();
+    private Map<String, Collection> collectionMap = new HashMap<>();
+    private Map<String, Item> itemMap = new HashMap<>();
 
     public EditAPI(String dataPath, String dlDatasetFilename) {
         this.dataPath = dataPath;
@@ -56,9 +55,12 @@ public class EditAPI {
         updateModel();
     }
 
-    private void updateModel() throws IOException {
+    public void updateModel() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         dataset = objectMapper.readValue(datasetFile, Dataset.class);
+        List<Collection> newCollections = new ArrayList<>();
+        Map<String,Collection> newCollectionMap = new HashMap<>();
+        Map<String, Item> newItemMap = new HashMap<>();
 
         // Setup collections
         for (Id id : dataset.getCollections()) {
@@ -72,19 +74,25 @@ public class EditAPI {
 
             Collection c = objectMapper.readValue(collectionFile, Collection.class);
             c.setFilepath(collectionPath); // is needed to get correct item path
-            collections.add(c);
+            newCollections.add(c);
 
             // Setup collection map
-            collectionMap.put(c.getName().getUrlSlug(), c);
+            newCollectionMap.put(c.getName().getUrlSlug(), c);
 
             // Items
             List<Item> items = new ArrayList<>();
             for (Id itemId : c.getItemIds()) {
                 Item item = this.getItem(itemId.getId(), c);
                 items.add(item);
+                newItemMap.put(item.getName(), item);
             }
             c.setItems(items);
+
         }
+
+        this.collections = newCollections;
+        this.collectionMap = newCollectionMap;
+        this.itemMap = newItemMap;
     }
 
     public Dataset getDataset() {
@@ -159,6 +167,9 @@ public class EditAPI {
 
     }
 
+    /**
+     * @return
+     */
     public boolean pushGitChanges() {
         try {
             git.add().addFilepattern(".").call();
@@ -181,5 +192,9 @@ public class EditAPI {
 
     public String getDataLocalPath() {
         return gitVariables.getGitSourcePath() + gitVariables.getGitSourceDataSubpath();
+    }
+
+    public Item getItem(String name) {
+        return itemMap.get(name);
     }
 }

@@ -15,6 +15,10 @@ $(document).ready(function () {
     $('#collectioneditform-reset').on('click', function () {
         $('#collectioneditform')[0].reset();
     });
+
+    $('#addItemFile').on('change', function () {
+        $('#addItemFileForm').submit();
+    })
 });
 
 
