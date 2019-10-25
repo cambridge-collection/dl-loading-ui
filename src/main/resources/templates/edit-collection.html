@@ -228,7 +228,10 @@
                                     <label for="additemFile">Add / Replace Item</label>
                                 </div>
                                 <div class="col-6 m-2">
-                                    <input type="file" class="form-control-file" id="addItemFile">
+                                    <form th:action="'/edit/collection/'+${collection.name.urlSlug}+'/addItem'"
+                                          method="post" id="addItemFileForm" enctype="multipart/form-data" >
+                                        <input type="file" name="file" class="form-control-file" id="addItemFile">
+                                    </form>
                                 </div>
                             </div>
                             <div class="row mt-6">

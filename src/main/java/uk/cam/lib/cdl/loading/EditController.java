@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -12,11 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
+import uk.cam.lib.cdl.loading.model.editor.Item;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -183,6 +186,15 @@ public class EditController {
     }
 
 
+    /**
+     * TODO validate the changes against the JSON schema.
+     *
+     * @param attributes
+     * @param collectionId
+     * @param collection
+     * @return
+     * @throws BadRequestException
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/edit/collection/{collectionId}/update")
     public RedirectView updateCollection(RedirectAttributes attributes,
                                          @PathVariable String collectionId,
@@ -219,10 +231,44 @@ public class EditController {
                 throw new IOException("Git push failed");
             }
 
+            editAPI.updateModel();
+
         } catch (IOException e) {
             attributes.addAttribute("error", "There was a problem updating the collection.");
             e.printStackTrace();
         }
+
+        return new RedirectView("/edit/collection/" + collectionId + "/");
+    }
+
+    @PostMapping("/edit/collection/{collectionId}/addItem")
+    public RedirectView addCollectionItem(RedirectAttributes attributes, @PathVariable String collectionId,
+                                          @RequestParam("file") MultipartFile file) throws BadRequestException, IOException {
+
+        System.out.println("in addCollectionItem ");
+        if (file.getContentType() == null || !file.getContentType().equals("application/xml")) {
+            attributes.addAttribute("error", "Item needs to be in TEI XML format.");
+            return new RedirectView("/edit/collection/" + collectionId + "/");
+        }
+
+        // Check to see if the file already exists
+        Item item = editAPI.getItem(file.getName());
+        if (item != null) {
+            // Overwrite existing Item
+            FileUtils.copyInputStreamToFile(file.getInputStream(), new File(item.getFilepath()));
+
+        } else {
+            // new Item
+            //TODO
+        }
+
+        boolean success = editAPI.pushGitChanges();
+        if (success) {
+            attributes.addAttribute("message", "Item added to collection.");
+        } else {
+            throw new IOException("Git push failed, on adding new item to collection.");
+        }
+
         return new RedirectView("/edit/collection/" + collectionId + "/");
     }
 
