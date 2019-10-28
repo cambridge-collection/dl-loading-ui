@@ -1,6 +1,5 @@
 package uk.cam.lib.cdl.loading.config;
 
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,14 +24,17 @@ public class EditConfig {
                       @Value("${git.sourcedata.url.username}") String gitSourceURLUserame,
                       @Value("${git.sourcedata.url.password}") String gitSourceURLPassword,
                       @Value("${git.sourcedata.branch}") String gitBranch,
-                      @Value("${git.sourcedata.dl-dataset.filename}") String dlDatasetFilename
+                      @Value("${git.sourcedata.dl-dataset.filename}") String dlDatasetFilename,
+                      @Value("${data.item.path}") String dataItemPath
     ) {
 
         this.gitVariables = new GitVariables(gitSourcePath, gitSourceDataSubpath, gitSourceURL, gitSourceURLUserame,
-            gitSourceURLPassword, gitBranch, dlDatasetFilename);
+                gitSourceURLPassword, gitBranch, dlDatasetFilename);
 
-        this.editAPI = new EditAPI(gitSourcePath + gitSourceDataSubpath, dlDatasetFilename);
+        this.editAPI = new EditAPI(gitSourcePath + gitSourceDataSubpath, dlDatasetFilename, gitSourcePath + dataItemPath);
+
     }
+
 
     @Bean
     public GitVariables gitVariables() {
@@ -40,13 +42,13 @@ public class EditConfig {
     }
 
     @Scheduled(fixedDelay = 5 * 60 * 1000, initialDelay = 500) // Every 5 mins
-    public void checkForUpdates() throws GitAPIException, IOException {
-        System.out.println("Checking for updates from git...");
-        editAPI.pullGitChanges();
+    public void checkForUpdates() throws IOException {
+        System.out.println("Updating model...");
+        editAPI.updateModel();
     }
 
     @Bean
-    public EditAPI editAPI() throws IOException {
+    public EditAPI editAPI() {
         return editAPI;
     }
 

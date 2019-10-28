@@ -1,15 +1,19 @@
 package uk.cam.lib.cdl.loading.model.editor;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CollectionCredit {
 
-    private Id prose;
+    private final Id prose;
+
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public CollectionCredit(@JsonProperty("prose") Id prose) {
+        this.prose = prose;
+    }
 
     public Id getProse() {
         return prose;
-    }
-
-    public void setProse(Id prose) {
-        this.prose = prose;
     }
 
     public String toString() {

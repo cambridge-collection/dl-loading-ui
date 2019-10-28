@@ -1,30 +1,34 @@
 package uk.cam.lib.cdl.loading.model.editor;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CollectionName {
 
-    private String urlslug;
-    private String sort;
-    private String shortName;
-    private String full;
+    private final String urlslug;
+    private final String sort;
+    private final String shortName;
+    private final String full;
+
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public CollectionName(@JsonProperty("url-slug") String urlslug,
+                          @JsonProperty("sort") String sort,
+                          @JsonProperty("short") String shortName,
+                          @JsonProperty("full") String full) {
+        this.urlslug = urlslug;
+        this.sort = sort;
+        this.shortName = shortName;
+        this.full = full;
+
+    }
 
     @JsonProperty("url-slug")
     public String getUrlSlug() {
         return urlslug;
     }
 
-    @JsonProperty("url-slug")
-    public void setUrlSlug(String urlslug) {
-        this.urlslug = urlslug;
-    }
-
     public String getSort() {
         return sort;
-    }
-
-    public void setSort(String sort) {
-        this.sort = sort;
     }
 
     @JsonProperty("short")
@@ -32,17 +36,8 @@ public class CollectionName {
         return shortName;
     }
 
-    @JsonProperty("short")
-    public void setShortName(String shortName) {
-        this.shortName = shortName;
-    }
-
     public String getFull() {
         return full;
-    }
-
-    public void setFull(String full) {
-        this.full = full;
     }
 
     public String toString() {
