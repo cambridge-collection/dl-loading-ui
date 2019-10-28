@@ -17,6 +17,7 @@ public class Collection {
     private final CollectionCredit credit;
     private final List<Id> ids;
     private String filepath;
+    private String thumbnailURL;
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public Collection(@JsonProperty("@type") String type,
@@ -65,10 +66,13 @@ public class Collection {
         }
     }
 
-    // TODO fix this hardcoding
     @JsonIgnore
     public String getThumbnailURL() {
-        return "/pages/images/collectionsView/collection-" + this.getName().getUrlSlug() + ".jpg";
+        return this.thumbnailURL;
+    }
+
+    public void setThumbnailURL(String thumbnailURL) {
+        this.thumbnailURL = thumbnailURL;
     }
 
     public String toString() {

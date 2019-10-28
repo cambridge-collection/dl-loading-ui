@@ -34,6 +34,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /*
 TODO This should be refactored out to talk to a external API.
@@ -53,6 +55,7 @@ public class EditAPI {
     private List<Collection> collections = new ArrayList<>();
     private Map<String, Collection> collectionMap = new HashMap<>();
     private Map<String, Item> itemMap = new HashMap<>();
+    private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
 
 
     public EditAPI(String dataPath, String dlDatasetFilename, String dataItemPath) {
@@ -65,7 +68,7 @@ public class EditAPI {
     private void setupEditAPI() throws IOException {
         // Clone git repo if not already available.
         setupRepo(gitVariables.getGitSourcePath(), gitVariables.getGitSourceURL(), gitVariables.getGitSourceURLUserame(),
-                gitVariables.getGitSourceURLPassword());
+            gitVariables.getGitSourceURLPassword());
 
         if (!datasetFile.exists()) {
             throw new FileNotFoundException("Dataset file cannot be found at: " + datasetFile.toPath());
@@ -100,6 +103,8 @@ public class EditAPI {
 
             Collection c = objectMapper.readValue(collectionFile, Collection.class);
             c.setFilepath(collectionFile.getCanonicalPath()); // is needed to get correct item path
+            c.setThumbnailURL(getDataLocalPath() + "/pages/images/collectionsView/collection-" + c.getName().getUrlSlug() +
+                ".jpg"); // TODO fix hardcoding
             newCollections.add(c);
 
             // Setup collection map
@@ -150,12 +155,12 @@ public class EditAPI {
             } else {
 
                 git = Git.cloneRepository()
-                        .setURI(gitSourceURL)
-                        .setBranch(gitVariables.getGitBranch())
-                        .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitSourceURLUserame,
-                                gitSourceURLPassword))
-                        .setDirectory(new File(gitSourcePath))
-                        .call();
+                    .setURI(gitSourceURL)
+                    .setBranch(gitVariables.getGitBranch())
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitSourceURLUserame,
+                        gitSourceURLPassword))
+                    .setDirectory(new File(gitSourcePath))
+                    .call();
 
             }
 
@@ -175,14 +180,14 @@ public class EditAPI {
     private boolean pullGitChanges() throws GitAPIException {
 
         FetchResult fetchResult = git.fetch().setCredentialsProvider(
-                new UsernamePasswordCredentialsProvider(gitVariables.getGitSourceURLUserame(),
-                        gitVariables.getGitSourceURLPassword())).call();
+            new UsernamePasswordCredentialsProvider(gitVariables.getGitSourceURLUserame(),
+                gitVariables.getGitSourceURLPassword())).call();
 
         // Check for changes, and pull if there have been.
         if (!fetchResult.getTrackingRefUpdates().isEmpty()) {
             PullResult pullResult = git.pull().setCredentialsProvider(
-                    new UsernamePasswordCredentialsProvider(gitVariables.getGitSourceURLUserame(),
-                            gitVariables.getGitSourceURLPassword())).call();
+                new UsernamePasswordCredentialsProvider(gitVariables.getGitSourceURLUserame(),
+                    gitVariables.getGitSourceURLPassword())).call();
             if (!pullResult.isSuccessful()) {
                 // TODO Handle conflict problems
                 System.err.println("Pull Request Failed: " + pullResult.toString());
@@ -206,8 +211,8 @@ public class EditAPI {
             git.add().addFilepattern(".").call();
             git.commit().setMessage("Changed from Loading UI").call();
             Iterable<PushResult> results = git.push().setCredentialsProvider(
-                    new UsernamePasswordCredentialsProvider(gitVariables.getGitSourceURLUserame(),
-                            gitVariables.getGitSourceURLPassword())).call();
+                new UsernamePasswordCredentialsProvider(gitVariables.getGitSourceURLUserame(),
+                    gitVariables.getGitSourceURLPassword())).call();
 
             for (PushResult pushResult : results) {
                 java.util.Collection<RemoteRefUpdate> remoteUpdates = pushResult.getRemoteUpdates();
@@ -230,7 +235,6 @@ public class EditAPI {
         return gitVariables.getGitSourcePath() + gitVariables.getGitSourceDataSubpath();
     }
 
-
     public boolean validate(MultipartFile file) {
 
         // Validate content
@@ -249,9 +253,11 @@ public class EditAPI {
         return valid;
     }
 
-    //TODO
     public boolean validateFilename(String filename) {
-        return true;
+
+        Matcher matcher = filenamePattern.matcher(filename);
+        return matcher.find();
+
     }
 
     private boolean validateXML(String filename, String content) {
@@ -293,47 +299,51 @@ public class EditAPI {
 
             Collection collection = getCollection(collectionUrlSlug);
 
+            File output;
+
             // Check to see if the file already exists
-            if (itemInCollection(itemName, collection)) {
+            boolean itemAlreadyInCollection = itemInCollection(itemName, collection);
+            if (itemMap.containsKey(itemName)) {
 
                 // Overwrite existing Item
-                FileUtils.copyInputStreamToFile(contents, new File(itemMap.get(itemName).getFilepath()));
-
-            } else if (itemMap.containsKey(itemName)) {
-
-                // Overwrite existing Item
-                FileUtils.copyInputStreamToFile(contents, new File(itemMap.get(itemName).getFilepath()));
-
-                // exists in another collection so add to this one.
-                collection.getItemIds().add(itemMap.get(itemName).getId());
+                output = new File(itemMap.get(itemName).getFilepath());
 
             } else {
 
                 // new Item
-                File output = new File(getDataItemPath() +
-                        FilenameUtils.getBaseName(itemName) +
-                        File.separator + itemName + "." + fileExtension);
+                output = new File(getDataItemPath() +
+                    FilenameUtils.getBaseName(itemName) +
+                    File.separator + itemName + "." + fileExtension);
                 output.getParentFile().mkdirs();
 
-                // write out item file
-                FileUtils.copyInputStreamToFile(contents, output);
+            }
 
-                String collectionDir = new File(collection.getFilepath()).getParentFile().getPath();
-                String itemPath = Paths.get(collectionDir).relativize(Paths.get(output.getCanonicalPath())).toString();
-                Id id = new Id(itemPath);
-                collection.getItemIds().add(id);
+            // Write out file.
+            FileUtils.copyInputStreamToFile(contents, output);
+
+            if (!itemAlreadyInCollection) {
+
+                // Add itemId to collection
+                if (itemMap.containsKey(itemName)) {
+                    collection.getItemIds().add(itemMap.get(itemName).getId());
+                } else {
+                    String collectionDir = new File(collection.getFilepath()).getParentFile().getPath();
+                    String itemPath = Paths.get(collectionDir).relativize(Paths.get(output.getCanonicalPath())).toString();
+                    Id id = new Id(itemPath);
+                    collection.getItemIds().add(id);
+                }
 
                 // Write out collection file
                 ObjectMapper mapper = new ObjectMapper();
                 ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
                 writer.writeValue(new File(collection.getFilepath()), collection);
 
-                updateModel();
-
             }
 
             //TODO
             //pushGitChanges();
+
+            updateModel();
 
             return true;
 
@@ -365,16 +375,16 @@ public class EditAPI {
             // remove parent dir if empty
             File parentFile = f.getParentFile();
             if (parentFile != null && f.getParentFile().isDirectory() &&
-                    Objects.requireNonNull(parentFile.list()).length == 0) {
+                Objects.requireNonNull(parentFile.list()).length == 0) {
                 if (!parentFile.delete()) {
                     return false;
                 }
             }
 
-            updateModel();
-
             //TODO
             //pushGitChanges();
+
+            updateModel();
 
             return true;
         } catch (IOException | GitAPIException e) {
