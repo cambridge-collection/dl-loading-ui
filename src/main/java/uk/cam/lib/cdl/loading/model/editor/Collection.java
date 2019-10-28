@@ -1,9 +1,9 @@
 package uk.cam.lib.cdl.loading.model.editor;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,57 +11,46 @@ import java.util.List;
  */
 public class Collection {
 
+    private final String type;
+    private final CollectionName name;
+    private final CollectionDescription description;
+    private final CollectionCredit credit;
+    private final List<Id> ids;
     private String filepath;
-    private String type;
-    private CollectionName name;
-    private CollectionDescription description;
-    private CollectionCredit credit;
-    private List<Id> ids = new ArrayList<>();
-    private List<Item> items = new ArrayList<>();
+
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public Collection(@JsonProperty("@type") String type,
+                      @JsonProperty("name") CollectionName name,
+                      @JsonProperty("description") CollectionDescription description,
+                      @JsonProperty("credit") CollectionCredit credit,
+                      @JsonProperty("items") List<Id> ids) {
+        this.type = type;
+        this.name = name;
+        this.description = description;
+        this.credit = credit;
+        this.ids = ids;
+    }
 
     @JsonProperty("@type")
     public String getType() {
         return type;
     }
 
-    @JsonProperty("@type")
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public CollectionName getName() {
         return name;
     }
 
-    public void setName(CollectionName name) {
-        this.name = name;
-    }
-
-
     public CollectionDescription getDescription() {
         return description;
-    }
-
-    public void setDescription(CollectionDescription description) {
-        this.description = description;
     }
 
     public CollectionCredit getCredit() {
         return credit;
     }
 
-    public void setCredit(CollectionCredit credit) {
-        this.credit = credit;
-    }
-
     @JsonProperty("items")
     public List<Id> getItemIds() {
         return ids;
-    }
-
-    @JsonProperty("items")
-    public void setItemIds(List<Id> ids) {
-        this.ids = ids;
     }
 
     @JsonIgnore
@@ -71,17 +60,9 @@ public class Collection {
 
     @JsonIgnore
     public void setFilepath(String filepath) {
-        this.filepath = filepath;
-    }
-
-    @JsonIgnore
-    public List<Item> getItems() {
-        return items;
-    }
-
-    @JsonIgnore
-    public void setItems(List<Item> items) {
-        this.items = items;
+        if (this.filepath == null) {
+            this.filepath = filepath;
+        }
     }
 
     // TODO fix this hardcoding
@@ -98,7 +79,7 @@ public class Collection {
         sb.append("    name: ").append(toIndentedString(name)).append("\n");
         sb.append("    description: ").append(toIndentedString(description)).append("\n");
         sb.append("    credit: ").append(toIndentedString(credit)).append("\n");
-        sb.append("    items: ").append(toIndentedString(items)).append("\n");
+        sb.append("    items: ").append(toIndentedString(ids)).append("\n");
         sb.append("}");
         return sb.toString();
     }

@@ -26,7 +26,7 @@
             <h1 class="h3 mb-0 text-gray-800 ml-3">Content Editor</h1>
         </div>
 
-        <div class="col-xl-11" style="max-width: 1000px">
+        <div class="col-xl-11" style="max-width: 1200px">
             <div class="mb-4">
                 <div th:if="${message}">
                     <div class="alert alert-success" role="alert">
@@ -46,11 +46,11 @@
                     Here you can browse and edit the content for your digital library.<br><br>
                     <ul>
                         <li>You can view and edit the files directly through the <a
-                            href="/edit/advanced-edit.html">advanced
+                                href="/edit/advanced-edit.html">advanced
                             content editor</a>.
                         </li>
                         <li>For advanced users, you can also get access through <a
-                            href="https://git-scm.com/book/en/v2/Getting-Started-What-is-Git%3F">git</a>.
+                                href="https://git-scm.com/book/en/v2/Getting-Started-What-is-Git%3F">git</a>.
                         </li>
                     </ul>
                 </div>
@@ -76,7 +76,7 @@
                                                 <div class="row no-gutters align-items-top">
                                                     <div class="col mr-2">
                                                         <div
-                                                            class="text-s text-primary font-weight-bold text-uppercase mb-1">
+                                                                class="text-s text-primary font-weight-bold text-uppercase mb-1">
                                                             <a th:href="'/edit/collection/'+${collection.name.urlSlug}"
                                                                th:text="${collection.name.shortName}"></a></div>
                                                         <div class="text-xs mb-0 text-gray-800 text-left"
@@ -105,7 +105,7 @@
                                             <div class="row no-gutters align-items-top">
                                                 <div class="col mr-2">
                                                     <div
-                                                        class="text-s font-weight-bold text-uppercase mb-1">
+                                                            class="text-s font-weight-bold text-uppercase mb-1">
                                                         <a class="text-gray-800" href="/edit/addcollection/"
                                                         >Add
                                                             Collection</a></div>

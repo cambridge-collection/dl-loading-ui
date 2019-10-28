@@ -1,9 +1,5 @@
 package uk.cam.lib.cdl.loading;
 
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -19,6 +15,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
+import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -54,11 +52,17 @@ public class EditController {
                                  @RequestParam(required = false) String error) {
 
         Collection collection = editAPI.getCollection(collectionUrlSlug);
+        // Get Item names from Ids
+        List<Item> items = new ArrayList<>();
+        for (Id id : collection.getItemIds()) {
+            items.add(editAPI.getItem(id.getId()));
+        }
+
         model.addAttribute("thumbnailURL", editAPI.getDataLocalPath() + collection.getThumbnailURL());
         model.addAttribute("collection", collection);
         model.addAttribute("error", error);
         model.addAttribute("message", message);
-
+        model.addAttribute("items", items);
         return "edit-collection";
     }
 
@@ -87,14 +91,14 @@ public class EditController {
                 if (f.isDirectory()) {
                     output.append("<li class=\"directory collapsed\">");
                     output.append("<a href=\"#\" rel=\"")
-                        .append(f.toPath().toAbsolutePath() + "/").append("\">")
-                        .append(f.toPath().getFileName()).append("</a></li>");
+                            .append(f.toPath().toAbsolutePath() + "/").append("\">")
+                            .append(f.toPath().getFileName()).append("</a></li>");
                 } else {
                     output.append("<li class=\"file ext_")
-                        .append(FilenameUtils.getExtension(f.toPath().toString())).append("\">");
+                            .append(FilenameUtils.getExtension(f.toPath().toString())).append("\">");
                     output.append("<a href=\"#\" rel=\"")
-                        .append(f.toPath().toAbsolutePath()).append("\">")
-                        .append(f.toPath().getFileName()).append("</a></li>");
+                            .append(f.toPath().toAbsolutePath()).append("\">")
+                            .append(f.toPath().getFileName()).append("</a></li>");
                 }
             }
         } else {
@@ -109,7 +113,7 @@ public class EditController {
     @RequestMapping(method = RequestMethod.POST, value = "/edit/filetree/get")
     public ResponseEntity<Resource> editFileTreeGet(Model model, @RequestParam String filepath,
                                                     HttpServletResponse response) throws BadRequestException,
-        IOException {
+            IOException {
         File file = new File(filepath);
 
         // Allow access to git dir checkout only.
@@ -124,14 +128,14 @@ public class EditController {
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file.getCanonicalPath()));
 
         return ResponseEntity.ok()
-            .contentLength(file.length())
-            .contentType(MediaType.parseMediaType(contentType))
-            .body(resource);
+                .contentLength(file.length())
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(resource);
     }
 
     @RequestMapping(value = "/edit/download")
     public ResponseEntity<Resource> editDownload(Model model, @RequestParam String filepath)
-        throws BadRequestException, IOException {
+            throws BadRequestException, IOException {
 
         File file = new File(filepath);
 
@@ -159,29 +163,29 @@ public class EditController {
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file.getCanonicalPath()));
 
         return ResponseEntity.ok()
-            .contentLength(file.length())
-            .header("Content-Disposition", "attachment; filename=" + filename)
-            .contentType(MediaType.parseMediaType(contentType))
-            .body(resource);
+                .contentLength(file.length())
+                .header("Content-Disposition", "attachment; filename=" + filename)
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(resource);
     }
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/edit/rename")
     public String editRename(Model model, @RequestParam String filepath)
-        throws BadRequestException, FileNotFoundException {
+            throws BadRequestException, FileNotFoundException {
         return "";
     }
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/edit/delete")
     public String editDelete(Model model, @RequestParam String filepath)
-        throws BadRequestException, FileNotFoundException {
+            throws BadRequestException, FileNotFoundException {
         return "";
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/edit/upload")
     public String editUpload(Model model, @RequestParam String filepath)
-        throws BadRequestException, FileNotFoundException {
+            throws BadRequestException, FileNotFoundException {
         return "";
     }
 
@@ -209,33 +213,19 @@ public class EditController {
             throw new BadRequestException(new Exception("Unknown collection with id: " + collectionId));
         }
 
-        // Set fixed values we don't want to allow editing for.
-        collection.getName().setUrlSlug(collectionId);
-        collection.setType(existingCollection.getType());
-        collection.setFilepath(existingCollection.getFilepath());
-        collection.setItems(existingCollection.getItems());
-        collection.setItemIds(existingCollection.getItemIds());
+        // Check values we do not want to allow to edit
+        // match the existing collection values
+        if (collection.getName().getUrlSlug().equals(collectionId) &&
+                collection.getType().equals(existingCollection.getType()) &&
+                collection.getFilepath().equals(existingCollection.getFilepath()) &&
+                collection.getItemIds().equals(existingCollection.getItemIds())) {
 
-        try {
-
-            // Write out file
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-            writer.writeValue(new File(editAPI.getDataLocalPath() + collection.getFilepath()), collection);
-
-            // Git Commit and push to remote repo.
-            boolean success = editAPI.pushGitChanges();
+            boolean success = editAPI.updateCollection(collection);
             if (success) {
                 attributes.addAttribute("message", "Collection Updated.");
             } else {
-                throw new IOException("Git push failed");
+                attributes.addAttribute("error", "Failed to update collection.");
             }
-
-            editAPI.updateModel();
-
-        } catch (IOException e) {
-            attributes.addAttribute("error", "There was a problem updating the collection.");
-            e.printStackTrace();
         }
 
         return new RedirectView("/edit/collection/" + collectionId + "/");
@@ -243,33 +233,50 @@ public class EditController {
 
     @PostMapping("/edit/collection/{collectionId}/addItem")
     public RedirectView addCollectionItem(RedirectAttributes attributes, @PathVariable String collectionId,
-                                          @RequestParam("file") MultipartFile file) throws BadRequestException, IOException {
+                                          @RequestParam("file") MultipartFile file) throws IOException {
 
-        System.out.println("in addCollectionItem ");
-        if (file.getContentType() == null || !file.getContentType().equals("application/xml")) {
+        if (file.getContentType() == null || !(file.getContentType().equals("text/xml") ||
+                file.getContentType().equals("application/json"))) {
             attributes.addAttribute("error", "Item needs to be in TEI XML format.");
             return new RedirectView("/edit/collection/" + collectionId + "/");
         }
 
-        // Check to see if the file already exists
-        Item item = editAPI.getItem(file.getName());
-        if (item != null) {
-            // Overwrite existing Item
-            FileUtils.copyInputStreamToFile(file.getInputStream(), new File(item.getFilepath()));
-
-        } else {
-            // new Item
-            //TODO
+        String itemName = FilenameUtils.getBaseName(file.getOriginalFilename());
+        String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if (!editAPI.validateFilename(itemName)) {
+            attributes.addAttribute("error", "Item name not valid.");
+            return new RedirectView("/edit/collection/" + collectionId + "/");
         }
 
-        boolean success = editAPI.pushGitChanges();
-        if (success) {
-            attributes.addAttribute("message", "Item added to collection.");
-        } else {
-            throw new IOException("Git push failed, on adding new item to collection.");
+        if (!editAPI.validate(file)) {
+            attributes.addAttribute("error", "Item is not valid XML/JSON or does not validate against the required schema.");
+            return new RedirectView("/edit/collection/" + collectionId + "/");
         }
+
+        if (!editAPI.addItemToCollection(itemName, fileExtension, file.getInputStream(), collectionId)) {
+            attributes.addAttribute("error", "Problem adding item to collection");
+            return new RedirectView("/edit/collection/" + collectionId + "/");
+        }
+
+        attributes.addAttribute("message", "Item added to collection.");
 
         return new RedirectView("/edit/collection/" + collectionId + "/");
     }
 
+    @PostMapping("/edit/collection/{collectionId}/deleteItem")
+    public RedirectView deleteCollectionItem(RedirectAttributes attributes, @PathVariable String collectionId,
+                                             @RequestParam String itemName) {
+
+        boolean success = editAPI.deleteItemFromCollection(itemName, collectionId);
+        if (success) {
+            attributes.addAttribute("message", "Item deleted from collection.");
+        } else {
+            attributes.addAttribute("error", "Problem deleting item");
+        }
+
+        return new RedirectView("/edit/collection/" + collectionId + "/");
+
+    }
+
 }
+

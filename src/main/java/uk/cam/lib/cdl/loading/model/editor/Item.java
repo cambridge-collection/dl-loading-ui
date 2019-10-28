@@ -1,23 +1,29 @@
 package uk.cam.lib.cdl.loading.model.editor;
 
+/**
+ * Not used for Jackson serialisation
+ */
 public class Item {
 
-    private String name;
-    private String filepath;
+    private final String name;
+    private final String filepath;
+    private final Id id;
+
+    public Item(String name, String filepath, Id id) {
+        this.filepath = filepath;
+        this.name = name;
+        this.id = id;
+    }
 
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getFilepath() {
         return filepath;
     }
 
-    public void setFilepath(String path) {
-        this.filepath = path;
+    public Id getId() {
+        return id;
     }
 }
