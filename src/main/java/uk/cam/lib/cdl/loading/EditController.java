@@ -58,7 +58,7 @@ public class EditController {
             items.add(editAPI.getItem(id.getId()));
         }
 
-        model.addAttribute("thumbnailURL", editAPI.getDataLocalPath() + collection.getThumbnailURL());
+        model.addAttribute("thumbnailURL", collection.getThumbnailURL());
         model.addAttribute("collection", collection);
         model.addAttribute("error", error);
         model.addAttribute("message", message);
@@ -91,14 +91,14 @@ public class EditController {
                 if (f.isDirectory()) {
                     output.append("<li class=\"directory collapsed\">");
                     output.append("<a href=\"#\" rel=\"")
-                            .append(f.toPath().toAbsolutePath() + "/").append("\">")
-                            .append(f.toPath().getFileName()).append("</a></li>");
+                        .append(f.toPath().toAbsolutePath() + "/").append("\">")
+                        .append(f.toPath().getFileName()).append("</a></li>");
                 } else {
                     output.append("<li class=\"file ext_")
-                            .append(FilenameUtils.getExtension(f.toPath().toString())).append("\">");
+                        .append(FilenameUtils.getExtension(f.toPath().toString())).append("\">");
                     output.append("<a href=\"#\" rel=\"")
-                            .append(f.toPath().toAbsolutePath()).append("\">")
-                            .append(f.toPath().getFileName()).append("</a></li>");
+                        .append(f.toPath().toAbsolutePath()).append("\">")
+                        .append(f.toPath().getFileName()).append("</a></li>");
                 }
             }
         } else {
@@ -113,7 +113,7 @@ public class EditController {
     @RequestMapping(method = RequestMethod.POST, value = "/edit/filetree/get")
     public ResponseEntity<Resource> editFileTreeGet(Model model, @RequestParam String filepath,
                                                     HttpServletResponse response) throws BadRequestException,
-            IOException {
+        IOException {
         File file = new File(filepath);
 
         // Allow access to git dir checkout only.
@@ -128,14 +128,14 @@ public class EditController {
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file.getCanonicalPath()));
 
         return ResponseEntity.ok()
-                .contentLength(file.length())
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(resource);
+            .contentLength(file.length())
+            .contentType(MediaType.parseMediaType(contentType))
+            .body(resource);
     }
 
     @RequestMapping(value = "/edit/download")
     public ResponseEntity<Resource> editDownload(Model model, @RequestParam String filepath)
-            throws BadRequestException, IOException {
+        throws BadRequestException, IOException {
 
         File file = new File(filepath);
 
@@ -163,29 +163,29 @@ public class EditController {
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file.getCanonicalPath()));
 
         return ResponseEntity.ok()
-                .contentLength(file.length())
-                .header("Content-Disposition", "attachment; filename=" + filename)
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(resource);
+            .contentLength(file.length())
+            .header("Content-Disposition", "attachment; filename=" + filename)
+            .contentType(MediaType.parseMediaType(contentType))
+            .body(resource);
     }
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/edit/rename")
     public String editRename(Model model, @RequestParam String filepath)
-            throws BadRequestException, FileNotFoundException {
+        throws BadRequestException, FileNotFoundException {
         return "";
     }
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/edit/delete")
     public String editDelete(Model model, @RequestParam String filepath)
-            throws BadRequestException, FileNotFoundException {
+        throws BadRequestException, FileNotFoundException {
         return "";
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/edit/upload")
     public String editUpload(Model model, @RequestParam String filepath)
-            throws BadRequestException, FileNotFoundException {
+        throws BadRequestException, FileNotFoundException {
         return "";
     }
 
@@ -216,9 +216,9 @@ public class EditController {
         // Check values we do not want to allow to edit
         // match the existing collection values
         if (collection.getName().getUrlSlug().equals(collectionId) &&
-                collection.getType().equals(existingCollection.getType()) &&
-                collection.getFilepath().equals(existingCollection.getFilepath()) &&
-                collection.getItemIds().equals(existingCollection.getItemIds())) {
+            collection.getType().equals(existingCollection.getType()) &&
+            collection.getFilepath().equals(existingCollection.getFilepath()) &&
+            collection.getItemIds().equals(existingCollection.getItemIds())) {
 
             boolean success = editAPI.updateCollection(collection);
             if (success) {
@@ -235,8 +235,7 @@ public class EditController {
     public RedirectView addCollectionItem(RedirectAttributes attributes, @PathVariable String collectionId,
                                           @RequestParam("file") MultipartFile file) throws IOException {
 
-        if (file.getContentType() == null || !(file.getContentType().equals("text/xml") ||
-                file.getContentType().equals("application/json"))) {
+        if (file.getContentType() == null || !(file.getContentType().equals("text/xml"))) {
             attributes.addAttribute("error", "Item needs to be in TEI XML format.");
             return new RedirectView("/edit/collection/" + collectionId + "/");
         }
@@ -244,7 +243,9 @@ public class EditController {
         String itemName = FilenameUtils.getBaseName(file.getOriginalFilename());
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
         if (!editAPI.validateFilename(itemName)) {
-            attributes.addAttribute("error", "Item name not valid.");
+            attributes.addAttribute("error", "Item name not valid. Should be for example: MS-TEST-00001. Using " +
+                " characters A-Z or numbers 0-9 and the - character delimiting sections.  Should have at least 3 " +
+                " sections, group (MS = Manuscripts, PR = printed etc) then the collection, then a five digit number.");
             return new RedirectView("/edit/collection/" + collectionId + "/");
         }
 
@@ -258,7 +259,7 @@ public class EditController {
             return new RedirectView("/edit/collection/" + collectionId + "/");
         }
 
-        attributes.addAttribute("message", "Item added to collection.");
+        attributes.addAttribute("message", "Item updated/added to collection.");
 
         return new RedirectView("/edit/collection/" + collectionId + "/");
     }

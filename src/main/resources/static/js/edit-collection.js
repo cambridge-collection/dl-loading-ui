@@ -1,7 +1,10 @@
 $(document).ready(function () {
 
-    let updateModel = $('#updateModal');
-    updateModel.modal({show: false});
+    let updateModal = $('#updateModal');
+    updateModal.modal({show: false});
+
+    let deleteItemModal = $('#deleteItemModal');
+    deleteItemModal.modal({show: false});
 
     $('#dataTable').DataTable({
         paging: true,
@@ -9,7 +12,7 @@ $(document).ready(function () {
     });
 
     $('#collectioneditform-submit').on('click', function () {
-        updateModel.modal('show');
+        updateModal.modal('show');
         $('#collectioneditform').submit();
     });
     $('#collectioneditform-reset').on('click', function () {
@@ -17,8 +20,26 @@ $(document).ready(function () {
     });
 
     $('#addItemFile').on('change', function () {
+        updateModal.modal('show');
         $('#addItemFileForm').submit();
-    })
+    });
+
+    $('button[id^="deleteItemButton_"]').on('click', function () {
+        console.log(this);
+        deleteItemModal.modal('show');
+        let form = this.form;
+        $('#confirmDeleteItemButton').on('click', function () {
+            form.submit();
+        });
+        return false;
+    });
+
+    $('#confirmDeleteItemButton').on('click', function () {
+        deleteItemModal.modal('hide');
+        updateModal.modal('show');
+        $('#deleteItemForm').submit();
+    });
+
 });
 
 
