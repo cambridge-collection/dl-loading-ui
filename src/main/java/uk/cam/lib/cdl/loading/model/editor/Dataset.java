@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading.model.editor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.beans.ConstructorProperties;
 import java.util.List;
 
 public class Dataset {
@@ -11,6 +12,7 @@ public class Dataset {
     private final String name;
     private final List<Id> collections;
 
+    @ConstructorProperties({"type", "name", "collections"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public Dataset(@JsonProperty("@type") String type,
                    @JsonProperty("name") String name,

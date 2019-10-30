@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.beans.ConstructorProperties;
 import java.util.List;
 
 /**
@@ -19,6 +20,7 @@ public class Collection {
     private String filepath;
     private String thumbnailURL;
 
+    @ConstructorProperties({"type", "name", "description", "credit", "items"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public Collection(@JsonProperty("@type") String type,
                       @JsonProperty("name") CollectionName name,

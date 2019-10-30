@@ -3,12 +3,15 @@ package uk.cam.lib.cdl.loading.model.editor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.beans.ConstructorProperties;
+
 public class CollectionDescription {
 
     private final String shortDescription;
     private final String medium;
     private final Id full;
 
+    @ConstructorProperties({"shortDescription", "full", "medium"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public CollectionDescription(@JsonProperty("short") String shortDescription,
                                  @JsonProperty("full") Id full,
