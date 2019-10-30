@@ -220,12 +220,12 @@
                                                     th:action="'/edit/collection/'+${collection.name.urlSlug}+'/deleteItem'"
                                                     method="post" th:id="'deleteItemForm_'+${item.name}">
                                                     <input type="hidden" name="itemName" th:value="${item.name}">
-                                                    <button class="btn btn-link" th:id="'deleteItemButton_'+${item.name}">
+                                                    <button class="btn btn-link"
+                                                            th:id="'deleteItemButton_'+${item.name}"
+                                                            onclick="return loading_ui_edit_collection.showDeleteModal(this);">
                                                         <i class="fas fa-trash-alt text-gray-500"></i>
                                                     </button>
                                                 </form>
-
-
 
 
                                             </td>
