@@ -2,18 +2,22 @@ package uk.cam.lib.cdl.loading;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
+import uk.cam.lib.cdl.loading.forms.CollectionForm;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.Item;
@@ -52,14 +56,17 @@ public class EditController {
                                  @RequestParam(required = false) String error) {
 
         Collection collection = editAPI.getCollection(collectionUrlSlug);
+        CollectionForm form = new CollectionForm(collection);
+
         // Get Item names from Ids
         List<Item> items = new ArrayList<>();
         for (Id id : collection.getItemIds()) {
             items.add(editAPI.getItem(id.getId()));
         }
 
+
         model.addAttribute("thumbnailURL", collection.getThumbnailURL());
-        model.addAttribute("collection", collection);
+        model.addAttribute("form", form);
         model.addAttribute("error", error);
         model.addAttribute("message", message);
         model.addAttribute("items", items);
@@ -189,20 +196,21 @@ public class EditController {
         return "";
     }
 
-
     /**
      * TODO validate the changes against the JSON schema.
      *
      * @param attributes
      * @param collectionId
-     * @param collection
+     * @param collectionForm
      * @return
      * @throws BadRequestException
      */
     @RequestMapping(method = RequestMethod.POST, value = "/edit/collection/{collectionId}/update")
     public RedirectView updateCollection(RedirectAttributes attributes,
                                          @PathVariable String collectionId,
-                                         @ModelAttribute Collection collection) throws BadRequestException {
+                                         @ModelAttribute CollectionForm collectionForm) throws BadRequestException {
+
+        Collection collection = collectionForm.toCollection();
 
         if (collection.getName() == null || collection.getName().getUrlSlug() == null) {
             throw new BadRequestException(new Exception());
@@ -215,10 +223,14 @@ public class EditController {
 
         // Check values we do not want to allow to edit
         // match the existing collection values
+
         if (collection.getName().getUrlSlug().equals(collectionId) &&
             collection.getType().equals(existingCollection.getType()) &&
             collection.getFilepath().equals(existingCollection.getFilepath()) &&
-            collection.getItemIds().equals(existingCollection.getItemIds())) {
+            collection.getThumbnailURL().equals(existingCollection.getThumbnailURL())) {
+
+            // TODO  &&
+            //            collection.getItemIds().equals(existingCollection.getItemIds())
 
             boolean success = editAPI.updateCollection(collection);
             if (success) {

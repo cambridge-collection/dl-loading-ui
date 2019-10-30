@@ -49,15 +49,18 @@
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <h6 class="m-0 font-weight-bold text-dark float-left">
-                                <span th:text="${collection.name.shortName}"></span></h6>
+                                <span th:text="${form.shortName}"></span></h6>
                         </div>
                         <div class="card-body">
 
                             <form method="post" id="collectioneditform"
-                                  th:action="@{'/edit/collection/'+${collection.name.urlSlug}+'/update'}"
-                                  th:object="${collection}">
-                                <input type="hidden" name="type" th:value="*{type}">
-                                <input type="hidden" name="name.urlSlug" th:value="*{name.urlSlug}">
+                                  th:action="@{'/edit/collection/'+${form.urlSlugName}+'/update'}"
+                                  th:object="${form}">
+                                <input type="hidden" name="collectionType" th:value="*{collectionType}">
+                                <input type="hidden" name="urlSlugName" th:value="*{urlSlugName}">
+                                <input type="hidden" name="itemIds" th:value="*{ItemIds}">
+                                <input type="hidden" name="filepath" th:value="*{filepath}">
+                                <input type="hidden" name="thumbnailURL" th:value="*{thumbnailURL}">
                                 <div class="form-group w-auto">
                                     <div class="row">
                                         <div class="col"><h4>Names</h4></div>
@@ -68,7 +71,7 @@
                                                 <div class="col-4 m-2 text-right">Identifier</div>
                                                 <div class="col m-2">
                                                     <span class="text-gray-800"
-                                                          th:text="*{name.urlSlug}"></span>
+                                                          th:text="*{urlSlugName}"></span>
                                                 </div>
                                             </div>
 
@@ -77,10 +80,10 @@
                                                     <label for="name.shortName">Short name</label>
                                                 </div>
                                                 <div class="col-6 m-2">
-                                                    <input class="form-control" type="text" name="name.shortName"
+                                                    <input class="form-control" type="text" name="shortName"
                                                            id="name.shortName"
                                                            maxlength="30"
-                                                           th:value="*{name.shortName}">
+                                                           th:value="*{shortName}">
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -88,10 +91,10 @@
                                                     <label for="name.full">Full name</label>
                                                 </div>
                                                 <div class="col m-2">
-                                                    <input class="form-control" type="text" th:name="name.full"
+                                                    <input class="form-control" type="text" th:name="fullName"
                                                            id="name.full"
                                                            maxlength="50"
-                                                           th:value="*{name.full}">
+                                                           th:value="*{fullName}">
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -99,10 +102,10 @@
                                                     <label for="name.sort">Sorting name</label>
                                                 </div>
                                                 <div class="col m-2">
-                                                    <input class="form-control" type="text" name="name.sort"
+                                                    <input class="form-control" type="text" name="sortName"
                                                            id="name.sort"
                                                            maxlength="50"
-                                                           th:value="*{name.sort}">
+                                                           th:value="*{sortName}">
                                                 </div>
                                             </div>
                                         </div>
@@ -113,7 +116,7 @@
                                                     <div class="row">
                                                         <div style="width: 150px">
                                                             <img class="img-thumbnail"
-                                                                 th:src="'/edit/download?filepath='+${thumbnailURL}"
+                                                                 th:src="'/edit/download?filepath='+${form.thumbnailURL}"
                                                                  width="146px"
                                                                  height="146px">
                                                         </div>
@@ -138,10 +141,10 @@
                                             <label for="description.shortDescription">Short</label>
                                         </div>
                                         <div class="col m-2">
-                                            <textarea class="form-control" name="description.shortDescription"
+                                            <textarea class="form-control" name="shortDescription"
                                                       id="description.shortDescription"
                                                       rows="4" cols="80"
-                                                      th:text="*{description.shortDescription}"></textarea>
+                                                      th:text="*{shortDescription}"></textarea>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -149,10 +152,10 @@
                                             <label for="description.medium">Medium</label>
                                         </div>
                                         <div class="col m-2">
-                                            <textarea class="form-control" name="description.medium"
+                                            <textarea class="form-control" name="mediumDescription"
                                                       id="description.medium"
                                                       rows="4" cols="80"
-                                                      th:text="*{description.medium}"></textarea>
+                                                      th:text="*{mediumDescription}"></textarea>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -164,9 +167,9 @@
                                                       id="description.full"
                                                       rows="4" cols="80"
                                             >To be implemented ...</textarea>
-                                            <input type="hidden" name="description.full.id"
+                                            <input type="hidden" name="fullDescription"
                                                    rows="4" cols="80"
-                                                   th:value="*{description.full.id}">
+                                                   th:value="*{fullDescription}">
                                         </div>
                                     </div>
 
@@ -182,8 +185,8 @@
                                                        id="credit.prose"
                                                        rows="4" cols="80"
                                              >To be implemented ...</textarea>
-                                            <input type="hidden" name="credit.prose.id"
-                                                   th:value="*{credit.prose.id}">
+                                            <input type="hidden" name="proseCredit"
+                                                   th:value="*{proseCredit}">
                                         </div>
                                     </div>
                                 </div>
@@ -217,7 +220,7 @@
                                             </td>
                                             <td>
                                                 <form
-                                                    th:action="'/edit/collection/'+${collection.name.urlSlug}+'/deleteItem'"
+                                                    th:action="'/edit/collection/'+${form.urlSlugName}+'/deleteItem'"
                                                     method="post" th:id="'deleteItemForm_'+${item.name}">
                                                     <input type="hidden" name="itemName" th:value="${item.name}">
                                                     <button class="btn btn-link"
@@ -244,7 +247,7 @@
                                     <label for="additemFile">Add / Replace Item</label>
                                 </div>
                                 <div class="col-6 m-2">
-                                    <form th:action="'/edit/collection/'+${collection.name.urlSlug}+'/addItem'"
+                                    <form th:action="'/edit/collection/'+${form.urlSlugName}+'/addItem'"
                                           method="post" id="addItemFileForm" enctype="multipart/form-data">
                                         <input type="file" name="file" class="form-control-file" id="addItemFile">
                                     </form>

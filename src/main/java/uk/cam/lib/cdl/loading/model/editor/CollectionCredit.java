@@ -3,10 +3,13 @@ package uk.cam.lib.cdl.loading.model.editor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.beans.ConstructorProperties;
+
 public class CollectionCredit {
 
     private final Id prose;
 
+    @ConstructorProperties({"prose"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public CollectionCredit(@JsonProperty("prose") Id prose) {
         this.prose = prose;

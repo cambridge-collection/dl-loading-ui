@@ -3,6 +3,8 @@ package uk.cam.lib.cdl.loading.model.editor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.beans.ConstructorProperties;
+
 public class CollectionName {
 
     private final String urlslug;
@@ -10,6 +12,7 @@ public class CollectionName {
     private final String shortName;
     private final String full;
 
+    @ConstructorProperties({"urlSlug", "sort", "shortName", "full"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public CollectionName(@JsonProperty("url-slug") String urlslug,
                           @JsonProperty("sort") String sort,

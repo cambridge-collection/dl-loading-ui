@@ -3,10 +3,13 @@ package uk.cam.lib.cdl.loading.model.editor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Id {
+import java.beans.ConstructorProperties;
+
+public class Id implements Comparable<Id> {
 
     private final String id;
 
+    @ConstructorProperties({"id"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public Id(@JsonProperty("@id") String id) {
         this.id = id;
@@ -40,6 +43,9 @@ public class Id {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Id) {
+            System.out.println(getId());
+            System.out.println(((Id) obj).getId());
+            System.out.println(getId().equals(((Id) obj).getId()));
             return getId().equals(((Id) obj).getId());
         }
         return false;
@@ -48,5 +54,10 @@ public class Id {
     @Override
     public int hashCode() {
         return getId().hashCode();
+    }
+
+    @Override
+    public int compareTo(Id id) {
+        return this.getId().compareTo(id.getId());
     }
 }

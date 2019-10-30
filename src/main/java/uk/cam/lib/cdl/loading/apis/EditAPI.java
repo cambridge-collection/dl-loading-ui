@@ -410,10 +410,12 @@ public class EditAPI {
             writer.writeValue(new File(collection.getFilepath()), collection);
 
             // Git Commit and push to remote repo.
-            boolean success = pushGitChanges();
+            // TODO
+            //boolean success = pushGitChanges();
             updateModel();
 
-            return success;
+            //return success;
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
