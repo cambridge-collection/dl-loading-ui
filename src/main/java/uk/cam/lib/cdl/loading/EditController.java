@@ -2,15 +2,12 @@ package uk.cam.lib.cdl.loading;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -28,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -227,10 +225,8 @@ public class EditController {
         if (collection.getName().getUrlSlug().equals(collectionId) &&
             collection.getType().equals(existingCollection.getType()) &&
             collection.getFilepath().equals(existingCollection.getFilepath()) &&
-            collection.getThumbnailURL().equals(existingCollection.getThumbnailURL())) {
-
-            // TODO  &&
-            //            collection.getItemIds().equals(existingCollection.getItemIds())
+            collection.getThumbnailURL().equals(existingCollection.getThumbnailURL()) &&
+            listEqualsIgnoreOrder(collection.getItemIds(), existingCollection.getItemIds())) {
 
             boolean success = editAPI.updateCollection(collection);
             if (success) {
@@ -241,6 +237,10 @@ public class EditController {
         }
 
         return new RedirectView("/edit/collection/" + collectionId + "/");
+    }
+
+    private <T> boolean listEqualsIgnoreOrder(List<T> list1, List<T> list2) {
+        return new HashSet<>(list1).equals(new HashSet<>(list2));
     }
 
     @PostMapping("/edit/collection/{collectionId}/addItem")

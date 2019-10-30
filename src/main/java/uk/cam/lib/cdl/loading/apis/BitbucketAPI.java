@@ -17,14 +17,12 @@ import java.util.List;
 
 public class BitbucketAPI extends WebAPI {
 
-    private URL apiURL;
-    private URL tagsURL;
-    private String username;
-    private String password;
+    private final URL tagsURL;
+    private final String username;
+    private final String password;
     private final String cacheName = "bitbucketTags";
 
     public BitbucketAPI(URL apiURL, String tagsURL, String username, String password) throws MalformedURLException {
-        this.apiURL = apiURL;
         this.tagsURL = new URL(apiURL, tagsURL);
         this.username = username;
         this.password = password;

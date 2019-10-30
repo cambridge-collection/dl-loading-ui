@@ -18,7 +18,7 @@ import java.util.List;
 
 public class DeploymentAPI extends WebAPI {
 
-    private URL deploymentURL;
+    private final URL deploymentURL;
     private final String cacheName = "deploymentInstances";
 
     public DeploymentAPI(URL deploymentURL) {

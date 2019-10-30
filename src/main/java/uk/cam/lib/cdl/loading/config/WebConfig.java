@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     @Value("${spring.application.static.path}")
-    String staticPath;
+    private String staticPath;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
