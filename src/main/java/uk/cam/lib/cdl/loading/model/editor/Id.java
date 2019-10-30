@@ -43,9 +43,6 @@ public class Id implements Comparable<Id> {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Id) {
-            System.out.println(getId());
-            System.out.println(((Id) obj).getId());
-            System.out.println(getId().equals(((Id) obj).getId()));
             return getId().equals(((Id) obj).getId());
         }
         return false;

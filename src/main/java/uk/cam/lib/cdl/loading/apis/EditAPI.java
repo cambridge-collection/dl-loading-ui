@@ -13,7 +13,6 @@ import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -43,24 +42,22 @@ Access info from the git data directly for now.
 */
 public class EditAPI {
 
-    @Autowired
-    private GitVariables gitVariables;
-
     private Git git;
+    private final GitVariables gitVariables;
     private final String dataPath;
     private final String dataItemPath;
     private final File datasetFile;
 
-    private Dataset dataset;
-    private Map<String, Collection> collectionMap = new HashMap<>();
-    private Map<String, Item> itemMap = new HashMap<>();
+    private Map<String, Collection> collectionMap = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, Item> itemMap = Collections.synchronizedMap(new HashMap<>());
     private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
 
 
-    public EditAPI(String dataPath, String dlDatasetFilename, String dataItemPath) {
+    public EditAPI(String dataPath, String dlDatasetFilename, String dataItemPath, GitVariables gitVariables) {
         this.dataPath = dataPath;
         this.datasetFile = new File(dataPath + File.separator + dlDatasetFilename);
         this.dataItemPath = dataItemPath;
+        this.gitVariables = gitVariables;
     }
 
     @PostConstruct
@@ -76,7 +73,7 @@ public class EditAPI {
         updateModel();
     }
 
-    public void updateModel() throws IOException {
+    public synchronized void updateModel() throws IOException {
 
         try {
             pullGitChanges();
@@ -85,9 +82,9 @@ public class EditAPI {
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
-        dataset = objectMapper.readValue(datasetFile, Dataset.class);
-        Map<String, Collection> newCollectionMap = new HashMap<>();
-        Map<String, Item> newItemMap = new HashMap<>();
+        Dataset dataset = objectMapper.readValue(datasetFile, Dataset.class);
+        Map<String, Collection> newCollectionMap = Collections.synchronizedMap(new HashMap<>());
+        Map<String, Item> newItemMap = Collections.synchronizedMap(new HashMap<>());
 
         // Setup collections
         for (Id id : dataset.getCollections()) {
@@ -118,10 +115,6 @@ public class EditAPI {
         this.itemMap = newItemMap;
     }
 
-    public Dataset getDataset() {
-        return dataset;
-    }
-
     public List<Collection> getCollections() {
         return new ArrayList<>(collectionMap.values());
     }
@@ -141,7 +134,8 @@ public class EditAPI {
         return itemMap.get(FilenameUtils.getBaseName(id));
     }
 
-    private void setupRepo(String gitSourcePath, String gitSourceURL, String gitSourceURLUserame, String gitSourceURLPassword) {
+    private synchronized void setupRepo(String gitSourcePath, String gitSourceURL, String gitSourceURLUserame,
+                                        String gitSourceURLPassword) {
         try {
             File dir = new File(gitSourcePath);
             if (dir.exists()) {

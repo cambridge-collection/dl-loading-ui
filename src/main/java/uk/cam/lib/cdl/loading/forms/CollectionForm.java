@@ -2,8 +2,8 @@ package uk.cam.lib.cdl.loading.forms;
 
 import uk.cam.lib.cdl.loading.model.editor.*;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CollectionForm {
 
@@ -30,9 +30,14 @@ public class CollectionForm {
         this.mediumDescription = collection.getDescription().getMedium();
         this.fullDescription = collection.getDescription().getFull().getId();
         this.proseCredit = collection.getCredit().getProse().getId();
-        this.itemIds = collection.getItemIds().stream().map(Id::getId).collect(Collectors.toList());
         this.filepath = collection.getFilepath();
         this.thumbnailURL = collection.getThumbnailURL();
+
+        List<String> itemIds = new ArrayList<>();
+        for (Id id : collection.getItemIds()) {
+            itemIds.add(id.getId());
+        }
+        this.itemIds = itemIds;
     }
 
     public CollectionForm() {
@@ -87,8 +92,12 @@ public class CollectionForm {
         CollectionDescription description = new CollectionDescription(shortDescription, new Id(fullDescription),
             mediumDescription);
         CollectionCredit credit = new CollectionCredit(new Id(proseCredit));
-        Collection c = new Collection(collectionType, name, description, credit,
-            itemIds.stream().map(Id::new).collect(Collectors.toList()));
+
+        List<Id> itemIds = new ArrayList<>();
+        for (String id : getItemIds()) {
+            itemIds.add(new Id(id));
+        }
+        Collection c = new Collection(collectionType, name, description, credit, itemIds);
         c.setFilepath(filepath);
         c.setThumbnailURL(thumbnailURL);
         return c;
@@ -127,7 +136,15 @@ public class CollectionForm {
     }
 
     public void setItemIds(List<String> itemIds) {
-        this.itemIds = itemIds;
+
+        // Thymeleaf appends extra [ ] to the itemIds, so remove these here.
+        List<String> ids = new ArrayList<>();
+        for (String id : itemIds) {
+            id = id.replaceAll("([\\[\\]])", "");
+            ids.add(id);
+        }
+
+        this.itemIds = ids;
     }
 
     public String getFilepath() {
