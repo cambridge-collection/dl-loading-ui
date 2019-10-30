@@ -1,3 +1,5 @@
+let loading_ui_edit_collection = {};
+
 $(document).ready(function () {
 
     let updateModal = $('#updateModal');
@@ -24,21 +26,17 @@ $(document).ready(function () {
         $('#addItemFileForm').submit();
     });
 
-    $('button[id^="deleteItemButton_"]').on('click', function () {
-        console.log(this);
+
+    loading_ui_edit_collection.showDeleteModal = function (button) {
         deleteItemModal.modal('show');
-        let form = this.form;
+        let form = button.form;
         $('#confirmDeleteItemButton').on('click', function () {
+            deleteItemModal.modal('hide');
+            updateModal.modal('show');
             form.submit();
         });
         return false;
-    });
-
-    $('#confirmDeleteItemButton').on('click', function () {
-        deleteItemModal.modal('hide');
-        updateModal.modal('show');
-        $('#deleteItemForm').submit();
-    });
+    };
 
 });
 
