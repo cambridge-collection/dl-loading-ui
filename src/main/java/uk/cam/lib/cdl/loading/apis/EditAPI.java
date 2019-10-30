@@ -52,7 +52,6 @@ public class EditAPI {
     private final File datasetFile;
 
     private Dataset dataset;
-    private List<Collection> collections = new ArrayList<>();
     private Map<String, Collection> collectionMap = new HashMap<>();
     private Map<String, Item> itemMap = new HashMap<>();
     private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
@@ -87,7 +86,6 @@ public class EditAPI {
 
         ObjectMapper objectMapper = new ObjectMapper();
         dataset = objectMapper.readValue(datasetFile, Dataset.class);
-        List<Collection> newCollections = new ArrayList<>();
         Map<String, Collection> newCollectionMap = new HashMap<>();
         Map<String, Item> newItemMap = new HashMap<>();
 
@@ -105,7 +103,6 @@ public class EditAPI {
             c.setFilepath(collectionFile.getCanonicalPath()); // is needed to get correct item path
             c.setThumbnailURL(getDataLocalPath() + "/pages/images/collectionsView/collection-" + c.getName().getUrlSlug() +
                 ".jpg"); // TODO fix hardcoding
-            newCollections.add(c);
 
             // Setup collection map
             newCollectionMap.put(c.getName().getUrlSlug(), c);
@@ -117,7 +114,6 @@ public class EditAPI {
 
         }
 
-        this.collections = newCollections;
         this.collectionMap = newCollectionMap;
         this.itemMap = newItemMap;
     }
@@ -127,7 +123,7 @@ public class EditAPI {
     }
 
     public List<Collection> getCollections() {
-        return collections;
+        return new ArrayList<>(collectionMap.values());
     }
 
     public Collection getCollection(String urlSlug) {
@@ -367,17 +363,19 @@ public class EditAPI {
             ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
             writer.writeValue(new File(collection.getFilepath()), collection);
 
-            // remove file
-            File f = new File(item.getFilepath());
-            if (!f.delete()) {
-                return false;
-            }
-            // remove parent dir if empty
-            File parentFile = f.getParentFile();
-            if (parentFile != null && f.getParentFile().isDirectory() &&
-                Objects.requireNonNull(parentFile.list()).length == 0) {
-                if (!parentFile.delete()) {
+            // Delete file for item if it exists in no other collection
+            if (getFirstCollectionForItem(item) == null) {
+                File f = new File(item.getFilepath());
+                if (!f.delete()) {
                     return false;
+                }
+                // remove parent dir if empty
+                File parentFile = f.getParentFile();
+                if (parentFile != null && f.getParentFile().isDirectory() &&
+                    Objects.requireNonNull(parentFile.list()).length == 0) {
+                    if (!parentFile.delete()) {
+                        return false;
+                    }
                 }
             }
 
@@ -391,6 +389,16 @@ public class EditAPI {
             e.printStackTrace();
         }
         return false;
+    }
+
+    private Collection getFirstCollectionForItem(Item i) {
+
+        for (Collection c : getCollections()) {
+            if (c.getItemIds().contains(i.getId())) {
+                return c;
+            }
+        }
+        return null;
     }
 
     public boolean updateCollection(Collection collection) {
