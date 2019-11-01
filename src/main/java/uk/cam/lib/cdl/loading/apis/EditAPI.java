@@ -330,8 +330,7 @@ public class EditAPI {
 
             }
 
-            //TODO
-            //pushGitChanges();
+            pushGitChanges();
 
             updateModel();
 
@@ -373,8 +372,7 @@ public class EditAPI {
                 }
             }
 
-            //TODO
-            //pushGitChanges();
+            pushGitChanges();
 
             updateModel();
 
@@ -404,12 +402,10 @@ public class EditAPI {
             writer.writeValue(new File(collection.getFilepath()), collection);
 
             // Git Commit and push to remote repo.
-            // TODO
-            //boolean success = pushGitChanges();
+            boolean success = pushGitChanges();
             updateModel();
 
-            //return success;
-            return true;
+            return success;
         } catch (IOException e) {
             e.printStackTrace();
         }

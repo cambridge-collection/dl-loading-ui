@@ -47,10 +47,6 @@ public class CollectionForm {
         return shortDescription;
     }
 
-    public void setShortDescription() {
-        this.shortDescription = shortDescription;
-    }
-
     public String getMediumDescription() {
         return mediumDescription;
     }
@@ -125,6 +121,10 @@ public class CollectionForm {
 
     public void setMediumDescription(String mediumDescription) {
         this.mediumDescription = mediumDescription;
+    }
+
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
     }
 
     public void setFullDescription(String fullDescription) {
