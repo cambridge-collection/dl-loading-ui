@@ -222,18 +222,21 @@ public class EditController {
         // Check values we do not want to allow to edit
         // match the existing collection values
 
+        boolean success = false;
         if (collection.getName().getUrlSlug().equals(collectionId) &&
             collection.getType().equals(existingCollection.getType()) &&
             collection.getFilepath().equals(existingCollection.getFilepath()) &&
             collection.getThumbnailURL().equals(existingCollection.getThumbnailURL()) &&
             listEqualsIgnoreOrder(collection.getItemIds(), existingCollection.getItemIds())) {
 
-            boolean success = editAPI.updateCollection(collection);
-            if (success) {
-                attributes.addAttribute("message", "Collection Updated.");
-            } else {
-                attributes.addAttribute("error", "Failed to update collection.");
-            }
+            success = editAPI.updateCollection(collection);
+
+        }
+
+        if (success) {
+            attributes.addAttribute("message", "Collection Updated.");
+        } else {
+            attributes.addAttribute("error", "Failed to update collection.");
         }
 
         return new RedirectView("/edit/collection/" + collectionId + "/");
