@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -19,15 +20,13 @@ import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 
-import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 
 @Controller
 public class EditController {
@@ -39,7 +38,7 @@ public class EditController {
         this.editAPI = editAPI;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/edit/edit.html")
+    @GetMapping("/edit/edit.html")
     public String edit(Model model) {
 
         List<Collection> collections = editAPI.getCollections();
@@ -48,13 +47,17 @@ public class EditController {
         return "edit";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/edit/collection/{collectionUrlSlug}")
-    public String editCollection(Model model, @PathVariable("collectionUrlSlug") String collectionUrlSlug,
-                                 @RequestParam(required = false) String message,
-                                 @RequestParam(required = false) String error) {
+    @GetMapping("/edit/collection/{collectionUrlSlug}")
+    public String editCollection(Model model, @PathVariable("collectionUrlSlug") String collectionUrlSlug) {
 
         Collection collection = editAPI.getCollection(collectionUrlSlug);
-        CollectionForm form = new CollectionForm(collection);
+
+        CollectionForm form;
+        if (model.asMap().get("form") == null) {
+            form = new CollectionForm(collection);
+        } else {
+            form = (CollectionForm) model.asMap().get("form");
+        }
 
         // Get Item names from Ids
         List<Item> items = new ArrayList<>();
@@ -65,77 +68,8 @@ public class EditController {
 
         model.addAttribute("thumbnailURL", collection.getThumbnailURL());
         model.addAttribute("form", form);
-        model.addAttribute("error", error);
-        model.addAttribute("message", message);
         model.addAttribute("items", items);
         return "edit-collection";
-    }
-
-    @RequestMapping(method = RequestMethod.GET, value = "/edit/advanced-edit.html")
-    public String editAdvanced(Model model) {
-
-        model.addAttribute("gitSourceDataPath", editAPI.getDataLocalPath());
-        return "advanced-edit";
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/edit/filetree/list")
-    @ResponseBody
-    public String editFileTreeList(Model model, @RequestParam String dir) throws BadRequestException {
-
-        File parent = new File(dir);
-
-        // Allow access to git dir checkout only.
-        if (!parent.exists() || !parent.toPath().toAbsolutePath().startsWith(editAPI.getDataLocalPath())) {
-            throw new BadRequestException(new Exception("Dir needs to be subdir of git file source."));
-        }
-
-        // Get list from file system
-        StringBuilder output = new StringBuilder("<ul class=\"jqueryFileTree\" style=\"display: none;\">");
-        if (parent.isDirectory()) {
-            for (final File f : Objects.requireNonNull(parent.listFiles())) {
-                if (f.isDirectory()) {
-                    output.append("<li class=\"directory collapsed\">");
-                    output.append("<a href=\"#\" rel=\"")
-                        .append(f.toPath().toAbsolutePath() + "/").append("\">")
-                        .append(f.toPath().getFileName()).append("</a></li>");
-                } else {
-                    output.append("<li class=\"file ext_")
-                        .append(FilenameUtils.getExtension(f.toPath().toString())).append("\">");
-                    output.append("<a href=\"#\" rel=\"")
-                        .append(f.toPath().toAbsolutePath()).append("\">")
-                        .append(f.toPath().getFileName()).append("</a></li>");
-                }
-            }
-        } else {
-            throw new BadRequestException(new Exception("Dir is not a directory"));
-        }
-        output.append("</ul>");
-
-        return output.toString();
-
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/edit/filetree/get")
-    public ResponseEntity<Resource> editFileTreeGet(Model model, @RequestParam String filepath,
-                                                    HttpServletResponse response) throws BadRequestException,
-        IOException {
-        File file = new File(filepath);
-
-        // Allow access to git dir checkout only.
-        if (!file.exists() || !file.toPath().toAbsolutePath().startsWith(editAPI.getDataLocalPath())) {
-            throw new BadRequestException(new Exception("Dir needs to be subdir of git file source."));
-        }
-
-        // Interpret data as a stream for display.
-        String contentType = "application/octet-stream";
-
-        //return response;
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(file.getCanonicalPath()));
-
-        return ResponseEntity.ok()
-            .contentLength(file.length())
-            .contentType(MediaType.parseMediaType(contentType))
-            .body(resource);
     }
 
     @RequestMapping(value = "/edit/download")
@@ -174,26 +108,6 @@ public class EditController {
             .body(resource);
     }
 
-
-    @RequestMapping(method = RequestMethod.POST, value = "/edit/rename")
-    public String editRename(Model model, @RequestParam String filepath)
-        throws BadRequestException, FileNotFoundException {
-        return "";
-    }
-
-
-    @RequestMapping(method = RequestMethod.POST, value = "/edit/delete")
-    public String editDelete(Model model, @RequestParam String filepath)
-        throws BadRequestException, FileNotFoundException {
-        return "";
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/edit/upload")
-    public String editUpload(Model model, @RequestParam String filepath)
-        throws BadRequestException, FileNotFoundException {
-        return "";
-    }
-
     /**
      * TODO validate the changes against the JSON schema.
      *
@@ -203,20 +117,31 @@ public class EditController {
      * @return
      * @throws BadRequestException
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/edit/collection/{collectionId}/update")
+    @PostMapping("/edit/collection/{collectionId}/update")
     public RedirectView updateCollection(RedirectAttributes attributes,
                                          @PathVariable String collectionId,
-                                         @ModelAttribute CollectionForm collectionForm) throws BadRequestException {
+                                         @Valid @ModelAttribute CollectionForm collectionForm,
+                                         final BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
+                "details.");
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
+            attributes.addFlashAttribute("form", collectionForm);
+            return new RedirectView("/edit/collection/" + collectionId + "/");
+        }
 
         Collection collection = collectionForm.toCollection();
 
         if (collection.getName() == null || collection.getName().getUrlSlug() == null) {
-            throw new BadRequestException(new Exception());
+            attributes.addFlashAttribute("error", "Failed to update collection, missing collection name.");
+            return new RedirectView("/edit/collection/" + collectionId + "/");
         }
 
         Collection existingCollection = editAPI.getCollection(collectionId);
         if (existingCollection == null) {
-            throw new BadRequestException(new Exception("Unknown collection with id: " + collectionId));
+            attributes.addFlashAttribute("error", "Unknown collection with id: " + collectionId);
+            return new RedirectView("/edit/collection/" + collectionId + "/");
         }
 
         // Check values we do not want to allow to edit
@@ -234,9 +159,9 @@ public class EditController {
         }
 
         if (success) {
-            attributes.addAttribute("message", "Collection Updated.");
+            attributes.addFlashAttribute("message", "Collection Updated.");
         } else {
-            attributes.addAttribute("error", "Failed to update collection.");
+            attributes.addFlashAttribute("error", "Failed to update collection.");
         }
 
         return new RedirectView("/edit/collection/" + collectionId + "/");
@@ -251,30 +176,30 @@ public class EditController {
                                           @RequestParam("file") MultipartFile file) throws IOException {
 
         if (file.getContentType() == null || !(file.getContentType().equals("text/xml"))) {
-            attributes.addAttribute("error", "Item needs to be in TEI XML format.");
+            attributes.addFlashAttribute("error", "Item needs to be in TEI XML format.");
             return new RedirectView("/edit/collection/" + collectionId + "/");
         }
 
         String itemName = FilenameUtils.getBaseName(file.getOriginalFilename());
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
         if (!editAPI.validateFilename(itemName)) {
-            attributes.addAttribute("error", "Item name not valid. Should be for example: MS-TEST-00001. Using " +
+            attributes.addFlashAttribute("error", "Item name not valid. Should be for example: MS-TEST-00001. Using " +
                 " characters A-Z or numbers 0-9 and the - character delimiting sections.  Should have at least 3 " +
                 " sections, group (MS = Manuscripts, PR = printed etc) then the collection, then a five digit number.");
             return new RedirectView("/edit/collection/" + collectionId + "/");
         }
 
         if (!editAPI.validate(file)) {
-            attributes.addAttribute("error", "Item is not valid XML/JSON or does not validate against the required schema.");
+            attributes.addFlashAttribute("error", "Item is not valid XML/JSON or does not validate against the required schema.");
             return new RedirectView("/edit/collection/" + collectionId + "/");
         }
 
         if (!editAPI.addItemToCollection(itemName, fileExtension, file.getInputStream(), collectionId)) {
-            attributes.addAttribute("error", "Problem adding item to collection");
+            attributes.addFlashAttribute("error", "Problem adding item to collection");
             return new RedirectView("/edit/collection/" + collectionId + "/");
         }
 
-        attributes.addAttribute("message", "Item updated/added to collection.");
+        attributes.addFlashAttribute("message", "Item updated/added to collection.");
 
         return new RedirectView("/edit/collection/" + collectionId + "/");
     }
@@ -285,14 +210,29 @@ public class EditController {
 
         boolean success = editAPI.deleteItemFromCollection(itemName, collectionId);
         if (success) {
-            attributes.addAttribute("message", "Item deleted from collection.");
+            attributes.addFlashAttribute("message", "Item deleted from collection.");
         } else {
-            attributes.addAttribute("error", "Problem deleting item");
+            attributes.addFlashAttribute("error", "Problem deleting item");
         }
 
         return new RedirectView("/edit/collection/" + collectionId + "/");
 
     }
+
+    /*public RedirectView replaceCollectionThumbnail(RedirectAttributes attributes, @PathVariable String collectionId,
+                                                   @RequestParam("file") MultipartFile file) throws IOException {
+
+        if (file.getContentType() == null ||
+            !(file.getContentType().equals("image/png")) || !(file.getContentType().equals("image/gif")) ||
+            !(file.getContentType().equals("image/jpg")) || !(file.getContentType().equals("image/jpeg"))) {
+
+            attributes.addFlashAttribute("error", "Item needs to be in .png, .jpg or .gif format.");
+            return new RedirectView("/edit/collection/" + collectionId + "/");
+        }
+
+
+        return new RedirectView("/edit/collection/" + collectionId + "/");
+    }*/
 
 }
 

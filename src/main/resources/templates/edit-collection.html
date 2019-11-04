@@ -70,6 +70,9 @@
                                             <div class="row">
                                                 <div class="col-4 m-2 text-right">Identifier</div>
                                                 <div class="col m-2">
+                                                    <div class="alert-danger"
+                                                         th:if="${#fields.hasErrors('urlSlugName')}"
+                                                         th:errors="*{urlSlugName}"></div>
                                                     <span class="text-gray-800"
                                                           th:text="*{urlSlugName}"></span>
                                                 </div>
@@ -80,6 +83,8 @@
                                                     <label for="name.shortName">Short name</label>
                                                 </div>
                                                 <div class="col-6 m-2">
+                                                    <div th:if="${#fields.hasErrors('shortName')}"
+                                                         th:errors="*{shortName}"></div>
                                                     <input class="form-control" type="text" name="shortName"
                                                            id="name.shortName"
                                                            maxlength="30"
@@ -91,6 +96,8 @@
                                                     <label for="name.full">Full name</label>
                                                 </div>
                                                 <div class="col m-2">
+                                                    <div class="alert-danger" th:if="${#fields.hasErrors('fullName')}"
+                                                         th:errors="*{fullName}"></div>
                                                     <input class="form-control" type="text" th:name="fullName"
                                                            id="name.full"
                                                            maxlength="50"
@@ -102,6 +109,8 @@
                                                     <label for="name.sort">Sorting name</label>
                                                 </div>
                                                 <div class="col m-2">
+                                                    <div class="alert-danger" th:if="${#fields.hasErrors('sortName')}"
+                                                         th:errors="*{sortName}"></div>
                                                     <input class="form-control" type="text" name="sortName"
                                                            id="name.sort"
                                                            maxlength="50"
@@ -141,6 +150,8 @@
                                             <label for="description.shortDescription">Short</label>
                                         </div>
                                         <div class="col m-2">
+                                            <div class="alert-danger" th:if="${#fields.hasErrors('shortDescription')}"
+                                                 th:errors="*{shortDescription}"></div>
                                             <textarea class="form-control" name="shortDescription"
                                                       id="description.shortDescription"
                                                       rows="4" cols="80"
@@ -152,6 +163,8 @@
                                             <label for="description.medium">Medium</label>
                                         </div>
                                         <div class="col m-2">
+                                            <div class="alert-danger" th:if="${#fields.hasErrors('mediumDescription')}"
+                                                 th:errors="*{mediumDescription}"></div>
                                             <textarea class="form-control" name="mediumDescription"
                                                       id="description.medium"
                                                       rows="4" cols="80"
@@ -163,6 +176,9 @@
                                             <label for="description.full">Full</label>
                                         </div>
                                         <div class="col m-2">
+                                            <div class="alert-danger" th:if="${#fields.hasErrors('fullDescription')}"
+                                                 th:errors="*{fullDescription}"></div>
+
                                             <textarea class="form-control" disabled
                                                       id="description.full"
                                                       rows="4" cols="80"
@@ -181,10 +197,12 @@
                                             <label for="credit.prose">Sponsors</label>
                                         </div>
                                         <div class="col m-2">
-                                             <textarea class="form-control" disabled
-                                                       id="credit.prose"
-                                                       rows="4" cols="80"
-                                             >To be implemented ...</textarea>
+                                            <div class="alert-danger" th:if="${#fields.hasErrors('proseCredit')}"
+                                                 th:errors="*{proseCredit}"></div>
+                                            <textarea class="form-control" disabled
+                                                      id="credit.prose"
+                                                      rows="4" cols="80"
+                                            >To be implemented ...</textarea>
                                             <input type="hidden" name="proseCredit"
                                                    th:value="*{proseCredit}">
                                         </div>

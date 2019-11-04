@@ -1,23 +1,60 @@
 package uk.cam.lib.cdl.loading.forms;
 
+import org.hibernate.validator.constraints.URL;
 import uk.cam.lib.cdl.loading.model.editor.*;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Note: This is currently more restrictive than the schema, needing not null values for all fields.
+ * Also, values for restricting fields are a bit of a work in progress.
+ */
+
 public class CollectionForm {
 
+    @NotBlank(message = "Must specify collection type.")
     private String collectionType;
+
+    @NotBlank(message = "Must specify a url-slug for this collection.")
+    @Pattern(regexp = "^[a-z\\-]+$")
     private String urlSlugName;
+
+    @NotBlank(message = "Must specify a sort name.")
     private String sortName;
+
+    @NotBlank(message = "Must specify a short name.")
+    @Size(min = 2, max = 50, message = "Short Name should be between 2 and 50 characters.")
     private String shortName;
+
+    @NotBlank(message = "Must specify a full name.")
     private String fullName;
+
+    @NotBlank(message = "Must specify a short description.")
+    @Size(min = 2, max = 500, message = "Short description should be between 2 and 500 characters.")
     private String shortDescription;
+
+    @NotBlank(message = "Must specify a medium description.")
+    @Size(min = 2, max = 5000, message = "Medium description must be between 2 and 5000 characters.")
     private String mediumDescription;
+
+    @NotBlank(message = "Must specify a full description.")
     private String fullDescription;
+
+    @NotBlank(message = "Must specify a prose credit.")
     private String proseCredit;
+
+    @NotNull
     private List<String> itemIds;
+
+    @NotBlank(message = "Must specify a file path.")
     private String filepath;
+
+    @NotBlank(message = "Must specify a thumbnail URL")
     private String thumbnailURL;
 
     public CollectionForm(Collection collection) {
@@ -103,8 +140,8 @@ public class CollectionForm {
         this.collectionType = collectionType;
     }
 
-    public void setUrlSlugName(String urlSlugName) {
-        this.urlSlugName = urlSlugName;
+    public void setUrlSlugName(@NotNull String urlSlugName) {
+        this.urlSlugName = urlSlugName.toLowerCase().trim();
     }
 
     public void setSortName(String sortName) {
