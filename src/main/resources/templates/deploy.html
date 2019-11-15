@@ -96,8 +96,8 @@
                                                th:text="${instance.instanceId}"></a></td>
                                         <td>
                                             <select th:name="${instance.instanceId}" class="custom-select"
-                                                    th:onfocus="beforeVersionChange(this)"
-                                                    th:onchange="onVersionChange(this)"
+                                                    th:onfocus="deploy.beforeVersionChange(this)"
+                                                    th:onchange="deploy.onVersionChange(this)"
                                             >
                                                 <option th:each="tag : ${tags}" th:value="${tag.name}"
                                                         th:text="${tag.name}"
@@ -139,7 +139,7 @@
                     </button>
                 </div>
                 <div class="modal-body">This will deploy the package <b><span
-                    id="confirmChangePackageName"></span></b> to
+                        id="confirmChangePackageName"></span></b> to
                     <b><span id="confirmChangeInstanceId"></span></b>.
                 </div>
                 <div class="modal-footer">

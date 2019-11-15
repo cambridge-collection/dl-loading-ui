@@ -79,10 +79,9 @@ public class DeployController {
         Instance instance = deploymentAPI.getInstance(instanceId);
         instance.setVersion(version);
         boolean returnOK = deploymentAPI.setInstance(instance);
-
         if (returnOK) {
             String message = "Deployment process has started for " + version + " to instance " + instanceId + ".  "
-                + " This may take a few minutes to complete.";
+                    + " This may take a few minutes to complete.";
 
             attributes.addFlashAttribute("message", message);
             deploymentAPI.cacheEvict();
@@ -111,7 +110,7 @@ public class DeployController {
             model.addAttribute("error", "There was an error getting details for this instance.");
         }
         if (instance.getVersion().equals(status.getCurrentCollectionsVersion()) &&
-            instance.getVersion().equals(status.getCurrentItemsVersion())) {
+                instance.getVersion().equals(status.getCurrentItemsVersion())) {
             deployment.setDeploymentComplete(true);
         } else {
             deployment.setDeploymentComplete(false);
