@@ -6,6 +6,8 @@ import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriUtils;
 import uk.cam.lib.cdl.loading.model.WebResponse;
 import uk.cam.lib.cdl.loading.model.deployment.Tag;
 
@@ -78,7 +80,7 @@ public class BitBucketAPI {
     public PackagingStatus getStatus(String id) {
         try {
             String json = webHelper.requestGET(new URL(pipelinesURL,
-                    URLEncoder.encode(id, StandardCharsets.UTF_8)),
+                UriUtils.encodeQueryParam(id, StandardCharsets.UTF_8)),
                 "application/json",
                 username,
                 password);
