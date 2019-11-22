@@ -18,7 +18,10 @@
             <li class="breadcrumb-item">
                 <a href="/">Home</a>
             </li>
-            <li class="breadcrumb-item active">Package</li>
+            <li class="breadcrumb-item">
+                <a href="/package/package.html">Package</a>
+            </li>
+            <li class="breadcrumb-item active">Package Status</li>
         </ol>
 
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -45,8 +48,8 @@
                 <div class="row">
                     <div class="col-5 m-3">
 
-                        There have been <span th:text="${commitsSinceLastPackage}"></span> edits made to the data,
-                        ready to package.
+                        Status:  <span th:text="${status.name}"></span><br>
+                        <span th:text="${status.type}"></span>
                     </div>
                 </div>
                 <div class="row">

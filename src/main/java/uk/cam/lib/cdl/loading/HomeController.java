@@ -48,10 +48,4 @@ public class HomeController {
         return "register";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/package/package.html")
-    public String pack(Model model) {
-
-        return "package";
-    }
-
 }

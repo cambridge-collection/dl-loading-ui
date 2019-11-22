@@ -83,7 +83,7 @@
                                                     <label for="name.shortName">Short name</label>
                                                 </div>
                                                 <div class="col-6 m-2">
-                                                    <div th:if="${#fields.hasErrors('shortName')}"
+                                                    <div class="alert-danger" th:if="${#fields.hasErrors('shortName')}"
                                                          th:errors="*{shortName}"></div>
                                                     <input class="form-control" type="text" name="shortName"
                                                            id="name.shortName"

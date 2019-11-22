@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
+import uk.cam.lib.cdl.loading.model.WebResponse;
 import uk.cam.lib.cdl.loading.model.deployment.Instance;
 import uk.cam.lib.cdl.loading.model.deployment.Status;
 
@@ -16,10 +17,11 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class DeploymentAPI extends WebAPI {
+public class DeploymentAPI {
 
     private final URL deploymentURL;
     private final String cacheName = "deploymentInstances";
+    private final WebHelper webHelper = new WebHelper();
 
     public DeploymentAPI(URL deploymentURL) {
         this.deploymentURL = deploymentURL;
@@ -31,7 +33,7 @@ public class DeploymentAPI extends WebAPI {
         try {
 
             URL url = new URL(deploymentURL + "instances");
-            String json = this.requestGET(url, "application/json");
+            String json = webHelper.requestGET(url, "application/json");
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, new TypeReference<List<Instance>>() {
             });
@@ -55,7 +57,7 @@ public class DeploymentAPI extends WebAPI {
         try {
 
             URL url = new URL(deploymentURL + "instances/" + instanceId);
-            String json = this.requestGET(url, "application/json");
+            String json = webHelper.requestGET(url, "application/json");
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, new TypeReference<Instance>() {
             });
@@ -89,7 +91,8 @@ public class DeploymentAPI extends WebAPI {
             postJSON.put("url", instance.getUrl());
             postJSON.put("version", instance.getVersion());
 
-            return this.requestPOSTJSON(url, postJSON);
+            WebResponse response = webHelper.requestPOSTJSON(url, postJSON);
+            return response.getCode() <= 299;
 
         } catch (MalformedURLException e) {
             System.err.println("Invalid URL for DeploymentAPI.  Look at your application.properties.");
@@ -111,11 +114,10 @@ public class DeploymentAPI extends WebAPI {
         try {
 
             URL url = new URL(deploymentURL + "instances/" + instanceId + "/status");
-            String json = this.requestGET(url, "application/json");
+            String json = webHelper.requestGET(url, "application/json");
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, new TypeReference<Status>() {
             });
-
 
         } catch (MalformedURLException e) {
             System.err.println("Invalid URL for DeploymentAPI.  Look at your application.properties.");

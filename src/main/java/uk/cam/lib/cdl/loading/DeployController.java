@@ -1,13 +1,14 @@
 package uk.cam.lib.cdl.loading;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-import uk.cam.lib.cdl.loading.apis.BitbucketAPI;
+import uk.cam.lib.cdl.loading.apis.BitBucketAPI;
 import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
 import uk.cam.lib.cdl.loading.model.deployment.Deployment;
 import uk.cam.lib.cdl.loading.model.deployment.Instance;
@@ -21,10 +22,10 @@ import java.util.List;
 public class DeployController {
 
     private final DeploymentAPI deploymentAPI;
-    private final BitbucketAPI bitbucketAPI;
+    private final BitBucketAPI bitbucketAPI;
 
     @Autowired
-    public DeployController(DeploymentAPI deploymentAPI, BitbucketAPI bitbucketAPI) {
+    public DeployController(DeploymentAPI deploymentAPI, @Qualifier("releaseRepo") BitBucketAPI bitbucketAPI) {
         this.deploymentAPI = deploymentAPI;
         this.bitbucketAPI = bitbucketAPI;
     }
