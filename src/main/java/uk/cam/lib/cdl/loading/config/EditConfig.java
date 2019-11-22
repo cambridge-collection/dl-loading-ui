@@ -17,22 +17,12 @@ public class EditConfig {
     private final EditAPI editAPI;
 
     @Autowired
-    public EditConfig(@Value("${git.sourcedata.checkout.path}") String gitSourcePath,
-                      @Value("${git.sourcedata.checkout.subpath.data}") String gitSourceDataSubpath,
-                      @Value("${git.sourcedata.url}") String gitSourceURL,
-                      @Value("${git.sourcedata.url.username}") String gitSourceURLUserame,
-                      @Value("${git.sourcedata.url.password}") String gitSourceURLPassword,
-                      @Value("${git.sourcedata.branch}") String gitBranch,
-                      @Value("${git.sourcedata.dl-dataset.filename}") String dlDatasetFilename,
-                      @Value("${data.item.path}") String dataItemPath
-    ) {
+    public EditConfig(GitSourceVariables gitSourceVariables, @Value("${data.item.path}") String dataItemPath) {
 
-        GitVariables gitVariables = new GitVariables(gitSourcePath, gitSourceDataSubpath, gitSourceURL,
-            gitSourceURLUserame,
-            gitSourceURLPassword, gitBranch, dlDatasetFilename);
-
-        this.editAPI = new EditAPI(gitSourcePath + gitSourceDataSubpath, dlDatasetFilename,
-            gitSourcePath + dataItemPath, gitVariables);
+        this.editAPI =
+            new EditAPI(gitSourceVariables.getGitSourcePath() + gitSourceVariables.getGitSourceDataSubpath(),
+                gitSourceVariables.getGitDatasetFilename(),
+                gitSourceVariables.getGitSourcePath() + dataItemPath, gitSourceVariables);
 
     }
 

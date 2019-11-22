@@ -2,19 +2,20 @@ package uk.cam.lib.cdl.loading.apis;
 
 
 import org.json.JSONObject;
+import uk.cam.lib.cdl.loading.model.WebResponse;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Base64;
 
-public abstract class WebAPI {
+public class WebHelper {
 
-    boolean requestPOSTJSON(URL url, JSONObject json) {
+    public WebResponse requestPOSTJSON(URL url, JSONObject json) {
         return requestPOSTJSON(url, json, null, null);
     }
 
-    boolean requestPOSTJSON(URL url, JSONObject json, String username, String password) {
+    public WebResponse requestPOSTJSON(URL url, JSONObject json, String username, String password) {
 
         HttpURLConnection con = null;
         try {
@@ -24,26 +25,27 @@ public abstract class WebAPI {
             con.setRequestProperty("Accept", "application/json");
             con.setDoOutput(true);
 
-            try (OutputStream os = con.getOutputStream()) {
-                byte[] input = json.toString().getBytes("utf-8");
-                os.write(input, 0, input.length);
-            }
-
             if (username != null && password != null) {
                 String userpass = username + ":" + password;
                 String basicAuth = "Basic " + new String(Base64.getEncoder().encode(userpass.getBytes()));
                 con.setRequestProperty("Authorization", basicAuth);
             }
 
-            Integer code = con.getResponseCode();
+            try (OutputStream os = con.getOutputStream()) {
+                byte[] input = json.toString().getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            int code = con.getResponseCode();
             String response = getContent(con, code);
 
+            WebResponse output = new WebResponse(code, response);
             if (code > 299) {
                 System.err.println("Error getting content. ");
                 System.err.println(response);
-                return false;
+                return output;
             } else {
-                return true;
+                return output;
             }
 
         } catch (IOException e) {
@@ -51,24 +53,25 @@ public abstract class WebAPI {
             e.printStackTrace();
         } finally {
             try {
+                assert con != null;
                 con.disconnect();
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
 
-        return false;
+        return null;
     }
 
 
-    String requestGET(URL url) {
+    public String requestGET(URL url) {
         return requestGET(url, "text/plain; charset=\"utf-8\"", null, null);
     }
 
-    String requestGET(URL url, String mimeType) {
+    public String requestGET(URL url, String mimeType) {
         return requestGET(url, mimeType, null, null);
     }
 
-    String requestGET(URL url, String mimeType, String username, String password) {
+    public String requestGET(URL url, String mimeType, String username, String password) {
 
         HttpURLConnection con = null;
         try {

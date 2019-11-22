@@ -6,17 +6,11 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.FetchResult;
-import org.eclipse.jgit.transport.PushResult;
-import org.eclipse.jgit.transport.RemoteRefUpdate;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import uk.cam.lib.cdl.loading.config.GitVariables;
+import uk.cam.lib.cdl.loading.config.GitSourceVariables;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Dataset;
 import uk.cam.lib.cdl.loading.model.editor.Id;
@@ -42,30 +36,25 @@ Access info from the git data directly for now.
 */
 public class EditAPI {
 
-    private Git git;
-    private final GitVariables gitVariables;
     private final String dataPath;
     private final String dataItemPath;
     private final File datasetFile;
+    private final GitHelper gitHelper;
 
     private Map<String, Collection> collectionMap = Collections.synchronizedMap(new HashMap<>());
     private Map<String, Item> itemMap = Collections.synchronizedMap(new HashMap<>());
     private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
 
 
-    public EditAPI(String dataPath, String dlDatasetFilename, String dataItemPath, GitVariables gitVariables) {
+    public EditAPI(String dataPath, String dlDatasetFilename, String dataItemPath, GitSourceVariables gitSourceVariables) {
+        gitHelper = new GitHelper(gitSourceVariables);
         this.dataPath = dataPath;
         this.datasetFile = new File(dataPath + File.separator + dlDatasetFilename);
         this.dataItemPath = dataItemPath;
-        this.gitVariables = gitVariables;
     }
 
     @PostConstruct
     private void setupEditAPI() throws IOException {
-        // Clone git repo if not already available.
-        setupRepo(gitVariables.getGitSourcePath(), gitVariables.getGitSourceURL(), gitVariables.getGitSourceURLUserame(),
-            gitVariables.getGitSourceURLPassword());
-
         if (!datasetFile.exists()) {
             throw new FileNotFoundException("Dataset file cannot be found at: " + datasetFile.toPath());
         }
@@ -76,7 +65,7 @@ public class EditAPI {
     public synchronized void updateModel() throws IOException {
 
         try {
-            pullGitChanges();
+            gitHelper.pullGitChanges();
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
@@ -98,7 +87,7 @@ public class EditAPI {
 
             Collection c = objectMapper.readValue(collectionFile, Collection.class);
             c.setFilepath(collectionFile.getCanonicalPath()); // is needed to get correct item path
-            c.setThumbnailURL(getDataLocalPath() + "/pages/images/collectionsView/collection-" + c.getName().getUrlSlug() +
+            c.setThumbnailURL(gitHelper.getDataLocalPath() + "/pages/images/collectionsView/collection-" + c.getName().getUrlSlug() +
                 ".jpg"); // TODO fix hardcoding
 
             // Setup collection map
@@ -134,96 +123,6 @@ public class EditAPI {
         return itemMap.get(FilenameUtils.getBaseName(id));
     }
 
-    private synchronized void setupRepo(String gitSourcePath, String gitSourceURL, String gitSourceURLUserame,
-                                        String gitSourceURLPassword) {
-        try {
-            File dir = new File(gitSourcePath);
-            if (dir.exists()) {
-
-                git = Git.init().setDirectory(dir).call();
-
-            } else {
-
-                git = Git.cloneRepository()
-                    .setURI(gitSourceURL)
-                    .setBranch(gitVariables.getGitBranch())
-                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitSourceURLUserame,
-                        gitSourceURLPassword))
-                    .setDirectory(new File(gitSourcePath))
-                    .call();
-
-            }
-
-        } catch (GitAPIException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Returns true if there were any changes.
-     * Runs on a schedule form EditConfig
-     *
-     * @return
-     * @throws GitAPIException
-     * @throws IOException
-     */
-    private boolean pullGitChanges() throws GitAPIException {
-
-        FetchResult fetchResult = git.fetch().setCredentialsProvider(
-            new UsernamePasswordCredentialsProvider(gitVariables.getGitSourceURLUserame(),
-                gitVariables.getGitSourceURLPassword())).call();
-
-        // Check for changes, and pull if there have been.
-        if (!fetchResult.getTrackingRefUpdates().isEmpty()) {
-            PullResult pullResult = git.pull().setCredentialsProvider(
-                new UsernamePasswordCredentialsProvider(gitVariables.getGitSourceURLUserame(),
-                    gitVariables.getGitSourceURLPassword())).call();
-            if (!pullResult.isSuccessful()) {
-                // TODO Handle conflict problems
-                System.err.println("Pull Request Failed: " + pullResult.toString());
-                return false;
-            }
-        }
-        return true;
-
-    }
-
-    /**
-     * @return
-     */
-    private boolean pushGitChanges() {
-        try {
-            boolean pullSuccess = pullGitChanges();
-            if (!pullSuccess) {
-                System.err.println("Problem pulling changes");
-                return false;
-            }
-            git.add().addFilepattern(".").call();
-            git.commit().setMessage("Changed from Loading UI").call();
-            Iterable<PushResult> results = git.push().setCredentialsProvider(
-                new UsernamePasswordCredentialsProvider(gitVariables.getGitSourceURLUserame(),
-                    gitVariables.getGitSourceURLPassword())).call();
-
-            for (PushResult pushResult : results) {
-                java.util.Collection<RemoteRefUpdate> remoteUpdates = pushResult.getRemoteUpdates();
-                for (RemoteRefUpdate ref : remoteUpdates) {
-                    if (ref.getStatus() != RemoteRefUpdate.Status.OK) {
-                        // TODO Handle conflict problems
-                        System.err.println("Problem pushing changes");
-                        return false;
-                    }
-                }
-            }
-            return true;
-        } catch (GitAPIException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public String getDataLocalPath() {
-        return gitVariables.getGitSourcePath() + gitVariables.getGitSourceDataSubpath();
-    }
 
     public boolean validate(MultipartFile file) {
 
@@ -285,7 +184,7 @@ public class EditAPI {
     public boolean addItemToCollection(String itemName, String fileExtension, InputStream contents, String collectionUrlSlug) {
 
         try {
-            pullGitChanges();
+            gitHelper.pullGitChanges();
 
             Collection collection = getCollection(collectionUrlSlug);
 
@@ -330,7 +229,7 @@ public class EditAPI {
 
             }
 
-            pushGitChanges();
+            gitHelper.pushGitChanges();
 
             updateModel();
 
@@ -345,7 +244,7 @@ public class EditAPI {
     public boolean deleteItemFromCollection(String itemName, String collectionUrlSlug) {
 
         try {
-            pullGitChanges();
+            gitHelper.pullGitChanges();
 
             Collection collection = getCollection(collectionUrlSlug);
             Item item = itemMap.get(itemName);
@@ -372,7 +271,7 @@ public class EditAPI {
                 }
             }
 
-            pushGitChanges();
+            gitHelper.pushGitChanges();
 
             updateModel();
 
@@ -402,7 +301,7 @@ public class EditAPI {
             writer.writeValue(new File(collection.getFilepath()), collection);
 
             // Git Commit and push to remote repo.
-            boolean success = pushGitChanges();
+            boolean success = gitHelper.pushGitChanges();
             updateModel();
 
             return success;
@@ -410,6 +309,10 @@ public class EditAPI {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public String getDataLocalPath() {
+        return gitHelper.getDataLocalPath();
     }
 
 }
