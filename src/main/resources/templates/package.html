@@ -42,20 +42,95 @@
             <!-- Cards -->
             <div class="card shadow mb-4">
 
-                <div class="row">
-                    <div class="col-5 m-3">
+                <div class="row" th:if="${updates.size()>0 && showChanges}">
+                    <div class="col-8 m-3">
+                        <div class="card shadow">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold">Edits</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Author</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Files Changed</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="table-striped text-dark">
 
-                        There have been <span th:text="${commitsSinceLastPackage}"></span> edits made to the data,
-                        ready to package.
+                                    <tr th:each="i : ${#numbers.sequence( 0, updates.size()-1)}"
+                                        th:with="update=${updates.get(i)}">
+
+                                        <th scope="row" th:text="${i+1}"></th>
+                                        <td th:text="${update.getAuthor()}"/>
+                                        <td th:text="${update.getDateString()}"/>
+                                        <td>
+                                            <div th:each="file: ${update.getFilesChanged()}">
+                                                <div class="row" th:text="${file}"/>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+                                <p>There have been <b th:text="${updates.size()}"></b> edits made to the data,
+                                    ready to package.</p>
+                                <a href="/package/startProcess" class="btn btn-primary">Build a package</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-6 m-3">
-                        <a href="/package/startProcess" class="btn btn-primary">Build a package</a>
+                <div class="row" th:if="${updates.size()<=0}">
+                    <div class="col-8 m-3">
+                        No changes have been made.
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col m-3">
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold">History</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">Build</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Result</th>
+                                        <th scope="col">Package</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="table-striped">
+
+                                    <tr th:each="pipeline: ${pipelines}">
+                                        <td><a th:href="'/package/'+${pipeline.id}+'/status'"><span
+                                            th:text="${pipeline.buildNumber}"></span></a></td>
+
+                                        <td th:text="${pipeline.created}"></td>
+
+                                        <td th:text="${pipeline.status.name}"></td>
+                                        <td
+                                            th:text="${pipeline.status.resultName != null} ? ${pipeline.status.resultName} : '...'"
+                                            th:class="${pipeline.status.resultType == 'pipeline_state_completed_successful'} ?
+                                            'table-success' : (${pipeline.status.resultType == 'pipeline_state_completed_failed'} ? 'table-danger' : 'table-warning')"
+                                        ></td>
+
+                                        <td th:text="${tagLookup.get(pipeline.id)?.name}"></td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
     <!-- /.container-fluid -->
