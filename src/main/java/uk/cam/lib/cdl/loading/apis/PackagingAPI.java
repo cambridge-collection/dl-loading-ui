@@ -1,17 +1,25 @@
 package uk.cam.lib.cdl.loading.apis;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.util.io.DisabledOutputStream;
+import org.json.JSONObject;
 import uk.cam.lib.cdl.loading.config.GitSourceVariables;
+import uk.cam.lib.cdl.loading.model.WebResponse;
+import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
+import uk.cam.lib.cdl.loading.model.packaging.Pipeline;
+import uk.cam.lib.cdl.loading.model.packaging.Update;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class PackagingAPI {
 
@@ -23,11 +31,14 @@ public class PackagingAPI {
         this.bitBucketAPI = bitBucketAPI;
     }
 
-    public int commitsSinceLastPackage() {
+    public List<Pipeline> getHistory() {
+        return bitBucketAPI.getPipelines();
+    }
+
+    public List<Update> updatesSinceLastPackage() {
 
         // TODO summarise changes instead.
         // Counts number of commits since last tag (or ever if no tag)
-        String lastTag = null;
         try {
 
             Repository repo = gitHelper.getGitInstance().getRepository();
@@ -46,9 +57,7 @@ public class PackagingAPI {
 
             RevWalk revWalk = new RevWalk(repo);
             revWalk.markStart(revWalk.parseCommit(repo.resolve("HEAD")));
-            Iterator<RevCommit> iterator = revWalk.iterator();
-            while (iterator.hasNext()) {
-                RevCommit next = iterator.next();
+            for (RevCommit next : revWalk) {
                 if (tagNames.contains(next.getId().getName())) {
                     break;
                 }
@@ -56,13 +65,57 @@ public class PackagingAPI {
                 commits.add(next);
             }
             revWalk.close();
-            return commits.size();
+
+            // Convert commits to updates.
+            List<Update> updates = new ArrayList<>();
+            for (RevCommit commit : commits) {
+                updates.add(getUpdate(commit));
+            }
+            return updates;
 
         } catch (GitAPIException | IOException e) {
             e.printStackTrace();
         }
 
-        return 0;
+        return new ArrayList<>();
+    }
+
+    private Update getUpdate(RevCommit commit) {
+
+        PersonIdent author = commit.getAuthorIdent();
+        String name = author.getName();
+        Date date = commit.getAuthorIdent().getWhen();
+        TimeZone authorTimeZone = commit.getAuthorIdent().getTimeZone();
+
+        List<String> filesChanged = new ArrayList<>();
+
+        try {
+
+            Repository repo = gitHelper.getGitInstance().getRepository();
+            ObjectReader reader = repo.newObjectReader();
+
+            // Assumes that there is at least one parent to the current commit.
+            RevCommit parent = commit.getParent(0);
+            CanonicalTreeParser headTreeIter = new CanonicalTreeParser();
+            headTreeIter.reset(reader, parent.getTree());
+
+            CanonicalTreeParser commitTreeIter = new CanonicalTreeParser();
+            commitTreeIter.reset(reader, commit.getTree());
+
+            DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
+            df.setRepository(gitHelper.getGitInstance().getRepository());
+            List<DiffEntry> entries = df.scan(headTreeIter, commitTreeIter);
+
+            for (DiffEntry diffEntry : entries) {
+                filesChanged.add(diffEntry.getPath(DiffEntry.Side.NEW));
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new Update(name, date, authorTimeZone, filesChanged);
+
     }
 
     /**
@@ -71,7 +124,10 @@ public class PackagingAPI {
     public String startProcess() {
 
         // Trigger pipeline and return UUID
-        return bitBucketAPI.triggerPipeline();
+        WebResponse response = bitBucketAPI.triggerPipeline();
+        // get the UUID
+        JSONObject content = new JSONObject(response.getResponse());
+        return content.getString("uuid");
 
     }
 
@@ -80,6 +136,5 @@ public class PackagingAPI {
         return bitBucketAPI.getStatus(UUID);
 
     }
-
 
 }

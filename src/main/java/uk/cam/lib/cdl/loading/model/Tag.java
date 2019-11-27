@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.model.deployment;
+package uk.cam.lib.cdl.loading.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.joda.time.DateTime;

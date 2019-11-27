@@ -33,7 +33,7 @@ public class DeploymentAPI {
         try {
 
             URL url = new URL(deploymentURL + "instances");
-            String json = webHelper.requestGET(url, "application/json");
+            String json = webHelper.requestGET(url, "application/json").getResponse();
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, new TypeReference<List<Instance>>() {
             });
@@ -57,7 +57,7 @@ public class DeploymentAPI {
         try {
 
             URL url = new URL(deploymentURL + "instances/" + instanceId);
-            String json = webHelper.requestGET(url, "application/json");
+            String json = webHelper.requestGET(url, "application/json").getResponse();
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, new TypeReference<Instance>() {
             });
@@ -114,7 +114,7 @@ public class DeploymentAPI {
         try {
 
             URL url = new URL(deploymentURL + "instances/" + instanceId + "/status");
-            String json = webHelper.requestGET(url, "application/json");
+            String json = webHelper.requestGET(url, "application/json").getResponse();
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(json, new TypeReference<Status>() {
             });

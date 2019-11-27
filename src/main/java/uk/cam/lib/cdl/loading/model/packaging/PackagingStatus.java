@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.apis;
+package uk.cam.lib.cdl.loading.model.packaging;
 
 public class PackagingStatus {
 

@@ -10,10 +10,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.BitBucketAPI;
 import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
+import uk.cam.lib.cdl.loading.model.Tag;
 import uk.cam.lib.cdl.loading.model.deployment.Deployment;
 import uk.cam.lib.cdl.loading.model.deployment.Instance;
 import uk.cam.lib.cdl.loading.model.deployment.Status;
-import uk.cam.lib.cdl.loading.model.deployment.Tag;
 
 import java.util.Collections;
 import java.util.List;
@@ -82,7 +82,7 @@ public class DeployController {
         boolean returnOK = deploymentAPI.setInstance(instance);
         if (returnOK) {
             String message = "Deployment process has started for " + version + " to instance " + instanceId + ".  "
-                    + " This may take a few minutes to complete.";
+                + " This may take a few minutes to complete.";
 
             attributes.addFlashAttribute("message", message);
             deploymentAPI.cacheEvict();
@@ -111,7 +111,7 @@ public class DeployController {
             model.addAttribute("error", "There was an error getting details for this instance.");
         }
         if (instance.getVersion().equals(status.getCurrentCollectionsVersion()) &&
-                instance.getVersion().equals(status.getCurrentItemsVersion())) {
+            instance.getVersion().equals(status.getCurrentItemsVersion())) {
             deployment.setDeploymentComplete(true);
         } else {
             deployment.setDeploymentComplete(false);

@@ -1,19 +1,22 @@
 package uk.cam.lib.cdl.loading.apis;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriUtils;
+import uk.cam.lib.cdl.loading.model.Tag;
 import uk.cam.lib.cdl.loading.model.WebResponse;
-import uk.cam.lib.cdl.loading.model.deployment.Tag;
+import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
+import uk.cam.lib.cdl.loading.model.packaging.Pipeline;
+import uk.cam.lib.cdl.loading.model.packaging.PipelineStatus;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -41,9 +44,10 @@ public class BitBucketAPI {
         this.password = password;
     }
 
+    // TODO replace by getting tags on checked out repo
     @Cacheable(cacheName)
     public List<Tag> getTags() {
-        String json = webHelper.requestGET(tagsURL, "application/json", username, password);
+        String json = webHelper.requestGET(tagsURL, "application/json", username, password).getResponse();
         JSONObject parent = new JSONObject(json);
         JSONArray values = parent.getJSONArray("values");
 
@@ -57,6 +61,57 @@ public class BitBucketAPI {
             tags.add(t);
         }
         return tags;
+    }
+
+    /**
+     * Gets the last 10 pipelines that have been run.
+     *
+     * @return
+     */
+    public List<Pipeline> getPipelines() {
+
+        List<Pipeline> output = new ArrayList<>();
+        try {
+            WebResponse response = webHelper.requestGET(new URL(pipelinesURL, "?sort=-created_on"),
+                "application/json",
+                username,
+                password);
+
+            JSONObject json = new JSONObject(response.getResponse());
+            JSONArray pipelines = json.getJSONArray("values");
+
+            for (int i = 0; i < pipelines.length(); i++) {
+                JSONObject pipeline = pipelines.getJSONObject(i);
+                String id = pipeline.getString("uuid");
+                int buildNumber = pipeline.getInt("build_number");
+
+                DateTimeFormatter parser = ISODateTimeFormat.dateTime();
+                Date created = parser.parseDateTime(pipeline.getString("created_on")).toDate();
+                Date completed = null;
+                if (pipeline.has("completed_on")) {
+                    completed = parser.parseDateTime(pipeline.getString("completed_on")).toDate();
+                }
+
+                JSONObject stateJSON = pipeline.getJSONObject("state");
+                String stateName = stateJSON.getString("name");
+                String stateType = stateJSON.getString("type");
+                // Assume max one result
+
+                String resultName = null;
+                String resultType = null;
+                if (stateJSON.has("result")) {
+                    JSONObject result = stateJSON.getJSONObject("result");
+                    resultName = result.getString("name");
+                    resultType = result.getString("type");
+                }
+                PipelineStatus pipelineStatus = new PipelineStatus(stateName, stateType, resultName, resultType);
+                output.add(new Pipeline(id, buildNumber, created, pipelineStatus, completed));
+            }
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return output;
 
     }
 
@@ -65,7 +120,7 @@ public class BitBucketAPI {
      *
      * @return
      */
-    public String triggerPipeline() {
+    public WebResponse triggerPipeline() {
 
         JSONObject jsonObject = new JSONObject("{ 'target': {'type': 'pipeline_ref_target','ref_type': 'branch'," +
             "'ref_name': " +
@@ -73,19 +128,16 @@ public class BitBucketAPI {
         WebResponse response = webHelper.requestPOSTJSON(pipelinesURL,
             jsonObject, username, password);
 
-        System.out.println("trigger Pipeline response:" + response.getResponse());
-        return response.getResponse();
+        return response;
     }
 
     public PackagingStatus getStatus(String id) {
         try {
             String json = webHelper.requestGET(new URL(pipelinesURL,
-                UriUtils.encodeQueryParam(id, StandardCharsets.UTF_8)),
+                    UriUtils.encodeQueryParam(id, StandardCharsets.UTF_8)),
                 "application/json",
                 username,
-                password);
-
-            System.out.println("get status response:" + json);
+                password).getResponse();
 
             JSONObject jsonObject = new JSONObject(json);
             JSONObject state = jsonObject.getJSONObject("state");

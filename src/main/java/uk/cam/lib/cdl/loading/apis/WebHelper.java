@@ -7,6 +7,7 @@ import uk.cam.lib.cdl.loading.model.WebResponse;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class WebHelper {
@@ -21,8 +22,7 @@ public class WebHelper {
         try {
             con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json; utf-8");
-            con.setRequestProperty("Accept", "application/json");
+            con.setRequestProperty("Content-Type", "application/json");
             con.setDoOutput(true);
 
             if (username != null && password != null) {
@@ -32,16 +32,19 @@ public class WebHelper {
             }
 
             try (OutputStream os = con.getOutputStream()) {
-                byte[] input = json.toString().getBytes("utf-8");
-                os.write(input, 0, input.length);
+                OutputStreamWriter writer = new OutputStreamWriter(os, StandardCharsets.UTF_8);
+                writer.write(json.toString());
+                writer.flush();
+                os.flush();
             }
 
+            String response = getContent(con);
             int code = con.getResponseCode();
-            String response = getContent(con, code);
 
             WebResponse output = new WebResponse(code, response);
             if (code > 299) {
                 System.err.println("Error getting content. ");
+                System.err.println(con.getResponseMessage());
                 System.err.println(response);
                 return output;
             } else {
@@ -62,16 +65,15 @@ public class WebHelper {
         return null;
     }
 
-
-    public String requestGET(URL url) {
+    public WebResponse requestGET(URL url) {
         return requestGET(url, "text/plain; charset=\"utf-8\"", null, null);
     }
 
-    public String requestGET(URL url, String mimeType) {
+    public WebResponse requestGET(URL url, String mimeType) {
         return requestGET(url, mimeType, null, null);
     }
 
-    public String requestGET(URL url, String mimeType, String username, String password) {
+    public WebResponse requestGET(URL url, String mimeType, String username, String password) {
 
         HttpURLConnection con = null;
         try {
@@ -85,15 +87,15 @@ public class WebHelper {
                 con.setRequestProperty("Authorization", basicAuth);
             }
 
-            Integer code = con.getResponseCode();
-            String response = getContent(con, code);
+            String response = getContent(con);
+            int code = con.getResponseCode();
 
             if (code > 299) {
                 System.err.println("Error getting content. ");
                 System.err.println(response);
                 return null;
             } else {
-                return response;
+                return new WebResponse(code, response);
             }
 
         } catch (IOException e) {
@@ -101,21 +103,18 @@ public class WebHelper {
             e.printStackTrace();
         } finally {
             try {
+                assert con != null;
                 con.disconnect();
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
 
         return null;
     }
 
-    private String getContent(HttpURLConnection con, Integer code) throws IOException {
+    private String getContent(HttpURLConnection con) throws IOException {
         Reader streamReader;
 
-        if (code > 299) {
-            System.err.println("Error in API: Response Code: " + code);
-            System.err.println("Con: " + con.getErrorStream());
-        }
         streamReader = new InputStreamReader(con.getInputStream());
         BufferedReader in = new BufferedReader(streamReader);
         String inputLine;
