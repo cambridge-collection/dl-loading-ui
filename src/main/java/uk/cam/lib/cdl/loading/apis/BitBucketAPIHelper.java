@@ -23,28 +23,38 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class BitBucketAPI {
+/**
+ * This class is used for calls to the Bitbucket API
+ * Package-private for use by APIs
+ */
+class BitBucketAPIHelper {
 
     private final URL apiURL;
     private final String branch;
-    private final URL tagsURL;
-    private final URL pipelinesURL;
+    private URL tagsURL = null;
+    private URL pipelinesURL = null;
     private final String username;
     private final String password;
     private final String cacheName = "bitbucketTags";
     private final WebHelper webHelper = new WebHelper();
 
-    public BitBucketAPI(URL apiURL, String branch, String repoURL, String tagsURL, String pipelinesURL, String username,
-                        String password) throws MalformedURLException {
+    public BitBucketAPIHelper(URL apiURL, String branch, String repoURL, String tagsURL, String pipelinesURL, String username,
+                        String password) {
+
         this.apiURL = apiURL;
         this.branch = branch;
-        this.tagsURL = new URL(apiURL, repoURL + tagsURL);
-        this.pipelinesURL = new URL(apiURL, repoURL + pipelinesURL);
         this.username = username;
         this.password = password;
+
+        try {
+            this.tagsURL = new URL(apiURL, repoURL + tagsURL);
+            this.pipelinesURL = new URL(apiURL, repoURL + pipelinesURL);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
     }
 
-    // TODO replace by getting tags on checked out repo
     @Cacheable(cacheName)
     public List<Tag> getTags() {
         String json = webHelper.requestGET(tagsURL, "application/json", username, password).getResponse();
@@ -163,3 +173,4 @@ public class BitBucketAPI {
     }
 
 }
+

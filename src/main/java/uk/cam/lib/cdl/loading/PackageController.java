@@ -1,7 +1,6 @@
 package uk.cam.lib.cdl.loading;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriUtils;
-import uk.cam.lib.cdl.loading.apis.BitBucketAPI;
 import uk.cam.lib.cdl.loading.apis.PackagingAPI;
 import uk.cam.lib.cdl.loading.model.Tag;
 import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
@@ -25,12 +23,10 @@ import java.util.List;
 public class PackageController {
 
     private final PackagingAPI packagingAPI;
-    private final BitBucketAPI bitbucketAPI;
 
     @Autowired
-    public PackageController(PackagingAPI packagingAPI, @Qualifier("sourceRepo") BitBucketAPI bitbucketAPI) {
+    public PackageController(PackagingAPI packagingAPI) {
         this.packagingAPI = packagingAPI;
-        this.bitbucketAPI = bitbucketAPI;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/package/package.html")
@@ -59,7 +55,7 @@ public class PackageController {
             // YOU WILL NEED TO CHANGE THIS IF TAG FORMAT IS CHANGED.
             // TODO update build status from pipeline with result info
             // https://developer.atlassian.com/server/bitbucket/how-tos/updating-build-status-for-commits/
-            List<Tag> tags = bitbucketAPI.getTags();
+            List<Tag> tags = packagingAPI.getTags();
             for (Tag tag : tags) {
                 if (tag.getName().endsWith("v" + pipeline.getBuildNumber())) {
                     tagLookup.put(pipeline.getId(), tag);

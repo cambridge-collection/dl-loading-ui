@@ -10,7 +10,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public class WebHelper {
+/**
+ * Class for help with web requests
+ * Package-private
+ */
+class WebHelper {
 
     public WebResponse requestPOSTJSON(URL url, JSONObject json) {
         return requestPOSTJSON(url, json, null, null);
