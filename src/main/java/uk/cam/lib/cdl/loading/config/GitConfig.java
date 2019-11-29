@@ -5,22 +5,35 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.net.URL;
+
 @Configuration
 public class GitConfig implements WebMvcConfigurer {
 
     @Bean
-    public GitSourceVariables getSourceVariables(@Value("${git.sourcedata.checkout.path}") String gitSourcePath,
-                                                 @Value("${git.sourcedata.checkout.subpath.data}") String gitSourceDataSubpath,
-                                                 @Value("${git.sourcedata.url}") String gitSourceURL,
-                                                 @Value("${git.sourcedata.url.username}") String gitSourceURLUserame,
-                                                 @Value("${git.sourcedata.url.password}") String gitSourceURLPassword,
-                                                 @Value("${git.sourcedata.branch}") String gitBranch,
-                                                 @Value("${git.sourcedata.dl-dataset.filename}") String dlDatasetFilename
+    public GitLocalVariables getLocalSourceVariables(@Value("${git.sourcedata.checkout.path}") String gitSourcePath,
+                                                @Value("${git.sourcedata.checkout.subpath.data}") String gitSourceDataSubpath,
+                                                @Value("${git.sourcedata.url}") String gitSourceURL,
+                                                @Value("${git.sourcedata.url.username}") String gitSourceURLUserame,
+                                                @Value("${git.sourcedata.url.password}") String gitSourceURLPassword,
+                                                @Value("${git.sourcedata.branch}") String gitBranch,
+                                                @Value("${git.sourcedata.dl-dataset.filename}") String dlDatasetFilename
     ) {
-        return new GitSourceVariables(gitSourcePath, gitSourceDataSubpath, gitSourceURL,
+        return new GitLocalVariables(gitSourcePath, gitSourceDataSubpath, gitSourceURL,
             gitSourceURLUserame,
             gitSourceURLPassword, gitBranch, dlDatasetFilename);
 
+    }
+
+    @Bean
+    public GitAPIVariables getSourceAPIVariables(@Value("${git.api.url}") URL gitAPIURL,
+                                                 @Value("${git.sourcedata.branch}") String gitBranch,
+                                                 @Value("${git.api.url.part.tags}") String tagsURL,
+                                                 @Value("${git.sourcedata.api.url.part.repo}") String repoURL,
+                                                 @Value("${git.api.url.part.pipelines}") String pipelinesURL,
+                                                 @Value("${git.api.username}") String gitUsername,
+                                                 @Value("${git.api.password}") String gitPassword){
+        return new GitAPIVariables(gitAPIURL, gitBranch, tagsURL, repoURL, pipelinesURL, gitUsername, gitPassword);
     }
 
 }

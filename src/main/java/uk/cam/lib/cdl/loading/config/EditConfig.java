@@ -17,7 +17,7 @@ public class EditConfig {
     private final EditAPI editAPI;
 
     @Autowired
-    public EditConfig(GitSourceVariables gitSourceVariables, @Value("${data.item.path}") String dataItemPath) {
+    public EditConfig(GitLocalVariables gitSourceVariables, @Value("${data.item.path}") String dataItemPath) {
 
         this.editAPI =
             new EditAPI(gitSourceVariables.getGitSourcePath() + gitSourceVariables.getGitSourceDataSubpath(),

@@ -1,15 +1,14 @@
 package uk.cam.lib.cdl.loading;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-import uk.cam.lib.cdl.loading.apis.BitBucketAPI;
 import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
+import uk.cam.lib.cdl.loading.apis.PackagingAPI;
 import uk.cam.lib.cdl.loading.model.Tag;
 import uk.cam.lib.cdl.loading.model.deployment.Deployment;
 import uk.cam.lib.cdl.loading.model.deployment.Instance;
@@ -22,12 +21,12 @@ import java.util.List;
 public class DeployController {
 
     private final DeploymentAPI deploymentAPI;
-    private final BitBucketAPI bitbucketAPI;
+    private final PackagingAPI packagingAPI;
 
     @Autowired
-    public DeployController(DeploymentAPI deploymentAPI, @Qualifier("releaseRepo") BitBucketAPI bitbucketAPI) {
+    public DeployController(DeploymentAPI deploymentAPI, PackagingAPI packagingAPI) {
         this.deploymentAPI = deploymentAPI;
-        this.bitbucketAPI = bitbucketAPI;
+        this.packagingAPI = packagingAPI;
     }
 
     /**
@@ -41,7 +40,9 @@ public class DeployController {
                          @ModelAttribute("error") String error) {
 
         List<Instance> instances = deploymentAPI.getInstances();
-        List<Tag> tags = bitbucketAPI.getTags();
+        // NOTE this gets the tags from the source repo instead of from the release repo, but they should be
+        // the same. Could checkout the release repo, or use BitBucket API for access to release repo directly.
+        List<Tag> tags = packagingAPI.getTags();
         Collections.sort(tags);
         Collections.sort(instances);
 

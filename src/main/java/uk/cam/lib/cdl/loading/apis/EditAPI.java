@@ -10,7 +10,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import uk.cam.lib.cdl.loading.config.GitSourceVariables;
+import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Dataset;
 import uk.cam.lib.cdl.loading.model.editor.Id;
@@ -46,7 +46,7 @@ public class EditAPI {
     private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
 
 
-    public EditAPI(String dataPath, String dlDatasetFilename, String dataItemPath, GitSourceVariables gitSourceVariables) {
+    public EditAPI(String dataPath, String dlDatasetFilename, String dataItemPath, GitLocalVariables gitSourceVariables) {
         gitHelper = new GitHelper(gitSourceVariables);
         this.dataPath = dataPath;
         this.datasetFile = new File(dataPath + File.separator + dlDatasetFilename);

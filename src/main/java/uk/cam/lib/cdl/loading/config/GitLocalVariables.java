@@ -1,6 +1,6 @@
 package uk.cam.lib.cdl.loading.config;
 
-public class GitSourceVariables {
+public class GitLocalVariables {
     private final String gitSourcePath;
     private final String gitSourceDataSubpath;
     private final String gitSourceURL;
@@ -9,13 +9,13 @@ public class GitSourceVariables {
     private final String gitBranch;
     private final String gitDatasetFilename;
 
-    public GitSourceVariables(String gitSourcePath,
-                              String gitSourceDataSubpath,
-                              String gitSourceURL,
-                              String gitSourceURLUserame,
-                              String gitSourceURLPassword,
-                              String gitBranch,
-                              String gitDLDataFilename
+    public GitLocalVariables(String gitSourcePath,
+                             String gitSourceDataSubpath,
+                             String gitSourceURL,
+                             String gitSourceURLUserame,
+                             String gitSourceURLPassword,
+                             String gitBranch,
+                             String gitDLDataFilename
     ) {
         this.gitSourcePath = gitSourcePath;
         this.gitSourceDataSubpath = gitSourceDataSubpath;

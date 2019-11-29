@@ -3,21 +3,30 @@ package uk.cam.lib.cdl.loading.apis;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.revwalk.RevObject;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import uk.cam.lib.cdl.loading.config.GitSourceVariables;
+import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * Class for help with git requests
+ * package-private
+ */
 public class GitHelper {
 
     private final Git git;
-    private final GitSourceVariables gitSourceVariables;
+    private final GitLocalVariables gitSourceVariables;
 
-    public GitHelper(GitSourceVariables gitSourceVariables) {
+    GitHelper(GitLocalVariables gitSourceVariables) {
         this.gitSourceVariables = gitSourceVariables;
         git = setupRepo(gitSourceVariables.getGitSourcePath(), gitSourceVariables.getGitSourceURL(),
             gitSourceVariables.getGitSourceURLUserame(),
@@ -116,8 +125,24 @@ public class GitHelper {
         }
     }
 
+    public List<RevObject> getTags() {
+        try {
+            List<Ref> refs = git.tagList().call();
+            List<RevObject> output = new ArrayList<>();
 
-    public String getDataLocalPath() {
+            for (Ref ref : refs) {
+                RevWalk walk = new RevWalk(git.getRepository());
+                output.add(walk.parseAny(ref.getObjectId()));
+            }
+
+            return output;
+        } catch (GitAPIException | IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+        public String getDataLocalPath() {
         return gitSourceVariables.getGitSourcePath() + gitSourceVariables.getGitSourceDataSubpath();
     }
 }
