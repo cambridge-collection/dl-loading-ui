@@ -1,0 +1,32 @@
+{
+  "@type" : "https://schemas.cudl.lib.cam.ac.uk/package/v1/collection.json",
+  "name" : {
+    "url-slug" : "test",
+    "sort" : "Sorting Test Name",
+    "short" : "Test",
+    "full" : "This is a Test Collection"
+  },
+  "description" : {
+    "short" : "Test collection. Short Description.",
+    "full" : {
+      "@id" : "../pages/html/collections/test/summary.html"
+    },
+    "medium" : "Test collection. {more changes} <with some> 一字值千金。 What about quotes\" '"
+  },
+  "credit" : {
+    "prose" : {
+      "@id" : "../pages/html/collections/test/sponsors.html"
+    }
+  },
+  "items" : [ {
+    "@id" : "../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml"
+  }, {
+    "@id" : "../items/data/tei/MS-ENGLISH-01197-00019/MS-ENGLISH-01197-00019xml"
+  }, {
+    "@id" : "../items/data/tei/MS-HEBREW-GASTER-00086/MS-HEBREW-GASTER-00086.xml"
+  }, {
+    "@id" : "../items/data/tei/MS-LATIN-00509/MS-LATIN-00509.xml"
+  }, {
+    "@id" : "../items/data/tei/MS-PERSIAN-00003/MS-PERSIAN-00003.xml"
+  } ]
+}

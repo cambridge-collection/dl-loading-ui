@@ -33,6 +33,11 @@ public class GitHelper {
             gitSourceVariables.getGitSourceURLPassword());
     }
 
+    GitHelper(Git git, GitLocalVariables gitSourceVariables) {
+        this.gitSourceVariables = gitSourceVariables;
+        this.git = git;
+    }
+
     public Git getGitInstance() {
         return git;
     }
