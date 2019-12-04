@@ -1,0 +1,5021 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_6790">
+   <teiHeader>
+      <fileDesc>
+         <titleStmt>
+            <title>Persian MS 3</title>
+            <funder>Iran Heritage Foundation and The John Rylands Research Institute</funder>
+         </titleStmt>
+         <publicationStmt>
+            <publisher>The University of Manchester Library</publisher>
+            <date calendar="#Gregorian">2014-MM-DD</date>
+            <pubPlace>
+               <address>
+                  <addrLine>The John Rylands Library</addrLine>
+                  <street>150 Deansgate</street>
+                  <settlement>Manchester</settlement>
+                  <postCode>M3 3EH</postCode>
+                  <addrLine>
+                     <ref target="http://www.library.manchester.ac.uk/specialcollections/">The John
+                        Rylands Library</ref>
+                  </addrLine>
+                  <addrLine>
+                     <email>uml.special-collections@manchester.ac.uk</email>
+                  </addrLine>
+               </address>
+            </pubPlace>
+            <idno>UkMaJRU</idno>
+            <idno type="msID">Persian_MS_3</idno>
+            <idno type="catalogue">Fihrist</idno>
+
+                <availability xml:id="displayImageRights" status="restricted">
+					<p>Zooming image © University of Manchester Library, All rights reserved.</p>
+				</availability>
+				<availability xml:id="downloadImageRights" status="restricted">
+					<licence>Images and Metadata made available for download are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).</licence>
+				</availability>
+				<availability xml:id="metadataRights" status="restricted">
+					<licence>Images and Metadata made available for download are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).</licence>
+				</availability>
+			</publicationStmt>
+         <sourceDesc>
+            <msDesc xml:id="Persian_MS_3" xml:lang="en">
+               <msIdentifier>
+                  <country>United Kingdom</country>
+                  <settlement>Manchester</settlement>
+                  <institution>The University of Manchester</institution>
+                  <repository>The John Rylands Library</repository>
+                  <collection>Persian Manuscripts</collection>
+                  <idno>Persian MS 3</idno>
+                  <altIdentifier type="former">
+                     <idno>Bland 13</idno>
+                  </altIdentifier>
+               </msIdentifier>
+               <msContents>
+                  <summary>Persian illustrated copy of Qazwini's <title>Wonders of Creation</title>, an important
+                     Arabic cosmography.</summary>
+                  <msItem xml:id="Persian_MS_3-item1">
+                     <author ref="http://lccn.loc.gov/n88675354" key="person_n88675354">
+                        <persName xml:lang="ar-Latn-x-lc" type="standard">Qazwīnī, Zakarīyā ibn
+                           Muḥammad, ca. 1203-1283</persName>
+                        <persName xml:lang="fa">قزوينی، زكريا بن محمد</persName>
+                     </author>
+                     <title xml:lang="fa-Latn-x-lc">ʻAjāyib al-makhlūqāt</title>
+                     <title xml:lang="fa">عجايب المخلوقات</title>
+                     <title xml:lang="fa" type="alt">عجايب المخلوقات و غرائب الموجودات</title>
+                     <title xml:lang="fa-Latn-x-lc" type="alt">ʻAjā’ib al-makhlūqāt va gharāʼib
+                        al-mawjūdāt</title>
+                     <title xml:lang="fa-Latn-x-lc" type="alt">ʻAjā’ib al-makhlūqāt wa-gharāʼib
+                        al-mawjūdāt</title>
+                     <textLang mainLang="fa">Persian</textLang>
+                  </msItem>
+               </msContents>
+               <physDesc>
+                  <objectDesc form="codex">
+                     <supportDesc material="chart">
+                        <support>The colour of the <material>paper</material> varies from cream
+                           through coffee to several shades of green.</support>
+                        <extent>256 folios <dimensions type="leaf" unit="cm">
+                              <height>34.2</height>
+                              <width>17.8</width>
+                           </dimensions>
+                           <dimensions type="written" unit="cm">
+                              <height>27</height>
+                              <width>12.3</width>
+                           </dimensions>
+                        </extent>
+                        <foliation xml:id="modern">
+                           <p>Pencil foliation throughout. As the pencil numbering includes three
+                              fly-leaves at the beginning, what should be numbered folio 1 is
+                              numbered 4 etc.</p>
+                        </foliation>
+                     </supportDesc>
+                     <layoutDesc>
+                        <layout columns="1" ruledLines="21" n="mistara"/>
+                     </layoutDesc>
+                  </objectDesc>
+                  <handDesc>
+                     <handNote scope="major" script="nasta_liq" medium="ink">Copied by <persName xml:lang="fa-Latn-x-lc" type="supplied" key="person_f4041"> Shūmā
+                              <foreign xml:id="per">شوما</foreign>
+                        </persName>
+                     </handNote>
+                  </handDesc>
+                  <decoDesc>
+                     <decoNote type="illustration">355 miniatures, which exemplify the mature
+                        Isfahan style, maintain a high standard of execution throughout. An
+                        extremely fine illuminated heading at the beginning of the text, with the
+                        central medallion left unpainted.</decoNote>
+                  </decoDesc>
+                  <bindingDesc>
+                     <decoNote>Contemporary binding of black morocco with fine stamped gilt
+                        medallions (flowers) and pendants (rabbits). Doublures of red leather, with
+                        medallions and pendants of gold cut-out work on blue, green and red
+                        backgrounds.</decoNote>
+                  </bindingDesc>
+               </physDesc>
+               <history>
+                  <origin>
+                     <origDate calendar="#Hijri-qamari" when="1632"/>
+                  </origin>
+                  <provenance>
+                     <p>Colophon on folio 259a (256a according to the modern pencil numbering)
+                        signed by Shamsa. At the beginning are two Persian seals with short
+                        librarians' entries: 1. Pitifāt 'Alī Khān; 2. Mu'izz al-Dawla Bahādur Khān
+                        (?), dated 1162/1749; one of the inscriptions appears to record the gift of
+                        the manuscript from the first to the second.</p>
+                     <p>Formerly part of the collection of the orientalist <persName type="standard"
+                                  ref="http://viaf.org/viaf/51695910"
+                                  key="person_51695910">Antoine-Isaac Silvestre de Sacy (1758-1838).</persName> A label has been affixed to the
+                        inside front cover which reads: 'M: Silvestre de Sacy, 226'. 
+                        The manuscript then became part of the collection of the Persian scholar <persName type="standard"
+                                  ref="http://viaf.org/viaf/20108923/#Bland,_Nathaniel,_1803-1865"
+                                  key="person_20108923">Nathaniel Bland (1803-1865)</persName>. Bland’s
+                        oriental manuscripts were sold through Bernard Quaritch in 1866 to <persName type="standard"
+                                  ref="http://viaf.org/viaf/97751058/#Crawford,_Alexander_Crawford_Lindsay,_Earl_of,_1812-1880"
+                                  key="person_97751058">Alexander Lindsay, 25th Earl of
+                        Crawford</persName>.</p>
+                  </provenance>
+                  <acquisition>
+                     <p>Purchased by Enriqueta Rylands, on behalf of the John Rylands Library,
+                        in <date calendar="#Gregorian" when="1901">1901</date> from <persName type="standard"
+                                  ref="http://viaf.org/viaf/9985420/#Crawford,_James_Ludovic_Lindsay,_Earl_of,_1847-1913"
+                                  key="person_9985420">James Ludovic Lindsay, 26th Earl of
+                           Crawford</persName>.</p>
+                  </acquisition>
+               </history>
+               <additional>
+                  <adminInfo>
+                     <recordHist>
+                        <source>
+                           <p>Bibliographical description based on an index created by <persName type="standard"
+                                        ref="http://viaf.org/viaf/56454583/#Navabpour,_Reza"
+                                        key="person_56454583">Reza Navabpour</persName> circa <date calendar="#Gregorian" notBefore="1992" notAfter="1994">1993</date>.
+                              Identification of provenance based on manuscript catalogue by Michael
+                              Kerney, <date calendar="#Gregorian" notAfter="1901" notBefore="1868">circa 1890s.</date>
+                           </p>
+                           <p>Codicological description based on B.W. Robinson, <title>Persian Paintings in the John Rylands Library: A Descriptive Catalogue</title> (London, 1980).</p>
+                        </source>
+                     </recordHist>
+                  </adminInfo>
+               </additional>
+            </msDesc>
+         </sourceDesc>
+      </fileDesc>
+      <encodingDesc>
+         <classDecl>
+            <taxonomy xml:id="LCSH">
+               <bibl>
+                  <ref target="http://id.loc.gov/authorities/about.html#lcsh">Library of Congress
+                     Subject Headings</ref>
+               </bibl>
+            </taxonomy>
+         </classDecl>
+      </encodingDesc>
+      <profileDesc>
+         <textClass>
+            <keywords scheme="#LCSH">
+               <list>
+                  <item>
+                     <term key="subject_sh2009118159" target="http://lccn.loc.gov/sh2009118159">Cosmography Early works to 1800</term>
+                  </item>
+                  <item>
+                     <term key="subject_sh85054014" target="http://lccn.loc.gov/sh85054014">Geography, Arab</term>
+                  </item>
+                  <item>
+                     <term key="subject_sh85149989" target="http://lccn.loc.gov/sh85149989">Zoology
+                        Pre-Linnean works</term>
+                  </item>
+               </list>
+            </keywords>
+         </textClass>
+      </profileDesc>
+      <revisionDesc>
+         <change when="2018-04-19">
+            <persName>Sophia Christmann</persName>Added codicological
+            information from Robinson catalogue.</change>
+         <change when="2017-11-07">
+            <persName>James Cummings</persName> Up-converted the markup using <ref target="https://github.com/bodleian/fihrist-mss/tree/master/processing/convertFihrist2Bodley.xsl">https://github.com/bodleian/fihrist-mss/tree/master/processing/convertFihrist2Bodley.xsl</ref>
+         </change>
+         <change when="2015">
+            <persName>Yasmin Faghihi</persName>
+         </change>
+      </revisionDesc>
+   </teiHeader>
+   <facsimile>
+      <graphic decls="#document-thumbnail"
+               rend="portrait"
+               url="MS-PERSIAN-00003-000-00001.jp2"/>
+      <surface xml:id="i1" n="Outside front cover">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="4172px"
+                  url="MS-PERSIAN-00003-000-00001.jp2"/>
+
+      </surface>
+      <surface xml:id="i2" n="Inside front cover">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3575px"
+                  url="MS-PERSIAN-00003-000-00002.jp2"/>
+
+      </surface>
+      <surface xml:id="i3" n="Flyleaf i a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00003.jp2"/>
+
+      </surface>
+      <surface xml:id="i4" n="Flyleaf i b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3391px"
+                  url="MS-PERSIAN-00003-000-00004.jp2"/>
+
+      </surface>
+      <surface xml:id="i5" n="1a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3408px"
+                  url="MS-PERSIAN-00003-000-00005.jp2"/>
+
+      </surface>
+      <surface xml:id="i6" n="1b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3475px"
+                  url="MS-PERSIAN-00003-000-00006.jp2"/>
+
+      </surface>
+      <surface xml:id="i7" n="2a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00007.jp2"/>
+
+      </surface>
+      <surface xml:id="i8" n="2b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3475px"
+                  url="MS-PERSIAN-00003-000-00008.jp2"/>
+
+      </surface>
+      <surface xml:id="i9" n="3a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00009.jp2"/>
+
+      </surface>
+      <surface xml:id="i10" n="3b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3475px"
+                  url="MS-PERSIAN-00003-000-00010.jp2"/>
+
+      </surface>
+      <surface xml:id="i11" n="4a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3461px"
+                  url="MS-PERSIAN-00003-000-00011.jp2"/>
+
+      </surface>
+      <surface xml:id="i12" n="4b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00012.jp2"/>
+
+      </surface>
+      <surface xml:id="i13" n="5a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3461px"
+                  url="MS-PERSIAN-00003-000-00013.jp2"/>
+
+      </surface>
+      <surface xml:id="i14" n="5b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00014.jp2"/>
+
+      </surface>
+      <surface xml:id="i15" n="6a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3461px"
+                  url="MS-PERSIAN-00003-000-00015.jp2"/>
+
+      </surface>
+      <surface xml:id="i16" n="6b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00016.jp2"/>
+
+      </surface>
+      <surface xml:id="i17" n="7a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3461px"
+                  url="MS-PERSIAN-00003-000-00017.jp2"/>
+
+      </surface>
+      <surface xml:id="i18" n="7b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00018.jp2"/>
+
+      </surface>
+      <surface xml:id="i19" n="8a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3461px"
+                  url="MS-PERSIAN-00003-000-00019.jp2"/>
+
+      </surface>
+      <surface xml:id="i20" n="8b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00020.jp2"/>
+
+      </surface>
+      <surface xml:id="i21" n="9a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3461px"
+                  url="MS-PERSIAN-00003-000-00021.jp2"/>
+
+      </surface>
+      <surface xml:id="i22" n="9b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00022.jp2"/>
+
+      </surface>
+      <surface xml:id="i23" n="10a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00023.jp2"/>
+
+      </surface>
+      <surface xml:id="i24" n="10b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00024.jp2"/>
+
+      </surface>
+      <surface xml:id="i25" n="11a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00025.jp2"/>
+
+      </surface>
+      <surface xml:id="i26" n="11b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00026.jp2"/>
+
+      </surface>
+      <surface xml:id="i27" n="12a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00027.jp2"/>
+
+      </surface>
+      <surface xml:id="i28" n="12b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00028.jp2"/>
+
+      </surface>
+      <surface xml:id="i29" n="13a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00029.jp2"/>
+
+      </surface>
+      <surface xml:id="i30" n="13b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00030.jp2"/>
+
+      </surface>
+      <surface xml:id="i31" n="14a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00031.jp2"/>
+
+      </surface>
+      <surface xml:id="i32" n="14b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00032.jp2"/>
+
+      </surface>
+      <surface xml:id="i33" n="15a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00033.jp2"/>
+
+      </surface>
+      <surface xml:id="i34" n="15b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3527px"
+                  url="MS-PERSIAN-00003-000-00034.jp2"/>
+
+      </surface>
+      <surface xml:id="i35" n="16a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00035.jp2"/>
+
+      </surface>
+      <surface xml:id="i36" n="16b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3527px"
+                  url="MS-PERSIAN-00003-000-00036.jp2"/>
+
+      </surface>
+      <surface xml:id="i37" n="17a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00037.jp2"/>
+
+      </surface>
+      <surface xml:id="i38" n="17b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3527px"
+                  url="MS-PERSIAN-00003-000-00038.jp2"/>
+
+      </surface>
+      <surface xml:id="i39" n="18a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00039.jp2"/>
+
+      </surface>
+      <surface xml:id="i40" n="18b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3483px"
+                  url="MS-PERSIAN-00003-000-00040.jp2"/>
+
+      </surface>
+      <surface xml:id="i41" n="19a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00041.jp2"/>
+
+      </surface>
+      <surface xml:id="i42" n="19b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00042.jp2"/>
+
+      </surface>
+      <surface xml:id="i43" n="20a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00043.jp2"/>
+
+      </surface>
+      <surface xml:id="i44" n="20b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00044.jp2"/>
+
+      </surface>
+      <surface xml:id="i45" n="21a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00045.jp2"/>
+
+      </surface>
+      <surface xml:id="i46" n="21b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00046.jp2"/>
+
+      </surface>
+      <surface xml:id="i47" n="22a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00047.jp2"/>
+
+      </surface>
+      <surface xml:id="i48" n="22b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00048.jp2"/>
+
+      </surface>
+      <surface xml:id="i49" n="23a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00049.jp2"/>
+
+      </surface>
+      <surface xml:id="i50" n="23b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00050.jp2"/>
+
+      </surface>
+      <surface xml:id="i51" n="24a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00051.jp2"/>
+
+      </surface>
+      <surface xml:id="i52" n="24b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00052.jp2"/>
+
+      </surface>
+      <surface xml:id="i53" n="25a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00053.jp2"/>
+
+      </surface>
+      <surface xml:id="i54" n="25b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00054.jp2"/>
+
+      </surface>
+      <surface xml:id="i55" n="26a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00055.jp2"/>
+
+      </surface>
+      <surface xml:id="i56" n="26b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00056.jp2"/>
+
+      </surface>
+      <surface xml:id="i57" n="27a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00057.jp2"/>
+
+      </surface>
+      <surface xml:id="i58" n="27b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00058.jp2"/>
+
+      </surface>
+      <surface xml:id="i59" n="28a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00059.jp2"/>
+
+      </surface>
+      <surface xml:id="i60" n="28b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00060.jp2"/>
+
+      </surface>
+      <surface xml:id="i61" n="29a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3451px"
+                  url="MS-PERSIAN-00003-000-00061.jp2"/>
+
+      </surface>
+      <surface xml:id="i62" n="29b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00062.jp2"/>
+
+      </surface>
+      <surface xml:id="i63" n="30a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3411px"
+                  url="MS-PERSIAN-00003-000-00063.jp2"/>
+
+      </surface>
+      <surface xml:id="i64" n="30b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00064.jp2"/>
+
+      </surface>
+      <surface xml:id="i65" n="31a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3411px"
+                  url="MS-PERSIAN-00003-000-00065.jp2"/>
+
+      </surface>
+      <surface xml:id="i66" n="31b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00066.jp2"/>
+
+      </surface>
+      <surface xml:id="i67" n="32a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3411px"
+                  url="MS-PERSIAN-00003-000-00067.jp2"/>
+
+      </surface>
+      <surface xml:id="i68" n="32b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00068.jp2"/>
+
+      </surface>
+      <surface xml:id="i69" n="33a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3411px"
+                  url="MS-PERSIAN-00003-000-00069.jp2"/>
+
+      </surface>
+      <surface xml:id="i70" n="33b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00070.jp2"/>
+
+      </surface>
+      <surface xml:id="i71" n="34a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3411px"
+                  url="MS-PERSIAN-00003-000-00071.jp2"/>
+
+      </surface>
+      <surface xml:id="i72" n="34b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00072.jp2"/>
+
+      </surface>
+      <surface xml:id="i73" n="35a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3411px"
+                  url="MS-PERSIAN-00003-000-00073.jp2"/>
+
+      </surface>
+      <surface xml:id="i74" n="35b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00074.jp2"/>
+
+      </surface>
+      <surface xml:id="i75" n="36a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3411px"
+                  url="MS-PERSIAN-00003-000-00075.jp2"/>
+
+      </surface>
+      <surface xml:id="i76" n="36b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00076.jp2"/>
+
+      </surface>
+      <surface xml:id="i77" n="37a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3411px"
+                  url="MS-PERSIAN-00003-000-00077.jp2"/>
+
+      </surface>
+      <surface xml:id="i78" n="37b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00078.jp2"/>
+
+      </surface>
+      <surface xml:id="i79" n="38a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3470px"
+                  url="MS-PERSIAN-00003-000-00079.jp2"/>
+
+      </surface>
+      <surface xml:id="i80" n="38b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00080.jp2"/>
+
+      </surface>
+      <surface xml:id="i81" n="39a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3515px"
+                  url="MS-PERSIAN-00003-000-00081.jp2"/>
+
+      </surface>
+      <surface xml:id="i82" n="39b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00082.jp2"/>
+
+      </surface>
+      <surface xml:id="i83" n="40a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3517px"
+                  url="MS-PERSIAN-00003-000-00083.jp2"/>
+
+      </surface>
+      <surface xml:id="i84" n="40b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3454px"
+                  url="MS-PERSIAN-00003-000-00084.jp2"/>
+
+      </surface>
+      <surface xml:id="i85" n="41a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3473px"
+                  url="MS-PERSIAN-00003-000-00085.jp2"/>
+
+      </surface>
+      <surface xml:id="i86" n="41b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3473px"
+                  url="MS-PERSIAN-00003-000-00086.jp2"/>
+
+      </surface>
+      <surface xml:id="i87" n="42a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3473px"
+                  url="MS-PERSIAN-00003-000-00087.jp2"/>
+
+      </surface>
+      <surface xml:id="i88" n="42b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3473px"
+                  url="MS-PERSIAN-00003-000-00088.jp2"/>
+
+      </surface>
+      <surface xml:id="i89" n="43a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3473px"
+                  url="MS-PERSIAN-00003-000-00089.jp2"/>
+
+      </surface>
+      <surface xml:id="i90" n="43b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3473px"
+                  url="MS-PERSIAN-00003-000-00090.jp2"/>
+
+      </surface>
+      <surface xml:id="i91" n="44a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3473px"
+                  url="MS-PERSIAN-00003-000-00091.jp2"/>
+
+      </surface>
+      <surface xml:id="i92" n="44b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3473px"
+                  url="MS-PERSIAN-00003-000-00092.jp2"/>
+
+      </surface>
+      <surface xml:id="i93" n="45a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3473px"
+                  url="MS-PERSIAN-00003-000-00093.jp2"/>
+
+      </surface>
+      <surface xml:id="i94" n="45b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3466px"
+                  url="MS-PERSIAN-00003-000-00094.jp2"/>
+
+      </surface>
+      <surface xml:id="i95" n="46a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3473px"
+                  url="MS-PERSIAN-00003-000-00095.jp2"/>
+
+      </surface>
+      <surface xml:id="i96" n="46b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3466px"
+                  url="MS-PERSIAN-00003-000-00096.jp2"/>
+
+      </surface>
+      <surface xml:id="i97" n="47a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3473px"
+                  url="MS-PERSIAN-00003-000-00097.jp2"/>
+
+      </surface>
+      <surface xml:id="i98" n="47b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3466px"
+                  url="MS-PERSIAN-00003-000-00098.jp2"/>
+
+      </surface>
+      <surface xml:id="i99" n="48a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3489px"
+                  url="MS-PERSIAN-00003-000-00099.jp2"/>
+
+      </surface>
+      <surface xml:id="i100" n="48b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3466px"
+                  url="MS-PERSIAN-00003-000-00100.jp2"/>
+
+      </surface>
+      <surface xml:id="i101" n="49a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3489px"
+                  url="MS-PERSIAN-00003-000-00101.jp2"/>
+
+      </surface>
+      <surface xml:id="i102" n="49b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3466px"
+                  url="MS-PERSIAN-00003-000-00102.jp2"/>
+
+      </surface>
+      <surface xml:id="i103" n="50a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3489px"
+                  url="MS-PERSIAN-00003-000-00103.jp2"/>
+
+      </surface>
+      <surface xml:id="i104" n="50b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3495px"
+                  url="MS-PERSIAN-00003-000-00104.jp2"/>
+
+      </surface>
+      <surface xml:id="i105" n="51a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3489px"
+                  url="MS-PERSIAN-00003-000-00105.jp2"/>
+
+      </surface>
+      <surface xml:id="i106" n="51b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3507px"
+                  url="MS-PERSIAN-00003-000-00106.jp2"/>
+
+      </surface>
+      <surface xml:id="i107" n="52a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3476px"
+                  url="MS-PERSIAN-00003-000-00107.jp2"/>
+
+      </surface>
+      <surface xml:id="i108" n="52b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3507px"
+                  url="MS-PERSIAN-00003-000-00108.jp2"/>
+
+      </surface>
+      <surface xml:id="i109" n="53a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3476px"
+                  url="MS-PERSIAN-00003-000-00109.jp2"/>
+
+      </surface>
+      <surface xml:id="i110" n="53b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3507px"
+                  url="MS-PERSIAN-00003-000-00110.jp2"/>
+
+      </surface>
+      <surface xml:id="i111" n="54a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3527px"
+                  url="MS-PERSIAN-00003-000-00111.jp2"/>
+
+      </surface>
+      <surface xml:id="i112" n="54b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3507px"
+                  url="MS-PERSIAN-00003-000-00112.jp2"/>
+
+      </surface>
+      <surface xml:id="i113" n="55a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3527px"
+                  url="MS-PERSIAN-00003-000-00113.jp2"/>
+
+      </surface>
+      <surface xml:id="i114" n="55b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3507px"
+                  url="MS-PERSIAN-00003-000-00114.jp2"/>
+
+      </surface>
+      <surface xml:id="i115" n="56a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3527px"
+                  url="MS-PERSIAN-00003-000-00115.jp2"/>
+
+      </surface>
+      <surface xml:id="i116" n="56b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00116.jp2"/>
+
+      </surface>
+      <surface xml:id="i117" n="57a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3527px"
+                  url="MS-PERSIAN-00003-000-00117.jp2"/>
+
+      </surface>
+      <surface xml:id="i118" n="57b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00118.jp2"/>
+
+      </surface>
+      <surface xml:id="i119" n="58a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3509px"
+                  url="MS-PERSIAN-00003-000-00119.jp2"/>
+
+      </surface>
+      <surface xml:id="i120" n="58b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00120.jp2"/>
+
+      </surface>
+      <surface xml:id="i121" n="59a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00121.jp2"/>
+
+      </surface>
+      <surface xml:id="i122" n="59b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00122.jp2"/>
+
+      </surface>
+      <surface xml:id="i123" n="60a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00123.jp2"/>
+
+      </surface>
+      <surface xml:id="i124" n="60b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00124.jp2"/>
+
+      </surface>
+      <surface xml:id="i125" n="61a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00125.jp2"/>
+
+      </surface>
+      <surface xml:id="i126" n="61b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00126.jp2"/>
+
+      </surface>
+      <surface xml:id="i127" n="62a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00127.jp2"/>
+
+      </surface>
+      <surface xml:id="i128" n="62b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00128.jp2"/>
+
+      </surface>
+      <surface xml:id="i129" n="63a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3477px"
+                  url="MS-PERSIAN-00003-000-00129.jp2"/>
+
+      </surface>
+      <surface xml:id="i130" n="63b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00130.jp2"/>
+
+      </surface>
+      <surface xml:id="i131" n="64a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3477px"
+                  url="MS-PERSIAN-00003-000-00131.jp2"/>
+
+      </surface>
+      <surface xml:id="i132" n="64b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00132.jp2"/>
+
+      </surface>
+      <surface xml:id="i133" n="65a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3477px"
+                  url="MS-PERSIAN-00003-000-00133.jp2"/>
+
+      </surface>
+      <surface xml:id="i134" n="65b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00134.jp2"/>
+
+      </surface>
+      <surface xml:id="i135" n="66a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3477px"
+                  url="MS-PERSIAN-00003-000-00135.jp2"/>
+
+      </surface>
+      <surface xml:id="i136" n="66b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00136.jp2"/>
+
+      </surface>
+      <surface xml:id="i137" n="67a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3477px"
+                  url="MS-PERSIAN-00003-000-00137.jp2"/>
+
+      </surface>
+      <surface xml:id="i138" n="67b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3547px"
+                  url="MS-PERSIAN-00003-000-00138.jp2"/>
+
+      </surface>
+      <surface xml:id="i139" n="68a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3477px"
+                  url="MS-PERSIAN-00003-000-00139.jp2"/>
+
+      </surface>
+      <surface xml:id="i140" n="68b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3547px"
+                  url="MS-PERSIAN-00003-000-00140.jp2"/>
+
+      </surface>
+      <surface xml:id="i141" n="69a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3477px"
+                  url="MS-PERSIAN-00003-000-00141.jp2"/>
+
+      </surface>
+      <surface xml:id="i142" n="69b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3547px"
+                  url="MS-PERSIAN-00003-000-00142.jp2"/>
+
+      </surface>
+      <surface xml:id="i143" n="70a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3477px"
+                  url="MS-PERSIAN-00003-000-00143.jp2"/>
+
+      </surface>
+      <surface xml:id="i144" n="70b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00144.jp2"/>
+
+      </surface>
+      <surface xml:id="i145" n="71a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3477px"
+                  url="MS-PERSIAN-00003-000-00145.jp2"/>
+
+      </surface>
+      <surface xml:id="i146" n="71b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00146.jp2"/>
+
+      </surface>
+      <surface xml:id="i147" n="72a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3441px"
+                  url="MS-PERSIAN-00003-000-00147.jp2"/>
+
+      </surface>
+      <surface xml:id="i148" n="72b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00148.jp2"/>
+
+      </surface>
+      <surface xml:id="i149" n="73a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3448px"
+                  url="MS-PERSIAN-00003-000-00149.jp2"/>
+
+      </surface>
+      <surface xml:id="i150" n="73b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00150.jp2"/>
+
+      </surface>
+      <surface xml:id="i151" n="74a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3448px"
+                  url="MS-PERSIAN-00003-000-00151.jp2"/>
+
+      </surface>
+      <surface xml:id="i152" n="74b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00152.jp2"/>
+
+      </surface>
+      <surface xml:id="i153" n="75a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3448px"
+                  url="MS-PERSIAN-00003-000-00153.jp2"/>
+
+      </surface>
+      <surface xml:id="i154" n="75b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00154.jp2"/>
+
+      </surface>
+      <surface xml:id="i155" n="76a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3448px"
+                  url="MS-PERSIAN-00003-000-00155.jp2"/>
+
+      </surface>
+      <surface xml:id="i156" n="76b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3498px"
+                  url="MS-PERSIAN-00003-000-00156.jp2"/>
+
+      </surface>
+      <surface xml:id="i157" n="77a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3448px"
+                  url="MS-PERSIAN-00003-000-00157.jp2"/>
+
+      </surface>
+      <surface xml:id="i158" n="77b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3498px"
+                  url="MS-PERSIAN-00003-000-00158.jp2"/>
+
+      </surface>
+      <surface xml:id="i159" n="78a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3448px"
+                  url="MS-PERSIAN-00003-000-00159.jp2"/>
+
+      </surface>
+      <surface xml:id="i160" n="78b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3498px"
+                  url="MS-PERSIAN-00003-000-00160.jp2"/>
+
+      </surface>
+      <surface xml:id="i161" n="79a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3448px"
+                  url="MS-PERSIAN-00003-000-00161.jp2"/>
+
+      </surface>
+      <surface xml:id="i162" n="79b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3498px"
+                  url="MS-PERSIAN-00003-000-00162.jp2"/>
+
+      </surface>
+      <surface xml:id="i163" n="80a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3460px"
+                  url="MS-PERSIAN-00003-000-00163.jp2"/>
+
+      </surface>
+      <surface xml:id="i164" n="80b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3498px"
+                  url="MS-PERSIAN-00003-000-00164.jp2"/>
+
+      </surface>
+      <surface xml:id="i165" n="81a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3460px"
+                  url="MS-PERSIAN-00003-000-00165.jp2"/>
+
+      </surface>
+      <surface xml:id="i166" n="81b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3498px"
+                  url="MS-PERSIAN-00003-000-00166.jp2"/>
+
+      </surface>
+      <surface xml:id="i167" n="82a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3460px"
+                  url="MS-PERSIAN-00003-000-00167.jp2"/>
+
+      </surface>
+      <surface xml:id="i168" n="82b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00168.jp2"/>
+
+      </surface>
+      <surface xml:id="i169" n="83a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3460px"
+                  url="MS-PERSIAN-00003-000-00169.jp2"/>
+
+      </surface>
+      <surface xml:id="i170" n="83b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00170.jp2"/>
+
+      </surface>
+      <surface xml:id="i171" n="84a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3460px"
+                  url="MS-PERSIAN-00003-000-00171.jp2"/>
+
+      </surface>
+      <surface xml:id="i172" n="84b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00172.jp2"/>
+
+      </surface>
+      <surface xml:id="i173" n="85a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3460px"
+                  url="MS-PERSIAN-00003-000-00173.jp2"/>
+
+      </surface>
+      <surface xml:id="i174" n="85b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00174.jp2"/>
+
+      </surface>
+      <surface xml:id="i175" n="86a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3460px"
+                  url="MS-PERSIAN-00003-000-00175.jp2"/>
+
+      </surface>
+      <surface xml:id="i176" n="86b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3533px"
+                  url="MS-PERSIAN-00003-000-00176.jp2"/>
+
+      </surface>
+      <surface xml:id="i177" n="87a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3479px"
+                  url="MS-PERSIAN-00003-000-00177.jp2"/>
+
+      </surface>
+      <surface xml:id="i178" n="87b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3533px"
+                  url="MS-PERSIAN-00003-000-00178.jp2"/>
+
+      </surface>
+      <surface xml:id="i179" n="88a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3460px"
+                  url="MS-PERSIAN-00003-000-00179.jp2"/>
+
+      </surface>
+      <surface xml:id="i180" n="88b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3533px"
+                  url="MS-PERSIAN-00003-000-00180.jp2"/>
+
+      </surface>
+      <surface xml:id="i181" n="89a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3510px"
+                  url="MS-PERSIAN-00003-000-00181.jp2"/>
+
+      </surface>
+      <surface xml:id="i182" n="89b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00182.jp2"/>
+
+      </surface>
+      <surface xml:id="i183" n="90a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00183.jp2"/>
+
+      </surface>
+      <surface xml:id="i184" n="90b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3507px"
+                  url="MS-PERSIAN-00003-000-00184.jp2"/>
+
+      </surface>
+      <surface xml:id="i185" n="91a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00185.jp2"/>
+
+      </surface>
+      <surface xml:id="i186" n="91b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3507px"
+                  url="MS-PERSIAN-00003-000-00186.jp2"/>
+
+      </surface>
+      <surface xml:id="i187" n="92a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00187.jp2"/>
+
+      </surface>
+      <surface xml:id="i188" n="92b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3507px"
+                  url="MS-PERSIAN-00003-000-00188.jp2"/>
+
+      </surface>
+      <surface xml:id="i189" n="93a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00189.jp2"/>
+
+      </surface>
+      <surface xml:id="i190" n="93b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3507px"
+                  url="MS-PERSIAN-00003-000-00190.jp2"/>
+
+      </surface>
+      <surface xml:id="i191" n="94a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00191.jp2"/>
+
+      </surface>
+      <surface xml:id="i192" n="94b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3507px"
+                  url="MS-PERSIAN-00003-000-00192.jp2"/>
+
+      </surface>
+      <surface xml:id="i193" n="95a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00193.jp2"/>
+
+      </surface>
+      <surface xml:id="i194" n="95b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3534px"
+                  url="MS-PERSIAN-00003-000-00194.jp2"/>
+
+      </surface>
+      <surface xml:id="i195" n="96a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00195.jp2"/>
+
+      </surface>
+      <surface xml:id="i196" n="96b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3534px"
+                  url="MS-PERSIAN-00003-000-00196.jp2"/>
+
+      </surface>
+      <surface xml:id="i197" n="97a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00197.jp2"/>
+
+      </surface>
+      <surface xml:id="i198" n="97b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3534px"
+                  url="MS-PERSIAN-00003-000-00198.jp2"/>
+
+      </surface>
+      <surface xml:id="i199" n="98a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00199.jp2"/>
+
+      </surface>
+      <surface xml:id="i200" n="98b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3534px"
+                  url="MS-PERSIAN-00003-000-00200.jp2"/>
+
+      </surface>
+      <surface xml:id="i201" n="99a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00201.jp2"/>
+
+      </surface>
+      <surface xml:id="i202" n="99b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3534px"
+                  url="MS-PERSIAN-00003-000-00202.jp2"/>
+
+      </surface>
+      <surface xml:id="i203" n="100a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00203.jp2"/>
+
+      </surface>
+      <surface xml:id="i204" n="100b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3534px"
+                  url="MS-PERSIAN-00003-000-00204.jp2"/>
+
+      </surface>
+      <surface xml:id="i205" n="101a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00205.jp2"/>
+
+      </surface>
+      <surface xml:id="i206" n="101b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3534px"
+                  url="MS-PERSIAN-00003-000-00206.jp2"/>
+
+      </surface>
+      <surface xml:id="i207" n="102a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00207.jp2"/>
+
+      </surface>
+      <surface xml:id="i208" n="102b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3534px"
+                  url="MS-PERSIAN-00003-000-00208.jp2"/>
+
+      </surface>
+      <surface xml:id="i209" n="103a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00209.jp2"/>
+
+      </surface>
+      <surface xml:id="i210" n="103b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3534px"
+                  url="MS-PERSIAN-00003-000-00210.jp2"/>
+
+      </surface>
+      <surface xml:id="i211" n="104a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00211.jp2"/>
+
+      </surface>
+      <surface xml:id="i212" n="104b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3534px"
+                  url="MS-PERSIAN-00003-000-00212.jp2"/>
+
+      </surface>
+      <surface xml:id="i213" n="105a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00213.jp2"/>
+
+      </surface>
+      <surface xml:id="i214" n="105b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3534px"
+                  url="MS-PERSIAN-00003-000-00214.jp2"/>
+
+      </surface>
+      <surface xml:id="i215" n="106a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00215.jp2"/>
+
+      </surface>
+      <surface xml:id="i216" n="106b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00216.jp2"/>
+
+      </surface>
+      <surface xml:id="i217" n="107a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00217.jp2"/>
+
+      </surface>
+      <surface xml:id="i218" n="107b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00218.jp2"/>
+
+      </surface>
+      <surface xml:id="i219" n="108a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00219.jp2"/>
+
+      </surface>
+      <surface xml:id="i220" n="108b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00220.jp2"/>
+
+      </surface>
+      <surface xml:id="i221" n="109a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3519px"
+                  url="MS-PERSIAN-00003-000-00221.jp2"/>
+
+      </surface>
+      <surface xml:id="i222" n="109b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00222.jp2"/>
+
+      </surface>
+      <surface xml:id="i223" n="110a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3532px"
+                  url="MS-PERSIAN-00003-000-00223.jp2"/>
+
+      </surface>
+      <surface xml:id="i224" n="110b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00224.jp2"/>
+
+      </surface>
+      <surface xml:id="i225" n="111a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3532px"
+                  url="MS-PERSIAN-00003-000-00225.jp2"/>
+
+      </surface>
+      <surface xml:id="i226" n="111b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00226.jp2"/>
+
+      </surface>
+      <surface xml:id="i227" n="112a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3532px"
+                  url="MS-PERSIAN-00003-000-00227.jp2"/>
+
+      </surface>
+      <surface xml:id="i228" n="112b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00228.jp2"/>
+
+      </surface>
+      <surface xml:id="i229" n="113a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3532px"
+                  url="MS-PERSIAN-00003-000-00229.jp2"/>
+
+      </surface>
+      <surface xml:id="i230" n="113b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00230.jp2"/>
+
+      </surface>
+      <surface xml:id="i231" n="114a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3532px"
+                  url="MS-PERSIAN-00003-000-00231.jp2"/>
+
+      </surface>
+      <surface xml:id="i232" n="114b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00232.jp2"/>
+
+      </surface>
+      <surface xml:id="i233" n="115a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3532px"
+                  url="MS-PERSIAN-00003-000-00233.jp2"/>
+
+      </surface>
+      <surface xml:id="i234" n="115b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00234.jp2"/>
+
+      </surface>
+      <surface xml:id="i235" n="116a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3515px"
+                  url="MS-PERSIAN-00003-000-00235.jp2"/>
+
+      </surface>
+      <surface xml:id="i236" n="116b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00236.jp2"/>
+
+      </surface>
+      <surface xml:id="i237" n="117a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3515px"
+                  url="MS-PERSIAN-00003-000-00237.jp2"/>
+
+      </surface>
+      <surface xml:id="i238" n="117b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00238.jp2"/>
+
+      </surface>
+      <surface xml:id="i239" n="118a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00239.jp2"/>
+
+      </surface>
+      <surface xml:id="i240" n="118b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00240.jp2"/>
+
+      </surface>
+      <surface xml:id="i241" n="119a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00241.jp2"/>
+
+      </surface>
+      <surface xml:id="i242" n="119b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00242.jp2"/>
+
+      </surface>
+      <surface xml:id="i243" n="120a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00243.jp2"/>
+
+      </surface>
+      <surface xml:id="i244" n="120b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00244.jp2"/>
+
+      </surface>
+      <surface xml:id="i245" n="121a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00245.jp2"/>
+
+      </surface>
+      <surface xml:id="i246" n="121b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00246.jp2"/>
+
+      </surface>
+      <surface xml:id="i247" n="122a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00247.jp2"/>
+
+      </surface>
+      <surface xml:id="i248" n="122b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3557px"
+                  url="MS-PERSIAN-00003-000-00248.jp2"/>
+
+      </surface>
+      <surface xml:id="i249" n="123a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00249.jp2"/>
+
+      </surface>
+      <surface xml:id="i250" n="123b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3557px"
+                  url="MS-PERSIAN-00003-000-00250.jp2"/>
+
+      </surface>
+      <surface xml:id="i251" n="124a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00251.jp2"/>
+
+      </surface>
+      <surface xml:id="i252" n="124b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00252.jp2"/>
+
+      </surface>
+      <surface xml:id="i253" n="125a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00253.jp2"/>
+
+      </surface>
+      <surface xml:id="i254" n="125b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00254.jp2"/>
+
+      </surface>
+      <surface xml:id="i255" n="126a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00255.jp2"/>
+
+      </surface>
+      <surface xml:id="i256" n="126b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00256.jp2"/>
+
+      </surface>
+      <surface xml:id="i257" n="127a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00257.jp2"/>
+
+      </surface>
+      <surface xml:id="i258" n="127b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00258.jp2"/>
+
+      </surface>
+      <surface xml:id="i259" n="128a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00259.jp2"/>
+
+      </surface>
+      <surface xml:id="i260" n="128b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00260.jp2"/>
+
+      </surface>
+      <surface xml:id="i261" n="129a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00261.jp2"/>
+
+      </surface>
+      <surface xml:id="i262" n="129b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00262.jp2"/>
+
+      </surface>
+      <surface xml:id="i263" n="130a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00263.jp2"/>
+
+      </surface>
+      <surface xml:id="i264" n="130b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00264.jp2"/>
+
+      </surface>
+      <surface xml:id="i265" n="131a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00265.jp2"/>
+
+      </surface>
+      <surface xml:id="i266" n="131b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00266.jp2"/>
+
+      </surface>
+      <surface xml:id="i267" n="132a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00267.jp2"/>
+
+      </surface>
+      <surface xml:id="i268" n="132b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00268.jp2"/>
+
+      </surface>
+      <surface xml:id="i269" n="133a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00269.jp2"/>
+
+      </surface>
+      <surface xml:id="i270" n="133b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00270.jp2"/>
+
+      </surface>
+      <surface xml:id="i271" n="134a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00271.jp2"/>
+
+      </surface>
+      <surface xml:id="i272" n="134b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00272.jp2"/>
+
+      </surface>
+      <surface xml:id="i273" n="135a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3511px"
+                  url="MS-PERSIAN-00003-000-00273.jp2"/>
+
+      </surface>
+      <surface xml:id="i274" n="135b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00274.jp2"/>
+
+      </surface>
+      <surface xml:id="i275" n="136a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3511px"
+                  url="MS-PERSIAN-00003-000-00275.jp2"/>
+
+      </surface>
+      <surface xml:id="i276" n="136b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00276.jp2"/>
+
+      </surface>
+      <surface xml:id="i277" n="137a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00277.jp2"/>
+
+      </surface>
+      <surface xml:id="i278" n="137b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00278.jp2"/>
+
+      </surface>
+      <surface xml:id="i279" n="138a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00279.jp2"/>
+
+      </surface>
+      <surface xml:id="i280" n="138b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00280.jp2"/>
+
+      </surface>
+      <surface xml:id="i281" n="139a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00281.jp2"/>
+
+      </surface>
+      <surface xml:id="i282" n="139b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00282.jp2"/>
+
+      </surface>
+      <surface xml:id="i283" n="140a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00283.jp2"/>
+
+      </surface>
+      <surface xml:id="i284" n="140b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3588px"
+                  url="MS-PERSIAN-00003-000-00284.jp2"/>
+
+      </surface>
+      <surface xml:id="i285" n="141a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00285.jp2"/>
+
+      </surface>
+      <surface xml:id="i286" n="141b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00286.jp2"/>
+
+      </surface>
+      <surface xml:id="i287" n="142a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00287.jp2"/>
+
+      </surface>
+      <surface xml:id="i288" n="142b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00288.jp2"/>
+
+      </surface>
+      <surface xml:id="i289" n="143a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3530px"
+                  url="MS-PERSIAN-00003-000-00289.jp2"/>
+
+      </surface>
+      <surface xml:id="i290" n="143b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00290.jp2"/>
+
+      </surface>
+      <surface xml:id="i291" n="144a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3542px"
+                  url="MS-PERSIAN-00003-000-00291.jp2"/>
+
+      </surface>
+      <surface xml:id="i292" n="144b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00292.jp2"/>
+
+      </surface>
+      <surface xml:id="i293" n="145a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3542px"
+                  url="MS-PERSIAN-00003-000-00293.jp2"/>
+
+      </surface>
+      <surface xml:id="i294" n="145b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00294.jp2"/>
+
+      </surface>
+      <surface xml:id="i295" n="146a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3542px"
+                  url="MS-PERSIAN-00003-000-00295.jp2"/>
+
+      </surface>
+      <surface xml:id="i296" n="146b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00296.jp2"/>
+
+      </surface>
+      <surface xml:id="i297" n="147a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3542px"
+                  url="MS-PERSIAN-00003-000-00297.jp2"/>
+
+      </surface>
+      <surface xml:id="i298" n="147b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00298.jp2"/>
+
+      </surface>
+      <surface xml:id="i299" n="148a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3542px"
+                  url="MS-PERSIAN-00003-000-00299.jp2"/>
+
+      </surface>
+      <surface xml:id="i300" n="148b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00300.jp2"/>
+
+      </surface>
+      <surface xml:id="i301" n="149a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3542px"
+                  url="MS-PERSIAN-00003-000-00301.jp2"/>
+
+      </surface>
+      <surface xml:id="i302" n="149b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00302.jp2"/>
+
+      </surface>
+      <surface xml:id="i303" n="150a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3542px"
+                  url="MS-PERSIAN-00003-000-00303.jp2"/>
+
+      </surface>
+      <surface xml:id="i304" n="150b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00304.jp2"/>
+
+      </surface>
+      <surface xml:id="i305" n="151a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00305.jp2"/>
+
+      </surface>
+      <surface xml:id="i306" n="151b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00306.jp2"/>
+
+      </surface>
+      <surface xml:id="i307" n="152a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00307.jp2"/>
+
+      </surface>
+      <surface xml:id="i308" n="152b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00308.jp2"/>
+
+      </surface>
+      <surface xml:id="i309" n="153a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3544px"
+                  url="MS-PERSIAN-00003-000-00309.jp2"/>
+
+      </surface>
+      <surface xml:id="i310" n="153b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00310.jp2"/>
+
+      </surface>
+      <surface xml:id="i311" n="154a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00311.jp2"/>
+
+      </surface>
+      <surface xml:id="i312" n="154b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00312.jp2"/>
+
+      </surface>
+      <surface xml:id="i313" n="155a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00313.jp2"/>
+
+      </surface>
+      <surface xml:id="i314" n="155b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00314.jp2"/>
+
+      </surface>
+      <surface xml:id="i315" n="156a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00315.jp2"/>
+
+      </surface>
+      <surface xml:id="i316" n="156b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00316.jp2"/>
+
+      </surface>
+      <surface xml:id="i317" n="157a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00317.jp2"/>
+
+      </surface>
+      <surface xml:id="i318" n="157b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00318.jp2"/>
+
+      </surface>
+      <surface xml:id="i319" n="158a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00319.jp2"/>
+
+      </surface>
+      <surface xml:id="i320" n="158b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00320.jp2"/>
+
+      </surface>
+      <surface xml:id="i321" n="159a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00321.jp2"/>
+
+      </surface>
+      <surface xml:id="i322" n="159b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00322.jp2"/>
+
+      </surface>
+      <surface xml:id="i323" n="160a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00323.jp2"/>
+
+      </surface>
+      <surface xml:id="i324" n="160b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00324.jp2"/>
+
+      </surface>
+      <surface xml:id="i325" n="161a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00325.jp2"/>
+
+      </surface>
+      <surface xml:id="i326" n="161b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00326.jp2"/>
+
+      </surface>
+      <surface xml:id="i327" n="162a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00327.jp2"/>
+
+      </surface>
+      <surface xml:id="i328" n="162b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3570px"
+                  url="MS-PERSIAN-00003-000-00328.jp2"/>
+
+      </surface>
+      <surface xml:id="i329" n="163a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00329.jp2"/>
+
+      </surface>
+      <surface xml:id="i330" n="163b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00330.jp2"/>
+
+      </surface>
+      <surface xml:id="i331" n="164a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00331.jp2"/>
+
+      </surface>
+      <surface xml:id="i332" n="164b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00332.jp2"/>
+
+      </surface>
+      <surface xml:id="i333" n="165a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3564px"
+                  url="MS-PERSIAN-00003-000-00333.jp2"/>
+
+      </surface>
+      <surface xml:id="i334" n="165b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00334.jp2"/>
+
+      </surface>
+      <surface xml:id="i335" n="166a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3558px"
+                  url="MS-PERSIAN-00003-000-00335.jp2"/>
+
+      </surface>
+      <surface xml:id="i336" n="166b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00336.jp2"/>
+
+      </surface>
+      <surface xml:id="i337" n="167a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3558px"
+                  url="MS-PERSIAN-00003-000-00337.jp2"/>
+
+      </surface>
+      <surface xml:id="i338" n="167b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00338.jp2"/>
+
+      </surface>
+      <surface xml:id="i339" n="168a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3558px"
+                  url="MS-PERSIAN-00003-000-00339.jp2"/>
+
+      </surface>
+      <surface xml:id="i340" n="168b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00340.jp2"/>
+
+      </surface>
+      <surface xml:id="i341" n="169a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3558px"
+                  url="MS-PERSIAN-00003-000-00341.jp2"/>
+
+      </surface>
+      <surface xml:id="i342" n="169b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00342.jp2"/>
+
+      </surface>
+      <surface xml:id="i343" n="170a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3558px"
+                  url="MS-PERSIAN-00003-000-00343.jp2"/>
+
+      </surface>
+      <surface xml:id="i344" n="170b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00344.jp2"/>
+
+      </surface>
+      <surface xml:id="i345" n="171a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3558px"
+                  url="MS-PERSIAN-00003-000-00345.jp2"/>
+
+      </surface>
+      <surface xml:id="i346" n="171b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00346.jp2"/>
+
+      </surface>
+      <surface xml:id="i347" n="172a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00347.jp2"/>
+
+      </surface>
+      <surface xml:id="i348" n="172b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00348.jp2"/>
+
+      </surface>
+      <surface xml:id="i349" n="173a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00349.jp2"/>
+
+      </surface>
+      <surface xml:id="i350" n="173b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00350.jp2"/>
+
+      </surface>
+      <surface xml:id="i351" n="174a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00351.jp2"/>
+
+      </surface>
+      <surface xml:id="i352" n="174b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00352.jp2"/>
+
+      </surface>
+      <surface xml:id="i353" n="175a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00353.jp2"/>
+
+      </surface>
+      <surface xml:id="i354" n="175b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00354.jp2"/>
+
+      </surface>
+      <surface xml:id="i355" n="176a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00355.jp2"/>
+
+      </surface>
+      <surface xml:id="i356" n="176b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00356.jp2"/>
+
+      </surface>
+      <surface xml:id="i357" n="177a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00357.jp2"/>
+
+      </surface>
+      <surface xml:id="i358" n="177b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00358.jp2"/>
+
+      </surface>
+      <surface xml:id="i359" n="178a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00359.jp2"/>
+
+      </surface>
+      <surface xml:id="i360" n="178b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00360.jp2"/>
+
+      </surface>
+      <surface xml:id="i361" n="179a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00361.jp2"/>
+
+      </surface>
+      <surface xml:id="i362" n="179b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00362.jp2"/>
+
+      </surface>
+      <surface xml:id="i363" n="180a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00363.jp2"/>
+
+      </surface>
+      <surface xml:id="i364" n="180b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00364.jp2"/>
+
+      </surface>
+      <surface xml:id="i365" n="181a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00365.jp2"/>
+
+      </surface>
+      <surface xml:id="i366" n="181b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00366.jp2"/>
+
+      </surface>
+      <surface xml:id="i367" n="182a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00367.jp2"/>
+
+      </surface>
+      <surface xml:id="i368" n="182b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00368.jp2"/>
+
+      </surface>
+      <surface xml:id="i369" n="183a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3535px"
+                  url="MS-PERSIAN-00003-000-00369.jp2"/>
+
+      </surface>
+      <surface xml:id="i370" n="183b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00370.jp2"/>
+
+      </surface>
+      <surface xml:id="i371" n="184a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3553px"
+                  url="MS-PERSIAN-00003-000-00371.jp2"/>
+
+      </surface>
+      <surface xml:id="i372" n="184b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00372.jp2"/>
+
+      </surface>
+      <surface xml:id="i373" n="185a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00373.jp2"/>
+
+      </surface>
+      <surface xml:id="i374" n="185b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00374.jp2"/>
+
+      </surface>
+      <surface xml:id="i375" n="186a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00375.jp2"/>
+
+      </surface>
+      <surface xml:id="i376" n="186b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00376.jp2"/>
+
+      </surface>
+      <surface xml:id="i377" n="187a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00377.jp2"/>
+
+      </surface>
+      <surface xml:id="i378" n="187b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00378.jp2"/>
+
+      </surface>
+      <surface xml:id="i379" n="188a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00379.jp2"/>
+
+      </surface>
+      <surface xml:id="i380" n="188b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00380.jp2"/>
+
+      </surface>
+      <surface xml:id="i381" n="189a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00381.jp2"/>
+
+      </surface>
+      <surface xml:id="i382" n="189b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00382.jp2"/>
+
+      </surface>
+      <surface xml:id="i383" n="190a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00383.jp2"/>
+
+      </surface>
+      <surface xml:id="i384" n="190b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00384.jp2"/>
+
+      </surface>
+      <surface xml:id="i385" n="191a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00385.jp2"/>
+
+      </surface>
+      <surface xml:id="i386" n="191b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00386.jp2"/>
+
+      </surface>
+      <surface xml:id="i387" n="192a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00387.jp2"/>
+
+      </surface>
+      <surface xml:id="i388" n="192b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00388.jp2"/>
+
+      </surface>
+      <surface xml:id="i389" n="193a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00389.jp2"/>
+
+      </surface>
+      <surface xml:id="i390" n="193b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00390.jp2"/>
+
+      </surface>
+      <surface xml:id="i391" n="194a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3569px"
+                  url="MS-PERSIAN-00003-000-00391.jp2"/>
+
+      </surface>
+      <surface xml:id="i392" n="194b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00392.jp2"/>
+
+      </surface>
+      <surface xml:id="i393" n="195a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3569px"
+                  url="MS-PERSIAN-00003-000-00393.jp2"/>
+
+      </surface>
+      <surface xml:id="i394" n="195b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00394.jp2"/>
+
+      </surface>
+      <surface xml:id="i395" n="196a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3569px"
+                  url="MS-PERSIAN-00003-000-00395.jp2"/>
+
+      </surface>
+      <surface xml:id="i396" n="196b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00396.jp2"/>
+
+      </surface>
+      <surface xml:id="i397" n="197a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3569px"
+                  url="MS-PERSIAN-00003-000-00397.jp2"/>
+
+      </surface>
+      <surface xml:id="i398" n="197b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00398.jp2"/>
+
+      </surface>
+      <surface xml:id="i399" n="198a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3569px"
+                  url="MS-PERSIAN-00003-000-00399.jp2"/>
+
+      </surface>
+      <surface xml:id="i400" n="198b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00400.jp2"/>
+
+      </surface>
+      <surface xml:id="i401" n="199a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3569px"
+                  url="MS-PERSIAN-00003-000-00401.jp2"/>
+
+      </surface>
+      <surface xml:id="i402" n="199b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00402.jp2"/>
+
+      </surface>
+      <surface xml:id="i403" n="200a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3569px"
+                  url="MS-PERSIAN-00003-000-00403.jp2"/>
+
+      </surface>
+      <surface xml:id="i404" n="200b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00404.jp2"/>
+
+      </surface>
+      <surface xml:id="i405" n="201a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3569px"
+                  url="MS-PERSIAN-00003-000-00405.jp2"/>
+
+      </surface>
+      <surface xml:id="i406" n="201b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00406.jp2"/>
+
+      </surface>
+      <surface xml:id="i407" n="202a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3569px"
+                  url="MS-PERSIAN-00003-000-00407.jp2"/>
+
+      </surface>
+      <surface xml:id="i408" n="202b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00408.jp2"/>
+
+      </surface>
+      <surface xml:id="i409" n="203a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00409.jp2"/>
+
+      </surface>
+      <surface xml:id="i410" n="203b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3568px"
+                  url="MS-PERSIAN-00003-000-00410.jp2"/>
+
+      </surface>
+      <surface xml:id="i411" n="204a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00411.jp2"/>
+
+      </surface>
+      <surface xml:id="i412" n="204b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3553px"
+                  url="MS-PERSIAN-00003-000-00412.jp2"/>
+
+      </surface>
+      <surface xml:id="i413" n="205a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00413.jp2"/>
+
+      </surface>
+      <surface xml:id="i414" n="205b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3559px"
+                  url="MS-PERSIAN-00003-000-00414.jp2"/>
+
+      </surface>
+      <surface xml:id="i415" n="206a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00415.jp2"/>
+
+      </surface>
+      <surface xml:id="i416" n="206b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3559px"
+                  url="MS-PERSIAN-00003-000-00416.jp2"/>
+
+      </surface>
+      <surface xml:id="i417" n="207a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00417.jp2"/>
+
+      </surface>
+      <surface xml:id="i418" n="207b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00418.jp2"/>
+
+      </surface>
+      <surface xml:id="i419" n="208a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00419.jp2"/>
+
+      </surface>
+      <surface xml:id="i420" n="208b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00420.jp2"/>
+
+      </surface>
+      <surface xml:id="i421" n="209a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3561px"
+                  url="MS-PERSIAN-00003-000-00421.jp2"/>
+
+      </surface>
+      <surface xml:id="i422" n="209b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00422.jp2"/>
+
+      </surface>
+      <surface xml:id="i423" n="210a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3538px"
+                  url="MS-PERSIAN-00003-000-00423.jp2"/>
+
+      </surface>
+      <surface xml:id="i424" n="210b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00424.jp2"/>
+
+      </surface>
+      <surface xml:id="i425" n="211a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00425.jp2"/>
+
+      </surface>
+      <surface xml:id="i426" n="211b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00426.jp2"/>
+
+      </surface>
+      <surface xml:id="i427" n="212a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00427.jp2"/>
+
+      </surface>
+      <surface xml:id="i428" n="212b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00428.jp2"/>
+
+      </surface>
+      <surface xml:id="i429" n="213a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00429.jp2"/>
+
+      </surface>
+      <surface xml:id="i430" n="213b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00430.jp2"/>
+
+      </surface>
+      <surface xml:id="i431" n="214a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00431.jp2"/>
+
+      </surface>
+      <surface xml:id="i432" n="214b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00432.jp2"/>
+
+      </surface>
+      <surface xml:id="i433" n="215a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00433.jp2"/>
+
+      </surface>
+      <surface xml:id="i434" n="215b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00434.jp2"/>
+
+      </surface>
+      <surface xml:id="i435" n="216a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00435.jp2"/>
+
+      </surface>
+      <surface xml:id="i436" n="216b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00436.jp2"/>
+
+      </surface>
+      <surface xml:id="i437" n="217a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00437.jp2"/>
+
+      </surface>
+      <surface xml:id="i438" n="217b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00438.jp2"/>
+
+      </surface>
+      <surface xml:id="i439" n="218a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00439.jp2"/>
+
+      </surface>
+      <surface xml:id="i440" n="218b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00440.jp2"/>
+
+      </surface>
+      <surface xml:id="i441" n="219a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00441.jp2"/>
+
+      </surface>
+      <surface xml:id="i442" n="219b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00442.jp2"/>
+
+      </surface>
+      <surface xml:id="i443" n="220a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00443.jp2"/>
+
+      </surface>
+      <surface xml:id="i444" n="220b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3543px"
+                  url="MS-PERSIAN-00003-000-00444.jp2"/>
+
+      </surface>
+      <surface xml:id="i445" n="221a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00445.jp2"/>
+
+      </surface>
+      <surface xml:id="i446" n="221b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00446.jp2"/>
+
+      </surface>
+      <surface xml:id="i447" n="222a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00447.jp2"/>
+
+      </surface>
+      <surface xml:id="i448" n="222b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00448.jp2"/>
+
+      </surface>
+      <surface xml:id="i449" n="223a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00449.jp2"/>
+
+      </surface>
+      <surface xml:id="i450" n="223b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00450.jp2"/>
+
+      </surface>
+      <surface xml:id="i451" n="224a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00451.jp2"/>
+
+      </surface>
+      <surface xml:id="i452" n="224b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00452.jp2"/>
+
+      </surface>
+      <surface xml:id="i453" n="225a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3540px"
+                  url="MS-PERSIAN-00003-000-00453.jp2"/>
+
+      </surface>
+      <surface xml:id="i454" n="225b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00454.jp2"/>
+
+      </surface>
+      <surface xml:id="i455" n="226a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00455.jp2"/>
+
+      </surface>
+      <surface xml:id="i456" n="226b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00456.jp2"/>
+
+      </surface>
+      <surface xml:id="i457" n="227a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00457.jp2"/>
+
+      </surface>
+      <surface xml:id="i458" n="227b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00458.jp2"/>
+
+      </surface>
+      <surface xml:id="i459" n="228a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00459.jp2"/>
+
+      </surface>
+      <surface xml:id="i460" n="228b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00460.jp2"/>
+
+      </surface>
+      <surface xml:id="i461" n="229a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00461.jp2"/>
+
+      </surface>
+      <surface xml:id="i462" n="229b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00462.jp2"/>
+
+      </surface>
+      <surface xml:id="i463" n="230a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00463.jp2"/>
+
+      </surface>
+      <surface xml:id="i464" n="230b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00464.jp2"/>
+
+      </surface>
+      <surface xml:id="i465" n="231a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00465.jp2"/>
+
+      </surface>
+      <surface xml:id="i466" n="231b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00466.jp2"/>
+
+      </surface>
+      <surface xml:id="i467" n="232a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00467.jp2"/>
+
+      </surface>
+      <surface xml:id="i468" n="232b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00468.jp2"/>
+
+      </surface>
+      <surface xml:id="i469" n="233a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00469.jp2"/>
+
+      </surface>
+      <surface xml:id="i470" n="233b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00470.jp2"/>
+
+      </surface>
+      <surface xml:id="i471" n="234a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00471.jp2"/>
+
+      </surface>
+      <surface xml:id="i472" n="234b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00472.jp2"/>
+
+      </surface>
+      <surface xml:id="i473" n="235a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00473.jp2"/>
+
+      </surface>
+      <surface xml:id="i474" n="235b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00474.jp2"/>
+
+      </surface>
+      <surface xml:id="i475" n="236a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00475.jp2"/>
+
+      </surface>
+      <surface xml:id="i476" n="236b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00476.jp2"/>
+
+      </surface>
+      <surface xml:id="i477" n="237a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00477.jp2"/>
+
+      </surface>
+      <surface xml:id="i478" n="237b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00478.jp2"/>
+
+      </surface>
+      <surface xml:id="i479" n="238a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00479.jp2"/>
+
+      </surface>
+      <surface xml:id="i480" n="238b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00480.jp2"/>
+
+      </surface>
+      <surface xml:id="i481" n="239a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3528px"
+                  url="MS-PERSIAN-00003-000-00481.jp2"/>
+
+      </surface>
+      <surface xml:id="i482" n="239b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00482.jp2"/>
+
+      </surface>
+      <surface xml:id="i483" n="240a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3462px"
+                  url="MS-PERSIAN-00003-000-00483.jp2"/>
+
+      </surface>
+      <surface xml:id="i484" n="240b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00484.jp2"/>
+
+      </surface>
+      <surface xml:id="i485" n="241a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3462px"
+                  url="MS-PERSIAN-00003-000-00485.jp2"/>
+
+      </surface>
+      <surface xml:id="i486" n="241b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00486.jp2"/>
+
+      </surface>
+      <surface xml:id="i487" n="242a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3462px"
+                  url="MS-PERSIAN-00003-000-00487.jp2"/>
+
+      </surface>
+      <surface xml:id="i488" n="242b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00488.jp2"/>
+
+      </surface>
+      <surface xml:id="i489" n="243a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3462px"
+                  url="MS-PERSIAN-00003-000-00489.jp2"/>
+
+      </surface>
+      <surface xml:id="i490" n="243b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00490.jp2"/>
+
+      </surface>
+      <surface xml:id="i491" n="244a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3462px"
+                  url="MS-PERSIAN-00003-000-00491.jp2"/>
+
+      </surface>
+      <surface xml:id="i492" n="244b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00492.jp2"/>
+
+      </surface>
+      <surface xml:id="i493" n="245a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3462px"
+                  url="MS-PERSIAN-00003-000-00493.jp2"/>
+
+      </surface>
+      <surface xml:id="i494" n="245b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00494.jp2"/>
+
+      </surface>
+      <surface xml:id="i495" n="246a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3462px"
+                  url="MS-PERSIAN-00003-000-00495.jp2"/>
+
+      </surface>
+      <surface xml:id="i496" n="246b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00496.jp2"/>
+
+      </surface>
+      <surface xml:id="i497" n="247a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3462px"
+                  url="MS-PERSIAN-00003-000-00497.jp2"/>
+
+      </surface>
+      <surface xml:id="i498" n="247b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00498.jp2"/>
+
+      </surface>
+      <surface xml:id="i499" n="248a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00499.jp2"/>
+
+      </surface>
+      <surface xml:id="i500" n="248b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00500.jp2"/>
+
+      </surface>
+      <surface xml:id="i501" n="249a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00501.jp2"/>
+
+      </surface>
+      <surface xml:id="i502" n="249b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00502.jp2"/>
+
+      </surface>
+      <surface xml:id="i503" n="250a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00503.jp2"/>
+
+      </surface>
+      <surface xml:id="i504" n="250b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00504.jp2"/>
+
+      </surface>
+      <surface xml:id="i505" n="251a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00505.jp2"/>
+
+      </surface>
+      <surface xml:id="i506" n="251b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00506.jp2"/>
+
+      </surface>
+      <surface xml:id="i507" n="252a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00507.jp2"/>
+
+      </surface>
+      <surface xml:id="i508" n="252b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00508.jp2"/>
+
+      </surface>
+      <surface xml:id="i509" n="253a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00509.jp2"/>
+
+      </surface>
+      <surface xml:id="i510" n="253b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00510.jp2"/>
+
+      </surface>
+      <surface xml:id="i511" n="254a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00511.jp2"/>
+
+      </surface>
+      <surface xml:id="i512" n="254b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00512.jp2"/>
+
+      </surface>
+      <surface xml:id="i513" n="255a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00513.jp2"/>
+
+      </surface>
+      <surface xml:id="i514" n="255b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00514.jp2"/>
+
+      </surface>
+      <surface xml:id="i515" n="256a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00515.jp2"/>
+
+      </surface>
+      <surface xml:id="i516" n="256b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00516.jp2"/>
+
+      </surface>
+      <surface xml:id="i517" n="257a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00517.jp2"/>
+
+      </surface>
+      <surface xml:id="i518" n="257b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00518.jp2"/>
+
+      </surface>
+      <surface xml:id="i519" n="258a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00519.jp2"/>
+
+      </surface>
+      <surface xml:id="i520" n="258b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00520.jp2"/>
+
+      </surface>
+      <surface xml:id="i521" n="259a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00521.jp2"/>
+
+      </surface>
+      <surface xml:id="i522" n="259b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00522.jp2"/>
+
+      </surface>
+      <surface xml:id="i523" n="260a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3488px"
+                  url="MS-PERSIAN-00003-000-00523.jp2"/>
+
+      </surface>
+      <surface xml:id="i524" n="261a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00524.jp2"/>
+
+      </surface>
+      <surface xml:id="i525" n="261b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3522px"
+                  url="MS-PERSIAN-00003-000-00525.jp2"/>
+
+      </surface>
+      <surface xml:id="i526" n="262a">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00526.jp2"/>
+
+      </surface>
+      <surface xml:id="i527" n="262b">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3350px"
+                  url="MS-PERSIAN-00003-000-00527.jp2"/>
+
+      </surface>
+      <surface xml:id="i528" n="Endleaf ">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3529px"
+                  url="MS-PERSIAN-00003-000-00528.jp2"/>
+
+      </surface>
+      <surface xml:id="i529" n="Inside back cover">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3562px"
+                  url="MS-PERSIAN-00003-000-00529.jp2"/>
+
+      </surface>
+      <surface xml:id="i530" n="Outside back cover">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="3627px"
+                  url="MS-PERSIAN-00003-000-00530.jp2"/>
+
+      </surface>
+      <surface xml:id="i531" n="Spine">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="859px"
+                  url="MS-PERSIAN-00003-000-00531.jp2"/>
+
+      </surface>
+      <surface xml:id="i532" n="Foredge">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="6400px"
+                  width="864px"
+                  url="MS-PERSIAN-00003-000-00532.jp2"/>
+
+      </surface>
+      <surface xml:id="i533" n="Head">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="1548px"
+                  width="6400px"
+                  url="MS-PERSIAN-00003-000-00533.jp2"/>
+      </surface>
+      <surface xml:id="i534" n="Tail">
+         <graphic decls="#downloadImageRights #download"
+                  rend="portrait"
+                  height="1548px"
+                  width="6400px"
+                  url="MS-PERSIAN-00003-000-00534.jp2"/>
+      </surface>
+   </facsimile>
+   <text>
+      <body>
+         <div>
+            <pb n="Outside front cover" xml:id="pb-Outsidefrontcover" facs="#i1"/>
+            <pb n="Inside front cover" xml:id="pb-Insidefrontcover" facs="#i2"/>
+            <pb n="Flyleaf i a" xml:id="pb-Flyleafia" facs="#i3"/>
+            <pb n="Flyleaf i b" xml:id="pb-Flyleafib" facs="#i4"/>
+            <pb n="1a" xml:id="pb-1a" facs="#i5"/>
+            <pb n="1b" xml:id="pb-1b" facs="#i6"/>
+            <pb n="2a" xml:id="pb-2a" facs="#i7"/>
+            <pb n="2b" xml:id="pb-2b" facs="#i8"/>
+            <pb n="3a" xml:id="pb-3a" facs="#i9"/>
+            <pb n="3b" xml:id="pb-3b" facs="#i10"/>
+            <pb n="4a" xml:id="pb-4a" facs="#i11"/>
+            <pb n="4b" xml:id="pb-4b" facs="#i12"/>
+            <pb n="5a" xml:id="pb-5a" facs="#i13"/>
+            <pb n="5b" xml:id="pb-5b" facs="#i14"/>
+            <pb n="6a" xml:id="pb-6a" facs="#i15"/>
+            <pb n="6b" xml:id="pb-6b" facs="#i16"/>
+            <pb n="7a" xml:id="pb-7a" facs="#i17"/>
+            <pb n="7b" xml:id="pb-7b" facs="#i18"/>
+            <pb n="8a" xml:id="pb-8a" facs="#i19"/>
+            <pb n="8b" xml:id="pb-8b" facs="#i20"/>
+            <pb n="9a" xml:id="pb-9a" facs="#i21"/>
+            <pb n="9b" xml:id="pb-9b" facs="#i22"/>
+            <pb n="10a" xml:id="pb-10a" facs="#i23"/>
+            <pb n="10b" xml:id="pb-10b" facs="#i24"/>
+            <pb n="11a" xml:id="pb-11a" facs="#i25"/>
+            <pb n="11b" xml:id="pb-11b" facs="#i26"/>
+            <pb n="12a" xml:id="pb-12a" facs="#i27"/>
+            <pb n="12b" xml:id="pb-12b" facs="#i28"/>
+            <pb n="13a" xml:id="pb-13a" facs="#i29"/>
+            <pb n="13b" xml:id="pb-13b" facs="#i30"/>
+            <pb n="14a" xml:id="pb-14a" facs="#i31"/>
+            <pb n="14b" xml:id="pb-14b" facs="#i32"/>
+            <pb n="15a" xml:id="pb-15a" facs="#i33"/>
+            <pb n="15b" xml:id="pb-15b" facs="#i34"/>
+            <pb n="16a" xml:id="pb-16a" facs="#i35"/>
+            <pb n="16b" xml:id="pb-16b" facs="#i36"/>
+            <pb n="17a" xml:id="pb-17a" facs="#i37"/>
+            <pb n="17b" xml:id="pb-17b" facs="#i38"/>
+            <pb n="18a" xml:id="pb-18a" facs="#i39"/>
+            <pb n="18b" xml:id="pb-18b" facs="#i40"/>
+            <pb n="19a" xml:id="pb-19a" facs="#i41"/>
+            <pb n="19b" xml:id="pb-19b" facs="#i42"/>
+            <pb n="20a" xml:id="pb-20a" facs="#i43"/>
+            <pb n="20b" xml:id="pb-20b" facs="#i44"/>
+            <pb n="21a" xml:id="pb-21a" facs="#i45"/>
+            <pb n="21b" xml:id="pb-21b" facs="#i46"/>
+            <pb n="22a" xml:id="pb-22a" facs="#i47"/>
+            <pb n="22b" xml:id="pb-22b" facs="#i48"/>
+            <pb n="23a" xml:id="pb-23a" facs="#i49"/>
+            <pb n="23b" xml:id="pb-23b" facs="#i50"/>
+            <pb n="24a" xml:id="pb-24a" facs="#i51"/>
+            <pb n="24b" xml:id="pb-24b" facs="#i52"/>
+            <pb n="25a" xml:id="pb-25a" facs="#i53"/>
+            <pb n="25b" xml:id="pb-25b" facs="#i54"/>
+            <pb n="26a" xml:id="pb-26a" facs="#i55"/>
+            <pb n="26b" xml:id="pb-26b" facs="#i56"/>
+            <pb n="27a" xml:id="pb-27a" facs="#i57"/>
+            <pb n="27b" xml:id="pb-27b" facs="#i58"/>
+            <pb n="28a" xml:id="pb-28a" facs="#i59"/>
+            <pb n="28b" xml:id="pb-28b" facs="#i60"/>
+            <pb n="29a" xml:id="pb-29a" facs="#i61"/>
+            <pb n="29b" xml:id="pb-29b" facs="#i62"/>
+            <pb n="30a" xml:id="pb-30a" facs="#i63"/>
+            <pb n="30b" xml:id="pb-30b" facs="#i64"/>
+            <pb n="31a" xml:id="pb-31a" facs="#i65"/>
+            <pb n="31b" xml:id="pb-31b" facs="#i66"/>
+            <pb n="32a" xml:id="pb-32a" facs="#i67"/>
+            <pb n="32b" xml:id="pb-32b" facs="#i68"/>
+            <pb n="33a" xml:id="pb-33a" facs="#i69"/>
+            <pb n="33b" xml:id="pb-33b" facs="#i70"/>
+            <pb n="34a" xml:id="pb-34a" facs="#i71"/>
+            <pb n="34b" xml:id="pb-34b" facs="#i72"/>
+            <pb n="35a" xml:id="pb-35a" facs="#i73"/>
+            <pb n="35b" xml:id="pb-35b" facs="#i74"/>
+            <pb n="36a" xml:id="pb-36a" facs="#i75"/>
+            <pb n="36b" xml:id="pb-36b" facs="#i76"/>
+            <pb n="37a" xml:id="pb-37a" facs="#i77"/>
+            <pb n="37b" xml:id="pb-37b" facs="#i78"/>
+            <pb n="38a" xml:id="pb-38a" facs="#i79"/>
+            <pb n="38b" xml:id="pb-38b" facs="#i80"/>
+            <pb n="39a" xml:id="pb-39a" facs="#i81"/>
+            <pb n="39b" xml:id="pb-39b" facs="#i82"/>
+            <pb n="40a" xml:id="pb-40a" facs="#i83"/>
+            <pb n="40b" xml:id="pb-40b" facs="#i84"/>
+            <pb n="41a" xml:id="pb-41a" facs="#i85"/>
+            <pb n="41b" xml:id="pb-41b" facs="#i86"/>
+            <pb n="42a" xml:id="pb-42a" facs="#i87"/>
+            <pb n="42b" xml:id="pb-42b" facs="#i88"/>
+            <pb n="43a" xml:id="pb-43a" facs="#i89"/>
+            <pb n="43b" xml:id="pb-43b" facs="#i90"/>
+            <pb n="44a" xml:id="pb-44a" facs="#i91"/>
+            <pb n="44b" xml:id="pb-44b" facs="#i92"/>
+            <pb n="45a" xml:id="pb-45a" facs="#i93"/>
+            <pb n="45b" xml:id="pb-45b" facs="#i94"/>
+            <pb n="46a" xml:id="pb-46a" facs="#i95"/>
+            <pb n="46b" xml:id="pb-46b" facs="#i96"/>
+            <pb n="47a" xml:id="pb-47a" facs="#i97"/>
+            <pb n="47b" xml:id="pb-47b" facs="#i98"/>
+            <pb n="48a" xml:id="pb-48a" facs="#i99"/>
+            <pb n="48b" xml:id="pb-48b" facs="#i100"/>
+            <pb n="49a" xml:id="pb-49a" facs="#i101"/>
+            <pb n="49b" xml:id="pb-49b" facs="#i102"/>
+            <pb n="50a" xml:id="pb-50a" facs="#i103"/>
+            <pb n="50b" xml:id="pb-50b" facs="#i104"/>
+            <pb n="51a" xml:id="pb-51a" facs="#i105"/>
+            <pb n="51b" xml:id="pb-51b" facs="#i106"/>
+            <pb n="52a" xml:id="pb-52a" facs="#i107"/>
+            <pb n="52b" xml:id="pb-52b" facs="#i108"/>
+            <pb n="53a" xml:id="pb-53a" facs="#i109"/>
+            <pb n="53b" xml:id="pb-53b" facs="#i110"/>
+            <pb n="54a" xml:id="pb-54a" facs="#i111"/>
+            <pb n="54b" xml:id="pb-54b" facs="#i112"/>
+            <pb n="55a" xml:id="pb-55a" facs="#i113"/>
+            <pb n="55b" xml:id="pb-55b" facs="#i114"/>
+            <pb n="56a" xml:id="pb-56a" facs="#i115"/>
+            <pb n="56b" xml:id="pb-56b" facs="#i116"/>
+            <pb n="57a" xml:id="pb-57a" facs="#i117"/>
+            <pb n="57b" xml:id="pb-57b" facs="#i118"/>
+            <pb n="58a" xml:id="pb-58a" facs="#i119"/>
+            <pb n="58b" xml:id="pb-58b" facs="#i120"/>
+            <pb n="59a" xml:id="pb-59a" facs="#i121"/>
+            <pb n="59b" xml:id="pb-59b" facs="#i122"/>
+            <pb n="60a" xml:id="pb-60a" facs="#i123"/>
+            <pb n="60b" xml:id="pb-60b" facs="#i124"/>
+            <pb n="61a" xml:id="pb-61a" facs="#i125"/>
+            <pb n="61b" xml:id="pb-61b" facs="#i126"/>
+            <pb n="62a" xml:id="pb-62a" facs="#i127"/>
+            <pb n="62b" xml:id="pb-62b" facs="#i128"/>
+            <pb n="63a" xml:id="pb-63a" facs="#i129"/>
+            <pb n="63b" xml:id="pb-63b" facs="#i130"/>
+            <pb n="64a" xml:id="pb-64a" facs="#i131"/>
+            <pb n="64b" xml:id="pb-64b" facs="#i132"/>
+            <pb n="65a" xml:id="pb-65a" facs="#i133"/>
+            <pb n="65b" xml:id="pb-65b" facs="#i134"/>
+            <pb n="66a" xml:id="pb-66a" facs="#i135"/>
+            <pb n="66b" xml:id="pb-66b" facs="#i136"/>
+            <pb n="67a" xml:id="pb-67a" facs="#i137"/>
+            <pb n="67b" xml:id="pb-67b" facs="#i138"/>
+            <pb n="68a" xml:id="pb-68a" facs="#i139"/>
+            <pb n="68b" xml:id="pb-68b" facs="#i140"/>
+            <pb n="69a" xml:id="pb-69a" facs="#i141"/>
+            <pb n="69b" xml:id="pb-69b" facs="#i142"/>
+            <pb n="70a" xml:id="pb-70a" facs="#i143"/>
+            <pb n="70b" xml:id="pb-70b" facs="#i144"/>
+            <pb n="71a" xml:id="pb-71a" facs="#i145"/>
+            <pb n="71b" xml:id="pb-71b" facs="#i146"/>
+            <pb n="72a" xml:id="pb-72a" facs="#i147"/>
+            <pb n="72b" xml:id="pb-72b" facs="#i148"/>
+            <pb n="73a" xml:id="pb-73a" facs="#i149"/>
+            <pb n="73b" xml:id="pb-73b" facs="#i150"/>
+            <pb n="74a" xml:id="pb-74a" facs="#i151"/>
+            <pb n="74b" xml:id="pb-74b" facs="#i152"/>
+            <pb n="75a" xml:id="pb-75a" facs="#i153"/>
+            <pb n="75b" xml:id="pb-75b" facs="#i154"/>
+            <pb n="76a" xml:id="pb-76a" facs="#i155"/>
+            <pb n="76b" xml:id="pb-76b" facs="#i156"/>
+            <pb n="77a" xml:id="pb-77a" facs="#i157"/>
+            <pb n="77b" xml:id="pb-77b" facs="#i158"/>
+            <pb n="78a" xml:id="pb-78a" facs="#i159"/>
+            <pb n="78b" xml:id="pb-78b" facs="#i160"/>
+            <pb n="79a" xml:id="pb-79a" facs="#i161"/>
+            <pb n="79b" xml:id="pb-79b" facs="#i162"/>
+            <pb n="80a" xml:id="pb-80a" facs="#i163"/>
+            <pb n="80b" xml:id="pb-80b" facs="#i164"/>
+            <pb n="81a" xml:id="pb-81a" facs="#i165"/>
+            <pb n="81b" xml:id="pb-81b" facs="#i166"/>
+            <pb n="82a" xml:id="pb-82a" facs="#i167"/>
+            <pb n="82b" xml:id="pb-82b" facs="#i168"/>
+            <pb n="83a" xml:id="pb-83a" facs="#i169"/>
+            <pb n="83b" xml:id="pb-83b" facs="#i170"/>
+            <pb n="84a" xml:id="pb-84a" facs="#i171"/>
+            <pb n="84b" xml:id="pb-84b" facs="#i172"/>
+            <pb n="85a" xml:id="pb-85a" facs="#i173"/>
+            <pb n="85b" xml:id="pb-85b" facs="#i174"/>
+            <pb n="86a" xml:id="pb-86a" facs="#i175"/>
+            <pb n="86b" xml:id="pb-86b" facs="#i176"/>
+            <pb n="87a" xml:id="pb-87a" facs="#i177"/>
+            <pb n="87b" xml:id="pb-87b" facs="#i178"/>
+            <pb n="88a" xml:id="pb-88a" facs="#i179"/>
+            <pb n="88b" xml:id="pb-88b" facs="#i180"/>
+            <pb n="89a" xml:id="pb-89a" facs="#i181"/>
+            <pb n="89b" xml:id="pb-89b" facs="#i182"/>
+            <pb n="90a" xml:id="pb-90a" facs="#i183"/>
+            <pb n="90b" xml:id="pb-90b" facs="#i184"/>
+            <pb n="91a" xml:id="pb-91a" facs="#i185"/>
+            <pb n="91b" xml:id="pb-91b" facs="#i186"/>
+            <pb n="92a" xml:id="pb-92a" facs="#i187"/>
+            <pb n="92b" xml:id="pb-92b" facs="#i188"/>
+            <pb n="93a" xml:id="pb-93a" facs="#i189"/>
+            <pb n="93b" xml:id="pb-93b" facs="#i190"/>
+            <pb n="94a" xml:id="pb-94a" facs="#i191"/>
+            <pb n="94b" xml:id="pb-94b" facs="#i192"/>
+            <pb n="95a" xml:id="pb-95a" facs="#i193"/>
+            <pb n="95b" xml:id="pb-95b" facs="#i194"/>
+            <pb n="96a" xml:id="pb-96a" facs="#i195"/>
+            <pb n="96b" xml:id="pb-96b" facs="#i196"/>
+            <pb n="97a" xml:id="pb-97a" facs="#i197"/>
+            <pb n="97b" xml:id="pb-97b" facs="#i198"/>
+            <pb n="98a" xml:id="pb-98a" facs="#i199"/>
+            <pb n="98b" xml:id="pb-98b" facs="#i200"/>
+            <pb n="99a" xml:id="pb-99a" facs="#i201"/>
+            <pb n="99b" xml:id="pb-99b" facs="#i202"/>
+            <pb n="100a" xml:id="pb-100a" facs="#i203"/>
+            <pb n="100b" xml:id="pb-100b" facs="#i204"/>
+            <pb n="101a" xml:id="pb-101a" facs="#i205"/>
+            <pb n="101b" xml:id="pb-101b" facs="#i206"/>
+            <pb n="102a" xml:id="pb-102a" facs="#i207"/>
+            <pb n="102b" xml:id="pb-102b" facs="#i208"/>
+            <pb n="103a" xml:id="pb-103a" facs="#i209"/>
+            <pb n="103b" xml:id="pb-103b" facs="#i210"/>
+            <pb n="104a" xml:id="pb-104a" facs="#i211"/>
+            <pb n="104b" xml:id="pb-104b" facs="#i212"/>
+            <pb n="105a" xml:id="pb-105a" facs="#i213"/>
+            <pb n="105b" xml:id="pb-105b" facs="#i214"/>
+            <pb n="106a" xml:id="pb-106a" facs="#i215"/>
+            <pb n="106b" xml:id="pb-106b" facs="#i216"/>
+            <pb n="107a" xml:id="pb-107a" facs="#i217"/>
+            <pb n="107b" xml:id="pb-107b" facs="#i218"/>
+            <pb n="108a" xml:id="pb-108a" facs="#i219"/>
+            <pb n="108b" xml:id="pb-108b" facs="#i220"/>
+            <pb n="109a" xml:id="pb-109a" facs="#i221"/>
+            <pb n="109b" xml:id="pb-109b" facs="#i222"/>
+            <pb n="110a" xml:id="pb-110a" facs="#i223"/>
+            <pb n="110b" xml:id="pb-110b" facs="#i224"/>
+            <pb n="111a" xml:id="pb-111a" facs="#i225"/>
+            <pb n="111b" xml:id="pb-111b" facs="#i226"/>
+            <pb n="112a" xml:id="pb-112a" facs="#i227"/>
+            <pb n="112b" xml:id="pb-112b" facs="#i228"/>
+            <pb n="113a" xml:id="pb-113a" facs="#i229"/>
+            <pb n="113b" xml:id="pb-113b" facs="#i230"/>
+            <pb n="114a" xml:id="pb-114a" facs="#i231"/>
+            <pb n="114b" xml:id="pb-114b" facs="#i232"/>
+            <pb n="115a" xml:id="pb-115a" facs="#i233"/>
+            <pb n="115b" xml:id="pb-115b" facs="#i234"/>
+            <pb n="116a" xml:id="pb-116a" facs="#i235"/>
+            <pb n="116b" xml:id="pb-116b" facs="#i236"/>
+            <pb n="117a" xml:id="pb-117a" facs="#i237"/>
+            <pb n="117b" xml:id="pb-117b" facs="#i238"/>
+            <pb n="118a" xml:id="pb-118a" facs="#i239"/>
+            <pb n="118b" xml:id="pb-118b" facs="#i240"/>
+            <pb n="119a" xml:id="pb-119a" facs="#i241"/>
+            <pb n="119b" xml:id="pb-119b" facs="#i242"/>
+            <pb n="120a" xml:id="pb-120a" facs="#i243"/>
+            <pb n="120b" xml:id="pb-120b" facs="#i244"/>
+            <pb n="121a" xml:id="pb-121a" facs="#i245"/>
+            <pb n="121b" xml:id="pb-121b" facs="#i246"/>
+            <pb n="122a" xml:id="pb-122a" facs="#i247"/>
+            <pb n="122b" xml:id="pb-122b" facs="#i248"/>
+            <pb n="123a" xml:id="pb-123a" facs="#i249"/>
+            <pb n="123b" xml:id="pb-123b" facs="#i250"/>
+            <pb n="124a" xml:id="pb-124a" facs="#i251"/>
+            <pb n="124b" xml:id="pb-124b" facs="#i252"/>
+            <pb n="125a" xml:id="pb-125a" facs="#i253"/>
+            <pb n="125b" xml:id="pb-125b" facs="#i254"/>
+            <pb n="126a" xml:id="pb-126a" facs="#i255"/>
+            <pb n="126b" xml:id="pb-126b" facs="#i256"/>
+            <pb n="127a" xml:id="pb-127a" facs="#i257"/>
+            <pb n="127b" xml:id="pb-127b" facs="#i258"/>
+            <pb n="128a" xml:id="pb-128a" facs="#i259"/>
+            <pb n="128b" xml:id="pb-128b" facs="#i260"/>
+            <pb n="129a" xml:id="pb-129a" facs="#i261"/>
+            <pb n="129b" xml:id="pb-129b" facs="#i262"/>
+            <pb n="130a" xml:id="pb-130a" facs="#i263"/>
+            <pb n="130b" xml:id="pb-130b" facs="#i264"/>
+            <pb n="131a" xml:id="pb-131a" facs="#i265"/>
+            <pb n="131b" xml:id="pb-131b" facs="#i266"/>
+            <pb n="132a" xml:id="pb-132a" facs="#i267"/>
+            <pb n="132b" xml:id="pb-132b" facs="#i268"/>
+            <pb n="133a" xml:id="pb-133a" facs="#i269"/>
+            <pb n="133b" xml:id="pb-133b" facs="#i270"/>
+            <pb n="134a" xml:id="pb-134a" facs="#i271"/>
+            <pb n="134b" xml:id="pb-134b" facs="#i272"/>
+            <pb n="135a" xml:id="pb-135a" facs="#i273"/>
+            <pb n="135b" xml:id="pb-135b" facs="#i274"/>
+            <pb n="136a" xml:id="pb-136a" facs="#i275"/>
+            <pb n="136b" xml:id="pb-136b" facs="#i276"/>
+            <pb n="137a" xml:id="pb-137a" facs="#i277"/>
+            <pb n="137b" xml:id="pb-137b" facs="#i278"/>
+            <pb n="138a" xml:id="pb-138a" facs="#i279"/>
+            <pb n="138b" xml:id="pb-138b" facs="#i280"/>
+            <pb n="139a" xml:id="pb-139a" facs="#i281"/>
+            <pb n="139b" xml:id="pb-139b" facs="#i282"/>
+            <pb n="140a" xml:id="pb-140a" facs="#i283"/>
+            <pb n="140b" xml:id="pb-140b" facs="#i284"/>
+            <pb n="141a" xml:id="pb-141a" facs="#i285"/>
+            <pb n="141b" xml:id="pb-141b" facs="#i286"/>
+            <pb n="142a" xml:id="pb-142a" facs="#i287"/>
+            <pb n="142b" xml:id="pb-142b" facs="#i288"/>
+            <pb n="143a" xml:id="pb-143a" facs="#i289"/>
+            <pb n="143b" xml:id="pb-143b" facs="#i290"/>
+            <pb n="144a" xml:id="pb-144a" facs="#i291"/>
+            <pb n="144b" xml:id="pb-144b" facs="#i292"/>
+            <pb n="145a" xml:id="pb-145a" facs="#i293"/>
+            <pb n="145b" xml:id="pb-145b" facs="#i294"/>
+            <pb n="146a" xml:id="pb-146a" facs="#i295"/>
+            <pb n="146b" xml:id="pb-146b" facs="#i296"/>
+            <pb n="147a" xml:id="pb-147a" facs="#i297"/>
+            <pb n="147b" xml:id="pb-147b" facs="#i298"/>
+            <pb n="148a" xml:id="pb-148a" facs="#i299"/>
+            <pb n="148b" xml:id="pb-148b" facs="#i300"/>
+            <pb n="149a" xml:id="pb-149a" facs="#i301"/>
+            <pb n="149b" xml:id="pb-149b" facs="#i302"/>
+            <pb n="150a" xml:id="pb-150a" facs="#i303"/>
+            <pb n="150b" xml:id="pb-150b" facs="#i304"/>
+            <pb n="151a" xml:id="pb-151a" facs="#i305"/>
+            <pb n="151b" xml:id="pb-151b" facs="#i306"/>
+            <pb n="152a" xml:id="pb-152a" facs="#i307"/>
+            <pb n="152b" xml:id="pb-152b" facs="#i308"/>
+            <pb n="153a" xml:id="pb-153a" facs="#i309"/>
+            <pb n="153b" xml:id="pb-153b" facs="#i310"/>
+            <pb n="154a" xml:id="pb-154a" facs="#i311"/>
+            <pb n="154b" xml:id="pb-154b" facs="#i312"/>
+            <pb n="155a" xml:id="pb-155a" facs="#i313"/>
+            <pb n="155b" xml:id="pb-155b" facs="#i314"/>
+            <pb n="156a" xml:id="pb-156a" facs="#i315"/>
+            <pb n="156b" xml:id="pb-156b" facs="#i316"/>
+            <pb n="157a" xml:id="pb-157a" facs="#i317"/>
+            <pb n="157b" xml:id="pb-157b" facs="#i318"/>
+            <pb n="158a" xml:id="pb-158a" facs="#i319"/>
+            <pb n="158b" xml:id="pb-158b" facs="#i320"/>
+            <pb n="159a" xml:id="pb-159a" facs="#i321"/>
+            <pb n="159b" xml:id="pb-159b" facs="#i322"/>
+            <pb n="160a" xml:id="pb-160a" facs="#i323"/>
+            <pb n="160b" xml:id="pb-160b" facs="#i324"/>
+            <pb n="161a" xml:id="pb-161a" facs="#i325"/>
+            <pb n="161b" xml:id="pb-161b" facs="#i326"/>
+            <pb n="162a" xml:id="pb-162a" facs="#i327"/>
+            <pb n="162b" xml:id="pb-162b" facs="#i328"/>
+            <pb n="163a" xml:id="pb-163a" facs="#i329"/>
+            <pb n="163b" xml:id="pb-163b" facs="#i330"/>
+            <pb n="164a" xml:id="pb-164a" facs="#i331"/>
+            <pb n="164b" xml:id="pb-164b" facs="#i332"/>
+            <pb n="165a" xml:id="pb-165a" facs="#i333"/>
+            <pb n="165b" xml:id="pb-165b" facs="#i334"/>
+            <pb n="166a" xml:id="pb-166a" facs="#i335"/>
+            <pb n="166b" xml:id="pb-166b" facs="#i336"/>
+            <pb n="167a" xml:id="pb-167a" facs="#i337"/>
+            <pb n="167b" xml:id="pb-167b" facs="#i338"/>
+            <pb n="168a" xml:id="pb-168a" facs="#i339"/>
+            <pb n="168b" xml:id="pb-168b" facs="#i340"/>
+            <pb n="169a" xml:id="pb-169a" facs="#i341"/>
+            <pb n="169b" xml:id="pb-169b" facs="#i342"/>
+            <pb n="170a" xml:id="pb-170a" facs="#i343"/>
+            <pb n="170b" xml:id="pb-170b" facs="#i344"/>
+            <pb n="171a" xml:id="pb-171a" facs="#i345"/>
+            <pb n="171b" xml:id="pb-171b" facs="#i346"/>
+            <pb n="172a" xml:id="pb-172a" facs="#i347"/>
+            <pb n="172b" xml:id="pb-172b" facs="#i348"/>
+            <pb n="173a" xml:id="pb-173a" facs="#i349"/>
+            <pb n="173b" xml:id="pb-173b" facs="#i350"/>
+            <pb n="174a" xml:id="pb-174a" facs="#i351"/>
+            <pb n="174b" xml:id="pb-174b" facs="#i352"/>
+            <pb n="175a" xml:id="pb-175a" facs="#i353"/>
+            <pb n="175b" xml:id="pb-175b" facs="#i354"/>
+            <pb n="176a" xml:id="pb-176a" facs="#i355"/>
+            <pb n="176b" xml:id="pb-176b" facs="#i356"/>
+            <pb n="177a" xml:id="pb-177a" facs="#i357"/>
+            <pb n="177b" xml:id="pb-177b" facs="#i358"/>
+            <pb n="178a" xml:id="pb-178a" facs="#i359"/>
+            <pb n="178b" xml:id="pb-178b" facs="#i360"/>
+            <pb n="179a" xml:id="pb-179a" facs="#i361"/>
+            <pb n="179b" xml:id="pb-179b" facs="#i362"/>
+            <pb n="180a" xml:id="pb-180a" facs="#i363"/>
+            <pb n="180b" xml:id="pb-180b" facs="#i364"/>
+            <pb n="181a" xml:id="pb-181a" facs="#i365"/>
+            <pb n="181b" xml:id="pb-181b" facs="#i366"/>
+            <pb n="182a" xml:id="pb-182a" facs="#i367"/>
+            <pb n="182b" xml:id="pb-182b" facs="#i368"/>
+            <pb n="183a" xml:id="pb-183a" facs="#i369"/>
+            <pb n="183b" xml:id="pb-183b" facs="#i370"/>
+            <pb n="184a" xml:id="pb-184a" facs="#i371"/>
+            <pb n="184b" xml:id="pb-184b" facs="#i372"/>
+            <pb n="185a" xml:id="pb-185a" facs="#i373"/>
+            <pb n="185b" xml:id="pb-185b" facs="#i374"/>
+            <pb n="186a" xml:id="pb-186a" facs="#i375"/>
+            <pb n="186b" xml:id="pb-186b" facs="#i376"/>
+            <pb n="187a" xml:id="pb-187a" facs="#i377"/>
+            <pb n="187b" xml:id="pb-187b" facs="#i378"/>
+            <pb n="188a" xml:id="pb-188a" facs="#i379"/>
+            <pb n="188b" xml:id="pb-188b" facs="#i380"/>
+            <pb n="189a" xml:id="pb-189a" facs="#i381"/>
+            <pb n="189b" xml:id="pb-189b" facs="#i382"/>
+            <pb n="190a" xml:id="pb-190a" facs="#i383"/>
+            <pb n="190b" xml:id="pb-190b" facs="#i384"/>
+            <pb n="191a" xml:id="pb-191a" facs="#i385"/>
+            <pb n="191b" xml:id="pb-191b" facs="#i386"/>
+            <pb n="192a" xml:id="pb-192a" facs="#i387"/>
+            <pb n="192b" xml:id="pb-192b" facs="#i388"/>
+            <pb n="193a" xml:id="pb-193a" facs="#i389"/>
+            <pb n="193b" xml:id="pb-193b" facs="#i390"/>
+            <pb n="194a" xml:id="pb-194a" facs="#i391"/>
+            <pb n="194b" xml:id="pb-194b" facs="#i392"/>
+            <pb n="195a" xml:id="pb-195a" facs="#i393"/>
+            <pb n="195b" xml:id="pb-195b" facs="#i394"/>
+            <pb n="196a" xml:id="pb-196a" facs="#i395"/>
+            <pb n="196b" xml:id="pb-196b" facs="#i396"/>
+            <pb n="197a" xml:id="pb-197a" facs="#i397"/>
+            <pb n="197b" xml:id="pb-197b" facs="#i398"/>
+            <pb n="198a" xml:id="pb-198a" facs="#i399"/>
+            <pb n="198b" xml:id="pb-198b" facs="#i400"/>
+            <pb n="199a" xml:id="pb-199a" facs="#i401"/>
+            <pb n="199b" xml:id="pb-199b" facs="#i402"/>
+            <pb n="200a" xml:id="pb-200a" facs="#i403"/>
+            <pb n="200b" xml:id="pb-200b" facs="#i404"/>
+            <pb n="201a" xml:id="pb-201a" facs="#i405"/>
+            <pb n="201b" xml:id="pb-201b" facs="#i406"/>
+            <pb n="202a" xml:id="pb-202a" facs="#i407"/>
+            <pb n="202b" xml:id="pb-202b" facs="#i408"/>
+            <pb n="203a" xml:id="pb-203a" facs="#i409"/>
+            <pb n="203b" xml:id="pb-203b" facs="#i410"/>
+            <pb n="204a" xml:id="pb-204a" facs="#i411"/>
+            <pb n="204b" xml:id="pb-204b" facs="#i412"/>
+            <pb n="205a" xml:id="pb-205a" facs="#i413"/>
+            <pb n="205b" xml:id="pb-205b" facs="#i414"/>
+            <pb n="206a" xml:id="pb-206a" facs="#i415"/>
+            <pb n="206b" xml:id="pb-206b" facs="#i416"/>
+            <pb n="207a" xml:id="pb-207a" facs="#i417"/>
+            <pb n="207b" xml:id="pb-207b" facs="#i418"/>
+            <pb n="208a" xml:id="pb-208a" facs="#i419"/>
+            <pb n="208b" xml:id="pb-208b" facs="#i420"/>
+            <pb n="209a" xml:id="pb-209a" facs="#i421"/>
+            <pb n="209b" xml:id="pb-209b" facs="#i422"/>
+            <pb n="210a" xml:id="pb-210a" facs="#i423"/>
+            <pb n="210b" xml:id="pb-210b" facs="#i424"/>
+            <pb n="211a" xml:id="pb-211a" facs="#i425"/>
+            <pb n="211b" xml:id="pb-211b" facs="#i426"/>
+            <pb n="212a" xml:id="pb-212a" facs="#i427"/>
+            <pb n="212b" xml:id="pb-212b" facs="#i428"/>
+            <pb n="213a" xml:id="pb-213a" facs="#i429"/>
+            <pb n="213b" xml:id="pb-213b" facs="#i430"/>
+            <pb n="214a" xml:id="pb-214a" facs="#i431"/>
+            <pb n="214b" xml:id="pb-214b" facs="#i432"/>
+            <pb n="215a" xml:id="pb-215a" facs="#i433"/>
+            <pb n="215b" xml:id="pb-215b" facs="#i434"/>
+            <pb n="216a" xml:id="pb-216a" facs="#i435"/>
+            <pb n="216b" xml:id="pb-216b" facs="#i436"/>
+            <pb n="217a" xml:id="pb-217a" facs="#i437"/>
+            <pb n="217b" xml:id="pb-217b" facs="#i438"/>
+            <pb n="218a" xml:id="pb-218a" facs="#i439"/>
+            <pb n="218b" xml:id="pb-218b" facs="#i440"/>
+            <pb n="219a" xml:id="pb-219a" facs="#i441"/>
+            <pb n="219b" xml:id="pb-219b" facs="#i442"/>
+            <pb n="220a" xml:id="pb-220a" facs="#i443"/>
+            <pb n="220b" xml:id="pb-220b" facs="#i444"/>
+            <pb n="221a" xml:id="pb-221a" facs="#i445"/>
+            <pb n="221b" xml:id="pb-221b" facs="#i446"/>
+            <pb n="222a" xml:id="pb-222a" facs="#i447"/>
+            <pb n="222b" xml:id="pb-222b" facs="#i448"/>
+            <pb n="223a" xml:id="pb-223a" facs="#i449"/>
+            <pb n="223b" xml:id="pb-223b" facs="#i450"/>
+            <pb n="224a" xml:id="pb-224a" facs="#i451"/>
+            <pb n="224b" xml:id="pb-224b" facs="#i452"/>
+            <pb n="225a" xml:id="pb-225a" facs="#i453"/>
+            <pb n="225b" xml:id="pb-225b" facs="#i454"/>
+            <pb n="226a" xml:id="pb-226a" facs="#i455"/>
+            <pb n="226b" xml:id="pb-226b" facs="#i456"/>
+            <pb n="227a" xml:id="pb-227a" facs="#i457"/>
+            <pb n="227b" xml:id="pb-227b" facs="#i458"/>
+            <pb n="228a" xml:id="pb-228a" facs="#i459"/>
+            <pb n="228b" xml:id="pb-228b" facs="#i460"/>
+            <pb n="229a" xml:id="pb-229a" facs="#i461"/>
+            <pb n="229b" xml:id="pb-229b" facs="#i462"/>
+            <pb n="230a" xml:id="pb-230a" facs="#i463"/>
+            <pb n="230b" xml:id="pb-230b" facs="#i464"/>
+            <pb n="231a" xml:id="pb-231a" facs="#i465"/>
+            <pb n="231b" xml:id="pb-231b" facs="#i466"/>
+            <pb n="232a" xml:id="pb-232a" facs="#i467"/>
+            <pb n="232b" xml:id="pb-232b" facs="#i468"/>
+            <pb n="233a" xml:id="pb-233a" facs="#i469"/>
+            <pb n="233b" xml:id="pb-233b" facs="#i470"/>
+            <pb n="234a" xml:id="pb-234a" facs="#i471"/>
+            <pb n="234b" xml:id="pb-234b" facs="#i472"/>
+            <pb n="235a" xml:id="pb-235a" facs="#i473"/>
+            <pb n="235b" xml:id="pb-235b" facs="#i474"/>
+            <pb n="236a" xml:id="pb-236a" facs="#i475"/>
+            <pb n="236b" xml:id="pb-236b" facs="#i476"/>
+            <pb n="237a" xml:id="pb-237a" facs="#i477"/>
+            <pb n="237b" xml:id="pb-237b" facs="#i478"/>
+            <pb n="238a" xml:id="pb-238a" facs="#i479"/>
+            <pb n="238b" xml:id="pb-238b" facs="#i480"/>
+            <pb n="239a" xml:id="pb-239a" facs="#i481"/>
+            <pb n="239b" xml:id="pb-239b" facs="#i482"/>
+            <pb n="240a" xml:id="pb-240a" facs="#i483"/>
+            <pb n="240b" xml:id="pb-240b" facs="#i484"/>
+            <pb n="241a" xml:id="pb-241a" facs="#i485"/>
+            <pb n="241b" xml:id="pb-241b" facs="#i486"/>
+            <pb n="242a" xml:id="pb-242a" facs="#i487"/>
+            <pb n="242b" xml:id="pb-242b" facs="#i488"/>
+            <pb n="243a" xml:id="pb-243a" facs="#i489"/>
+            <pb n="243b" xml:id="pb-243b" facs="#i490"/>
+            <pb n="244a" xml:id="pb-244a" facs="#i491"/>
+            <pb n="244b" xml:id="pb-244b" facs="#i492"/>
+            <pb n="245a" xml:id="pb-245a" facs="#i493"/>
+            <pb n="245b" xml:id="pb-245b" facs="#i494"/>
+            <pb n="246a" xml:id="pb-246a" facs="#i495"/>
+            <pb n="246b" xml:id="pb-246b" facs="#i496"/>
+            <pb n="247a" xml:id="pb-247a" facs="#i497"/>
+            <pb n="247b" xml:id="pb-247b" facs="#i498"/>
+            <pb n="248a" xml:id="pb-248a" facs="#i499"/>
+            <pb n="248b" xml:id="pb-248b" facs="#i500"/>
+            <pb n="249a" xml:id="pb-249a" facs="#i501"/>
+            <pb n="249b" xml:id="pb-249b" facs="#i502"/>
+            <pb n="250a" xml:id="pb-250a" facs="#i503"/>
+            <pb n="250b" xml:id="pb-250b" facs="#i504"/>
+            <pb n="251a" xml:id="pb-251a" facs="#i505"/>
+            <pb n="251b" xml:id="pb-251b" facs="#i506"/>
+            <pb n="252a" xml:id="pb-252a" facs="#i507"/>
+            <pb n="252b" xml:id="pb-252b" facs="#i508"/>
+            <pb n="253a" xml:id="pb-253a" facs="#i509"/>
+            <pb n="253b" xml:id="pb-253b" facs="#i510"/>
+            <pb n="254a" xml:id="pb-254a" facs="#i511"/>
+            <pb n="254b" xml:id="pb-254b" facs="#i512"/>
+            <pb n="255a" xml:id="pb-255a" facs="#i513"/>
+            <pb n="255b" xml:id="pb-255b" facs="#i514"/>
+            <pb n="256a" xml:id="pb-256a" facs="#i515"/>
+            <pb n="256b" xml:id="pb-256b" facs="#i516"/>
+            <pb n="257a" xml:id="pb-257a" facs="#i517"/>
+            <pb n="257b" xml:id="pb-257b" facs="#i518"/>
+            <pb n="258a" xml:id="pb-258a" facs="#i519"/>
+            <pb n="258b" xml:id="pb-258b" facs="#i520"/>
+            <pb n="259a" xml:id="pb-259a" facs="#i521"/>
+            <pb n="259b" xml:id="pb-259b" facs="#i522"/>
+            <pb n="260a" xml:id="pb-260a" facs="#i523"/>
+            <pb n="261a" xml:id="pb-261a" facs="#i524"/>
+            <pb n="261b" xml:id="pb-261b" facs="#i525"/>
+            <pb n="262a" xml:id="pb-262a" facs="#i526"/>
+            <pb n="262b" xml:id="pb-262b" facs="#i527"/>
+            <pb n="Endleaf " xml:id="pb-Endleaf" facs="#i528"/>
+            <pb n="Inside back cover" xml:id="pb-Insidebackcover" facs="#i529"/>
+            <pb n="Outside back cover" xml:id="pb-Outsidebackcover" facs="#i530"/>
+            <pb n="Spine" xml:id="pb-Spine" facs="#i531"/>
+            <pb n="Foredge" xml:id="pb-Foredge" facs="#i532"/>
+            <pb n="Head" xml:id="pb-Head" facs="#i533"/>
+            <pb n="Tail" xml:id="pb-Tail" facs="#i534"/>
+         </div>
+      </body>
+   </text>
+</TEI>

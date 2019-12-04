@@ -16,7 +16,6 @@ import uk.cam.lib.cdl.loading.model.editor.Dataset;
 import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 
-import javax.annotation.PostConstruct;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,23 +46,42 @@ public class EditAPI {
 
 
     public EditAPI(String dataPath, String dlDatasetFilename, String dataItemPath, GitLocalVariables gitSourceVariables) {
-        gitHelper = new GitHelper(gitSourceVariables);
+        this.gitHelper = new GitHelper(gitSourceVariables);
         this.dataPath = dataPath;
         this.datasetFile = new File(dataPath + File.separator + dlDatasetFilename);
         this.dataItemPath = dataItemPath;
+        setup();
     }
 
-    @PostConstruct
-    private void setupEditAPI() throws IOException {
-        if (!datasetFile.exists()) {
-            throw new FileNotFoundException("Dataset file cannot be found at: " + datasetFile.toPath());
-        }
+    /**
+     * For testing
+     *
+     * @param dataPath
+     * @param dlDatasetFilename
+     * @param dataItemPath
+     * @param gitHelper
+     */
+    public EditAPI(String dataPath, String dlDatasetFilename, String dataItemPath, GitHelper gitHelper) {
+        this.gitHelper = gitHelper;
+        this.dataPath = dataPath;
+        this.datasetFile = new File(dataPath + File.separator + dlDatasetFilename);
+        this.dataItemPath = dataItemPath;
+        setup();
+    }
 
-        updateModel();
+    private void setup() {
+        try {
+            if (!datasetFile.exists()) {
+                throw new FileNotFoundException("Dataset file cannot be found at: " + datasetFile.toPath());
+            }
+
+            updateModel();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public synchronized void updateModel() throws IOException {
-
         try {
             gitHelper.pullGitChanges();
         } catch (GitAPIException e) {
@@ -131,7 +149,8 @@ public class EditAPI {
         try {
             String content = IOUtils.toString(file.getInputStream(), StandardCharsets.UTF_8);
 
-            if (Objects.requireNonNull(file.getContentType()).equals("text/xml")) {
+            if (Objects.requireNonNull(file.getContentType()).equals("text/xml") ||
+                Objects.requireNonNull(file.getContentType()).equals("application/xml")) {
                 valid = validateXML(file.getOriginalFilename(), content);
             }
 

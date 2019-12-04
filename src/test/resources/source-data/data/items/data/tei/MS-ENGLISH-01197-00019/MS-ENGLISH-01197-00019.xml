@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+	<teiHeader>
+		<fileDesc>
+			
+			<titleStmt>
+				<title>Englishmen! The Illegal Meeting</title>
+				
+				
+				<respStmt>
+					<resp>TEI Encoding</resp>
+					<name>Joe Devlin</name>
+				</respStmt>
+			</titleStmt>
+			<publicationStmt>
+				<publisher>The University of Manchester Library</publisher>
+				<date calendar="Gregorian">2019</date>
+				<pubPlace>
+					<address>
+						<addrLine>The John Rylands Library</addrLine>
+						<street>150 Deansgate</street>
+						<settlement>Manchester</settlement>
+						<postCode>M3 3EH</postCode>
+						<addrLine>
+							<ref target="http://www.library.manchester.ac.uk/specialcollections/">The John Rylands Library</ref>
+						</addrLine>
+						<addrLine>
+							<email>uml.special-collections@manchester.ac.uk</email>
+						</addrLine>
+					</address>
+				</pubPlace>
+				<idno>English MS 1197/19</idno>
+				<availability xml:id="displayImageRights" status="restricted">
+					<p>Zooming image © University of Manchester Library, All rights reserved.</p>
+				</availability>
+				<availability xml:id="downloadImageRights" status="restricted">
+					<licence>Images and Metadata made available for download are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).</licence>
+				</availability>
+				<availability xml:id="metadataRights" status="restricted">
+					<licence>Images and Metadata made available for download are licensed under a Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).</licence>
+				</availability>
+			</publicationStmt>
+			<sourceDesc>
+				<msDesc xml:lang="eng">
+					<msIdentifier>
+						<country>United Kingdom</country>
+						<region type="county">Greater Manchester</region>
+						<settlement>Manchester</settlement>
+						<institution>The University of Manchester Library</institution>
+						<repository>The John Rylands Library</repository>
+						<collection>Wadsworth MSS: Peterloo, 1819</collection>
+						<idno>English MS 1197/19</idno>
+						<altIdentifier type="former">
+							<idno>R106303</idno>
+						</altIdentifier>
+
+						
+					</msIdentifier>
+					<msContents>
+						<summary>
+					<seg type="para">
+						Public notice issued by the Magistrates declaring illegal the public meeting to be held on the
+						<date when="1819-08-09">9th of August 1819</date> in Manchester and therefore postponed,
+						and cautioning 'Englishmen' against attending.
+					</seg>
+				</summary>
+						<msItem>
+							<title>Englishmen! The Illegal Meeting</title>
+							<title type="alt">Placard against H. Hunt</title>
+
+							<textLang mainLang="eng">English</textLang>
+							
+							<respStmt>
+								<resp/>
+								<name type="person" role="com">
+								<persName type="standard">Hay, William Robert,
+									1761-1839</persName>
+								<persName type="display">William Robert Hay,
+									1761-1839</persName>
+								</name>
+								<name type="corporation" role="prt">
+									<persName type="standard">C. Wheeler and Son</persName>
+									<persName type="display">C. Wheeler and Son (Manchester)</persName>
+								</name>
+							</respStmt>
+
+														
+						</msItem>
+					</msContents>
+					<physDesc>
+						
+						<objectDesc>
+							<supportDesc material="paper">
+								<support>
+									<material>Paper</material>
+								</support>
+								<extent>1 sheet</extent>
+
+								
+								
+							</supportDesc>
+							
+						</objectDesc>
+						
+						
+						
+					</physDesc>
+
+					<history>
+						
+						<origin>
+							<origDate calendar="Gregorian" when="1819-08-04">4th August, 1819</origDate>
+							<origPlace><country ref="131874314">England</country>,
+								<placeName ref="45353708"> Manchester </placeName>
+							</origPlace>
+						</origin>
+						<provenance>
+							<p>
+								<name type="person" role="fmo">
+									<persName type="standard">Smith family</persName>
+									<persName type="display">Smith family</persName>
+								</name>
+							</p>
+							<p>
+								<name type="person" ref="http://viaf.org/viaf/306154070" role="fmo">
+									<persName type="standard">Wadsworth, A. P. (Alfred Powell),
+										1891-1956</persName>
+									<persName type="display">A.P. (Alfred Powell) Wadsworth, 1891-1956</persName>
+								</name>
+							</p>
+						</provenance>
+						<acquisition>
+							<p>Donated to the Library by A. P. Wadsworth (then editor of the
+								Manchester Guardian) in 1940</p>					
+						</acquisition>
+					</history>
+					<additional>
+						<adminInfo>
+						<recordHist>
+							<source>
+								Description derived from <ref target="https://luna.manchester.ac.uk/luna/servlet/s/xbn0ah"
+									>University of Manchester LUNA catalogue</ref>
+							</source>
+						</recordHist>
+						
+							<availability status="restricted">
+								<p>The manuscript is available for consultation by any accredited reader.</p>
+							</availability>
+						</adminInfo>
+					</additional>
+				</msDesc>
+			</sourceDesc>
+		</fileDesc>
+		<encodingDesc>
+			<classDecl>
+				<taxonomy xml:id="LCSH">
+					<bibl>
+						<ref target="http://id.loc.gov/authorities/subjects.html#lcsh">Library of Congress Subject Headings</ref>
+					</bibl>
+				</taxonomy>
+				<taxonomy xml:id="VIAF">
+					<bibl>
+						<ref target="https://viaf.org/">VIAF: The Virtual International Authority File</ref>
+					</bibl>
+				</taxonomy>
+			</classDecl>
+		</encodingDesc>
+		<profileDesc>
+			<textClass>
+				<keywords scheme="#LCSH">
+					<list>
+						<item>
+							<ref target="http://id.loc.gov/authorities/subjects/sh85080391.html">Peterloo Massacre, Manchester, England, 1819</ref>
+						</item>
+						<item>
+							<ref>Social movements--Great Britain--History--19th century</ref>
+						</item>
+						<item>
+							<ref target="http://id.loc.gov/authorities/subjects/sh85056819.html">Great Britain--History--19th century </ref>
+						</item>
+						<item>
+							<ref>Manchester (England)--Politics and government--19th century</ref>
+						</item>
+						<item>
+							<ref>Radicalism--England--Manchester</ref>
+						</item>
+						<item>
+							<ref>Public meetings--Law and legislation--Great Britain</ref>
+						</item>
+						<item>
+							<ref target="http://id.loc.gov/authorities/names/n81042321.html">Manchester (England) </ref>
+						</item>
+
+					</list>
+
+				</keywords>
+			</textClass>
+		</profileDesc>
+		<revisionDesc>
+			<change when="2019-06-19">
+				<persName>Joe Devlin</persName>
+			</change>
+		</revisionDesc>
+	</teiHeader>
+	    <facsimile>
+          <graphic decls="#document-thumbnail" rend="portrait" url="MS-ENGLISH-01197-00019-000-00001.jp2"/>
+          <surface xml:id="i1" n="1">
+            <graphic decls="#downloadImageRights #download" rend="portrait" height="6500px"
+                width="4409px" url="MS-ENGLISH-01197-00019-000-00001.jp2"/>
+          </surface>
+    </facsimile>
+    <text>
+        <body>
+            <div>
+                <pb n="1" xml:id="pb-1" facs="#i1"/>
+            </div>
+        </body>
+    </text>
+</TEI>
