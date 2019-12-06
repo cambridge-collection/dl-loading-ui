@@ -7,15 +7,13 @@ public class GitLocalVariables {
     private final String gitSourceURLUserame;
     private final String gitSourceURLPassword;
     private final String gitBranch;
-    private final String gitDatasetFilename;
 
     public GitLocalVariables(String gitSourcePath,
                              String gitSourceDataSubpath,
                              String gitSourceURL,
                              String gitSourceURLUserame,
                              String gitSourceURLPassword,
-                             String gitBranch,
-                             String gitDLDataFilename
+                             String gitBranch
     ) {
         this.gitSourcePath = gitSourcePath;
         this.gitSourceDataSubpath = gitSourceDataSubpath;
@@ -23,7 +21,6 @@ public class GitLocalVariables {
         this.gitSourceURLUserame = gitSourceURLUserame;
         this.gitSourceURLPassword = gitSourceURLPassword;
         this.gitBranch = gitBranch;
-        this.gitDatasetFilename = gitDLDataFilename;
     }
 
     public String getGitSourcePath() {
@@ -48,9 +45,5 @@ public class GitLocalVariables {
 
     public String getGitBranch() {
         return gitBranch;
-    }
-
-    public String getGitDatasetFilename() {
-        return gitDatasetFilename;
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
+import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.forms.CollectionForm;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Id;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+
 
 @Controller
 public class EditController {
@@ -47,26 +49,49 @@ public class EditController {
         return "edit";
     }
 
-    @GetMapping("/edit/collection/{collectionUrlSlug}")
-    public String editCollection(Model model, @PathVariable("collectionUrlSlug") String collectionUrlSlug) {
+    /**
+     * Display edit collection form
+     *
+     * @param model
+     * @param collectionId
+     * @return
+     * @throws NotFoundException
+     */
+    @GetMapping(value = {"/edit/collection/"})
+    public String editCollection(Model model, @RequestParam(required = false) String collectionId)
+        throws NotFoundException {
 
-        Collection collection = editAPI.getCollection(collectionUrlSlug);
-
+        // TODO check permissions
         CollectionForm form;
-        if (model.asMap().get("form") == null) {
-            form = new CollectionForm(collection);
-        } else {
-            form = (CollectionForm) model.asMap().get("form");
-        }
-
-        // Get Item names from Ids
+        boolean newCollection = true;
         List<Item> items = new ArrayList<>();
-        for (Id id : collection.getItemIds()) {
-            items.add(editAPI.getItem(id.getId()));
+        ;
+        if (collectionId == null) {
+            form = new CollectionForm();
+        } else {
+            Collection collection = editAPI.getCollection(collectionId);
+            if (model.asMap().get("form") == null) {
+                form = new CollectionForm(collection);
+            } else {
+                form = (CollectionForm) model.asMap().get("form");
+            }
+            // Get Item names from Ids
+            if (collection != null) {
+                newCollection = false;
+                for (Id id : collection.getItemIds()) {
+                    items.add(editAPI.getItem(id.getId()));
+                }
+            }
         }
 
+        String thumbnailURL = form.getThumbnailURL();
+        if (thumbnailURL == null || thumbnailURL.isEmpty()) {
+            thumbnailURL = editAPI.getDataLocalPath() + File.separator + "/pages/images/collectionsView/collection" +
+                "-blank.jpg"; // TODO read from UI properties.
+        }
 
-        model.addAttribute("thumbnailURL", collection.getThumbnailURL());
+        model.addAttribute("newCollection", newCollection);
+        model.addAttribute("thumbnailURL", thumbnailURL);
         model.addAttribute("form", form);
         model.addAttribute("items", items);
         return "edit-collection";
@@ -112,14 +137,12 @@ public class EditController {
      * TODO validate the changes against the JSON schema.
      *
      * @param attributes
-     * @param collectionId
      * @param collectionForm
      * @return
      * @throws BadRequestException
      */
-    @PostMapping("/edit/collection/{collectionId}/update")
+    @PostMapping("/edit/collection/update")
     public RedirectView updateCollection(RedirectAttributes attributes,
-                                         @PathVariable String collectionId,
                                          @Valid @ModelAttribute CollectionForm collectionForm,
                                          final BindingResult bindingResult) {
 
@@ -128,35 +151,29 @@ public class EditController {
                 "details.");
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
             attributes.addFlashAttribute("form", collectionForm);
-            return new RedirectView("/edit/collection/" + collectionId + "/");
+            attributes.addAttribute("collectionId", collectionForm.getUrlSlugName());
+
+            return new RedirectView("/edit/collection/");
         }
 
         Collection collection = collectionForm.toCollection();
 
         if (collection.getName() == null || collection.getName().getUrlSlug() == null) {
             attributes.addFlashAttribute("error", "Failed to update collection, missing collection name.");
-            return new RedirectView("/edit/collection/" + collectionId + "/");
+            attributes.addAttribute("collectionId", collectionForm.getUrlSlugName());
+            return new RedirectView("/edit/collection/");
         }
 
-        Collection existingCollection = editAPI.getCollection(collectionId);
+/*        Collection existingCollection = editAPI.getCollection(collection.getName().getUrlSlug());
         if (existingCollection == null) {
-            attributes.addFlashAttribute("error", "Unknown collection with id: " + collectionId);
-            return new RedirectView("/edit/collection/" + collectionId + "/");
-        }
 
-        // Check values we do not want to allow to edit
-        // match the existing collection values
+            attributes.addFlashAttribute("error", "Unknown collection with id: " + collection.getName().getUrlSlug());
+            attributes.addAttribute("collectionId", collectionForm.getUrlSlugName());
+            return new RedirectView("/edit/collection/");
+        }*/
 
-        boolean success = false;
-        if (collection.getName().getUrlSlug().equals(collectionId) &&
-            collection.getType().equals(existingCollection.getType()) &&
-            collection.getFilepath().equals(existingCollection.getFilepath()) &&
-            collection.getThumbnailURL().equals(existingCollection.getThumbnailURL()) &&
-            listEqualsIgnoreOrder(collection.getItemIds(), existingCollection.getItemIds())) {
-
-            success = editAPI.updateCollection(collection);
-
-        }
+        // TODO make sure we have permission to edit the collection being edited.
+        boolean success = editAPI.updateCollection(collection);
 
         if (success) {
             attributes.addFlashAttribute("message", "Collection Updated.");
@@ -164,7 +181,8 @@ public class EditController {
             attributes.addFlashAttribute("error", "Failed to update collection.");
         }
 
-        return new RedirectView("/edit/collection/" + collectionId + "/");
+        attributes.addAttribute("collectionId", collectionForm.getUrlSlugName());
+        return new RedirectView("/edit/collection/");
     }
 
     private <T> boolean listEqualsIgnoreOrder(List<T> list1, List<T> list2) {
@@ -219,6 +237,15 @@ public class EditController {
 
     }
 
+/*    @GetMapping("/edit/addcollection")
+    public RedirectView addCollection(RedirectAttributes attributes,
+                                         @Valid @ModelAttribute CollectionForm collectionForm) {
+
+
+        String collectionId =
+        attributes.addAttribute("newCollection", true);
+        return new RedirectView("/edit/collection/" + collectionId + "/");
+    }*/
     /*public RedirectView replaceCollectionThumbnail(RedirectAttributes attributes, @PathVariable String collectionId,
                                                    @RequestParam("file") MultipartFile file) throws IOException {
 

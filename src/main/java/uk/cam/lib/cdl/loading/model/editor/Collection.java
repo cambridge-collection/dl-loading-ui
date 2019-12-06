@@ -10,14 +10,13 @@ import java.util.List;
 /**
  * TODO Make this a full implementation
  */
-public class Collection {
+public class Collection implements Comparable<Collection> {
 
     private final String type;
     private final CollectionName name;
     private final CollectionDescription description;
     private final CollectionCredit credit;
     private final List<Id> ids;
-    private String filepath;
     private String thumbnailURL;
 
     @ConstructorProperties({"type", "name", "description", "credit", "items"})
@@ -57,18 +56,6 @@ public class Collection {
     }
 
     @JsonIgnore
-    public String getFilepath() {
-        return filepath;
-    }
-
-    @JsonIgnore
-    public void setFilepath(String filepath) {
-        if (this.filepath == null) {
-            this.filepath = filepath;
-        }
-    }
-
-    @JsonIgnore
     public String getThumbnailURL() {
         return this.thumbnailURL;
     }
@@ -99,5 +86,23 @@ public class Collection {
             return "null";
         }
         return o.toString().replace("\n", "\n    ");
+    }
+
+    @Override
+    public int compareTo(Collection collection) {
+        return getName().getUrlSlug().compareTo(collection.getName().getUrlSlug());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Collection) {
+            return toString().equals(obj.toString());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
     }
 }

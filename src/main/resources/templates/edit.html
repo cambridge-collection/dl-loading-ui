@@ -46,11 +46,11 @@
                     Here you can browse and edit the content for your digital library.<br><br>
                     <ul>
                         <li>You can view and edit the files directly through the <a
-                                href="/edit/advanced-edit.html">advanced
+                            href="/edit/advanced-edit.html">advanced
                             content editor</a>.
                         </li>
                         <li>For advanced users, you can also get access through <a
-                                href="https://git-scm.com/book/en/v2/Getting-Started-What-is-Git%3F">git</a>.
+                            href="https://git-scm.com/book/en/v2/Getting-Started-What-is-Git%3F">git</a>.
                         </li>
                     </ul>
                 </div>
@@ -76,9 +76,10 @@
                                                 <div class="row no-gutters align-items-top">
                                                     <div class="col mr-2">
                                                         <div
-                                                                class="text-s text-primary font-weight-bold text-uppercase mb-1">
-                                                            <a th:href="'/edit/collection/'+${collection.name.urlSlug}"
-                                                               th:text="${collection.name.shortName}"></a></div>
+                                                            class="text-s text-primary font-weight-bold text-uppercase mb-1">
+                                                            <a
+                                                                th:href="'/edit/collection/?collectionId='+${collection.name.urlSlug}"
+                                                                th:text="${collection.name.shortName}"></a></div>
                                                         <div class="text-xs mb-0 text-gray-800 text-left"
                                                              th:text="${collection.description.shortDescription}">
                                                         </div>
@@ -90,7 +91,8 @@
                                                 <div class="row align-items-end float-right" style="position:
                                                 absolute; bottom: 0; right:7px;">
                                                     <div class="col-auto">
-                                                        <a th:href="'/edit/collection/'+${collection.name.urlSlug}">
+                                                        <a
+                                                            th:href="'/edit/collection/?collectionId='+${collection.name.urlSlug}">
                                                             <i class="fas fa-arrow-alt-circle-right fa-2x"></i>
                                                         </a>
                                                     </div>
@@ -105,8 +107,8 @@
                                             <div class="row no-gutters align-items-top">
                                                 <div class="col mr-2">
                                                     <div
-                                                            class="text-s font-weight-bold text-uppercase mb-1">
-                                                        <a class="text-gray-800" href="/edit/addcollection/"
+                                                        class="text-s font-weight-bold text-uppercase mb-1">
+                                                        <a class="text-gray-800" href="/edit/collection/"
                                                         >Add
                                                             Collection</a></div>
                                                     <div class="text-xs mb-0 text-gray-800 text-left">
@@ -117,7 +119,7 @@
                                             <div class="row align-items-end float-right" style="position:
                                                 absolute; bottom: 0; right:7px;">
                                                 <div class="col-auto">
-                                                    <a href="/edit/addcollection/">
+                                                    <a href="/edit/collection/">
                                                         <i class="fas fa-plus fa-2x"></i>
                                                     </a>
                                                 </div>
