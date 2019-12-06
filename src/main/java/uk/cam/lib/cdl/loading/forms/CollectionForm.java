@@ -1,6 +1,5 @@
 package uk.cam.lib.cdl.loading.forms;
 
-import org.hibernate.validator.constraints.URL;
 import uk.cam.lib.cdl.loading.model.editor.*;
 
 import javax.validation.constraints.NotBlank;
@@ -17,11 +16,11 @@ import java.util.List;
 
 public class CollectionForm {
 
-    @NotBlank(message = "Must specify collection type.")
+    //@NotBlank(message = "Must specify collection type.")
     private String collectionType;
 
     @NotBlank(message = "Must specify a url-slug for this collection.")
-    @Pattern(regexp = "^[a-z\\-]+$")
+    @Pattern(regexp = "^[a-z\\-]+$", message = "Must be all lower case letters or hyphen '-' with no spaces.")
     private String urlSlugName;
 
     @NotBlank(message = "Must specify a sort name.")
@@ -42,22 +41,22 @@ public class CollectionForm {
     @Size(min = 2, max = 5000, message = "Medium description must be between 2 and 5000 characters.")
     private String mediumDescription;
 
-    @NotBlank(message = "Must specify a full description.")
+    //@NotBlank(message = "Must specify a full description.")
     private String fullDescription;
 
-    @NotBlank(message = "Must specify a prose credit.")
+    //@NotBlank(message = "Must specify a prose credit.")
     private String proseCredit;
 
     @NotNull
     private List<String> itemIds;
 
-    @NotBlank(message = "Must specify a file path.")
-    private String filepath;
-
-    @NotBlank(message = "Must specify a thumbnail URL")
+    //@NotBlank(message = "Must specify a thumbnail URL")
     private String thumbnailURL;
 
     public CollectionForm(Collection collection) {
+        if (collection == null) {
+            return;
+        }
         this.collectionType = collection.getType();
         this.urlSlugName = collection.getName().getUrlSlug();
         this.sortName = collection.getName().getSort();
@@ -67,7 +66,6 @@ public class CollectionForm {
         this.mediumDescription = collection.getDescription().getMedium();
         this.fullDescription = collection.getDescription().getFull().getId();
         this.proseCredit = collection.getCredit().getProse().getId();
-        this.filepath = collection.getFilepath();
         this.thumbnailURL = collection.getThumbnailURL();
 
         List<String> itemIds = new ArrayList<>();
@@ -78,6 +76,7 @@ public class CollectionForm {
     }
 
     public CollectionForm() {
+        this.collectionType = "https://schemas.cudl.lib.cam.ac.uk/package/v1/collection.json";
     }
 
     public String getShortDescription() {
@@ -131,7 +130,6 @@ public class CollectionForm {
             itemIds.add(new Id(id));
         }
         Collection c = new Collection(collectionType, name, description, credit, itemIds);
-        c.setFilepath(filepath);
         c.setThumbnailURL(thumbnailURL);
         return c;
     }
@@ -140,8 +138,9 @@ public class CollectionForm {
         this.collectionType = collectionType;
     }
 
-    public void setUrlSlugName(@NotNull String urlSlugName) {
-        this.urlSlugName = urlSlugName.toLowerCase().trim();
+    public void setUrlSlugName(String urlSlugName) {
+
+        this.urlSlugName = urlSlugName;
     }
 
     public void setSortName(String sortName) {
@@ -182,14 +181,6 @@ public class CollectionForm {
         }
 
         this.itemIds = ids;
-    }
-
-    public String getFilepath() {
-        return filepath;
-    }
-
-    public void setFilepath(String filepath) {
-        this.filepath = filepath;
     }
 
     public String getThumbnailURL() {

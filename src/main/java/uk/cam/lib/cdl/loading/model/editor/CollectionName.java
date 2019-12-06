@@ -64,4 +64,17 @@ public class CollectionName {
         }
         return o.toString().replace("\n", "\n    ");
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CollectionName) {
+            return toString().equals(obj.toString());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
 }

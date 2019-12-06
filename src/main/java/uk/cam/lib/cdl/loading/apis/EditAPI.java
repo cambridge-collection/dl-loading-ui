@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.apis;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -12,9 +13,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
-import uk.cam.lib.cdl.loading.model.editor.Dataset;
-import uk.cam.lib.cdl.loading.model.editor.Id;
-import uk.cam.lib.cdl.loading.model.editor.Item;
+import uk.cam.lib.cdl.loading.model.editor.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -38,17 +37,20 @@ public class EditAPI {
     private final String dataPath;
     private final String dataItemPath;
     private final File datasetFile;
+    private final File uiFile;
     private final GitHelper gitHelper;
 
     private Map<String, Collection> collectionMap = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, String> collectionFilepaths = Collections.synchronizedMap(new HashMap<>());
     private Map<String, Item> itemMap = Collections.synchronizedMap(new HashMap<>());
     private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
 
-
-    public EditAPI(String dataPath, String dlDatasetFilename, String dataItemPath, GitLocalVariables gitSourceVariables) {
+    public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath,
+                   GitLocalVariables gitSourceVariables) {
         this.gitHelper = new GitHelper(gitSourceVariables);
         this.dataPath = dataPath;
         this.datasetFile = new File(dataPath + File.separator + dlDatasetFilename);
+        this.uiFile = new File(dataPath + File.separator + dlUIFilename);
         this.dataItemPath = dataItemPath;
         setup();
     }
@@ -61,10 +63,12 @@ public class EditAPI {
      * @param dataItemPath
      * @param gitHelper
      */
-    public EditAPI(String dataPath, String dlDatasetFilename, String dataItemPath, GitHelper gitHelper) {
+    public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath,
+                   GitHelper gitHelper) {
         this.gitHelper = gitHelper;
         this.dataPath = dataPath;
         this.datasetFile = new File(dataPath + File.separator + dlDatasetFilename);
+        this.uiFile = new File(dataPath + File.separator + dlUIFilename);
         this.dataItemPath = dataItemPath;
         setup();
     }
@@ -88,38 +92,68 @@ public class EditAPI {
             e.printStackTrace();
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Dataset dataset = objectMapper.readValue(datasetFile, Dataset.class);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+        mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
+        Dataset dataset = mapper.readValue(datasetFile, Dataset.class);
         Map<String, Collection> newCollectionMap = Collections.synchronizedMap(new HashMap<>());
+        Map<String, String> newCollectionFilepaths = Collections.synchronizedMap(new HashMap<>());
         Map<String, Item> newItemMap = Collections.synchronizedMap(new HashMap<>());
 
         // Setup collections
         for (Id id : dataset.getCollections()) {
 
             String collectionPath = id.getId();
-
             File collectionFile = new File(dataPath + File.separator + collectionPath);
             if (!collectionFile.exists()) {
                 throw new FileNotFoundException("Collection file cannot be found at: " + collectionFile.toPath());
             }
 
-            Collection c = objectMapper.readValue(collectionFile, Collection.class);
-            c.setFilepath(collectionFile.getCanonicalPath()); // is needed to get correct item path
-            c.setThumbnailURL(gitHelper.getDataLocalPath() + "/pages/images/collectionsView/collection-" + c.getName().getUrlSlug() +
-                ".jpg"); // TODO fix hardcoding
+            Collection c = mapper.readValue(collectionFile, Collection.class);
+            String urlSlug = c.getName().getUrlSlug();
+            String thumbnailURL = getCollectionThumbnailURL(collectionFile.getCanonicalPath());
+            c.setThumbnailURL(thumbnailURL);
 
-            // Setup collection map
-            newCollectionMap.put(c.getName().getUrlSlug(), c);
+            // Setup collection maps
+            newCollectionMap.put(urlSlug, c);
+            newCollectionFilepaths.put(urlSlug, collectionFile.getCanonicalPath());
 
-            // Items
             for (Id itemId : c.getItemIds()) {
-                newItemMap.put(FilenameUtils.getBaseName(itemId.getId()), createItem(itemId.getId(), c));
+                newItemMap.put(FilenameUtils.getBaseName(itemId.getId()), createItem(itemId.getId(), collectionFile));
             }
 
         }
 
         this.collectionMap = newCollectionMap;
+        this.collectionFilepaths = newCollectionFilepaths;
         this.itemMap = newItemMap;
+    }
+
+    // TODO parse UI data into a model object
+    private String getCollectionThumbnailURL(String requiredCollectionFilepath) {
+
+        if (requiredCollectionFilepath != null) {
+            try {
+
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+                mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
+                UI ui = mapper.readValue(uiFile, UI.class);
+                for (UICollection collection : ui.getThemeData().getCollections()) {
+                    String collectionPath = collection.getCollection().getId();
+                    File collectionFile = new File(dataPath + File.separator + collectionPath);
+                    if (collectionFile.getCanonicalPath().equals(requiredCollectionFilepath)) {
+                        String relativeThumbnailPath = collection.getThumbnail().getId();
+                        File thumbnailFile = new File(dataPath, relativeThumbnailPath);
+                        return thumbnailFile.getCanonicalPath();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
     }
 
     public List<Collection> getCollections() {
@@ -130,9 +164,7 @@ public class EditAPI {
         return collectionMap.get(urlSlug);
     }
 
-    private Item createItem(String id, Collection collection) throws IOException {
-
-        File collectionFile = new File(collection.getFilepath());
+    private Item createItem(String id, File collectionFile) throws IOException {
         File f = new File(collectionFile.getParentFile().getCanonicalPath(), id);
         return new Item(FilenameUtils.getBaseName(f.getName()), f.getCanonicalPath(), new Id(id));
     }
@@ -140,7 +172,6 @@ public class EditAPI {
     public Item getItem(String id) {
         return itemMap.get(FilenameUtils.getBaseName(id));
     }
-
 
     public boolean validate(MultipartFile file) {
 
@@ -231,11 +262,12 @@ public class EditAPI {
 
             if (!itemAlreadyInCollection) {
 
+                String collectionFilePath = collectionFilepaths.get(collection.getName().getUrlSlug());
                 // Add itemId to collection
                 if (itemMap.containsKey(itemName)) {
                     collection.getItemIds().add(itemMap.get(itemName).getId());
                 } else {
-                    String collectionDir = new File(collection.getFilepath()).getParentFile().getPath();
+                    String collectionDir = new File(collectionFilePath).getParentFile().getPath();
                     String itemPath = Paths.get(collectionDir).relativize(Paths.get(output.getCanonicalPath())).toString();
                     Id id = new Id(itemPath);
                     collection.getItemIds().add(id);
@@ -244,7 +276,7 @@ public class EditAPI {
                 // Write out collection file
                 ObjectMapper mapper = new ObjectMapper();
                 ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-                writer.writeValue(new File(collection.getFilepath()), collection);
+                writer.writeValue(new File(collectionFilePath), collection);
 
             }
 
@@ -272,7 +304,8 @@ public class EditAPI {
             // Write out collection file
             ObjectMapper mapper = new ObjectMapper();
             ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-            writer.writeValue(new File(collection.getFilepath()), collection);
+            String collectionFilePath = collectionFilepaths.get(collectionUrlSlug);
+            writer.writeValue(new File(collectionFilePath), collection);
 
             // Delete file for item if it exists in no other collection
             if (getFirstCollectionForItem(item) == null) {
@@ -314,10 +347,33 @@ public class EditAPI {
     public boolean updateCollection(Collection collection) {
         try {
 
-            // Write out file
+            final Set<String> collections = collectionMap.keySet();
             ObjectMapper mapper = new ObjectMapper();
+
+            // New collection
+            if (!collections.contains(collection)) {
+
+                // add collection to dataset file.
+                Dataset dataset = mapper.readValue(datasetFile, Dataset.class);
+                List<Id> collectionIds = dataset.getCollections();
+                // assume new collections go in the collections directory
+                String collectionPath = "collections/" + collection.getName().getUrlSlug() + ".collection.json";
+                collectionIds.add(new Id(collectionPath));
+
+                // Write out dataset file
+                ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
+                writer.writeValue(datasetFile, dataset);
+
+                File collectionFile = new File(dataPath + File.separator + collectionPath);
+                collectionFilepaths.put(collection.getName().getUrlSlug(), collectionFile.getCanonicalPath());
+
+            }
+
+            // Write out collection file
+            String collectionFilepath = collectionFilepaths.get(collection.getName().getUrlSlug());
+
             ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-            writer.writeValue(new File(collection.getFilepath()), collection);
+            writer.writeValue(new File(collectionFilepath), collection);
 
             // Git Commit and push to remote repo.
             boolean success = gitHelper.pushGitChanges();
@@ -332,6 +388,10 @@ public class EditAPI {
 
     public String getDataLocalPath() {
         return gitHelper.getDataLocalPath();
+    }
+
+    public File getDatasetFile() {
+        return datasetFile;
     }
 
 }

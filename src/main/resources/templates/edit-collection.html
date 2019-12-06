@@ -54,13 +54,9 @@
                         <div class="card-body">
 
                             <form method="post" id="collectioneditform"
-                                  th:action="@{'/edit/collection/'+${form.urlSlugName}+'/update'}"
+                                  th:action="@{'/edit/collection/update'}"
                                   th:object="${form}">
-                                <input type="hidden" name="collectionType" th:value="*{collectionType}">
-                                <input type="hidden" name="urlSlugName" th:value="*{urlSlugName}">
                                 <input type="hidden" name="itemIds" th:value="*{ItemIds}">
-                                <input type="hidden" name="filepath" th:value="*{filepath}">
-                                <input type="hidden" name="thumbnailURL" th:value="*{thumbnailURL}">
                                 <div class="form-group w-auto">
                                     <div class="row">
                                         <div class="col"><h4>Names</h4></div>
@@ -68,13 +64,20 @@
                                     <div class="row">
                                         <div class="col">
                                             <div class="row">
-                                                <div class="col-4 m-2 text-right">Identifier</div>
+                                                <div class="col-4 m-2 text-right">Identifier / URL</div>
                                                 <div class="col m-2">
                                                     <div class="alert-danger"
                                                          th:if="${#fields.hasErrors('urlSlugName')}"
                                                          th:errors="*{urlSlugName}"></div>
-                                                    <span class="text-gray-800"
-                                                          th:text="*{urlSlugName}"></span>
+                                                    <!--                                                    <span th:if="${newCollection}" class="text-gray-800"
+                                                                                                              th:text="*{urlSlugName}">
+                                                                                                            <input type="hidden" name="urlSlugName" th:value="*{urlSlugName}">
+                                                                                                        </span>-->
+                                                    <input class="form-control"
+                                                           type="text" name="urlSlugName"
+                                                           id="name.urlSlugName"
+                                                           maxlength="30"
+                                                           th:value="*{urlSlugName}">
                                                 </div>
                                             </div>
 
@@ -125,7 +128,7 @@
                                                     <div class="row">
                                                         <div style="width: 150px">
                                                             <img class="img-thumbnail"
-                                                                 th:src="'/edit/download?filepath='+${form.thumbnailURL}"
+                                                                 th:src="'/edit/download?filepath='+${thumbnailURL}"
                                                                  width="146px"
                                                                  height="146px">
                                                         </div>
@@ -212,7 +215,7 @@
                             <div class="row mt-6">
                                 <div class="col"><h4>Items</h4></div>
                             </div>
-                            <div class="row">
+                            <div th:if="${!newCollection}" class="row">
                                 <div class="col-2 m-2 text-right">
 
                                 </div>
@@ -256,11 +259,18 @@
 
                                 </div>
                             </div>
+                            <div th:if="${newCollection}" class="row">
+                                <div class="col-2 m-2 text-right">
+                                </div>
+                                <div class="col-6 m-2">
+                                    Please 'Update' to create your collection before you can add items.
+                                </div>
+                            </div>
                             <div class="row mt-6">
                                 <div>
                                 </div>
                             </div>
-                            <div class="row mt-6">
+                            <div th:if="${!newCollection}" class="row mt-6">
                                 <div class="col-2 m-2 text-right">
                                     <label for="additemFile">Add / Replace Item</label>
                                 </div>

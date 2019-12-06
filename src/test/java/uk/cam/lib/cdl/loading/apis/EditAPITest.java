@@ -72,13 +72,13 @@ class EditAPITest {
 
         gitSourceVariables = new GitLocalVariables(cloneDir.getCanonicalPath(), "/data",
             "gitSourceURL", "gitSourceURLUserame",
-            "gitSourceURLPassword", "gitBranch", "test.dl-dataset.json");
+            "gitSourceURLPassword", "gitBranch");
 
 
         GitHelper gitHelper = new GitHelper(git, gitSourceVariables);
 
         editAPI = new EditAPI(cloneDir.getCanonicalPath() + "/data",
-            gitSourceVariables.getGitDatasetFilename(),
+            "test.dl-dataset.json", "test.ui.json5",
             gitSourceVariables.getGitSourcePath() + "/data/items/data/tei/", gitHelper);
 
     }
@@ -199,14 +199,14 @@ class EditAPITest {
         assert ("sortName".equals(editAPI.getCollection("test").getName().getSort()));
     }
 
-/*    @Test
+    @Test
     void addCollection() {
 
         Collection collection = makeCollection("newCollection");
         assert (!editAPI.getCollections().contains(collection));
-        editAPI.addCollection(collection);
+        editAPI.updateCollection(collection);
         assert (editAPI.getCollections().contains(collection));
-    }*/
+    }
 
     @Test
     void getDataLocalPath() {
@@ -222,12 +222,11 @@ class EditAPITest {
         CollectionCredit credit = new CollectionCredit(new Id("proseCredit"));
 
         List<Id> itemIds = new ArrayList<>();
-        itemIds.add(new Id("MS-TEST-00001"));
+        itemIds.add(new Id("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml"));
 
         Collection c = new Collection("collectionType", name, description, credit, itemIds);
         String filePath =
             gitSourceVariables.getGitSourcePath() + "/data/collections/" + urlSlugName + ".collection.json";
-        c.setFilepath(filePath);
         c.setThumbnailURL("thumbnailURL");
 
         return c;

@@ -55,5 +55,17 @@ public class CollectionDescription {
         return o.toString().replace("\n", "\n    ");
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CollectionDescription) {
+            return toString().equals(obj.toString());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
 
 }
