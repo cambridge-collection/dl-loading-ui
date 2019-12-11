@@ -29,7 +29,7 @@ public class GitHelper {
     GitHelper(GitLocalVariables gitSourceVariables) {
         this.gitSourceVariables = gitSourceVariables;
         git = setupRepo(gitSourceVariables.getGitSourcePath(), gitSourceVariables.getGitSourceURL(),
-            gitSourceVariables.getGitSourceURLUserame(),
+            gitSourceVariables.getGitSourceURLUsername(),
             gitSourceVariables.getGitSourceURLPassword());
     }
 
@@ -42,7 +42,7 @@ public class GitHelper {
         return git;
     }
 
-    private synchronized Git setupRepo(String gitSourcePath, String gitSourceURL, String gitSourceURLUserame,
+    private synchronized Git setupRepo(String gitSourcePath, String gitSourceURL, String gitSourceURLUsername,
                                        String gitSourceURLPassword) {
         try {
             File dir = new File(gitSourcePath);
@@ -55,7 +55,7 @@ public class GitHelper {
                 return Git.cloneRepository()
                     .setURI(gitSourceURL)
                     .setBranch(gitSourceVariables.getGitBranch())
-                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitSourceURLUserame,
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitSourceURLUsername,
                         gitSourceURLPassword))
                     .setDirectory(new File(gitSourcePath))
                     .call();
@@ -79,13 +79,13 @@ public class GitHelper {
     public boolean pullGitChanges() throws GitAPIException {
 
         FetchResult fetchResult = git.fetch().setCredentialsProvider(
-            new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUserame(),
+            new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUsername(),
                 gitSourceVariables.getGitSourceURLPassword())).call();
 
         // Check for changes, and pull if there have been.
         if (!fetchResult.getTrackingRefUpdates().isEmpty()) {
             PullResult pullResult = git.pull().setCredentialsProvider(
-                new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUserame(),
+                new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUsername(),
                     gitSourceVariables.getGitSourceURLPassword())).call();
             if (!pullResult.isSuccessful()) {
                 // TODO Handle conflict problems
@@ -110,7 +110,7 @@ public class GitHelper {
             git.add().addFilepattern(".").call();
             git.commit().setMessage("Changed from Loading UI").call();
             Iterable<PushResult> results = git.push().setCredentialsProvider(
-                new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUserame(),
+                new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUsername(),
                     gitSourceVariables.getGitSourceURLPassword())).call();
 
             for (PushResult pushResult : results) {

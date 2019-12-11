@@ -76,7 +76,10 @@ public class CollectionForm {
     }
 
     public CollectionForm() {
-        this.collectionType = "https://schemas.cudl.lib.cam.ac.uk/package/v1/collection.json";
+
+        this.setCollectionType("https://schemas.cudl.lib.cam.ac.uk/package/v1/collection.json");
+        this.setProseCredit("../pages/html/collections/sample/sponsors.html"); // TODO fix hardcoding
+        this.setFullDescription("../pages/html/collections/sample/summary.html"); // TODO fix hardcoding
     }
 
     public String getShortDescription() {
