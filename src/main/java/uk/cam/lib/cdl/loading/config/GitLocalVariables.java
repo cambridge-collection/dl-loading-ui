@@ -35,7 +35,7 @@ public class GitLocalVariables {
         return gitSourceURL;
     }
 
-    public String getGitSourceURLUserame() {
+    public String getGitSourceURLUsername() {
         return gitSourceURLUserame;
     }
 
