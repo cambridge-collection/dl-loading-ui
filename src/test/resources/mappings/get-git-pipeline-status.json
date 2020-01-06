@@ -1,0 +1,14 @@
+{
+    "request" : {
+        "url" : "/pipelines/testid",
+        "method" : "GET"
+    },
+    "response" : {
+        "status" : 200,
+        "body" : "{\"type\": \"pipeline\", \"uuid\": \"{33ced4f9-0055-48e2-9e92-8ba73b6c52d0}\", \"repository\": {\"name\": \"mdiv-data-source\", \"type\": \"repository\", \"full_name\": \"CUDL/mdiv-data-source\", \"links\": {\"self\": {\"href\": \"https://api.bitbucket.org/2.0/repositories/CUDL/mdiv-data-source\"}, \"html\": {\"href\": \"https://bitbucket.org/CUDL/mdiv-data-source\"}, \"avatar\": {\"href\": \"https://bytebucket.org/ravatar/%7Be84327da-7cc4-44c5-b76b-63ecda6d8eb3%7D?ts=default\"}}, \"uuid\": \"{e84327da-7cc4-44c5-b76b-63ecda6d8eb3}\"}, \"state\": {\"name\": \"COMPLETED\", \"type\": \"pipeline_state_completed\", \"result\": {\"name\": \"SUCCESSFUL\", \"type\": \"pipeline_state_completed_successful\"}}, \"build_number\": 171, \"creator\": {\"display_name\": \"MUDL Bot\", \"uuid\": \"{8922be7f-abac-4707-b42e-03284ac4ed0c}\", \"links\": {\"self\": {\"href\": \"https://api.bitbucket.org/2.0/users/%7B8922be7f-abac-4707-b42e-03284ac4ed0c%7D\"}, \"html\": {\"href\": \"https://bitbucket.org/%7B8922be7f-abac-4707-b42e-03284ac4ed0c%7D/\"}, \"avatar\": {\"href\": \"https://secure.gravatar.com/avatar/cc2b9a99ac3fb7deaeea25798b97b89b?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMB-6.png\"}}, \"type\": \"user\", \"nickname\": \"mudl-bot\", \"account_id\": \"5c45b4743e729341b3511365\"}, \"created_on\": \"2019-12-11T11:29:16.308Z\", \"completed_on\": \"2019-12-11T11:32:52.509Z\", \"target\": {\"type\": \"pipeline_ref_target\", \"ref_type\": \"branch\", \"ref_name\": \"content-loader-ui\", \"selector\": {\"type\": \"custom\", \"pattern\": \"package\"}, \"commit\": {\"type\": \"commit\", \"hash\": \"26495fea90c4499861a629d735a104108bb11a62\", \"links\": {\"self\": {\"href\": \"https://api.bitbucket.org/2.0/repositories/CUDL/mdiv-data-source/commit/26495fea90c4499861a629d735a104108bb11a62\"}, \"html\": {\"href\": \"https://bitbucket.org/CUDL/mdiv-data-source/commits/26495fea90c4499861a629d735a104108bb11a62\"}}}}, \"trigger\": {\"name\": \"MANUAL\", \"type\": \"pipeline_trigger_manual\"}, \"run_number\": 1, \"duration_in_seconds\": 197, \"build_seconds_used\": 196, \"expired\": false, \"links\": {\"self\": {\"href\": \"https://bitbucket-pipelines.prod.public.atl-paas.net//rest/1.0/accounts/{716de5e6-3a3b-434e-89f9-dd8f688aa3ac}/repositories/{e84327da-7cc4-44c5-b76b-63ecda6d8eb3}/pipelines/{33ced4f9-0055-48e2-9e92-8ba73b6c52d0}\"}, \"steps\": {\"href\": \"https://bitbucket-pipelines.prod.public.atl-paas.net//rest/1.0/accounts/{716de5e6-3a3b-434e-89f9-dd8f688aa3ac}/repositories/{e84327da-7cc4-44c5-b76b-63ecda6d8eb3}/pipelines/{33ced4f9-0055-48e2-9e92-8ba73b6c52d0}/steps\"}}, \"has_variables\": false}",
+        "headers" : {
+            "Content-Type" : "application/json"
+        }
+    }
+}
+

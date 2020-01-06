@@ -56,6 +56,7 @@ class BitBucketAPIHelper {
     }
 
     @Cacheable(cacheName)
+/*
     public List<Tag> getTags() {
         String json = webHelper.requestGET(tagsURL, "application/json", username, password).getResponse();
         JSONObject parent = new JSONObject(json);
@@ -72,6 +73,7 @@ class BitBucketAPIHelper {
         }
         return tags;
     }
+*/
 
     /**
      * Gets the last 10 pipelines that have been run.

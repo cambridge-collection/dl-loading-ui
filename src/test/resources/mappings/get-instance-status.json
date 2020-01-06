@@ -1,0 +1,14 @@
+{
+    "request" : {
+        "url" : "/api/deploy/v0.1/instances/testid/status",
+        "method" : "GET"
+    },
+    "response" : {
+        "status" : 200,
+        "body" : "{  \"currentCollectionsVersion\": \"dl-version-123\",  \"currentItemsVersion\": \"dl-version-123\",  \"instanceId\": \"testid\"}",
+        "headers" : {
+            "Content-Type" : "application/json"
+        }
+    }
+}
+

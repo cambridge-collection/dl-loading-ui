@@ -1,0 +1,14 @@
+{
+    "request" : {
+        "url" : "/api/deploy/v0.1/instances/testid",
+        "method" : "GET"
+    },
+    "response" : {
+        "status" : 200,
+        "body" : " {  \"displayOrder\": 0,    \"instanceId\": \"testid\",    \"url\": \"string\",    \"version\": \"string\"  }",
+        "headers" : {
+            "Content-Type" : "application/json"
+        }
+    }
+}
+

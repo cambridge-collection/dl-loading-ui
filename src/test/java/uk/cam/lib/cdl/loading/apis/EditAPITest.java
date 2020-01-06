@@ -3,9 +3,6 @@ package uk.cam.lib.cdl.loading.apis;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryCache;
-import org.eclipse.jgit.util.FS;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -43,41 +40,27 @@ class EditAPITest {
     // content is added from the resources source-data dir.
     public EditAPITest() throws IOException, GitAPIException {
 
-        // Create a folder in the temp folder that will act as the remote repository
-        File remoteDir = File.createTempFile("remote", "");
-        remoteDir.delete();
-        remoteDir.mkdirs();
+        MockGitRepo gitRepo = new MockGitRepo();
+        Git git = gitRepo.getGit();
 
-        // Create a bare repository
-        RepositoryCache.FileKey fileKey = RepositoryCache.FileKey.exact(remoteDir, FS.DETECTED);
-        Repository remoteRepo = fileKey.open(false);
-        remoteRepo.create(true);
-
-        // Clone the bare repository
-        File cloneDir = File.createTempFile("clone", "");
-        cloneDir.delete();
-        cloneDir.mkdirs();
-
-        Git git = Git.cloneRepository().setURI(remoteRepo.getDirectory().getAbsolutePath()).setDirectory(cloneDir).call();
-
-        // Let's to our first commit
+        // Let's do our first commit
         // Create a new file
         File testSourceDir = new File("./src/test/resources/source-data");
-        FileUtils.copyDirectory(testSourceDir, cloneDir);
+        FileUtils.copyDirectory(testSourceDir, gitRepo.getCloneDir());
 
         // Commit the new file
         git.add().addFilepattern(".").call();
         git.commit().setMessage("Adding Test Data").setAuthor("testuser", "test@example.com ").call();
 
 
-        gitSourceVariables = new GitLocalVariables(cloneDir.getCanonicalPath(), "/data",
+        gitSourceVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "/data",
             "gitSourceURL", "gitSourceURLUserame",
             "gitSourceURLPassword", "gitBranch");
 
 
         GitHelper gitHelper = new GitHelper(git, gitSourceVariables);
 
-        editAPI = new EditAPI(cloneDir.getCanonicalPath() + "/data",
+        editAPI = new EditAPI(gitRepo.getCloneDir().getCanonicalPath() + "/data",
             "test.dl-dataset.json", "test.ui.json5",
             gitSourceVariables.getGitSourcePath() + "/data/items/data/tei/", gitHelper);
 
