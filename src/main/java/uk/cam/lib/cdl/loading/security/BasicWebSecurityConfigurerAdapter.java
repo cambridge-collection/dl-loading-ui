@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +81,10 @@ public class BasicWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdap
 
         http.addFilterAfter(new CustomFilter(),
             BasicAuthenticationFilter.class);
+
+        // Required for allowing Iframe embedding from same origin.
+        http.headers().frameOptions().disable()
+            .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN));
 
         http.logout()
             .logoutUrl("/logout")

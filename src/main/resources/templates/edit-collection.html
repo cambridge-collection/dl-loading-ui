@@ -8,6 +8,7 @@
     <link href="/webjars/startbootstrap-sb-admin-2/vendor/datatables/dataTables.bootstrap4.css" rel="stylesheet">
     <link href="/webjars/startbootstrap-sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
     <link href="/webjars/ckeditor/standard/contents.css" rel="stylesheet">
+    <link href="/css/edit-collection.css" rel="stylesheet">
 
     <!-- page styles -->
 </head>
@@ -127,17 +128,21 @@
                                                 <div class="card-body">
                                                     <div class="row">
                                                         <div style="width: 150px">
-                                                            <img class="img-thumbnail"
+                                                            <img id="thumbnailImage" class="img-thumbnail"
                                                                  th:src="'/edit/source/'+${thumbnailURL}"
                                                                  width="146px"
                                                                  height="146px">
+                                                            <input id="thumbnailImageInput" type="hidden"
+                                                                   name="thumbnailURL"
+                                                                   th:value="${thumbnailURL}">
                                                         </div>
                                                         <div class="col">
                                                             <p><u>Collection Thumbnail</u></p>
-                                                            <p>This image should be square and will be resized to be
-                                                                146x146
+                                                            <p>This image should be square and 146x146
                                                                 pixels.</p>
-                                                            <p><a href="#">Replace Image</a></p>
+                                                            <p><a href="#"
+                                                                  id="replaceImageModalButton">Replace
+                                                                Image</a></p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -338,17 +343,31 @@
         </div>
     </div>
 
-</div>
-<!-- /.container-fluid -->
-
-<!-- Sticky Footer -->
-<footer class="sticky-footer">
-    <div class="container my-auto">
-        <div class="copyright text-center my-auto">
-            <span>Created by Cambridge University Library</span>
+    <div class="modal fade" id="replaceImageModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div style="--aspect-ratio: 16/9;">
+                        <iframe src="/editor/browse/images" width="1000px" height="500px" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
-</footer>
+
+    <!-- /.container-fluid -->
+
+    <!-- Sticky Footer -->
+    <footer class="sticky-footer">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>Created by Cambridge University Library</span>
+            </div>
+        </div>
+    </footer>
 
 </div>
 <!-- /.content-wrapper -->

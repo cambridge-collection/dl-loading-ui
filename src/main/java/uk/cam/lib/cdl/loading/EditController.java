@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 
@@ -220,10 +219,6 @@ public class EditController {
 
         attributes.addAttribute("collectionId", collectionForm.getUrlSlugName());
         return new RedirectView("/edit/collection/");
-    }
-
-    private <T> boolean listEqualsIgnoreOrder(List<T> list1, List<T> list2) {
-        return new HashSet<>(list1).equals(new HashSet<>(list2));
     }
 
     @PostMapping("/edit/collection/{collectionId}/addItem")
