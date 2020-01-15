@@ -22,6 +22,7 @@ import uk.cam.lib.cdl.loading.model.WebResponse;
 import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
 import uk.cam.lib.cdl.loading.model.packaging.Pipeline;
 import uk.cam.lib.cdl.loading.model.packaging.Update;
+import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.io.IOException;
 import java.util.*;
@@ -39,12 +40,12 @@ import java.util.*;
 public class PackagingAPI {
 
     private final GitHelper gitHelper;
-    private final BitBucketAPIHelper sourceBitBucketAPI;
+    private final BitBucketAPI sourceBitBucketAPI;
 
     public PackagingAPI(GitLocalVariables gitSourceVariables, GitAPIVariables gitAPIVariables) {
         this.gitHelper = new GitHelper(gitSourceVariables);
 
-        this.sourceBitBucketAPI = new BitBucketAPIHelper(gitAPIVariables.getGitAPIURL(), gitAPIVariables.getGitBranch(),
+        this.sourceBitBucketAPI = new BitBucketAPI(gitAPIVariables.getGitAPIURL(), gitAPIVariables.getGitBranch(),
             gitAPIVariables.getRepoURL(), gitAPIVariables.getTagsURL(), gitAPIVariables.getPipelinesURL(),
             gitAPIVariables.getGitUsername(), gitAPIVariables.getGitPassword());
     }

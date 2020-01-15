@@ -1,0 +1,75 @@
+body {
+    background: white;
+}
+
+a.campl-external {
+    background: #fff;
+    padding-right: 0px;
+}
+
+.thumbnail {
+    height: 210px;
+    display: block;
+    padding: 15px 15px 0px 15px;
+    margin-bottom: 30px;
+    line-height: 1.42857143;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    -webkit-transition: border 0.2s ease-in-out;
+    -o-transition: border 0.2s ease-in-out;
+    transition: border 0.2s ease-in-out;
+    box-sizing: border-box;
+}
+
+.delete-button {
+    opacity: 0.8;
+    float: right;
+    margin-top: 10px;
+}
+
+.thumbnail .caption {
+    position: absolute;
+    bottom: 30px;
+    line-height: 1.42857143;
+    font-size: 12px;
+    font-weight: normal;
+    width: 80%;
+}
+
+.thumbnail img {
+    margin-right: auto;
+    margin-left: auto;
+    display: block;
+}
+
+.fancybox img {
+    max-height: 100px;
+    max-width: 200px;
+}
+
+#addFile {
+    position: fixed;
+    width: 500px;
+    margin: -300px auto auto -250px;
+    top: 50%;
+    left: 50%;
+    text-align: center;
+}
+
+#addFile .input {
+    margin: 10px;
+}
+
+#deleteFile {
+    position: fixed;
+    width: 500px;
+    margin: -300px auto auto -250px;
+    top: 50%;
+    left: 50%;
+    text-align: center;
+}
+
+#deleteFile .input {
+    margin: 10px;
+}

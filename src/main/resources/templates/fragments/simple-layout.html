@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <div th:replace="fragments/header :: header"></div>
+    <title layout:title-pattern="CDL: Content Loader"></title>
+
+    <div th:replace="fragments/styles :: styles"></div>
+
+</head>
+<body id="page-top">
+<div id="wrapper">
+    <div layout:fragment="content"></div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
+<div layout:fragment="page_js"></div>
+</body>
+</html>

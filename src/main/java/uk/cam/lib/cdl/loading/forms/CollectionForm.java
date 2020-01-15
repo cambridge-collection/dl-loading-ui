@@ -42,10 +42,12 @@ public class CollectionForm {
     private String mediumDescription;
 
     //@NotBlank(message = "Must specify a full description.")
-    private String fullDescription;
+    private String fullDescriptionPath;
+    private String fullDescriptionHTML;
 
     //@NotBlank(message = "Must specify a prose credit.")
-    private String proseCredit;
+    private String proseCreditPath;
+    private String proseCreditHTML;
 
     @NotNull
     private List<String> itemIds;
@@ -53,7 +55,7 @@ public class CollectionForm {
     //@NotBlank(message = "Must specify a thumbnail URL")
     private String thumbnailURL;
 
-    public CollectionForm(Collection collection) {
+    public CollectionForm(Collection collection, String descriptionHTML, String creditHTML) {
         if (collection == null) {
             return;
         }
@@ -64,8 +66,10 @@ public class CollectionForm {
         this.fullName = collection.getName().getFull();
         this.shortDescription = collection.getDescription().getShortDescription();
         this.mediumDescription = collection.getDescription().getMedium();
-        this.fullDescription = collection.getDescription().getFull().getId();
-        this.proseCredit = collection.getCredit().getProse().getId();
+        this.fullDescriptionPath = collection.getDescription().getFull().getId();
+        this.fullDescriptionHTML = descriptionHTML;
+        this.proseCreditPath = collection.getCredit().getProse().getId();
+        this.proseCreditHTML = creditHTML;
         this.thumbnailURL = collection.getThumbnailURL();
 
         List<String> itemIds = new ArrayList<>();
@@ -78,8 +82,10 @@ public class CollectionForm {
     public CollectionForm() {
 
         this.setCollectionType("https://schemas.cudl.lib.cam.ac.uk/package/v1/collection.json");
-        this.setProseCredit("../pages/html/collections/sample/sponsors.html"); // TODO fix hardcoding
-        this.setFullDescription("../pages/html/collections/sample/summary.html"); // TODO fix hardcoding
+
+        // TODO fix this
+        this.setProseCreditPath("../pages/html/collections/sample/sponsors.html"); // TODO fix hardcoding
+        this.setFullDescriptionPath("../pages/html/collections/sample/summary.html"); // TODO fix hardcoding
     }
 
     public String getShortDescription() {
@@ -90,12 +96,20 @@ public class CollectionForm {
         return mediumDescription;
     }
 
-    public String getFullDescription() {
-        return fullDescription;
+    public String getFullDescriptionPath() {
+        return fullDescriptionPath;
     }
 
-    public String getProseCredit() {
-        return proseCredit;
+    public String getFullDescriptionHTML() {
+        return fullDescriptionHTML;
+    }
+
+    public String getProseCreditPath() {
+        return proseCreditPath;
+    }
+
+    public String getProseCreditHTML() {
+        return proseCreditHTML;
     }
 
     public String getFullName() {
@@ -124,9 +138,9 @@ public class CollectionForm {
 
     public Collection toCollection() {
         CollectionName name = new CollectionName(urlSlugName, sortName, shortName, fullName);
-        CollectionDescription description = new CollectionDescription(shortDescription, new Id(fullDescription),
+        CollectionDescription description = new CollectionDescription(shortDescription, new Id(fullDescriptionPath),
             mediumDescription);
-        CollectionCredit credit = new CollectionCredit(new Id(proseCredit));
+        CollectionCredit credit = new CollectionCredit(new Id(proseCreditPath));
 
         List<Id> itemIds = new ArrayList<>();
         for (String id : getItemIds()) {
@@ -166,12 +180,24 @@ public class CollectionForm {
         this.shortDescription = shortDescription;
     }
 
-    public void setFullDescription(String fullDescription) {
-        this.fullDescription = fullDescription;
+    public void setFullDescriptionPath(String fullDescriptionPath) {
+        this.fullDescriptionPath = fullDescriptionPath;
     }
 
-    public void setProseCredit(String proseCredit) {
-        this.proseCredit = proseCredit;
+    public void setFullDescriptionHTML(String fullDescriptionHTML) {
+
+        // TODO Save HTML
+        this.fullDescriptionHTML = fullDescriptionHTML;
+    }
+
+    public void setProseCreditPath(String proseCreditPath) {
+        this.proseCreditPath = proseCreditPath;
+    }
+
+    public void setProseCreditHTML(String proseCreditHTML) {
+
+        // TODO Save HTML
+        this.proseCreditHTML = proseCreditHTML;
     }
 
     public void setItemIds(List<String> itemIds) {
@@ -194,3 +220,4 @@ public class CollectionForm {
         this.thumbnailURL = thumbnailURL;
     }
 }
+

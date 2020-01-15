@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -21,6 +22,7 @@ import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,19 +61,40 @@ public class EditController {
      */
     @GetMapping(value = {"/edit/collection/"})
     public String editCollection(Model model, @RequestParam(required = false) String collectionId)
-        throws NotFoundException {
+        throws NotFoundException, IOException {
 
         // TODO check permissions
         CollectionForm form;
         boolean newCollection = true;
         List<Item> items = new ArrayList<>();
-        ;
+
         if (collectionId == null) {
             form = new CollectionForm();
         } else {
             Collection collection = editAPI.getCollection(collectionId);
             if (model.asMap().get("form") == null) {
-                form = new CollectionForm(collection);
+
+                File collectionFile = new File(editAPI.getCollectionPath(collectionId));
+                File fullDescription = new File(collectionFile.getParentFile(),
+                    collection.getDescription().getFull().getId());
+                String collectionRelativePath =
+                    fullDescription.getParent().replaceAll(editAPI.getDataLocalPath()
+                        , "") + "/";
+                String descriptionHTML = FileUtils.readFileToString(fullDescription, "UTF-8");
+
+                // Need to parse relative links.
+                // TODO Make more robust.
+                descriptionHTML = descriptionHTML.replaceAll("src\\s*=\\s*'\\s*(?!http)",
+                    "src='/edit/source/" + collectionRelativePath);
+                descriptionHTML = descriptionHTML.replaceAll("src\\s*=\\s*\"\\s*(?!http)",
+                    "src=\"/edit/source/" + collectionRelativePath);
+
+
+                File credit = new File(collectionFile.getParentFile(),
+                    collection.getCredit().getProse().getId());
+                String creditHTML = FileUtils.readFileToString(credit, "UTF-8");
+
+                form = new CollectionForm(collection, descriptionHTML, creditHTML);
             } else {
                 form = (CollectionForm) model.asMap().get("form");
             }
@@ -84,24 +107,38 @@ public class EditController {
             }
         }
 
+        // Get thumbnail URL
         String thumbnailURL = form.getThumbnailURL();
         if (thumbnailURL == null || thumbnailURL.isEmpty()) {
-            thumbnailURL = editAPI.getDataLocalPath() + File.separator + "/pages/images/collectionsView/collection" +
+            thumbnailURL = "/pages/images/collectionsView/collection" +
                 "-blank.jpg"; // TODO read from UI properties.
         }
 
+        // Get HTML
         model.addAttribute("newCollection", newCollection);
         model.addAttribute("thumbnailURL", thumbnailURL);
         model.addAttribute("form", form);
         model.addAttribute("items", items);
+        model.addAttribute("dataLocalPath", editAPI.getDataLocalPath());
+
         return "edit-collection";
     }
 
-    @RequestMapping(value = "/edit/download")
-    public ResponseEntity<Resource> editDownload(Model model, @RequestParam String filepath)
+    /**
+     * Returns the requested file contents specified by filepath if it exists in the checkedout source repo.
+     *
+     * @param request
+     * @return
+     * @throws BadRequestException
+     * @throws IOException
+     */
+    @GetMapping(value = "/edit/source/**")
+    public ResponseEntity<Resource> editDownload(HttpServletRequest request)
         throws BadRequestException, IOException {
 
-        File file = new File(filepath);
+        String filepath = request.getRequestURI().split(request.getContextPath() + "/edit/source/")[1];
+
+        File file = new File(editAPI.getDataLocalPath() + filepath);
 
         // Allow access to git dir checkout only.
         if (!file.exists() || !file.toPath().toAbsolutePath().startsWith(editAPI.getDataLocalPath())) {
@@ -236,30 +273,6 @@ public class EditController {
         return new RedirectView("/edit/collection/" + collectionId + "/");
 
     }
-
-/*    @GetMapping("/edit/addcollection")
-    public RedirectView addCollection(RedirectAttributes attributes,
-                                         @Valid @ModelAttribute CollectionForm collectionForm) {
-
-
-        String collectionId =
-        attributes.addAttribute("newCollection", true);
-        return new RedirectView("/edit/collection/" + collectionId + "/");
-    }*/
-    /*public RedirectView replaceCollectionThumbnail(RedirectAttributes attributes, @PathVariable String collectionId,
-                                                   @RequestParam("file") MultipartFile file) throws IOException {
-
-        if (file.getContentType() == null ||
-            !(file.getContentType().equals("image/png")) || !(file.getContentType().equals("image/gif")) ||
-            !(file.getContentType().equals("image/jpg")) || !(file.getContentType().equals("image/jpeg"))) {
-
-            attributes.addFlashAttribute("error", "Item needs to be in .png, .jpg or .gif format.");
-            return new RedirectView("/edit/collection/" + collectionId + "/");
-        }
-
-
-        return new RedirectView("/edit/collection/" + collectionId + "/");
-    }*/
 
 }
 

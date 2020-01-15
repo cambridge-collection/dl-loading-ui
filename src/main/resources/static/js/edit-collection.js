@@ -38,6 +38,18 @@ $(document).ready(function () {
         return false;
     };
 
+    // Setup HTML editor
+    CKEDITOR.replace('description.full', {
+        filebrowserImageBrowseUrl: '/editor/browse/images',
+        height: 500,
+        removeButtons: 'About'
+    });
+
+    CKEDITOR.replace('credit.prose', {
+        filebrowserImageBrowseUrl: '/editor/browse/images',
+        height: 300,
+        removeButtons: 'About'
+    });
 });
 
 
