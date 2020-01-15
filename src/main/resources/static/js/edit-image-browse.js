@@ -51,16 +51,25 @@ $(document).ready(function () {
     }
 
     function selectFile(file) {
-        window.opener.CKEDITOR.tools.callFunction(
-            context.ckEditorFunctionId, file.url);
-        window.close();
+
+        // If this is called by CKEditor return value to that window.
+        if (context.ckEditor !== 'None') {
+            // update image in CKEditor (HTML Editing window)
+            window.opener.CKEDITOR.tools.callFunction(
+                context.ckEditorFunctionId, file.url);
+            window.close();
+        } else {
+            // update Image for collection and close parent modal
+            window.parent.$('#thumbnailImageInput').val(file.url.replace('/edit/source/', ''));
+            window.parent.$('#thumbnailImage').attr('src', file.url);
+            window.parent.$('#replaceImageModal').modal('hide');
+        }
     }
 
     function openDeleteConfirmation(file) {
-        if(file.type === 'DIRECTORY') {
+        if (file.type === 'DIRECTORY') {
             deleteInfo.html('<p>Only empty folders can be deleted.</p>');
-        }
-        else {
+        } else {
             deleteInfo.html('<p>Please make VERY sure this image is not used in any web pages before deleting it.</p>');
         }
 
@@ -69,7 +78,7 @@ $(document).ready(function () {
     }
 
     function deleteSelectedFile() {
-        if(!fileToDelete)
+        if (!fileToDelete)
             throw new Error('No file selected');
 
         let file = fileToDelete;
@@ -86,9 +95,9 @@ $(document).ready(function () {
             });
     }
 
-    function pathJoin(parts, sep){
+    function pathJoin(parts, sep) {
         let separator = sep || '/';
-        let replace   = new RegExp(separator+'{1,}', 'g');
+        let replace = new RegExp(separator + '{1,}', 'g');
         return parts.join(separator).replace(replace, separator);
     }
 
@@ -118,7 +127,7 @@ $(document).ready(function () {
         return true;
     }
 
-    $("#addFileForm").submit(function() {
+    $("#addFileForm").submit(function () {
         let url = `/editor/add/image?CKEditor=${encodeURIComponent(context.ckEditor)}&CKEditorFuncNum=${encodeURIComponent(context.ckEditorFunctionId)}&langCode=${encodeURIComponent(context.language)}`;
 
         if (validateAddForm()) {
@@ -130,7 +139,7 @@ $(document).ready(function () {
                 cache: false,
                 contentType: false,
                 processData: false,
-                success: function(data) {
+                success: function (data) {
                     window.location.reload(); //reload page.
                 }
             });

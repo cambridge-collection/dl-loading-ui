@@ -24,15 +24,16 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Controller for editing content through CKEditor on path /editor
  *
  * @author jennie
- *
  */
 @Controller
 @RequestMapping("/editor")
@@ -58,21 +59,18 @@ public class ContentEditorController {
     protected final GitHelper git = new GitHelper(gitLocalPath, gitUrl);
     private final UsersDao usersDao; */
 
-   // protected final Log logger = LogFactory.getLog(getClass());
-   private final EditAPI editAPI;
+    // protected final Log logger = LogFactory.getLog(getClass());
 
     @Autowired
     public ContentEditorController(EditAPI editAPI) {
-        this.editAPI = editAPI;
-
         contentImagesURL = "/edit/source/pages/images";
-        contentImagesPath = editAPI.getDataLocalPath()+"pages/images";
-        contentHTMLPath = editAPI.getDataLocalPath()+"pages/html";
+        contentImagesPath = editAPI.getDataLocalPath() + "pages/images";
+        contentHTMLPath = editAPI.getDataLocalPath() + "pages/html";
     }
 
     /**
      * Request on URL /editor/update/html
-     *
+     * <p>
      * Used by CKEditor to update the HTML on specified sections of the website.
      * Also commits to git.
      *
@@ -86,14 +84,14 @@ public class ContentEditorController {
     //@Secured("hasRole('ROLE_ADMIN')")
     @RequestMapping(value = "/update/html", method = RequestMethod.POST)
     public synchronized ModelAndView handleUpdateRequest(
-            HttpServletResponse response, HttpSession session,
-            @Valid @ModelAttribute() UpdateHTMLParameters writeParams,
-            BindingResult errors) throws IOException, JSONException {
+        HttpServletResponse response, HttpSession session,
+        @Valid @ModelAttribute() UpdateHTMLParameters writeParams,
+        BindingResult errors) throws IOException, JSONException {
 
         if (errors.hasErrors()) {
             throw new IOException(
-                    "HTML Update failed due to invalid parameters. Please check "
-                            + "your filename contains only valid characters.");
+                "HTML Update failed due to invalid parameters. Please check "
+                    + "your filename contains only valid characters.");
         }
 
         boolean success = saveHTML(writeParams);
@@ -119,7 +117,7 @@ public class ContentEditorController {
 
     /**
      * Request on URL /editor/add/image
-     *
+     * <p>
      * Used by CKEditor to upload an image file to the server.
      *
      * @param request
@@ -132,17 +130,17 @@ public class ContentEditorController {
     //@Secured("hasRole('ROLE_ADMIN')")
     @RequestMapping(value = "/add/image", method = RequestMethod.POST)
     public ModelAndView handleAddImageRequest(HttpServletRequest request,
-            HttpServletResponse response, HttpSession session,
-            @Valid @ModelAttribute() AddImagesParameters addParams,
-            BindingResult bindResult) throws IOException {
+                                              HttpServletResponse response, HttpSession session,
+                                              @Valid @ModelAttribute() AddImagesParameters addParams,
+                                              BindingResult bindResult) throws IOException {
 
         // Check file extension and content type are image.
         uploadFileValidation(addParams, bindResult);
 
         if (bindResult.hasErrors()) {
             throw new IOException(
-                    "Your image upload failed. Please ensure you have selected a file "
-                            + "and that your directory path contains only valid characters.");
+                "Your image upload failed. Please ensure you have selected a file "
+                    + "and that your directory path contains only valid characters.");
         }
 
         String filename = addParams.getUpload().getOriginalFilename();
@@ -150,7 +148,7 @@ public class ContentEditorController {
 
         // Save the file to disk.
         boolean saveSuccessful = FileSave.save(contentImagesPath
-                + File.separator + addParams.getDirectory(), filename, is);
+            + File.separator + addParams.getDirectory(), filename, is);
 
         if (saveSuccessful) {
 /*            AdminUser adminUser = Users.currentAdminUser(usersDao);
@@ -164,14 +162,14 @@ public class ContentEditorController {
 
         response.setContentType("text/html");
         write("<html><head><script> window.opener.CKEDITOR.tools.callFunction( "
-                + addParams.getCKEditorFuncNum()
-                + ", '"
-                + contentImagesURL
-                + "/"
-                + addParams.getUpload().getOriginalFilename()
-                + "', 'save successful: "
-                + saveSuccessful
-                + "' );window.close();</script>", response.getOutputStream());
+            + addParams.getCKEditorFuncNum()
+            + ", '"
+            + contentImagesURL
+            + "/"
+            + addParams.getUpload().getOriginalFilename()
+            + "', 'save successful: "
+            + saveSuccessful
+            + "' );window.close();</script>", response.getOutputStream());
 
         return null;
 
@@ -179,13 +177,11 @@ public class ContentEditorController {
 
     /**
      * Request on /editor/browse/images
-     *
+     * <p>
      * Used by CKEditor to browse the images available on the server.
      *
-     * @param request
-     * @param response
-     * @param ckEditor
-     * @param ckEditorFuncNum
+     * @param CKEditor
+     * @param CKEditorFuncNum
      * @param langCode
      * @return
      * @throws IOException
@@ -193,13 +189,10 @@ public class ContentEditorController {
     //@Secured("hasRole('ROLE_ADMIN')")
     @RequestMapping(value = "/browse/images")
     public ModelAndView handleBrowseImagesRequest(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @RequestParam("CKEditor") String ckEditor,
-            @RequestParam("CKEditorFuncNum") String ckEditorFuncNum,
-            @RequestParam("langCode") String langCode,
-            @RequestParam(value = "browseDir", required = false) String browseDir)
-            throws IOException {
+        @RequestParam(defaultValue = "None") String CKEditor,
+        @RequestParam(defaultValue = "-1") String CKEditorFuncNum,
+        @RequestParam(defaultValue = "en") String langCode,
+        @RequestParam(required = false) String browseDir) {
 
         // Get a list of images on the server.
         File imagesDir = new File(contentImagesPath);
@@ -210,24 +203,24 @@ public class ContentEditorController {
         // File[] files = imagesDir.listFiles();
         BrowseFile imageFiles = buildFileHierarchy(imagesDir);
 
-        imageFiles = buildBrowseDirectory(browseDir, imageFiles);
+        imageFiles = buildBrowseDirectory(browseDir, Objects.requireNonNull(imageFiles));
 
         ModelAndView modelAndView = new ModelAndView("edit-image-browse");
-        modelAndView.addObject("ckEditor", ckEditor);
-        modelAndView.addObject("ckEditorFuncNum", ckEditorFuncNum);
+        modelAndView.addObject("ckEditor", CKEditor);
+        modelAndView.addObject("ckEditorFuncNum", CKEditorFuncNum);
         modelAndView.addObject("langCode", langCode);
         modelAndView.addObject("imageFiles", imageFiles);
         modelAndView.addObject("browseDir", browseDir);
         modelAndView.addObject("homeDir", imagesDir.getPath());
         modelAndView.addObject("currentDir",
-                browseDir.replaceFirst(contentImagesPath, ""));
+            browseDir.replaceFirst(contentImagesPath, ""));
 
         return modelAndView;
     }
 
     /**
      * on Path /editor/delete/image
-     *
+     * <p>
      * Deletes the image at the specified path. Must start with
      * contentImagesPath.
      *
@@ -242,25 +235,25 @@ public class ContentEditorController {
     //@Secured("hasRole('ROLE_ADMIN')")
     @RequestMapping(value = "/delete/image", method = RequestMethod.POST)
     public ModelAndView handleDeleteImageRequest(HttpServletRequest request,
-            HttpServletResponse response, HttpSession session,
-            @Valid @ModelAttribute() DeleteImagesParameters deleteParams,
-            BindingResult bindResult) throws IOException, JSONException {
+                                                 HttpServletResponse response, HttpSession session,
+                                                 @Valid @ModelAttribute() DeleteImagesParameters deleteParams,
+                                                 BindingResult bindResult) throws IOException, JSONException {
 
         if (bindResult.hasErrors()) {
             throw new IOException(
-                    "Your image or directory delete failed. Please ensure the filePath exists "
-                            + "and has only got allowed characters in.");
+                "Your image or directory delete failed. Please ensure the filePath exists "
+                    + "and has only got allowed characters in.");
         }
 
         // delete the file.
         String filePath = deleteParams.getFilePath();
         File file = (new File(contentImagesPath + File.separator + filePath))
-                .getCanonicalFile();
+            .getCanonicalFile();
         boolean successful = false;
 
         if (file.exists() && !file.isDirectory()) {
             successful = file.delete(); // delete file
-        } else if (file.exists() && file.list().length == 0) {
+        } else if (file.exists() && Objects.requireNonNull(file.list()).length == 0) {
             successful = file.delete(); // delete empty directory.
         }
 
@@ -286,8 +279,9 @@ public class ContentEditorController {
     /**
      * Builds a list of image files on the server to be displayed by the browse
      * page.
-     *
+     * <p>
      * Files should be under the directory specified in contentPath.
+     *
      * @return
      */
     private BrowseFile buildFileHierarchy(File file) {
@@ -297,22 +291,22 @@ public class ContentEditorController {
         }
 
         String fileURL = contentImagesURL
-                + file.getPath().replaceFirst(contentImagesPath, "");
+            + file.getPath().replaceFirst(contentImagesPath, "");
 
         if (!file.isDirectory()) {
             return new BrowseFile(file.getName(), file.getPath(), fileURL,
-                    file.isDirectory(), null);
+                file.isDirectory(), null);
         }
 
         ArrayList<BrowseFile> children = new ArrayList<BrowseFile>();
-        for (int i = 0; i < file.listFiles().length; i++) {
+        for (int i = 0; i < Objects.requireNonNull(file.listFiles()).length; i++) {
 
-            File child = file.listFiles()[i];
+            File child = Objects.requireNonNull(file.listFiles())[i];
             children.add(buildFileHierarchy(child));
         }
         Collections.sort(children);
         return new BrowseFile(file.getName(), file.getPath(), fileURL,
-                file.isDirectory(), children);
+            file.isDirectory(), children);
     }
 
     /**
@@ -321,10 +315,10 @@ public class ContentEditorController {
      * @return
      */
     private BrowseFile buildBrowseDirectory(String browseDir,
-            BrowseFile imageFiles) {
+                                            BrowseFile imageFiles) {
 
         if (imageFiles.isDirectory()
-                && imageFiles.getFilePath().equals(browseDir)) {
+            && imageFiles.getFilePath().equals(browseDir)) {
             return imageFiles;
         }
 
@@ -332,8 +326,8 @@ public class ContentEditorController {
         if (children == null)
             return null;
 
-        for (int i = 0; i < children.size(); i++) {
-            BrowseFile f = buildBrowseDirectory(browseDir, children.get(i));
+        for (BrowseFile child : children) {
+            BrowseFile f = buildBrowseDirectory(browseDir, child);
             if (f != null) {
                 return f;
             }
@@ -350,7 +344,7 @@ public class ContentEditorController {
      * @throws IOException
      */
     private synchronized boolean saveHTML(UpdateHTMLParameters writeParams)
-            throws IOException {
+        throws IOException {
 
         // Read in data from request
         String html = writeParams.getHtml();
@@ -358,7 +352,7 @@ public class ContentEditorController {
 
         // Save the file to disk.
         return FileSave.save(contentHTMLPath, filename,
-                new ByteArrayInputStream(html.getBytes("UTF-8")));
+            new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8)));
 
     }
 
@@ -440,22 +434,22 @@ public class ContentEditorController {
     }
 
     private void uploadFileValidation(AddImagesParameters uploadParams,
-            BindingResult bindResult) throws IOException {
+                                      BindingResult bindResult) throws IOException {
         if (uploadParams.getUpload().getSize() == 0) {
             bindResult.rejectValue("upload", "Upload file required.");
         }
 
         // check file extension / content type for image.
         java.util.regex.Pattern pattern = java.util.regex.Pattern
-                .compile("^[-_A-Za-z0-9]+\\.(?i)(jpg|jpeg|png|gif|bmp)$");
+            .compile("^[-_A-Za-z0-9]+\\.(?i)(jpg|jpeg|png|gif|bmp)$");
         boolean isImageFile = pattern.matcher(
-                uploadParams.getUpload().getOriginalFilename()).matches();
-        boolean isImageContent = uploadParams.getUpload().getContentType()
-                .startsWith("image");
+            Objects.requireNonNull(uploadParams.getUpload().getOriginalFilename())).matches();
+        boolean isImageContent = Objects.requireNonNull(uploadParams.getUpload().getContentType())
+            .startsWith("image");
 
         if (!isImageFile && isImageContent) {
             bindResult.rejectValue("upload",
-                    "Upload filename should be jpg, png, gif or bmp.");
+                "Upload filename should be jpg, png, gif or bmp.");
         }
     }
 
@@ -527,20 +521,13 @@ public class ContentEditorController {
     }
 
     private boolean write(String text, OutputStream outputStream) {
-        PrintStream out = null;
-        try {
-            out = new PrintStream(new BufferedOutputStream(outputStream), true,
-                    "UTF-8");
+        try (PrintStream out = new PrintStream(new BufferedOutputStream(outputStream), true,
+            "UTF-8")) {
             out.print(text);
 
         } catch (Exception e) {
             e.printStackTrace();
             return false;
-        } finally {
-            try {
-                out.close();
-            } catch (Exception e) {
-            }
         }
         return true;
     }

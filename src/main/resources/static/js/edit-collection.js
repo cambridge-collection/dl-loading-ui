@@ -8,6 +8,9 @@ $(document).ready(function () {
     let deleteItemModal = $('#deleteItemModal');
     deleteItemModal.modal({show: false});
 
+    let replaceImageModal = $('#replaceImageModal');
+    replaceImageModal.modal({show: false});
+
     $('#dataTable').DataTable({
         paging: true,
         searching: true
@@ -20,12 +23,14 @@ $(document).ready(function () {
     $('#collectioneditform-reset').on('click', function () {
         $('#collectioneditform')[0].reset();
     });
-
     $('#addItemFile').on('change', function () {
         updateModal.modal('show');
         $('#addItemFileForm').submit();
     });
-
+    $('#replaceImageModalButton').on('click', function () {
+        replaceImageModal.modal('show');
+        return false;
+    });
 
     loading_ui_edit_collection.showDeleteModal = function (button) {
         deleteItemModal.modal('show');
