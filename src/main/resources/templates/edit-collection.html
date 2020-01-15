@@ -7,9 +7,9 @@
           type="text/css">
     <link href="/webjars/startbootstrap-sb-admin-2/vendor/datatables/dataTables.bootstrap4.css" rel="stylesheet">
     <link href="/webjars/startbootstrap-sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
+    <link href="/webjars/ckeditor/standard/contents.css" rel="stylesheet">
 
     <!-- page styles -->
-    <link href="/css/edit-collection.css" rel="stylesheet">
 </head>
 <body>
 <div id="content-wrapper" layout:fragment="content">
@@ -128,7 +128,7 @@
                                                     <div class="row">
                                                         <div style="width: 150px">
                                                             <img class="img-thumbnail"
-                                                                 th:src="'/edit/download?filepath='+${thumbnailURL}"
+                                                                 th:src="'/edit/source/'+${thumbnailURL}"
                                                                  width="146px"
                                                                  height="146px">
                                                         </div>
@@ -179,16 +179,17 @@
                                             <label for="description.full">Full</label>
                                         </div>
                                         <div class="col m-2">
-                                            <div class="alert-danger" th:if="${#fields.hasErrors('fullDescription')}"
-                                                 th:errors="*{fullDescription}"></div>
+                                            <div class="alert-danger"
+                                                 th:if="${#fields.hasErrors('fullDescriptionHTML')}"
+                                                 th:errors="*{fullDescriptionHTML}"></div>
 
-                                            <textarea class="form-control" disabled
+                                            <textarea class="form-control"
                                                       id="description.full"
-                                                      rows="4" cols="80"
-                                            >To be implemented ...</textarea>
-                                            <input type="hidden" name="fullDescription"
-                                                   rows="4" cols="80"
-                                                   th:value="*{fullDescription}">
+
+                                                      th:text="*{fullDescriptionHTML}"
+                                            ></textarea>
+                                            <input type="hidden" name="fullDescriptionPath"
+                                                   th:value="*{fullDescriptionPath}">
                                         </div>
                                     </div>
 
@@ -200,14 +201,14 @@
                                             <label for="credit.prose">Sponsors</label>
                                         </div>
                                         <div class="col m-2">
-                                            <div class="alert-danger" th:if="${#fields.hasErrors('proseCredit')}"
-                                                 th:errors="*{proseCredit}"></div>
-                                            <textarea class="form-control" disabled
+                                            <div class="alert-danger" th:if="${#fields.hasErrors('proseCreditHTML')}"
+                                                 th:errors="*{proseCreditHTML}"></div>
+                                            <textarea class="form-control"
                                                       id="credit.prose"
-                                                      rows="4" cols="80"
-                                            >To be implemented ...</textarea>
-                                            <input type="hidden" name="proseCredit"
-                                                   th:value="*{proseCredit}">
+                                                      th:text="*{proseCreditHTML}"
+                                            ></textarea>
+                                            <input type="hidden" name="proseCreditPath"
+                                                   th:value="*{proseCreditPath}">
                                         </div>
                                     </div>
                                 </div>
@@ -232,12 +233,10 @@
                                         </thead>
                                         <tbody>
                                         <tr th:each="item : ${items}">
-                                            <td>
-                                                <form action="/edit/download" method="post">
-                                                    <input type="hidden" name="filepath" th:value="${item.filepath}">
-                                                    <button type="submit" class="btn btn-link"
-                                                            th:text="${item.name}"></button>
-                                                </form>
+                                            <td
+                                                th:with="relativeFilePath=${item.filepath.replace(dataLocalPath, '')}">
+                                                <a th:href="'/edit/source/'+${relativeFilePath}" th:text="${item.name}">
+                                                </a>
                                             </td>
                                             <td>
                                                 <form
@@ -355,6 +354,7 @@
 <!-- /.content-wrapper -->
 
 <div id="page_js" layout:fragment="page_js">
+    <script type="text/javascript" src="/webjars/ckeditor/standard/ckeditor.js"></script>
     <script type="text/javascript" src="/js/edit-collection.js"></script>
 </div>
 </body>

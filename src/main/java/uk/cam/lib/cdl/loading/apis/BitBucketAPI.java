@@ -1,6 +1,5 @@
 package uk.cam.lib.cdl.loading.apis;
 
-import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
@@ -9,11 +8,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.util.UriUtils;
-import uk.cam.lib.cdl.loading.model.Tag;
 import uk.cam.lib.cdl.loading.model.WebResponse;
 import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
 import uk.cam.lib.cdl.loading.model.packaging.Pipeline;
 import uk.cam.lib.cdl.loading.model.packaging.PipelineStatus;
+import uk.cam.lib.cdl.loading.utils.WebHelper;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,7 +26,7 @@ import java.util.List;
  * This class is used for calls to the Bitbucket API
  * Package-private for use by APIs
  */
-class BitBucketAPIHelper {
+class BitBucketAPI {
 
     private final URL apiURL;
     private final String branch;
@@ -38,7 +37,7 @@ class BitBucketAPIHelper {
     private final String cacheName = "bitbucketTags";
     private final WebHelper webHelper = new WebHelper();
 
-    public BitBucketAPIHelper(URL apiURL, String branch, String repoURL, String tagsURL, String pipelinesURL, String username,
+    public BitBucketAPI(URL apiURL, String branch, String repoURL, String tagsURL, String pipelinesURL, String username,
                         String password) {
 
         this.apiURL = apiURL;

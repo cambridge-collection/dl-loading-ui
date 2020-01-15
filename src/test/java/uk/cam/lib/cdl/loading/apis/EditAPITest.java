@@ -17,6 +17,7 @@ import uk.cam.lib.cdl.loading.config.EditConfig;
 import uk.cam.lib.cdl.loading.config.GitConfig;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.model.editor.*;
+import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.io.File;
 import java.io.IOException;

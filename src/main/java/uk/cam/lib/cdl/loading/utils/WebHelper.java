@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.apis;
+package uk.cam.lib.cdl.loading.utils;
 
 
 import org.json.JSONObject;
@@ -12,9 +12,8 @@ import java.util.Base64;
 
 /**
  * Class for help with web requests
- * Package-private
  */
-class WebHelper {
+public class WebHelper {
 
     public WebResponse requestPOSTJSON(URL url, JSONObject json) {
         return requestPOSTJSON(url, json, null, null);

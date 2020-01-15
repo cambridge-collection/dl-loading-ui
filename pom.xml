@@ -105,6 +105,21 @@
             <version>5.5.1.201910021850-r</version>
         </dependency>
         <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>ckeditor</artifactId>
+            <version>4.13.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jtidy</groupId>
+            <artifactId>jtidy</artifactId>
+            <version>r938</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>fancybox</artifactId>
+            <version>3.2.5</version>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>RELEASE</version>

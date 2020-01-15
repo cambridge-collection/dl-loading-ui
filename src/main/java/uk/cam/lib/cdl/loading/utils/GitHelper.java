@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.apis;
+package uk.cam.lib.cdl.loading.utils;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
@@ -19,21 +19,20 @@ import java.util.List;
 
 /**
  * Class for help with git requests
- * package-private
  */
 public class GitHelper {
 
     private final Git git;
     private final GitLocalVariables gitSourceVariables;
 
-    GitHelper(GitLocalVariables gitSourceVariables) {
+    public GitHelper(GitLocalVariables gitSourceVariables) {
         this.gitSourceVariables = gitSourceVariables;
         git = setupRepo(gitSourceVariables.getGitSourcePath(), gitSourceVariables.getGitSourceURL(),
             gitSourceVariables.getGitSourceURLUsername(),
             gitSourceVariables.getGitSourceURLPassword());
     }
 
-    GitHelper(Git git, GitLocalVariables gitSourceVariables) {
+    public GitHelper(Git git, GitLocalVariables gitSourceVariables) {
         this.gitSourceVariables = gitSourceVariables;
         this.git = git;
     }

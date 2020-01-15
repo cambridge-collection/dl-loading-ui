@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import uk.cam.lib.cdl.loading.model.WebResponse;
 import uk.cam.lib.cdl.loading.model.deployment.Instance;
 import uk.cam.lib.cdl.loading.model.deployment.Status;
+import uk.cam.lib.cdl.loading.utils.WebHelper;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

@@ -14,6 +14,7 @@ import org.xml.sax.SAXException;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.*;
+import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -144,8 +145,9 @@ public class EditAPI {
                     File collectionFile = new File(dataPath + File.separator + collectionPath);
                     if (collectionFile.getCanonicalPath().equals(requiredCollectionFilepath)) {
                         String relativeThumbnailPath = collection.getThumbnail().getId();
-                        File thumbnailFile = new File(dataPath, relativeThumbnailPath);
-                        return thumbnailFile.getCanonicalPath();
+                        return relativeThumbnailPath;
+                        //File thumbnailFile = new File(dataPath, relativeThumbnailPath);
+                        //return thumbnailFile.getCanonicalPath();
                     }
                 }
             } catch (IOException e) {
@@ -388,6 +390,10 @@ public class EditAPI {
 
     public String getDataLocalPath() {
         return gitHelper.getDataLocalPath();
+    }
+
+    public String getCollectionPath(String collectionURLSlug) {
+        return collectionFilepaths.get(collectionURLSlug);
     }
 
     public File getDatasetFile() {
