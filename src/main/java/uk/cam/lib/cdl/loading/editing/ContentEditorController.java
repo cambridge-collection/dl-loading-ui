@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading.editing;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -35,12 +36,17 @@ public class ContentEditorController {
     protected final String contentHTMLPath;
     protected final String contentImagesPath;
     protected final String contentImagesURL;
+    private final String pathForDataDisplay;
 
     @Autowired
-    public ContentEditorController(EditAPI editAPI) {
-        contentImagesURL = "/edit/source/pages/images";
-        contentImagesPath = editAPI.getDataLocalPath() + "pages/images";
-        contentHTMLPath = editAPI.getDataLocalPath() + "pages/html";
+    public ContentEditorController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay,
+                                   @Value("${data.path.images}") String imagePath,
+                                   @Value("${data.path.html}") String htmlPath) {
+
+        this.pathForDataDisplay = pathForDataDisplay;
+        this.contentImagesURL = pathForDataDisplay + imagePath;
+        this.contentImagesPath = editAPI.getDataLocalPath() + imagePath;
+        this.contentHTMLPath = editAPI.getDataLocalPath() + htmlPath;
     }
 
     /**
@@ -187,6 +193,7 @@ public class ContentEditorController {
         model.addAttribute("homeDir", imagesDir.getPath());
         model.addAttribute("currentDir",
             browseDir.replaceFirst(contentImagesPath, ""));
+        model.addAttribute("pathForDataDisplay", pathForDataDisplay);
 
         return "edit-image-browse";
     }

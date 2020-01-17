@@ -185,8 +185,6 @@ public class CollectionForm {
     }
 
     public void setFullDescriptionHTML(String fullDescriptionHTML) {
-
-        // TODO Save HTML
         this.fullDescriptionHTML = fullDescriptionHTML;
     }
 
@@ -195,8 +193,6 @@ public class CollectionForm {
     }
 
     public void setProseCreditHTML(String proseCreditHTML) {
-
-        // TODO Save HTML
         this.proseCreditHTML = proseCreditHTML;
     }
 

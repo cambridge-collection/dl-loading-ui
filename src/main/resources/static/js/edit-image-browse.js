@@ -60,7 +60,7 @@ $(document).ready(function () {
             window.close();
         } else {
             // update Image for collection and close parent modal
-            window.parent.$('#thumbnailImageInput').val(file.url.replace('/edit/source/', ''));
+            window.parent.$('#thumbnailImageInput').val(file.url.replace(context.pathForDataDisplay, ''));
             window.parent.$('#thumbnailImage').attr('src', file.url);
             window.parent.$('#replaceImageModal').modal('hide');
         }

@@ -129,7 +129,7 @@
                                                     <div class="row">
                                                         <div style="width: 150px">
                                                             <img id="thumbnailImage" class="img-thumbnail"
-                                                                 th:src="'/edit/source/'+${thumbnailURL}"
+                                                                 th:src="${pathForDataDisplay + thumbnailURL}"
                                                                  width="146px"
                                                                  height="146px">
                                                             <input id="thumbnailImageInput" type="hidden"
@@ -190,7 +190,7 @@
 
                                             <textarea class="form-control"
                                                       id="description.full"
-
+                                                      name="fullDescriptionHTML"
                                                       th:text="*{fullDescriptionHTML}"
                                             ></textarea>
                                             <input type="hidden" name="fullDescriptionPath"
@@ -210,6 +210,7 @@
                                                  th:errors="*{proseCreditHTML}"></div>
                                             <textarea class="form-control"
                                                       id="credit.prose"
+                                                      name="proseCreditHTML"
                                                       th:text="*{proseCreditHTML}"
                                             ></textarea>
                                             <input type="hidden" name="proseCreditPath"
@@ -240,7 +241,8 @@
                                         <tr th:each="item : ${items}">
                                             <td
                                                 th:with="relativeFilePath=${item.filepath.replace(dataLocalPath, '')}">
-                                                <a th:href="'/edit/source/'+${relativeFilePath}" th:text="${item.name}">
+                                                <a th:href="${pathForDataDisplay + relativeFilePath}"
+                                                   th:text="${item.name}">
                                                 </a>
                                             </td>
                                             <td>
