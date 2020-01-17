@@ -1,3 +1,6 @@
 /target/
 /dl-loading-ui.iml
 /.idea/
+/ui.iml
+/ui.ipr
+/ui.iws

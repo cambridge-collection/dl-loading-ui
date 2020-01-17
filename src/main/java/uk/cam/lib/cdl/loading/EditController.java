@@ -16,7 +16,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
-import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.forms.CollectionForm;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Id;
@@ -53,14 +52,14 @@ public class EditController {
     /**
      * Display edit collection form
      *
-     * @param model
-     * @param collectionId
-     * @return
-     * @throws NotFoundException
+     * @param model        Model object
+     * @param collectionId urlSlug for collection
+     * @return edit collection view
+     * @throws IOException Cannot read collection HTML
      */
     @GetMapping(value = {"/edit/collection/"})
     public String editCollection(Model model, @RequestParam(required = false) String collectionId)
-        throws NotFoundException, IOException {
+        throws IOException {
 
         // TODO check permissions
         CollectionForm form;
@@ -126,13 +125,13 @@ public class EditController {
     /**
      * Returns the requested file contents specified by filepath if it exists in the checkedout source repo.
      *
-     * @param request
-     * @return
-     * @throws BadRequestException
-     * @throws IOException
+     * @param request HTTPServletRequest
+     * @return requested resource
+     * @throws BadRequestException If requested resource is not within the dataLocalSourcePath
+     * @throws IOException Unable to find resource
      */
     @GetMapping(value = "/edit/source/**")
-    public ResponseEntity<Resource> editDownload(HttpServletRequest request)
+    public ResponseEntity<Resource> editSourceData(HttpServletRequest request)
         throws BadRequestException, IOException {
 
         String filepath = request.getRequestURI().split(request.getContextPath() + "/edit/source/")[1];
@@ -172,10 +171,12 @@ public class EditController {
     /**
      * TODO validate the changes against the JSON schema.
      *
-     * @param attributes
-     * @param collectionForm
-     * @return
-     * @throws BadRequestException
+     * Saves changes to the collection presented in the CollectionForm and redirects to
+     * show the updated edit collections page.
+     *
+     * @param attributes Model attributes to be used in the redirect
+     * @param collectionForm Validated collectionForm from edit Collection page
+     * @return RedirectView to the collections page (after updates have been saved).
      */
     @PostMapping("/edit/collection/update")
     public RedirectView updateCollection(RedirectAttributes attributes,
