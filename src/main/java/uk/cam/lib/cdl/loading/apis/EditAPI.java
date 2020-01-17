@@ -57,12 +57,12 @@ public class EditAPI {
     }
 
     /**
-     * For testing
+     * Used for testing Edit API
      *
-     * @param dataPath
-     * @param dlDatasetFilename
-     * @param dataItemPath
-     * @param gitHelper
+     * @param dataPath          File path to source data
+     * @param dlDatasetFilename Filename for the root JSON file for this dataset.
+     * @param dataItemPath      File path to the item TEI directory.
+     * @param gitHelper         Object for interacting with Git
      */
     public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath,
                    GitHelper gitHelper) {
@@ -86,6 +86,12 @@ public class EditAPI {
         }
     }
 
+    /**
+     * Re-reads data from the file system and converts this into the object Model.
+     * Helpful to update from Git changes made elsewhere.
+     *
+     * @throws IOException On problems accessing file system data
+     */
     public synchronized void updateModel() throws IOException {
         try {
             gitHelper.pullGitChanges();
@@ -144,10 +150,7 @@ public class EditAPI {
                     String collectionPath = collection.getCollection().getId();
                     File collectionFile = new File(dataPath + File.separator + collectionPath);
                     if (collectionFile.getCanonicalPath().equals(requiredCollectionFilepath)) {
-                        String relativeThumbnailPath = collection.getThumbnail().getId();
-                        return relativeThumbnailPath;
-                        //File thumbnailFile = new File(dataPath, relativeThumbnailPath);
-                        //return thumbnailFile.getCanonicalPath();
+                        return collection.getThumbnail().getId();
                     }
                 }
             } catch (IOException e) {
@@ -346,14 +349,14 @@ public class EditAPI {
         return null;
     }
 
-    public boolean updateCollection(Collection collection) {
+    public boolean updateCollection(Collection collection, String descriptionHTML, String creditHTML) {
         try {
 
             final Set<String> collections = collectionMap.keySet();
             ObjectMapper mapper = new ObjectMapper();
 
             // New collection
-            if (!collections.contains(collection)) {
+            if (!collections.contains(collection.getName().getUrlSlug())) {
 
                 // add collection to dataset file.
                 Dataset dataset = mapper.readValue(datasetFile, Dataset.class);
@@ -372,10 +375,20 @@ public class EditAPI {
             }
 
             // Write out collection file
-            String collectionFilepath = collectionFilepaths.get(collection.getName().getUrlSlug());
+            File collectionFile = new File(collectionFilepaths.get(collection.getName().getUrlSlug()));
+
+            // Write out HTML section files
+            File descriptionHTMLFile = new File(collectionFile.getParent(), collection.getDescription().getFull().getId());
+            FileUtils.write(descriptionHTMLFile, descriptionHTML, "UTF-8");
+
+            File creditHTMLFile = new File(collectionFile.getParent(), collection.getCredit().getProse().getId());
+            FileUtils.write(creditHTMLFile, creditHTML, "UTF-8");
+
+            // Update collection thumbnail in the UI
+            // TODO
 
             ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-            writer.writeValue(new File(collectionFilepath), collection);
+            writer.writeValue(collectionFile, collection);
 
             // Git Commit and push to remote repo.
             boolean success = gitHelper.pushGitChanges();

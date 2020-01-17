@@ -179,7 +179,9 @@ class EditAPITest {
 
         assert ("Sorting Test Name".equals(editAPI.getCollection("test").getName().getSort()));
         Collection collection = makeCollection("test");
-        editAPI.updateCollection(collection);
+        String descriptionHTML = "<html>test description</html>";
+        String creditHTML = "<html>test credit</html>";
+        editAPI.updateCollection(collection, descriptionHTML, creditHTML);
         assert ("sortName".equals(editAPI.getCollection("test").getName().getSort()));
     }
 
@@ -188,7 +190,9 @@ class EditAPITest {
 
         Collection collection = makeCollection("newCollection");
         assert (!editAPI.getCollections().contains(collection));
-        editAPI.updateCollection(collection);
+        String descriptionHTML = "<html>test description</html>";
+        String creditHTML = "<html>test credit</html>";
+        editAPI.updateCollection(collection, descriptionHTML, creditHTML);
         assert (editAPI.getCollections().contains(collection));
     }
 

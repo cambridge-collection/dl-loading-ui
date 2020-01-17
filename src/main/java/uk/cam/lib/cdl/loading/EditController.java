@@ -2,7 +2,11 @@ package uk.cam.lib.cdl.loading;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -26,6 +30,7 @@ import javax.validation.Valid;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,10 +39,12 @@ import java.util.List;
 public class EditController {
 
     private final EditAPI editAPI;
+    private final String pathForDataDisplay;
 
     @Autowired
-    public EditController(EditAPI editAPI) {
+    public EditController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay) {
         this.editAPI = editAPI;
+        this.pathForDataDisplay = pathForDataDisplay;
     }
 
     @GetMapping("/edit/edit.html")
@@ -73,24 +80,18 @@ public class EditController {
             if (model.asMap().get("form") == null) {
 
                 File collectionFile = new File(editAPI.getCollectionPath(collectionId));
+
+                // Description HTML
                 File fullDescription = new File(collectionFile.getParentFile(),
                     collection.getDescription().getFull().getId());
-                String collectionRelativePath =
-                    fullDescription.getParent().replaceAll(editAPI.getDataLocalPath()
-                        , "") + "/";
                 String descriptionHTML = FileUtils.readFileToString(fullDescription, "UTF-8");
+                descriptionHTML = prepareHTMLForDisplay(descriptionHTML, fullDescription.getCanonicalPath());
 
-                // Need to parse relative links.
-                // TODO Make more robust.
-                descriptionHTML = descriptionHTML.replaceAll("src\\s*=\\s*'\\s*(?!http)",
-                    "src='/edit/source/" + collectionRelativePath);
-                descriptionHTML = descriptionHTML.replaceAll("src\\s*=\\s*\"\\s*(?!http)",
-                    "src=\"/edit/source/" + collectionRelativePath);
-
-
+                // Credit HTML
                 File credit = new File(collectionFile.getParentFile(),
                     collection.getCredit().getProse().getId());
                 String creditHTML = FileUtils.readFileToString(credit, "UTF-8");
+                creditHTML = prepareHTMLForDisplay(creditHTML, credit.getCanonicalPath());
 
                 form = new CollectionForm(collection, descriptionHTML, creditHTML);
             } else {
@@ -118,23 +119,57 @@ public class EditController {
         model.addAttribute("form", form);
         model.addAttribute("items", items);
         model.addAttribute("dataLocalPath", editAPI.getDataLocalPath());
+        model.addAttribute("pathForDataDisplay", pathForDataDisplay);
 
         return "edit-collection";
     }
 
+    // Need to parse relative links to add in 'pathForDataDisplay' for local viewing.
+    private String prepareHTMLForDisplay(String html, String HTMLFilePath) {
+        Document doc = Jsoup.parse(html);
+        for (Element img : doc.select("img[src]")) {
+            String src = img.attr("src");
+
+            String collectionRelativePath =
+                new File(HTMLFilePath).getParent().replaceAll(editAPI.getDataLocalPath()
+                    , "");
+
+            img.attr("src", pathForDataDisplay + collectionRelativePath + "/" + src);
+        }
+        return doc.outerHtml();
+    }
+
+    // Need to parse links from display to format to be saved.
+    // replace 'pathForDataDisplay' with file path to data
+    // Generate relative path from collections
+    private String prepareHTMLForSaving(String html, String HTMLFilePath) throws IOException {
+        Document doc = Jsoup.parse(html);
+        for (Element img : doc.select("img[src]")) {
+            String src = img.attr("src");
+            src = src.replace(pathForDataDisplay, "");
+            File imageFile = new File(editAPI.getDataLocalPath(), src);
+            String relativePath =
+                Paths.get(HTMLFilePath).getParent().relativize(Paths.get(imageFile.getCanonicalPath())).toString();
+
+            img.attr("src", relativePath.replace(editAPI.getDataLocalPath(), ""));
+        }
+        return doc.outerHtml();
+    }
+
     /**
      * Returns the requested file contents specified by filepath if it exists in the checkedout source repo.
+     * Currently on /edit/source/
      *
      * @param request HTTPServletRequest
      * @return requested resource
      * @throws BadRequestException If requested resource is not within the dataLocalSourcePath
-     * @throws IOException Unable to find resource
+     * @throws IOException         Unable to find resource
      */
-    @GetMapping(value = "/edit/source/**")
+    @GetMapping(value = "${data.url.display}**")
     public ResponseEntity<Resource> editSourceData(HttpServletRequest request)
         throws BadRequestException, IOException {
 
-        String filepath = request.getRequestURI().split(request.getContextPath() + "/edit/source/")[1];
+        String filepath = request.getRequestURI().split(request.getContextPath() + pathForDataDisplay)[1];
 
         File file = new File(editAPI.getDataLocalPath() + filepath);
 
@@ -170,18 +205,19 @@ public class EditController {
 
     /**
      * TODO validate the changes against the JSON schema.
-     *
+     * <p>
      * Saves changes to the collection presented in the CollectionForm and redirects to
      * show the updated edit collections page.
      *
-     * @param attributes Model attributes to be used in the redirect
+     * @param attributes     Model attributes to be used in the redirect
      * @param collectionForm Validated collectionForm from edit Collection page
      * @return RedirectView to the collections page (after updates have been saved).
      */
+    // TODO make sure we have permission to edit the collection being edited.
     @PostMapping("/edit/collection/update")
     public RedirectView updateCollection(RedirectAttributes attributes,
                                          @Valid @ModelAttribute CollectionForm collectionForm,
-                                         final BindingResult bindingResult) {
+                                         final BindingResult bindingResult) throws IOException {
 
         if (bindingResult.hasErrors()) {
             attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
@@ -209,8 +245,18 @@ public class EditController {
             return new RedirectView("/edit/collection/");
         }*/
 
-        // TODO make sure we have permission to edit the collection being edited.
-        boolean success = editAPI.updateCollection(collection);
+        // Update links in HTML
+        String collectionPath = new File(editAPI.getCollectionPath(collection.getName().getUrlSlug())).getParent();
+        String collectionHTMLPath = new File(collectionPath, collectionForm.getFullDescriptionPath()).getCanonicalPath();
+        String creditHTMLPath = new File(collectionPath, collectionForm.getProseCreditPath()).getCanonicalPath();
+
+        String fullDescriptionHTML = prepareHTMLForSaving(collectionForm.getFullDescriptionHTML(), collectionHTMLPath);
+        String proseCreditHTML = prepareHTMLForSaving(collectionForm.getProseCreditHTML(), creditHTMLPath);
+        // TODO Do we need to convert other links?
+
+        // Save collection file
+        boolean success = editAPI.updateCollection(collection, fullDescriptionHTML,
+            proseCreditHTML);
 
         if (success) {
             attributes.addFlashAttribute("message", "Collection Updated.");
