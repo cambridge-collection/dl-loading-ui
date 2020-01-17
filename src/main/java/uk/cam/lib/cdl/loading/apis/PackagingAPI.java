@@ -145,8 +145,6 @@ public class PackagingAPI {
     /**
      * Converts from RevCommit to Update object
      *
-     * @param commit
-     * @return
      */
     private Update getUpdate(RevCommit commit) {
 

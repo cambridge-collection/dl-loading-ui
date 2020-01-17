@@ -1,30 +1,23 @@
 package uk.cam.lib.cdl.loading.editing;
 
-import org.apache.commons.io.output.StringBuilderWriter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
-import org.w3c.tidy.Tidy;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,26 +33,8 @@ import java.util.Objects;
 public class ContentEditorController {
 
     protected final String contentHTMLPath;
-    /*protected final String contentHTMLURL = Properties
-            .getString("cudl-viewer-content.html.url");*/
     protected final String contentImagesPath;
     protected final String contentImagesURL;
-    /*    protected final String gitLocalPath = Properties
-                .getString("admin.git.content.localpath");
-    protected final String gitUsername = Properties
-            .getString("admin.git.content.username");
-    protected final String gitPassword = Properties
-            .getString("admin.git.content.password");
-    protected final String gitUrl = Properties
-            .getString("admin.git.content.url");
-    protected final String gitRefspec = Properties
-            .getString("admin.git.content.refspec");
-    protected final String localBranch = Properties
-            .getString("admin.git.content.branch.local");
-    protected final GitHelper git = new GitHelper(gitLocalPath, gitUrl);
-    private final UsersDao usersDao; */
-
-    // protected final Log logger = LogFactory.getLog(getClass());
 
     @Autowired
     public ContentEditorController(EditAPI editAPI) {
@@ -74,17 +49,17 @@ public class ContentEditorController {
      * Used by CKEditor to update the HTML on specified sections of the website.
      * Also commits to git.
      *
-     * @param response
+     * @param response HttpServletResponse
      * @param writeParams
-     * @param errors
+     * @param errors Errors thrown when binding
      * @return
      * @throws IOException
      * @throws JSONException
      */
-    //@Secured("hasRole('ROLE_ADMIN')")
+ /*   //@Secured("hasRole('ROLE_ADMIN')")
     @RequestMapping(value = "/update/html", method = RequestMethod.POST)
     public synchronized ModelAndView handleUpdateRequest(
-        HttpServletResponse response, HttpSession session,
+        HttpServletResponse response,
         @Valid @ModelAttribute() UpdateHTMLParameters writeParams,
         BindingResult errors) throws IOException, JSONException {
 
@@ -96,14 +71,14 @@ public class ContentEditorController {
 
         boolean success = saveHTML(writeParams);
         if (success) {
-/*            AdminUser adminUser = Users.currentAdminUser(usersDao);
+*//*            AdminUser adminUser = Users.currentAdminUser(usersDao);
 
             if (!git.commit(adminUser.getAdminName(),
                     adminUser.getAdminEmail(),
                     "cudl-viewer: Saving HTML changes")
                     || !git.push(gitUsername, gitPassword, localBranch)) {
                 success = false;
-            }*/
+            }*//*
         }
 
         JSONObject json = new JSONObject();
@@ -113,26 +88,22 @@ public class ContentEditorController {
         write(json.toString(), response.getOutputStream());
         return null;
 
-    }
+    }*/
 
     /**
      * Request on URL /editor/add/image
      * <p>
      * Used by CKEditor to upload an image file to the server.
      *
-     * @param request
-     * @param response
-     * @param addParams
-     * @param bindResult
-     * @return
-     * @throws IOException
+     * @param addParams  Information about the file to add
+     * @param bindResult Result of data binding
+     * @return HTML with JS to set the CKEditor value
+     * @throws IOException on a binding error
      */
     //@Secured("hasRole('ROLE_ADMIN')")
-    @RequestMapping(value = "/add/image", method = RequestMethod.POST)
-    public ModelAndView handleAddImageRequest(HttpServletRequest request,
-                                              HttpServletResponse response, HttpSession session,
-                                              @Valid @ModelAttribute() AddImagesParameters addParams,
-                                              BindingResult bindResult) throws IOException {
+    @PostMapping("/add/image")
+    public ResponseEntity<String> handleAddImageRequest(@Valid @ModelAttribute() AddImagesParameters addParams,
+                                                        BindingResult bindResult) throws IOException {
 
         // Check file extension and content type are image.
         uploadFileValidation(addParams, bindResult);
@@ -160,8 +131,7 @@ public class ContentEditorController {
             }*/
         }
 
-        response.setContentType("text/html");
-        write("<html><head><script> window.opener.CKEDITOR.tools.callFunction( "
+        String output = "<html><head><script> window.opener.CKEDITOR.tools.callFunction( "
             + addParams.getCKEditorFuncNum()
             + ", '"
             + contentImagesURL
@@ -169,9 +139,12 @@ public class ContentEditorController {
             + addParams.getUpload().getOriginalFilename()
             + "', 'save successful: "
             + saveSuccessful
-            + "' );window.close();</script>", response.getOutputStream());
+            + "' );window.close();</script>";
 
-        return null;
+        return ResponseEntity.ok()
+            .contentLength(output.length())
+            .contentType(MediaType.TEXT_HTML)
+            .body(output);
 
     }
 
@@ -179,16 +152,17 @@ public class ContentEditorController {
      * Request on /editor/browse/images
      * <p>
      * Used by CKEditor to browse the images available on the server.
+     * Also used by the Collection editor to change the collection thumbnail.
      *
-     * @param CKEditor
-     * @param CKEditorFuncNum
-     * @param langCode
-     * @return
-     * @throws IOException
+     * @param CKEditor        Reference to the CKEditor that called this
+     * @param CKEditorFuncNum Reference to the CKEditor Function Number Parameter
+     * @param langCode        language code from CKEditor
+     * @return browse image view
      */
     //@Secured("hasRole('ROLE_ADMIN')")
-    @RequestMapping(value = "/browse/images")
-    public ModelAndView handleBrowseImagesRequest(
+    @GetMapping("/browse/images")
+    public String handleBrowseImagesRequest(
+        Model model,
         @RequestParam(defaultValue = "None") String CKEditor,
         @RequestParam(defaultValue = "-1") String CKEditorFuncNum,
         @RequestParam(defaultValue = "en") String langCode,
@@ -205,17 +179,16 @@ public class ContentEditorController {
 
         imageFiles = buildBrowseDirectory(browseDir, Objects.requireNonNull(imageFiles));
 
-        ModelAndView modelAndView = new ModelAndView("edit-image-browse");
-        modelAndView.addObject("ckEditor", CKEditor);
-        modelAndView.addObject("ckEditorFuncNum", CKEditorFuncNum);
-        modelAndView.addObject("langCode", langCode);
-        modelAndView.addObject("imageFiles", imageFiles);
-        modelAndView.addObject("browseDir", browseDir);
-        modelAndView.addObject("homeDir", imagesDir.getPath());
-        modelAndView.addObject("currentDir",
+        model.addAttribute("ckEditor", CKEditor);
+        model.addAttribute("ckEditorFuncNum", CKEditorFuncNum);
+        model.addAttribute("langCode", langCode);
+        model.addAttribute("imageFiles", imageFiles);
+        model.addAttribute("browseDir", browseDir);
+        model.addAttribute("homeDir", imagesDir.getPath());
+        model.addAttribute("currentDir",
             browseDir.replaceFirst(contentImagesPath, ""));
 
-        return modelAndView;
+        return "edit-image-browse";
     }
 
     /**
@@ -224,20 +197,16 @@ public class ContentEditorController {
      * Deletes the image at the specified path. Must start with
      * contentImagesPath.
      *
-     * @param request
-     * @param response
-     * @param deleteParams
-     * @param bindResult
-     * @return
-     * @throws IOException
-     * @throws JSONException
+     * @param deleteParams Parameters for image to delete
+     * @param bindResult   result of object binding
+     * @return JSON response
+     * @throws IOException on binding error
      */
     //@Secured("hasRole('ROLE_ADMIN')")
-    @RequestMapping(value = "/delete/image", method = RequestMethod.POST)
-    public ModelAndView handleDeleteImageRequest(HttpServletRequest request,
-                                                 HttpServletResponse response, HttpSession session,
-                                                 @Valid @ModelAttribute() DeleteImagesParameters deleteParams,
-                                                 BindingResult bindResult) throws IOException, JSONException {
+    @PostMapping("/delete/image")
+    public ResponseEntity<String> handleDeleteImageRequest(
+        @Valid @ModelAttribute() DeleteImagesParameters deleteParams,
+        BindingResult bindResult) throws IOException {
 
         if (bindResult.hasErrors()) {
             throw new IOException(
@@ -270,10 +239,11 @@ public class ContentEditorController {
         JSONObject json = new JSONObject();
         json.put("deletesuccess", successful);
 
-        response.setStatus(successful ? 200 : 400);
-        response.setContentType("application/json");
-        write(json.toString(), response.getOutputStream());
-        return null;
+        return ResponseEntity.status(successful ? 200 : 400)
+            .contentLength(json.toString().length())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(json.toString());
+
     }
 
     /**
@@ -282,7 +252,7 @@ public class ContentEditorController {
      * <p>
      * Files should be under the directory specified in contentPath.
      *
-     * @return
+     * @return BrowseFile object
      */
     private BrowseFile buildFileHierarchy(File file) {
 
@@ -312,7 +282,7 @@ public class ContentEditorController {
     /**
      * Picks out the directory currently being viewed and it's children.
      *
-     * @return
+     * @return BrowseFile object
      */
     private BrowseFile buildBrowseDirectory(String browseDir,
                                             BrowseFile imageFiles) {
@@ -335,6 +305,8 @@ public class ContentEditorController {
 
         return null;
     }
+    /*
+     */
 
     /**
      * Note: Does not validate params. This should occur before calling this
@@ -342,7 +314,7 @@ public class ContentEditorController {
      *
      * @return
      * @throws IOException
-     */
+     *//*
     private synchronized boolean saveHTML(UpdateHTMLParameters writeParams)
         throws IOException {
 
@@ -354,7 +326,7 @@ public class ContentEditorController {
         return FileSave.save(contentHTMLPath, filename,
             new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8)));
 
-    }
+    }*/
 
     // Performs validation on parameters used for writing images.
     public static class AddImagesParameters {
@@ -454,7 +426,7 @@ public class ContentEditorController {
     }
 
     // Performs validation on parameters used for writing html.
-    public static class UpdateHTMLParameters {
+    /*public static class UpdateHTMLParameters {
 
         private static final Log logger = LogFactory.getLog(UpdateHTMLParameters.class);
 
@@ -518,9 +490,9 @@ public class ContentEditorController {
 
         }
 
-    }
+    }*/
 
-    private boolean write(String text, OutputStream outputStream) {
+/*    private boolean write(String text, OutputStream outputStream) {
         try (PrintStream out = new PrintStream(new BufferedOutputStream(outputStream), true,
             "UTF-8")) {
             out.print(text);
@@ -530,6 +502,6 @@ public class ContentEditorController {
             return false;
         }
         return true;
-    }
+    }*/
 
 }

@@ -41,18 +41,18 @@ public class CollectionForm {
     @Size(min = 2, max = 5000, message = "Medium description must be between 2 and 5000 characters.")
     private String mediumDescription;
 
-    //@NotBlank(message = "Must specify a full description.")
+    @NotBlank(message = "Must specify a full description.")
     private String fullDescriptionPath;
     private String fullDescriptionHTML;
 
-    //@NotBlank(message = "Must specify a prose credit.")
+    @NotBlank(message = "Must specify a prose credit.")
     private String proseCreditPath;
     private String proseCreditHTML;
 
     @NotNull
     private List<String> itemIds;
 
-    //@NotBlank(message = "Must specify a thumbnail URL")
+    @NotBlank(message = "Must specify a thumbnail URL")
     private String thumbnailURL;
 
     public CollectionForm(Collection collection, String descriptionHTML, String creditHTML) {

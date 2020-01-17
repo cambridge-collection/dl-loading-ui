@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,7 +30,7 @@ public class PackageController {
         this.packagingAPI = packagingAPI;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/package/package.html")
+    @GetMapping ("/package/package.html")
     public String pack(Model model) {
 
         List<Update> updates = packagingAPI.updatesSinceLastPackage();
@@ -69,14 +70,14 @@ public class PackageController {
         return "package";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/package/startProcess")
+    @GetMapping ("/package/startProcess")
     public RedirectView startProcess(Model model) {
         String processId = packagingAPI.startProcess();
 
         return new RedirectView("/package/" + UriUtils.encodePathSegment(processId, StandardCharsets.UTF_8) + "/status");
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/package/{id}/status")
+    @GetMapping("/package/{id}/status")
     public String status(Model model, @PathVariable("id") String id) {
         PackagingStatus status = packagingAPI.getStatus(id);
         model.addAttribute("status", status);

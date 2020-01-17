@@ -28,9 +28,8 @@ import java.util.List;
  */
 class BitBucketAPI {
 
-    private final URL apiURL;
     private final String branch;
-    private URL tagsURL = null;
+    //private URL tagsURL = null;
     private URL pipelinesURL = null;
     private final String username;
     private final String password;
@@ -40,22 +39,20 @@ class BitBucketAPI {
     public BitBucketAPI(URL apiURL, String branch, String repoURL, String tagsURL, String pipelinesURL, String username,
                         String password) {
 
-        this.apiURL = apiURL;
         this.branch = branch;
         this.username = username;
         this.password = password;
 
         try {
-            this.tagsURL = new URL(apiURL, repoURL + tagsURL);
+            //this.tagsURL = new URL(apiURL, repoURL + tagsURL);
             this.pipelinesURL = new URL(apiURL, repoURL + pipelinesURL);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 
     }
-
-    @Cacheable(cacheName)
 /*
+    @Cacheable(cacheName)
     public List<Tag> getTags() {
         String json = webHelper.requestGET(tagsURL, "application/json", username, password).getResponse();
         JSONObject parent = new JSONObject(json);
@@ -77,7 +74,7 @@ class BitBucketAPI {
     /**
      * Gets the last 10 pipelines that have been run.
      *
-     * @return
+     * @return List of last 10 pipelines.
      */
     public List<Pipeline> getPipelines() {
 
@@ -129,7 +126,7 @@ class BitBucketAPI {
     /**
      * This assumes the custom pipeline is called 'package'.
      *
-     * @return
+     * @return Pipeline response
      */
     public WebResponse triggerPipeline() {
 
@@ -142,6 +139,12 @@ class BitBucketAPI {
         return response;
     }
 
+    /**
+     * Get Pipeline status
+     *
+     * @param id for Pipeline build
+     * @return PackagingStatus object for this pipeline build.
+     */
     public PackagingStatus getStatus(String id) {
         try {
             String json = webHelper.requestGET(new URL(pipelinesURL,

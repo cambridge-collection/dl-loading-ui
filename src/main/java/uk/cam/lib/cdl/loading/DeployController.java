@@ -35,7 +35,7 @@ public class DeployController {
      * @param model
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/deploy/deploy.html")
+    @GetMapping ("/deploy/deploy.html")
     public String deploy(Model model, @ModelAttribute("message") String message,
                          @ModelAttribute("error") String error) {
 
@@ -57,7 +57,7 @@ public class DeployController {
         return "deploy";
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/deploy/cache/refresh")
+    @GetMapping("/deploy/cache/refresh")
     public String deployRefreshCache(Model model, @ModelAttribute("message") String message,
                                      @ModelAttribute("error") String error) {
 
@@ -74,7 +74,7 @@ public class DeployController {
      * @return
      * @throws JSONException
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/deploy/{instanceId}")
+    @PostMapping("/deploy/{instanceId}")
     public RedirectView deployVersion(RedirectAttributes attributes, @PathVariable("instanceId") String instanceId,
                                       @RequestParam String version) throws JSONException {
         /** TODO validate input **/
@@ -96,7 +96,7 @@ public class DeployController {
         return new RedirectView("/deploy/status/" + instanceId + "/");
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/deploy/status/{instanceId}")
+    @GetMapping("/deploy/status/{instanceId}")
     public String deployStatus(Model model, @PathVariable("instanceId") String instanceId) {
 
         Deployment deployment = new Deployment();
