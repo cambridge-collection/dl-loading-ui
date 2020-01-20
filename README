@@ -1,0 +1,17 @@
+Cambridge Digital Library: Content Loader
+
+This is a project for editing and loading data into the Cambridge Digital Library Platform.
+
+
+Package:
+
+    mvn clean package
+
+Run:
+
+    java -jar target/ui-0.1.0-SNAPSHOT.war
+
+This will run the application on:
+
+    http://localhost:8081
+
