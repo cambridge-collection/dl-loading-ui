@@ -8,8 +8,8 @@ import java.beans.ConstructorProperties;
 public class UICollection {
 
     private final Id collection;
-    private final String layout;
-    private final Id thumbnail;
+    private String layout;
+    private Id thumbnail;
 
     @ConstructorProperties({"collection", "layout", "thumbnail"})
     public UICollection(Id collection, String layout, Id thumbnail) {
@@ -28,7 +28,15 @@ public class UICollection {
         return layout;
     }
 
+    public void setLayout(String layout) {
+        this.layout = layout;
+    }
+
     public Id getThumbnail() {
         return thumbnail;
+    }
+
+    public void setThumbnail(Id thumbnail) {
+        this.thumbnail = thumbnail;
     }
 }
