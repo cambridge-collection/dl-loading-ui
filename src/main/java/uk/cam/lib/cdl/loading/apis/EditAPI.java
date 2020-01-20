@@ -16,6 +16,7 @@ import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.*;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
+import javax.validation.constraints.NotNull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,6 +29,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /*
 TODO This should be refactored out to talk to a external API.
@@ -44,6 +46,7 @@ public class EditAPI {
     private Map<String, Collection> collectionMap = Collections.synchronizedMap(new HashMap<>());
     private Map<String, String> collectionFilepaths = Collections.synchronizedMap(new HashMap<>());
     private Map<String, Item> itemMap = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, String> thumbnailImageURLs = Collections.synchronizedMap(new HashMap<>());
     private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
 
     public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath,
@@ -118,8 +121,6 @@ public class EditAPI {
 
             Collection c = mapper.readValue(collectionFile, Collection.class);
             String urlSlug = c.getName().getUrlSlug();
-            String thumbnailURL = getCollectionThumbnailURL(collectionFile.getCanonicalPath());
-            c.setThumbnailURL(thumbnailURL);
 
             // Setup collection maps
             newCollectionMap.put(urlSlug, c);
@@ -134,32 +135,84 @@ public class EditAPI {
         this.collectionMap = newCollectionMap;
         this.collectionFilepaths = newCollectionFilepaths;
         this.itemMap = newItemMap;
-    }
 
-    // TODO parse UI data into a model object
-    private String getCollectionThumbnailURL(String requiredCollectionFilepath) {
+        // Update UI
+        Map<String, String> newThumbnailImageURLs = Collections.synchronizedMap(new HashMap<>());
+        UI ui = mapper.readValue(uiFile, UI.class);
+        for (UICollection collection : ui.getThemeData().getCollections()) {
 
-        if (requiredCollectionFilepath != null) {
-            try {
+            // Get collection Id from the filepath
+            String collectionPath = collection.getCollection().getId();
+            String collectionId = getCollectionIdFromCollectionPath(collectionPath);
+            newThumbnailImageURLs.put(collectionId, collection.getThumbnail().getId());
 
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
-                mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
-                UI ui = mapper.readValue(uiFile, UI.class);
-                for (UICollection collection : ui.getThemeData().getCollections()) {
-                    String collectionPath = collection.getCollection().getId();
-                    File collectionFile = new File(dataPath + File.separator + collectionPath);
-                    if (collectionFile.getCanonicalPath().equals(requiredCollectionFilepath)) {
-                        return collection.getThumbnail().getId();
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        }
+        this.thumbnailImageURLs = newThumbnailImageURLs;
+
+        for (Collection c : collectionMap.values()) {
+            String thumbnailURL = getCollectionThumbnailURL(c.getName().getUrlSlug());
+            c.setThumbnailURL(thumbnailURL);
         }
 
-        return null;
     }
+
+    private String getCollectionIdFromCollectionPath(String collectionPath) {
+
+        File collectionFile = new File(uiFile.getParent(), collectionPath);
+
+        Stream<String> matchingIds =
+            collectionFilepaths.entrySet().stream()
+                .filter(entry -> {
+                    try {
+                        return entry.getValue().equals(collectionFile.getCanonicalPath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return false;
+                }).map(Map.Entry::getKey);
+
+        // should be only one match collection id for this Filepath
+        // record in thumbnailImageURLs map <Collection id, thumbnail URL>
+        return matchingIds.findFirst().get();
+    }
+
+    /**
+     * Get the ThumbnailURL for a collection.
+     *
+     * @param collectionId relative to the ui file.
+     * @return
+     */
+    private String getCollectionThumbnailURL(@NotNull String collectionId) {
+
+        return this.thumbnailImageURLs.get(collectionId);
+    }
+
+    private void setCollectionThumbnailURL(String thumbnailURL, String collectionId) {
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+            mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
+            UI ui = mapper.readValue(uiFile, UI.class);
+            for (UICollection collection : ui.getThemeData().getCollections()) {
+                String thisCollectionPath = collection.getCollection().getId();
+                String thisCollectionId = getCollectionIdFromCollectionPath(thisCollectionPath);
+                if (thisCollectionId.equals(collectionId)) {
+
+                    collection.setThumbnail(new Id(thumbnailURL));
+                    ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
+                    writer.writeValue(uiFile, ui);
+                    break;
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     public List<Collection> getCollections() {
         return new ArrayList<>(collectionMap.values());
@@ -385,10 +438,7 @@ public class EditAPI {
             FileUtils.write(creditHTMLFile, creditHTML, "UTF-8");
 
             // Update collection thumbnail in the UI
-            // TODO
-
-            ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-            writer.writeValue(collectionFile, collection);
+            setCollectionThumbnailURL(collection.getThumbnailURL(), collection.getName().getUrlSlug());
 
             // Git Commit and push to remote repo.
             boolean success = gitHelper.pushGitChanges();
