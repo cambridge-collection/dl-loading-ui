@@ -76,7 +76,7 @@ class EditAPITest {
         JSONObject testCollection = new JSONObject(fileString);
         String sortName = testCollection.getJSONObject("name").getString("sort");
         assert (sortName.equals("Sorting Test Name"));
-        assert ("Sorting Test Name".equals(editAPI.getCollection("test").getName().getSort()));
+        assert ("Sorting Test Name".equals(editAPI.getCollection("collections/test.collection.json").getName().getSort()));
 
         final JSONObject newName = testCollection.getJSONObject("name").put("sort", "New Value");
         final JSONObject newCollection = testCollection.put("name", newName);
@@ -85,7 +85,7 @@ class EditAPITest {
         editAPI.updateModel();
 
         // check model has been updated
-        assert ("New Value".equals(editAPI.getCollection("test").getName().getSort()));
+        assert ("New Value".equals(editAPI.getCollection("collections/test.collection.json").getName().getSort()));
     }
 
     @Test
@@ -99,7 +99,7 @@ class EditAPITest {
 
     @Test
     void getCollection() {
-        Collection test = editAPI.getCollection("test");
+        Collection test = editAPI.getCollection("collections/test.collection.json");
         assert (test != null);
         assert (test.getName().getUrlSlug().equals("test"));
         assert (test.getItemIds().size() == 5);
@@ -155,7 +155,7 @@ class EditAPITest {
         MockMultipartFile xmlFile2 = new MockMultipartFile("xml", "filename.xml", "text/xml", ("<?xml " +
             "version=\"1.0\" encoding=\"UTF-8\"?><test></test>").getBytes());
 
-        editAPI.addItemToCollection("MS-MYITEMTEST-00001", "xml", xmlFile2.getInputStream(), "test");
+        editAPI.addItemToCollection("MS-MYITEMTEST-00001", "xml", xmlFile2.getInputStream(), "collections/test.collection.json");
 
         Item item = editAPI.getItem("MS-MYITEMTEST-00001");
         assert (item != null);
@@ -163,26 +163,26 @@ class EditAPITest {
         assert (item.getName().equals("MS-MYITEMTEST-00001"));
         assert (item.getFilepath().endsWith("/data/items/data/tei/MS-MYITEMTEST-00001/MS-MYITEMTEST-00001.xml"));
         Id id = new Id("../items/data/tei/MS-MYITEMTEST-00001/MS-MYITEMTEST-00001.xml");
-        assert (editAPI.getCollection("test").getItemIds().contains(id));
+        assert (editAPI.getCollection("collections/test.collection.json").getItemIds().contains(id));
     }
 
     @Test
     void deleteItemFromCollection() {
 
-        assert (editAPI.getCollection("test").getItemIds().contains(new Id("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml")));
-        editAPI.deleteItemFromCollection("MS-TEST-00001", "test");
-        assert (!editAPI.getCollection("test").getItemIds().contains(new Id("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml")));
+        assert (editAPI.getCollection("collections/test.collection.json").getItemIds().contains(new Id("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml")));
+        editAPI.deleteItemFromCollection("MS-TEST-00001", "collections/test.collection.json");
+        assert (!editAPI.getCollection("collections/test.collection.json").getItemIds().contains(new Id("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml")));
     }
 
     @Test
     void updateCollection() {
 
-        assert ("Sorting Test Name".equals(editAPI.getCollection("test").getName().getSort()));
+        assert ("Sorting Test Name".equals(editAPI.getCollection("collections/test.collection.json").getName().getSort()));
         Collection collection = makeCollection("test");
         String descriptionHTML = "<html>test description</html>";
         String creditHTML = "<html>test credit</html>";
         editAPI.updateCollection(collection, descriptionHTML, creditHTML);
-        assert ("sortName".equals(editAPI.getCollection("test").getName().getSort()));
+        assert ("sortName".equals(editAPI.getCollection("collections/test.collection.json").getName().getSort()));
     }
 
     @Test
@@ -217,6 +217,7 @@ class EditAPITest {
         String filePath =
             gitSourceVariables.getGitSourcePath() + "/data/"+collectionId;
         c.setThumbnailURL("thumbnailURL");
+        c.setCollectionId(collectionId);
 
         return c;
     }
