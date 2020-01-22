@@ -9,7 +9,7 @@ Package:
 
 Run:
 
-    java -jar target/ui-0.1.0-SNAPSHOT.war
+    mvn spring-boot:run
 
 This will run the application on:
 

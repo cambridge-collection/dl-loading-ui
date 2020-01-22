@@ -16,12 +16,15 @@ import java.util.List;
 
 public class CollectionForm {
 
-    //@NotBlank(message = "Must specify collection type.")
+    @NotBlank(message = "Must specify collection type.")
     private String collectionType;
 
     @NotBlank(message = "Must specify a url-slug for this collection.")
     @Pattern(regexp = "^[a-z\\-]+$", message = "Must be all lower case letters or hyphen '-' with no spaces.")
     private String urlSlugName;
+
+    // Can be null/blank for new collections.
+    private String collectionId;
 
     @NotBlank(message = "Must specify a sort name.")
     private String sortName;
@@ -41,12 +44,12 @@ public class CollectionForm {
     @Size(min = 2, max = 5000, message = "Medium description must be between 2 and 5000 characters.")
     private String mediumDescription;
 
-    @NotBlank(message = "Must specify a full description.")
     private String fullDescriptionPath;
+    @NotBlank(message = "Must specify a full description.")
     private String fullDescriptionHTML;
 
-    @NotBlank(message = "Must specify a prose credit.")
     private String proseCreditPath;
+    @NotBlank(message = "Must specify a prose credit.")
     private String proseCreditHTML;
 
     @NotNull
@@ -55,12 +58,13 @@ public class CollectionForm {
     @NotBlank(message = "Must specify a thumbnail URL")
     private String thumbnailURL;
 
-    public CollectionForm(Collection collection, String descriptionHTML, String creditHTML) {
-        if (collection == null) {
+    public CollectionForm(String collectionId, Collection collection, String descriptionHTML, String creditHTML) {
+        if (collectionId == null || collection == null) {
             return;
         }
         this.collectionType = collection.getType();
         this.urlSlugName = collection.getName().getUrlSlug();
+        this.collectionId = collectionId;
         this.sortName = collection.getName().getSort();
         this.shortName = collection.getName().getShortName();
         this.fullName = collection.getName().getFull();
@@ -81,11 +85,9 @@ public class CollectionForm {
 
     public CollectionForm() {
 
+        // TODO read from properties
         this.setCollectionType("https://schemas.cudl.lib.cam.ac.uk/package/v1/collection.json");
 
-        // TODO fix this
-        this.setProseCreditPath("../pages/html/collections/sample/sponsors.html"); // TODO fix hardcoding
-        this.setFullDescriptionPath("../pages/html/collections/sample/summary.html"); // TODO fix hardcoding
     }
 
     public String getShortDescription() {
@@ -128,6 +130,10 @@ public class CollectionForm {
         return urlSlugName;
     }
 
+    public String getCollectionId() {
+        return collectionId;
+    }
+
     public String getCollectionType() {
         return collectionType;
     }
@@ -148,6 +154,7 @@ public class CollectionForm {
         }
         Collection c = new Collection(collectionType, name, description, credit, itemIds);
         c.setThumbnailURL(thumbnailURL);
+        c.setCollectionId(collectionId);
         return c;
     }
 
@@ -158,6 +165,11 @@ public class CollectionForm {
     public void setUrlSlugName(String urlSlugName) {
 
         this.urlSlugName = urlSlugName;
+    }
+
+    public void setCollectionId(String collectionId) {
+
+        this.collectionId = collectionId;
     }
 
     public void setSortName(String sortName) {

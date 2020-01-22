@@ -2,6 +2,7 @@ package uk.cam.lib.cdl.loading.model.editor;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.cam.lib.cdl.loading.model.editor.ui.UIThemeData;
 
 import java.beans.ConstructorProperties;
 
@@ -24,10 +25,12 @@ public class UI {
         return type;
     }
 
+    @JsonProperty("theme-name")
     public String getThemeName() {
         return themeName;
     }
 
+    @JsonProperty("theme-data")
     public UIThemeData getThemeData() {
         return themeData;
     }

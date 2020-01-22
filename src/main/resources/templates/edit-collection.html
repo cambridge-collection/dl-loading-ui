@@ -58,6 +58,7 @@
                                   th:action="@{'/edit/collection/update'}"
                                   th:object="${form}">
                                 <input type="hidden" name="itemIds" th:value="*{ItemIds}">
+                                <input type="hidden" name="collectionId" th:value="*{collectionId}">
                                 <div class="form-group w-auto">
                                     <div class="row">
                                         <div class="col"><h4>Names</h4></div>
@@ -70,10 +71,7 @@
                                                     <div class="alert-danger"
                                                          th:if="${#fields.hasErrors('urlSlugName')}"
                                                          th:errors="*{urlSlugName}"></div>
-                                                    <!--                                                    <span th:if="${newCollection}" class="text-gray-800"
-                                                                                                              th:text="*{urlSlugName}">
-                                                                                                            <input type="hidden" name="urlSlugName" th:value="*{urlSlugName}">
-                                                                                                        </span>-->
+
                                                     <input class="form-control"
                                                            type="text" name="urlSlugName"
                                                            id="name.urlSlugName"
@@ -247,9 +245,10 @@
                                             </td>
                                             <td>
                                                 <form
-                                                    th:action="'/edit/collection/'+${form.urlSlugName}+'/deleteItem'"
+                                                    action="/edit/collection/deleteItem"
                                                     method="post" th:id="'deleteItemForm_'+${item.name}">
                                                     <input type="hidden" name="itemName" th:value="${item.name}">
+                                                    <input type="hidden" name="collectionId" th:value="${form.collectionId}">
                                                     <button class="btn btn-link"
                                                             th:id="'deleteItemButton_'+${item.name}"
                                                             onclick="return loading_ui_edit_collection.showDeleteModal(this);">
@@ -281,9 +280,10 @@
                                     <label for="additemFile">Add / Replace Item</label>
                                 </div>
                                 <div class="col-6 m-2">
-                                    <form th:action="'/edit/collection/'+${form.urlSlugName}+'/addItem'"
+                                    <form action="/edit/collection/addItem"
                                           method="post" id="addItemFileForm" enctype="multipart/form-data">
                                         <input type="file" name="file" class="form-control-file" id="addItemFile">
+                                        <input type="hidden" name="collectionId" th:value="${form.collectionId}">
                                     </form>
                                 </div>
                             </div>

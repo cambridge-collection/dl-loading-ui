@@ -7,7 +7,7 @@ import java.beans.ConstructorProperties;
 
 public class CollectionCredit {
 
-    private final Id prose;
+    private Id prose;
 
     @ConstructorProperties({"prose"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -17,6 +17,10 @@ public class CollectionCredit {
 
     public Id getProse() {
         return prose;
+    }
+
+    public void setProse(Id id) {
+        this.prose = id;
     }
 
     public String toString() {

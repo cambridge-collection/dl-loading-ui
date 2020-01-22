@@ -1,6 +1,7 @@
-package uk.cam.lib.cdl.loading.model.editor;
+package uk.cam.lib.cdl.loading.model.editor.ui;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import uk.cam.lib.cdl.loading.model.editor.Id;
 
 import java.beans.ConstructorProperties;
 

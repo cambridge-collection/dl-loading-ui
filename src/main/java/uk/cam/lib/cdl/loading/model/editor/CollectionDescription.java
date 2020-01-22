@@ -9,7 +9,7 @@ public class CollectionDescription {
 
     private final String shortDescription;
     private final String medium;
-    private final Id full;
+    private Id full;
 
     @ConstructorProperties({"shortDescription", "full", "medium"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -28,6 +28,10 @@ public class CollectionDescription {
 
     public Id getFull() {
         return full;
+    }
+
+    public void setFull(Id full) {
+        this.full = full;
     }
 
     public String getMedium() {
