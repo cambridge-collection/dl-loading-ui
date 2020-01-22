@@ -1,6 +1,5 @@
 package uk.cam.lib.cdl.loading.editing;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +11,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
+import uk.cam.lib.cdl.loading.config.GitLocalVariables;
+import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -37,64 +38,20 @@ public class ContentEditorController {
     protected final String contentImagesPath;
     protected final String contentImagesURL;
     private final String pathForDataDisplay;
+    private final GitHelper gitHelper;
 
     @Autowired
     public ContentEditorController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay,
                                    @Value("${data.path.images}") String imagePath,
-                                   @Value("${data.path.html}") String htmlPath) {
+                                   @Value("${data.path.html}") String htmlPath,
+                                   GitLocalVariables gitSourceVariables) {
 
         this.pathForDataDisplay = pathForDataDisplay;
         this.contentImagesURL = pathForDataDisplay + imagePath;
         this.contentImagesPath = editAPI.getDataLocalPath() + imagePath;
         this.contentHTMLPath = editAPI.getDataLocalPath() + htmlPath;
+        this.gitHelper = new GitHelper(gitSourceVariables);
     }
-
-    /**
-     * Request on URL /editor/update/html
-     * <p>
-     * Used by CKEditor to update the HTML on specified sections of the website.
-     * Also commits to git.
-     *
-     * @param response HttpServletResponse
-     * @param writeParams
-     * @param errors Errors thrown when binding
-     * @return
-     * @throws IOException
-     * @throws JSONException
-     */
- /*   //@Secured("hasRole('ROLE_ADMIN')")
-    @RequestMapping(value = "/update/html", method = RequestMethod.POST)
-    public synchronized ModelAndView handleUpdateRequest(
-        HttpServletResponse response,
-        @Valid @ModelAttribute() UpdateHTMLParameters writeParams,
-        BindingResult errors) throws IOException, JSONException {
-
-        if (errors.hasErrors()) {
-            throw new IOException(
-                "HTML Update failed due to invalid parameters. Please check "
-                    + "your filename contains only valid characters.");
-        }
-
-        boolean success = saveHTML(writeParams);
-        if (success) {
-*//*            AdminUser adminUser = Users.currentAdminUser(usersDao);
-
-            if (!git.commit(adminUser.getAdminName(),
-                    adminUser.getAdminEmail(),
-                    "cudl-viewer: Saving HTML changes")
-                    || !git.push(gitUsername, gitPassword, localBranch)) {
-                success = false;
-            }*//*
-        }
-
-        JSONObject json = new JSONObject();
-        json.put("writesuccess", success);
-
-        response.setContentType("application/json");
-        write(json.toString(), response.getOutputStream());
-        return null;
-
-    }*/
 
     /**
      * Request on URL /editor/add/image
@@ -128,13 +85,8 @@ public class ContentEditorController {
             + File.separator + addParams.getDirectory(), filename, is);
 
         if (saveSuccessful) {
-/*            AdminUser adminUser = Users.currentAdminUser(usersDao);
-
-            if (!git.commit(adminUser.getAdminName(),
-                    adminUser.getAdminEmail(), "cudl-viewer: Adding new image")
-                    || !git.push(gitUsername, gitPassword, localBranch)) {
-                saveSuccessful = false;
-            }*/
+            // Git Commit and push to remote repo.
+            saveSuccessful = gitHelper.pushGitChanges();
         }
 
         String output = "<html><head><script> window.opener.CKEDITOR.tools.callFunction( "
@@ -191,8 +143,7 @@ public class ContentEditorController {
         model.addAttribute("imageFiles", imageFiles);
         model.addAttribute("browseDir", browseDir);
         model.addAttribute("homeDir", imagesDir.getPath());
-        model.addAttribute("currentDir",
-            browseDir.replaceFirst(contentImagesPath, ""));
+        model.addAttribute("currentDir", browseDir.replaceFirst(contentImagesPath, ""));
         model.addAttribute("pathForDataDisplay", pathForDataDisplay);
 
         return "edit-image-browse";
@@ -234,13 +185,8 @@ public class ContentEditorController {
         }
 
         if (successful) {
-/*            AdminUser adminUser = Users.currentAdminUser(usersDao);
-
-            if (!git.delete(file.getPath(), adminUser.getAdminName(),
-                    adminUser.getAdminEmail(), "cudl-viewer: Deleting image")
-                    || !git.push(gitUsername, gitPassword, localBranch)) {
-                successful = false;
-            }*/
+            // Git Commit and push to remote repo.
+            successful = gitHelper.pushGitChanges();
         }
 
         JSONObject json = new JSONObject();
@@ -312,28 +258,6 @@ public class ContentEditorController {
 
         return null;
     }
-    /*
-     */
-
-    /**
-     * Note: Does not validate params. This should occur before calling this
-     * method.
-     *
-     * @return
-     * @throws IOException
-     *//*
-    private synchronized boolean saveHTML(UpdateHTMLParameters writeParams)
-        throws IOException {
-
-        // Read in data from request
-        String html = writeParams.getHtml();
-        String filename = writeParams.getFilename();
-
-        // Save the file to disk.
-        return FileSave.save(contentHTMLPath, filename,
-            new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8)));
-
-    }*/
 
     // Performs validation on parameters used for writing images.
     public static class AddImagesParameters {
@@ -431,84 +355,4 @@ public class ContentEditorController {
                 "Upload filename should be jpg, png, gif or bmp.");
         }
     }
-
-    // Performs validation on parameters used for writing html.
-    /*public static class UpdateHTMLParameters {
-
-        private static final Log logger = LogFactory.getLog(UpdateHTMLParameters.class);
-
-        @NotNull
-        @Pattern(regexp = "^[-_/A-Za-z0-9]+\\.html$", message = "Invalid filename")
-        private String filename;
-
-        @NotNull
-        private String html;
-
-        public String getFilename() {
-            return filename;
-        }
-
-        public void setFilename(String filename) {
-            this.filename = filename;
-        }
-
-        public String getHtml() {
-            return html;
-        }
-
-        public void setHtml(String html) {
-            logger.debug("setHtml() before tidy: " + html);
-            this.html = tidyHTML(html);
-            logger.debug("setHtml() after tidy: " + this.html);
-        }
-
-        private String tidyHTML(String input) {
-
-            try {
-                Tidy tidy = new Tidy();
-                tidy.setXHTML(false);
-                tidy.setInputEncoding("UTF-8");
-                tidy.setOutputEncoding("UTF-8");
-                tidy.setMakeClean(false);
-                tidy.setTidyMark(false);
-                tidy.setIndentContent(true);
-                tidy.setSmartIndent(true);
-                tidy.setDropEmptyParas(false);
-                tidy.setDocType("omit");
-                tidy.setQuiet(true);
-                tidy.setPrintBodyOnly(true);
-                tidy.setShowWarnings(false);
-
-                Writer writer = new StringBuilderWriter(input.length());
-                tidy.parse(new StringReader(input), writer);
-
-                String output = writer.toString();
-                if (output != null && !output.trim().equals("")) {
-                    return output;
-                }
-
-            } catch (Exception e) {
-                logger.error("Tidying HTML failed", e);
-            }
-
-            // default to return input in event of any
-            // error.
-            return input;
-
-        }
-
-    }*/
-
-/*    private boolean write(String text, OutputStream outputStream) {
-        try (PrintStream out = new PrintStream(new BufferedOutputStream(outputStream), true,
-            "UTF-8")) {
-            out.print(text);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }*/
-
 }

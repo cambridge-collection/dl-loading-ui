@@ -204,6 +204,7 @@ class EditAPITest {
     }
 
     private Collection makeCollection(String urlSlugName) {
+        String collectionId = "collections/" + urlSlugName + ".collection.json";
         CollectionName name = new CollectionName(urlSlugName, "sortName", "shortName", "fullName");
         CollectionDescription description = new CollectionDescription("shortDescription", new Id("fullDescription"),
             "mediumDescription");
@@ -214,7 +215,7 @@ class EditAPITest {
 
         Collection c = new Collection("collectionType", name, description, credit, itemIds);
         String filePath =
-            gitSourceVariables.getGitSourcePath() + "/data/collections/" + urlSlugName + ".collection.json";
+            gitSourceVariables.getGitSourcePath() + "/data/"+collectionId;
         c.setThumbnailURL("thumbnailURL");
 
         return c;

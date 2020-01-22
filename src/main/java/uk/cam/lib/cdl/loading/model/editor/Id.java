@@ -28,7 +28,6 @@ public class Id implements Comparable<Id> {
         return sb.toString();
     }
 
-
     /**
      * Convert the given object to string with each line indented by 4 spaces
      * (except the first line).

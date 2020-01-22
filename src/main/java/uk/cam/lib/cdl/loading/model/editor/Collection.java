@@ -18,6 +18,7 @@ public class Collection implements Comparable<Collection> {
     private final CollectionCredit credit;
     private final List<Id> ids;
     private String thumbnailURL;
+    private String collectionId;
 
     @ConstructorProperties({"type", "name", "description", "credit", "items"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -60,6 +61,7 @@ public class Collection implements Comparable<Collection> {
         return this.thumbnailURL;
     }
 
+    @JsonIgnore
     public void setThumbnailURL(String thumbnailURL) {
         this.thumbnailURL = thumbnailURL;
     }
@@ -90,7 +92,7 @@ public class Collection implements Comparable<Collection> {
 
     @Override
     public int compareTo(Collection collection) {
-        return getName().getUrlSlug().compareTo(collection.getName().getUrlSlug());
+        return getCollectionId().compareTo(collection.getCollectionId());
     }
 
     @Override
@@ -104,5 +106,15 @@ public class Collection implements Comparable<Collection> {
     @Override
     public int hashCode() {
         return toString().hashCode();
+    }
+
+    @JsonIgnore
+    public String getCollectionId() {
+        return collectionId;
+    }
+
+    @JsonIgnore
+    public void setCollectionId(String collectionId) {
+        this.collectionId = collectionId;
     }
 }

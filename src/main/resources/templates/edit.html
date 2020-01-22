@@ -63,7 +63,7 @@
                                                         <div
                                                             class="text-s text-primary font-weight-bold text-uppercase mb-1">
                                                             <a
-                                                                th:href="'/edit/collection/?collectionId='+${collection.name.urlSlug}"
+                                                                th:href="'/edit/collection/?collectionId='+${collection.collectionId}"
                                                                 th:text="${collection.name.shortName}"></a></div>
                                                         <div class="text-xs mb-0 text-gray-800 text-left"
                                                              th:text="${collection.description.shortDescription}">
@@ -77,7 +77,7 @@
                                                 absolute; bottom: 0; right:7px;">
                                                     <div class="col-auto">
                                                         <a
-                                                            th:href="'/edit/collection/?collectionId='+${collection.name.urlSlug}">
+                                                            th:href="'/edit/collection/?collectionId='+${collection.collectionId}">
                                                             <i class="fas fa-arrow-alt-circle-right fa-2x"></i>
                                                         </a>
                                                     </div>
