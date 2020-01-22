@@ -2,6 +2,10 @@ Cambridge Digital Library: Content Loader
 
 This is a project for editing and loading data into the Cambridge Digital Library Platform.
 
+Configure:
+
+    Look at properties in src/main/resources/application.properties
+    In particular set 'git.sourcedata.checkout.path' to a local dir to checkout the source data.
 
 Package:
 
