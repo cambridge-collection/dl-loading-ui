@@ -1,71 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!DOCTYPE HTML>
+<html xmlns:layout="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{fragments/simple-layout-dark}" xmlns:th="https://www.thymeleaf.org">
 <head>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>SB Admin - Login</title>
-
-    <!-- Custom fonts for this template-->
+    <!-- TODO: fix the flash of unstyled content that happens if these styles are not included here -->
     <link href="/webjars/startbootstrap-sb-admin-2/vendor/fontawesome-free/css/all.min.css" rel="stylesheet"
           type="text/css">
-
-    <!-- Custom styles for this template-->
     <link href="/webjars/startbootstrap-sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
-
 </head>
+<body>
+<div id="content-wrapper" layout:fragment="content">
 
-<body class="bg-dark">
-
-<div class="container">
-    <div class="card card-login mx-auto mt-5">
-        <div class="card-header">Login</div>
-        <div class="card-body">
-            <form>
-                <div class="form-group">
-                    <div class="form-label-group">
-                        <input type="email" id="inputEmail" class="form-control" placeholder="Email address"
-                               required="required" autofocus="autofocus">
-                        <label for="inputEmail">Email address</label>
-                    </div>
+    <div class="container col-12 row justify-content-center">
+        <div class="card card-login col-5 mt-5">
+            <div class="card-header">Login</div>
+            <div class="card-body">
+                <div th:if="${param.error}">
+                    Invalid username and password.
                 </div>
-                <div class="form-group">
-                    <div class="form-label-group">
-                        <input type="password" id="inputPassword" class="form-control" placeholder="Password"
-                               required="required">
-                        <label for="inputPassword">Password</label>
-                    </div>
+                <div th:if="${param.logout}">
+                    You have been logged out.
                 </div>
-                <div class="form-group">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" value="remember-me">
-                            Remember Password
-                        </label>
+                <form th:action="@{/login/login.html}" method="post">
+                    <div class="form-group">
+                        <div class="form-label-group">
+                            <input name="username" type="text" id="username" class="form-control" placeholder="Username"
+                                   required="required" autofocus="autofocus">
+                            <label for="username">Username</label>
+                        </div>
                     </div>
+                    <div class="form-group">
+                        <div class="form-label-group">
+                            <input name="password" type="password" id="password" class="form-control"
+                                   placeholder="Password"
+                                   required="required">
+                            <label for="password">Password</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value="remember-me">
+                                Remember Password
+                            </label>
+                        </div>
+                    </div>
+                    <input type="submit" class="btn btn-primary btn-block" value="Login"/>
+                </form>
+                <div class="text-center">
+                    <a class="d-block small mt-3" href="login/register.html">Register an Account</a>
+                    <a class="d-block small" href="login/forgot-password.html">Forgot Password?</a>
                 </div>
-                <a class="btn btn-primary btn-block" href="/index.html">Login</a>
-            </form>
-            <div class="text-center">
-                <a class="d-block small mt-3" href="login/register.html">Register an Account</a>
-                <a class="d-block small" href="login/forgot-password.html">Forgot Password?</a>
+            </div>
+        </div>
+        <div class="card card-login col-4 m-5 text-black-50 ">
+            <div class="card-header">Example Logins</div>
+            <div class="card-body">
+                <p>Use these examples to test the system:</p>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <td>Username</td>
+                        <td>Password</td>
+                        <td>Role</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>manchester</td>
+                        <td>viewme</td>
+                        <td>ROLE_USER, ROLE_ADMIN</td>
+                    </tr>
+                    <tr>
+                        <td>admin</td>
+                        <td>basicadminpass</td>
+                        <td>ROLE_USER, ROLE_ADMIN</td>
+                    </tr>
+                    <tr>
+                        <td>user</td>
+                        <td>basicuserpass</td>
+                        <td>ROLE_USER</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+
 </div>
-
-<!-- Bootstrap core JavaScript-->
-<script src="/webjars/startbootstrap-sb-admin-2/vendor/jquery/jquery.min.js"></script>
-<script src="/webjars/startbootstrap-sb-admin-2/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-<!-- Core plugin JavaScript-->
-<script src="/webjars/startbootstrap-sb-admin-2/vendor/jquery-easing/jquery.easing.min.js"></script>
+<!-- /.content-wrapper -->
 
 </body>
-
 </html>
