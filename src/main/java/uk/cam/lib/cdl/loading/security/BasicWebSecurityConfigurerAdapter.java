@@ -1,17 +1,15 @@
 package uk.cam.lib.cdl.loading.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 
 import java.util.ArrayList;
@@ -21,81 +19,78 @@ import java.util.List;
 @EnableWebSecurity
 public class BasicWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private MyBasicAuthenticationEntryPoint authenticationEntryPoint;
-
     @Value("${dl-loading-ui.auth.basic.users}")
     private String users;
 
     @Value("${dl-loading-ui.auth.basic.admins}")
     private String admins;
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    @Bean
+    @Override
+    public UserDetailsService userDetailsService() {
+        // NOTE deprecated as this should not be used in production. Will be replaced by SAML.
 
-        /** TODO Replace with LDAP auth ***/
+        List<UserDetails> userDetails = new ArrayList<>();
 
         // Setup Users
         String[] userArray = users.split(",");
-        for (int i = 0; i < userArray.length; i++) {
-            String[] user = userArray[i].split(":");
+        for (String value : userArray) {
+            String[] user = value.split(":");
             String username = user[0];
             String password = user[1];
-
-            auth.inMemoryAuthentication()
-                .withUser(username).password(passwordEncoder().encode(password))
-                .authorities(new SimpleGrantedAuthority("ROLE_USER"));
+            userDetails.add(
+                User.withDefaultPasswordEncoder()
+                    .username(username)
+                    .password(password)
+                    .roles("USER")
+                    .build());
         }
 
         // Setup Admins
         String[] adminArray = admins.split(",");
-        for (int i = 0; i < adminArray.length; i++) {
-            String[] user = adminArray[i].split(":");
+        for (String s : adminArray) {
+            String[] user = s.split(":");
             String username = user[0];
             String password = user[1];
-
-            List authorities = new ArrayList();
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-
-            auth.inMemoryAuthentication()
-                .withUser(username).password(passwordEncoder().encode(password))
-                .authorities(authorities);
-
+            userDetails.add(
+                User.withDefaultPasswordEncoder()
+                    .username(username)
+                    .password(password)
+                    .roles("USER", "ADMIN")
+                    .build());
         }
 
+        return new InMemoryUserDetailsManager(userDetails);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
             .authorizeRequests()
-            .antMatchers("/js").permitAll()
-            .antMatchers("/css").permitAll()
-            .antMatchers("/img").permitAll()
+            .antMatchers("/js/**").permitAll()
+            .antMatchers("/css/**").permitAll()
+            .antMatchers("/img/**").permitAll()
+            .antMatchers("/webjars/**").permitAll()
             .antMatchers("/login/**").permitAll()
             .anyRequest().authenticated()
             .and()
-            .httpBasic()
-            .authenticationEntryPoint(authenticationEntryPoint);
 
-        http.addFilterAfter(new CustomFilter(),
-            BasicAuthenticationFilter.class);
+            .formLogin()
+            .loginPage("/login/login.html")
+            .permitAll()
+            .and()
 
-        // Required for allowing Iframe embedding from same origin.
-        http.headers().frameOptions().disable()
-            .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN));
+            // Required for allowing Iframe embedding from same origin.
+            .headers().frameOptions().disable()
+            .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
+            .and()
 
-        http.logout()
+            .logout()
             .logoutUrl("/logout")
             .logoutSuccessUrl("/login/login.html")
             .invalidateHttpSession(true)
             .deleteCookies("JSESSIONID");
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
 }
