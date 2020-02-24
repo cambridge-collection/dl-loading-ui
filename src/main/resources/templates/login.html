@@ -20,7 +20,7 @@
                 <div th:if="${param.logout}">
                     You have been logged out.
                 </div>
-                <form th:action="@{/login/login.html}" method="post">
+<!--                <form th:action="@{/login/login.html}" method="post">
                     <div class="form-group">
                         <div class="form-label-group">
                             <input name="username" type="text" id="username" class="form-control" placeholder="Username"
@@ -45,46 +45,26 @@
                         </div>
                     </div>
                     <input type="submit" class="btn btn-primary btn-block" value="Login"/>
+                </form>-->
+                <form th:action="${idpDiscoReturnURL}" method="get">
+
+                    <input type="hidden"  th:name="${idpDiscoReturnParam}" th:id="'idp_' + ${idps[0]}"
+                           th:value="${idps[0]}" />
+
+                    <p>Please login using the button below and you will be redirected to the login
+                    screen for your organisation.</p>
+                    <small class="d-block text-center mt-3" id="sso-btn">
+                        <button type="submit" class="btn btn-primary btn-icon-split">
+                           <span class="icon text-white-50">
+                               <i class="fas fa-handshake"></i>
+                            </span>
+                            <span class="text">Login</span>
+                        </button>
+                    </small>
                 </form>
-                <div class="text-center">
-                    <a class="d-block small mt-3" href="login/register.html">Register an Account</a>
-                    <a class="d-block small" href="login/forgot-password.html">Forgot Password?</a>
-                </div>
+
             </div>
         </div>
-        <div class="card card-login col-4 m-5 text-black-50 ">
-            <div class="card-header">Example Logins</div>
-            <div class="card-body">
-                <p>Use these examples to test the system:</p>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <td>Username</td>
-                        <td>Password</td>
-                        <td>Role</td>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>manchester</td>
-                        <td>viewme</td>
-                        <td>ROLE_USER, ROLE_ADMIN</td>
-                    </tr>
-                    <tr>
-                        <td>admin</td>
-                        <td>basicadminpass</td>
-                        <td>ROLE_USER, ROLE_ADMIN</td>
-                    </tr>
-                    <tr>
-                        <td>user</td>
-                        <td>basicuserpass</td>
-                        <td>ROLE_USER</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 
 </div>
 <!-- /.content-wrapper -->

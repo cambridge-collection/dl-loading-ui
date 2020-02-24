@@ -1,11 +1,10 @@
 package uk.cam.lib.cdl.loading;
 
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import uk.cam.lib.cdl.loading.security.MyUserDetails;
 
 @Controller
 public class HomeController {
@@ -13,12 +12,18 @@ public class HomeController {
     @GetMapping({"/", "/index.html"})
     public String index(Model model) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object authentication =  SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = "Unknown";
-        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            username = authentication.getName();
+        String firstName = "";
+        String lastName = "";
+        if (authentication instanceof MyUserDetails) {
+            username = ((MyUserDetails) authentication).getUsername();
+            firstName = ((MyUserDetails) authentication).getFirstName();
+            lastName = ((MyUserDetails) authentication).getLastName();
         }
         model.addAttribute("username", username);
+        model.addAttribute("firstName", firstName);
+        model.addAttribute("lastName", lastName);
 
         return "home";
     }
