@@ -19,3 +19,45 @@ This will run the application on:
 
     http://localhost:8081
 
+Authentication:
+
+This application requires a SAML IdP to login.  I can recommend Keycloak https://www.keycloak.org/
+Getting started guide for Keycloak: https://www.keycloak.org/docs/latest/getting_started/
+Also a nice guide on setting up a Spring Boot app with SAML and Keycloak:
+https://blog.codecentric.de/en/2019/03/secure-spring-boot-app-saml-keycloak/
+
+Keycloak config:
+    - Setup Keycloak Client
+
+    - Create a new SAML client in Keycloak with the client-id com:demo:spring:sp.
+    In the client settings tab configure the following:
+
+    - Include AuthnStatement On
+    - Include OneTimeUse Condition Off
+    - Sign Documents On
+    - Optimize REDIRECT signing key lookup Off
+    - Sign Assertions On
+    - Signature Algorithm RSA_SHA256
+    - SAML Signature Key Name KEY_ID
+    - Canonicalization Method EXCLUSIVE
+    - Encrypt Assertions Off
+    - Client Signature Required On
+    - Force POST Binding On
+    - Front Channel Logout On
+    - Force Name ID Format Off
+    - Name ID Format username
+    - Root URL http://localhost:8080
+    - Valid Redirect URIs /saml/*
+    - Base URL /
+    Open Fine Grain SAML Endpoint Configuration
+    - Assertion Consumer Service POST Binding URL http://localhost:8080/saml/SSO
+    - Logout Service POST Binding URL http://localhost:8080/saml/logout
+
+In the SAML Keys tab you need to import the Keystore of the example app.
+
+    Click on import
+    Archive Format JKS
+    Key-Alias dl-loading-ui
+    Store pass *see keepass*
+    Select configure the path to src/main/resources/saml/samlKeystore.jks
+

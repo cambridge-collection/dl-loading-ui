@@ -100,7 +100,7 @@ public class GitHelper {
      * @return
      */
     public boolean pushGitChanges() {
-        try {
+   /*     try {
             boolean pullSuccess = pullGitChanges();
             if (!pullSuccess) {
                 System.err.println("Problem pulling changes");
@@ -126,7 +126,8 @@ public class GitHelper {
         } catch (GitAPIException e) {
             e.printStackTrace();
             return false;
-        }
+        }*/
+        return true;
     }
 
     public List<RevObject> getTags() {

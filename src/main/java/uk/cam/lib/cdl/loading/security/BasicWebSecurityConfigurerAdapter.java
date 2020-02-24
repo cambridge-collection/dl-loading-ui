@@ -1,8 +1,11 @@
+/*
+
 package uk.cam.lib.cdl.loading.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -15,8 +18,15 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 import java.util.ArrayList;
 import java.util.List;
 
+*/
+/**
+ * FOR TESTING PURPOSES ONLY, DISABLE FOR RELEASE.
+ *//*
+
+
 @Configuration
 @EnableWebSecurity
+@Order(2)
 public class BasicWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     @Value("${dl-loading-ui.auth.basic.users}")
@@ -94,3 +104,4 @@ public class BasicWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdap
 
 
 }
+*/
