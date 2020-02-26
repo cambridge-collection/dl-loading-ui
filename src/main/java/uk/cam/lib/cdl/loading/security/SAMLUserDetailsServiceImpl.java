@@ -36,7 +36,12 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
         GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
         authorities.add(authority);
 
-        // TODO persist in a datastore?
+        // TODO persist in a datastore
+        // TODO Allow the recording of roles for specific users
+        // TODO ensure userID is persistent.
+        // Note: We don't want to record any personal data we don't need, so we can use the first/last names
+        // for display when logged in but perhaps not store in DB.  Could store email?  Do we need to be
+        // able to id accounts from this?
         return new MyUserDetails(userID, "", givenName, surname, email, true, authorities);
     }
 
