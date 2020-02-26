@@ -39,18 +39,8 @@
     "roles": {
         "realm": [
             {
-                "id": "b9f4a4ac-1e10-4610-9f1e-367a108be378",
-                "name": "offline_access",
-                "description": "${role_offline-access}",
-                "composite": false,
-                "clientRole": false,
-                "containerId": "demo",
-                "attributes": {}
-            },
-            {
-                "id": "45d69e4e-cc9b-4f61-a866-a93df0a20383",
-                "name": "uma_authorization",
-                "description": "${role_uma_authorization}",
+                "id": "2e7e8c4c-2738-45ed-901b-216b6f10a1d8",
+                "name": "DEMO_USER",
                 "composite": false,
                 "clientRole": false,
                 "containerId": "demo",
@@ -72,8 +62,7 @@
     },
     "groups": [],
     "defaultRoles": [
-        "uma_authorization",
-        "offline_access"
+        "DEMO_USER"
     ],
     "requiredCredentials": [
         "password"
@@ -116,14 +105,7 @@
         {
             "clientScope": "saml_profile",
             "roles": [
-                "offline_access",
-                "uma_authorization"
-            ]
-        },
-        {
-            "clientScope": "offline_access",
-            "roles": [
-                "offline_access"
+                "DEMO_USER"
             ]
         }
     ],
@@ -263,57 +245,6 @@
                         "access.token.claim": "true",
                         "claim.name": "email",
                         "jsonType.label": "String"
-                    }
-                }
-            ]
-        },
-        {
-            "id": "9bab9b06-7e99-42ef-a257-52ceee5021be",
-            "name": "saml_profile",
-            "description": "",
-            "protocol": "saml",
-            "attributes": {
-                "include.in.token.scope": "true",
-                "display.on.consent.screen": "false"
-            },
-            "protocolMappers": [
-                {
-                    "id": "c485d377-cfd4-475b-8782-9e782ac2650a",
-                    "name": "X500 givenName",
-                    "protocol": "saml",
-                    "protocolMapper": "saml-user-property-mapper",
-                    "consentRequired": false,
-                    "config": {
-                        "attribute.nameformat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
-                        "user.attribute": "firstName",
-                        "friendly.name": "givenName",
-                        "attribute.name": "urn:oid:2.5.4.42"
-                    }
-                },
-                {
-                    "id": "1e310d2a-c152-4a5c-bbff-ba8428ef5f10",
-                    "name": "X500 surname",
-                    "protocol": "saml",
-                    "protocolMapper": "saml-user-property-mapper",
-                    "consentRequired": false,
-                    "config": {
-                        "attribute.nameformat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
-                        "user.attribute": "lastName",
-                        "friendly.name": "surname",
-                        "attribute.name": "urn:oid:2.5.4.4"
-                    }
-                },
-                {
-                    "id": "03c0197a-4aa7-4321-a615-d57fac3414f9",
-                    "name": "X500 email",
-                    "protocol": "saml",
-                    "protocolMapper": "saml-user-property-mapper",
-                    "consentRequired": false,
-                    "config": {
-                        "attribute.nameformat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
-                        "user.attribute": "email",
-                        "friendly.name": "email",
-                        "attribute.name": "urn:oid:1.2.840.113549.1.9.1"
                     }
                 }
             ]
@@ -683,11 +614,11 @@
                     "protocolMapper": "oidc-usermodel-client-role-mapper",
                     "consentRequired": false,
                     "config": {
-                        "multivalued": "true",
                         "user.attribute": "foo",
                         "access.token.claim": "true",
                         "claim.name": "resource_access.${client_id}.roles",
-                        "jsonType.label": "String"
+                        "jsonType.label": "String",
+                        "multivalued": "true"
                     }
                 },
                 {
@@ -697,11 +628,62 @@
                     "protocolMapper": "oidc-usermodel-realm-role-mapper",
                     "consentRequired": false,
                     "config": {
-                        "multivalued": "true",
                         "user.attribute": "foo",
                         "access.token.claim": "true",
                         "claim.name": "realm_access.roles",
-                        "jsonType.label": "String"
+                        "jsonType.label": "String",
+                        "multivalued": "true"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "9bab9b06-7e99-42ef-a257-52ceee5021be",
+            "name": "saml_profile",
+            "description": "",
+            "protocol": "saml",
+            "attributes": {
+                "include.in.token.scope": "true",
+                "display.on.consent.screen": "false"
+            },
+            "protocolMappers": [
+                {
+                    "id": "c485d377-cfd4-475b-8782-9e782ac2650a",
+                    "name": "X500 givenName",
+                    "protocol": "saml",
+                    "protocolMapper": "saml-user-property-mapper",
+                    "consentRequired": false,
+                    "config": {
+                        "attribute.nameformat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                        "user.attribute": "firstName",
+                        "friendly.name": "givenName",
+                        "attribute.name": "urn:oid:2.5.4.42"
+                    }
+                },
+                {
+                    "id": "1e310d2a-c152-4a5c-bbff-ba8428ef5f10",
+                    "name": "X500 surname",
+                    "protocol": "saml",
+                    "protocolMapper": "saml-user-property-mapper",
+                    "consentRequired": false,
+                    "config": {
+                        "attribute.nameformat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                        "user.attribute": "lastName",
+                        "friendly.name": "surname",
+                        "attribute.name": "urn:oid:2.5.4.4"
+                    }
+                },
+                {
+                    "id": "03c0197a-4aa7-4321-a615-d57fac3414f9",
+                    "name": "X500 email",
+                    "protocol": "saml",
+                    "protocolMapper": "saml-user-property-mapper",
+                    "consentRequired": false,
+                    "config": {
+                        "attribute.nameformat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                        "user.attribute": "email",
+                        "friendly.name": "email",
+                        "attribute.name": "urn:oid:1.2.840.113549.1.9.1"
                     }
                 }
             ]
@@ -729,18 +711,9 @@
         }
     ],
     "defaultDefaultClientScopes": [
-        "roles",
-        "web-origins",
-        "email",
-        "profile",
-        "role_list"
+        "saml_profile"
     ],
-    "defaultOptionalClientScopes": [
-        "address",
-        "offline_access",
-        "phone",
-        "microprofile-jwt"
-    ],
+    "defaultOptionalClientScopes": [],
     "browserSecurityHeaders": {
         "contentSecurityPolicyReportOnly": "",
         "xContentTypeOptions": "nosniff",
