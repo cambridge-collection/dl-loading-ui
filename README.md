@@ -1,14 +1,14 @@
-#Cambridge Digital Library: Content Loader
+# Cambridge Digital Library: Content Loader
 
 This is a project for editing and loading data into the Cambridge Digital Library Platform.
 
-##Configure:
+## Configure:
 
 Look at properties in **src/main/resources/application.properties**
 In particular set **'git.sourcedata.checkout.path'** to a local dir to
 checkout the source data.
 
-##Authentication:
+## Authentication:
 
 ### Setting up your Idp
 This application requires a SAML IdP to provide user authentication.
@@ -70,11 +70,11 @@ auth.saml.keycloak.auth-server-url=http://your-keycloak-host/auth/realms/demo
 
 You can now start the loading ui and log in using the user account you have created.
 
-##Package:
+## Package:
 
     mvn clean package
 
-##Run:
+## Run:
 
     mvn spring-boot:run
 
