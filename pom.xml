@@ -46,6 +46,8 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
             <exclusions>
+                <!-- com.vaadin.external.google:android-json just repackages
+                     org.json:json, which it duplicates and conflicts with. -->
                 <exclusion>
                     <groupId>com.vaadin.external.google</groupId>
                     <artifactId>android-json</artifactId>
