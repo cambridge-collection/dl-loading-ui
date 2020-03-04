@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.security;
+package uk.cam.lib.cdl.loading.security.saml;
 
 import org.opensaml.Configuration;
 import org.opensaml.xml.security.BasicSecurityConfiguration;

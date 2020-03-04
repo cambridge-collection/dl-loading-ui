@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.security;
+package uk.cam.lib.cdl.loading.security.saml;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,11 +7,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.stereotype.Service;
+import uk.cam.lib.cdl.loading.security.MyUserDetails;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@ConditionalOnSAMLAuth
 public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
 
     @Value("${auth.saml.attr.firstName}")
