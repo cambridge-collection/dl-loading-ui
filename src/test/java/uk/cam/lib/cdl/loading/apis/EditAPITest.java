@@ -6,17 +6,17 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.cam.lib.cdl.loading.config.EditConfig;
-import uk.cam.lib.cdl.loading.config.GitConfig;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
-import uk.cam.lib.cdl.loading.model.editor.*;
+import uk.cam.lib.cdl.loading.model.editor.Collection;
+import uk.cam.lib.cdl.loading.model.editor.CollectionCredit;
+import uk.cam.lib.cdl.loading.model.editor.CollectionDescription;
+import uk.cam.lib.cdl.loading.model.editor.CollectionName;
+import uk.cam.lib.cdl.loading.model.editor.Id;
+import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.io.File;
@@ -27,8 +27,6 @@ import java.util.List;
 /**
  * Uses a Bare Repository for testing jgit commands.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {EditConfig.class, GitConfig.class})
 @SpringBootTest
 class EditAPITest {
 

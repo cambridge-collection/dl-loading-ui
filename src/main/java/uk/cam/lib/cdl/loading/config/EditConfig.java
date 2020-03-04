@@ -1,48 +1,49 @@
 package uk.cam.lib.cdl.loading.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
+import uk.cam.lib.cdl.loading.apis.EditAPIUpdater;
 
-import java.io.IOException;
+import java.nio.file.Path;
 
-@ConditionalOnProperty(
-    value = "edit.scheduling.enable", havingValue = "true", matchIfMissing = true
-)
 @Configuration
 @EnableScheduling
 public class EditConfig {
-
-    private final EditAPI editAPI;
-
-    @Autowired
-    public EditConfig(@Value("${data.dl-dataset.filename}") String dlDatasetFilename,
-                      @Value("${data.ui.filename}") String dlUIFilename,
-                      GitLocalVariables gitSourceVariables,
-                      @Value("${data.item.path}") String dataItemPath) {
-
-        this.editAPI =
-            new EditAPI(gitSourceVariables.getGitSourcePath() + gitSourceVariables.getGitSourceDataSubpath(),
-                dlDatasetFilename, dlUIFilename,
-                gitSourceVariables.getGitSourcePath() + dataItemPath, gitSourceVariables);
-
-    }
-
-    @Scheduled(fixedDelay = 5 * 60 * 1000, initialDelay = 500) // Every 5 mins
-    public void checkForUpdates() throws IOException {
-        System.out.println("Updating model...");
-        editAPI.updateModel();
+    @Bean
+    public Path dlDatasetFilename(@Value("${data.dl-dataset.filename}") Path dlDatasetFilename) {
+        return dlDatasetFilename;
     }
 
     @Bean
-    public EditAPI editAPI() {
-        return editAPI;
+    public Path dlUIFilename(@Value("${data.ui.filename}") Path dlUIFilename) {
+        return dlUIFilename;
     }
 
+    @Bean Path dataItemPath(@Value("${data.item.path}") Path dataItemPath) {
+        if(dataItemPath.isAbsolute()) {
+            throw new IllegalArgumentException(String.format("dataItemPath cannot be absolute: '%s'", dataItemPath));
+        }
+        return dataItemPath;
+    }
+
+    @Bean
+    public EditAPI editAPI(GitLocalVariables gitSourceVariables, Path dlDatasetFilename, Path dlUIFilename, Path dataItemPath) {
+        return new EditAPI(Path.of(gitSourceVariables.getGitSourcePath(), gitSourceVariables.getGitSourceDataSubpath()).toString(),
+            dlDatasetFilename.toString(), dlUIFilename.toString(),
+            Path.of(gitSourceVariables.getGitSourcePath()).resolve(dataItemPath).toString(),
+            gitSourceVariables);
+    }
+
+    @ConditionalOnProperty(
+        value = "edit.scheduling.enable", havingValue = "true", matchIfMissing = true
+    )
+    @Bean
+    public EditAPIUpdater editAPIUpdater(EditAPI editAPI) {
+        return new EditAPIUpdater(editAPI);
+    }
 }
 

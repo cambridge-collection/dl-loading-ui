@@ -1,15 +1,15 @@
 package uk.cam.lib.cdl.loading.apis;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.cam.lib.cdl.loading.config.EditConfig;
+import org.springframework.web.util.UriComponentsBuilder;
+import uk.cam.lib.cdl.loading.LoadingUIApplication;
 import uk.cam.lib.cdl.loading.config.GitAPIVariables;
-import uk.cam.lib.cdl.loading.config.GitConfig;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
 import uk.cam.lib.cdl.loading.model.packaging.Pipeline;
@@ -18,17 +18,19 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest
-@ContextConfiguration(classes = {EditConfig.class, GitConfig.class})
-@AutoConfigureWireMock(port = 8089)
+@SpringBootTest(classes = LoadingUIApplication.class)
+@AutoConfigureWireMock(port = 0)
 class PackagingAPITest {
+
+    @Autowired
+    private WireMockServer wireMockServer;
 
     private PackagingAPI packagingAPI;
     private GitLocalVariables gitSourceVariables;
     private GitAPIVariables gitAPIVariables;
 
-    public PackagingAPITest() throws IOException, GitAPIException {
+    @BeforeEach
+    public void setup() throws IOException, GitAPIException {
 
         MockGitRepo gitRepo = new MockGitRepo();
 
@@ -37,7 +39,7 @@ class PackagingAPITest {
             "gitSourceURLPassword", "gitBranch");
 
 
-        String gitAPIURL = "http://localhost:8089/git/api";
+        String gitAPIURL = UriComponentsBuilder.fromHttpUrl(wireMockServer.baseUrl()).path("/git/api").toUriString();
 
         gitAPIVariables = new GitAPIVariables(new URL(gitAPIURL),
             "gitBranch",
@@ -47,8 +49,7 @@ class PackagingAPITest {
             "gitUsername",
             "gitPassword");
 
-            packagingAPI = new PackagingAPI(gitSourceVariables, gitAPIVariables);
-
+        packagingAPI = new PackagingAPI(gitSourceVariables, gitAPIVariables);
     }
 
     @Test
