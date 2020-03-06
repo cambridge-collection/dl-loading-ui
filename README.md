@@ -70,6 +70,23 @@ auth.saml.keycloak.auth-server-url=http://your-keycloak-host/auth/realms/demo
 
 You can now start the loading ui and log in using the user account you have created.
 
+## Setting up the Development API
+
+The application requires a development API (https://bitbucket.org/CUDL/dl-deployment-api/) to be contactable in order
+to make requests to get the instance -> data-version mappings and deploy new data packages.
+
+If you want to run a local version, use the git link above to download and then see instructions within to run.
+Update the 'deployment.api.url' property to point to the installation.
+
+Without setting this up the 'deploy' section will not function.
+
+## Setting up the database
+
+
+## Further Details
+
+More details can be found in `src/main/docs/Overview.md`
+
 ## Package:
 
     mvn clean package

@@ -41,21 +41,23 @@
             </div>
 
             <!-- Cards -->
-            <div>
+            <div th:each="workspace: ${workspaces}">
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-dark float-left">My Workspace</h6>
+                        <th:h6 class="m-0 font-weight-bold text-dark float-left"
+                               th:text="'Workspace: '+${workspace.name}"> </th:h6>
                     </div>
                     <div class="card-body">
 
-
-                        <div class="card shadow mb-4">
+                        <div class="card shadow mb-4" th:if="${not #lists.isEmpty(workspace.getCollectionIds())}">
                             <div class="card-header py-3">
                                 <h6 class="m-0 font-weight-bold text-dark float-left">My Collections</h6>
                             </div>
                             <div class="card-body row">
-                                <tr th:each="collection: ${collections}">
-                                    <div class="col-xl-3 col-md-6 mb-4">
+                                <table>
+                                <tr th:each="collectionId: ${workspace.getCollectionIds()}">
+                                    <div th:with="collection=${collections.get(collectionId)}"
+                                         class="col-xl-3 col-md-6 mb-4">
                                         <div class="card border-left-primary shadow h-100 py-2">
                                             <div class="card-body" style="height: 200px; position:relative">
                                                 <div class="row no-gutters align-items-top">
@@ -85,7 +87,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </tr>
+                                </tr></table>
                                 <div class="col-xl-3 col-md-6 mb-4">
                                     <div class="card shadow h-100 py-2">
                                         <div class="card-body" style="height: 200px; position:relative">
@@ -116,12 +118,17 @@
                             </div>
                         </div>
 
-                        <div class="card shadow mb-4">
+                        <div class="card shadow mb-4" th:if="${not #lists.isEmpty(workspace.getItemIds())}">
                             <div class="card-header py-3">
                                 <h6 class="m-0 font-weight-bold text-dark float-left">My Items</h6>
                             </div>
                             <div class="card-body">
-                                To be implemented...
+
+                                <div th:each="itemId: ${workspace.getItemIds()}">
+                                    <div class="col-xl-3 col-md-6 mb-4"
+                                    th:text="${itemId}">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

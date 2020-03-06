@@ -80,9 +80,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
     @Value("${auth.saml.entityId}")
     private String entityId;
 
+    @Value("${auth.saml.options.nameIdFormat}")
+    private String nameIdFormat;
+
     public void init() {
         this.backgroundTaskTimer = new Timer(true);
-        this.multiThreadedHttpConnectionManager = new MultiThreadedHttpConnectionManager();
         this.multiThreadedHttpConnectionManager = new MultiThreadedHttpConnectionManager();
     }
 
@@ -121,7 +123,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
     public SAMLAuthenticationProvider samlAuthenticationProvider() {
         SAMLAuthenticationProvider samlAuthenticationProvider = new SAMLAuthenticationProvider();
         samlAuthenticationProvider.setUserDetails(samlUserDetailsServiceImpl);
-        samlAuthenticationProvider.setForcePrincipalAsString(false);
+        samlAuthenticationProvider.setForcePrincipalAsString(true);
         return samlAuthenticationProvider;
     }
 
@@ -185,7 +187,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
         Resource storeFile = loader
             .getResource(keystorePath);
         String storePass = keystoreStorePass;
-        System.out.println("pass: "+storePass);
         Map<String, String> passwords = new HashMap<String, String>();
         passwords.put(keystoreKey, keystoreKeyPass);
         String defaultKey = keystoreKey;
@@ -205,6 +206,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements I
         Set<String> idps = new HashSet<>(1);
         idps.add(entityId);
         webSSOProfileOptions.setAllowedIDPs(idps);
+        webSSOProfileOptions.setNameID(nameIdFormat);
         return webSSOProfileOptions;
     }
 

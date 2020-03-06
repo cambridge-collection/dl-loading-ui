@@ -1,0 +1,196 @@
+<!DOCTYPE HTML>
+<html xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{fragments/main-layout}">
+<head>
+    <!-- TODO: fix the flash of unstyled content that happens if these styles are not included here -->
+    <link href="/webjars/startbootstrap-sb-admin-2/vendor/fontawesome-free/css/all.min.css" rel="stylesheet"
+          type="text/css">
+    <link href="/webjars/startbootstrap-sb-admin-2/vendor/datatables/dataTables.bootstrap4.css" rel="stylesheet">
+    <link href="/webjars/startbootstrap-sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
+    <!-- page styles -->
+</head>
+<body>
+<div id="content-wrapper" layout:fragment="content">
+
+    <div class="container-fluid">
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/user-management/">User Management</a>
+            </li>
+            <li class="breadcrumb-item active">Edit Workspace</li>
+        </ol>
+
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800 ml-3">Edit Workspace</h1>
+        </div>
+
+        <div class="col-lg-11" style="max-width: 1200px">
+            <div class="mb-4">
+                <div th:if="${message}">
+                    <div class="alert alert-success" role="alert">
+                        <span th:text="${message}"></span>
+                    </div>
+                </div>
+                <div th:if="${error}">
+                    <div class="alert alert-danger" role="alert">
+                        <span th:text="${error}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-dark float-left">
+                            <span th:text="${form.name}"></span></h6>
+                    </div>
+                    <div class="card-body">
+
+                        <form method="post" id="updateworkspaceform"
+                              th:action="@{'/user-management/updateworkspace'}"
+                              th:object="${form}">
+                            <input type="hidden" name="id" th:value="*{id}">
+                            <div class="form-group w-auto">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="row">
+                                            <div class="col-4 m-2 text-right">Name</div>
+                                            <div class="col m-2">
+                                                <div class="alert-danger"
+                                                     th:if="${#fields.hasErrors('name')}"
+                                                     th:errors="*{name}"></div>
+
+                                                <input class="form-control"
+                                                       type="text" name="name"
+                                                       id="name"
+                                                       maxlength="30"
+                                                       th:value="*{name}">
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-4 m-2 text-right">
+                                                <label for="collectionIds">Collections</label>
+                                            </div>
+                                            <div class="col-6 m-2">
+                                                <div class="alert-danger" th:if="${#fields.hasErrors('collectionIds')}"
+                                                     th:errors="*{collectionIds}"></div>
+                                                <input class="form-control" type="text" name="collectionIds"
+                                                       id="collectionIds"
+                                                       maxlength="30"
+                                                       th:value="*{collectionIds}">
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-4 m-2 text-right">
+                                                <label for="itemIds">Items</label>
+                                            </div>
+                                            <div class="col-6 m-2">
+                                                <div class="alert-danger" th:if="${#fields.hasErrors('itemIds')}"
+                                                     th:errors="*{itemIds}"></div>
+                                                <input class="form-control" type="text" name="itemIds"
+                                                       id="itemIds"
+                                                       maxlength="30"
+                                                       th:value="*{itemIds}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-6">
+                                <div class="col">
+
+                                    <button type="button" id="collectioneditform-reset" class="btn btn-secondary
+                                                float-right
+                                        m-1">Reset
+                                    </button>
+                                    <button type="button" id="collectioneditform-submit" class="btn btn-primary
+                                                float-right m-1">Update
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">Your changes are being saved...
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteItemModal" tabindex="-1" role="dialog" aria-labelledby="deleteItemModal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteItemModalLabel">Remove this item?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    This will remove the item from this collection and delete the item if there are no other
+                    collections it is contained in.
+                </div>
+                <div class="modal-footer">
+                    <button value="value" class="btn btn-danger" id="confirmDeleteItemButton">
+                        Remove Item
+                    </button>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="replaceImageModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div style="--aspect-ratio: 16/9;">
+                        <iframe src="/editor/browse/images" width="1000px" height="500px" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- /.container-fluid -->
+
+    <!-- Sticky Footer -->
+    <footer class="sticky-footer">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>Created by Cambridge University Library</span>
+            </div>
+        </div>
+    </footer>
+
+</div>
+<!-- /.content-wrapper -->
+
+<div id="page_js" layout:fragment="page_js">
+    <script type="text/javascript" src="/webjars/ckeditor/standard/ckeditor.js"></script>
+    <script type="text/javascript" src="/js/edit-collection.js"></script>
+</div>
+</body>
+</html>

@@ -4,6 +4,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import uk.cam.lib.cdl.loading.model.security.User;
 import uk.cam.lib.cdl.loading.security.MyUserDetails;
 
 @Controller
@@ -17,9 +18,10 @@ public class HomeController {
         String firstName = "";
         String lastName = "";
         if (authentication instanceof MyUserDetails) {
-            username = ((MyUserDetails) authentication).getUsername();
-            firstName = ((MyUserDetails) authentication).getFirstName();
-            lastName = ((MyUserDetails) authentication).getLastName();
+            User user = ((MyUserDetails) authentication).getUser();
+            username = user.getUsername();
+            firstName = user.getFirstName();
+            lastName = user.getLastName();
         }
         model.addAttribute("username", username);
         model.addAttribute("firstName", firstName);

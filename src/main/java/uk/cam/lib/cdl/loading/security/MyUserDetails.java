@@ -1,42 +1,36 @@
 package uk.cam.lib.cdl.loading.security;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import uk.cam.lib.cdl.loading.model.security.Role;
+import uk.cam.lib.cdl.loading.model.security.User;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 public class MyUserDetails implements UserDetails {
 
-    private final String username;
-    private final String password;
-    private final String firstName;
-    private final String lastName;
-    private final String email;
-    private boolean isEnabled;
+    private static final long serialVersionUID = -4868816810054682474L;
+    private User user;
+    private Collection<GrantedAuthority> authorities  = new HashSet<>();;
 
-    private Collection<? extends GrantedAuthority> authorities;
-
-    public MyUserDetails(String username, String password, String firstName, String lastName, String email,
-                         boolean isEnabled, Collection<? extends GrantedAuthority> authorities) {
-        this.username = username;
-        this.password = password;
-        this.firstName = firstName;
-        this.email = email;
-        this.lastName = lastName;
-        this.isEnabled = isEnabled;
-        this.authorities = authorities;
+    public MyUserDetails(User user) {
+        this.user = user;
+        initAuthorities(user);
     }
 
-    public String getFirstName() {
-        return firstName;
+    public User getUser() {
+        return user;
     }
 
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getEmail() {
-        return email;
+    private void initAuthorities(User user) {
+        if (user.getAuthorities() == null) {
+            return;
+        }
+        for (Role role : user.getAuthorities()) {
+            authorities.add(new SimpleGrantedAuthority(role.getAuthority()));
+        }
     }
 
     @Override
@@ -46,12 +40,12 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return password;
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return user.getUsername();
     }
 
     @Override
@@ -71,6 +65,6 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return isEnabled;
+        return user.isEnabled();
     }
 }

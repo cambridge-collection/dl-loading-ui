@@ -94,7 +94,8 @@ this.
       Note: When configuring a server, you may need to check that the required status files are available through
       apache.
 
-      There is still work to be done on the display for this section.
+      There is still work to be done on the display for this section, and especially on the errors when not connected
+      to a correctly setup instance.
 
       Once the puppet run is completed the new data should be visible on the server/instance.
 
@@ -103,3 +104,11 @@ this.
        assigned ROLEs. This section should be available only to people with the correct ROLE.
 
       To be implemented.
+
+
+   ##Other Issues:
+
+   There is currently some caching in the results of the deployment API which can probably be removed as it seems to
+   just make it too unresponsive to releases and the deployment interface should now be used by a large number of
+   users anyway.  Just remove the @Cacheable annotations.
+

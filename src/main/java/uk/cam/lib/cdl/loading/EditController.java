@@ -22,11 +22,14 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
+import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
 import uk.cam.lib.cdl.loading.forms.CollectionForm;
+import uk.cam.lib.cdl.loading.model.RolesPrefix;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.Item;
+import uk.cam.lib.cdl.loading.model.editor.Workspace;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -35,6 +38,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 
@@ -45,15 +49,37 @@ public class EditController {
     private final String pathForDataDisplay;
 
     @Autowired
+    private WorkspaceRepository workspaceRepository;
+
+    @Autowired
     public EditController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay) {
         this.editAPI = editAPI;
         this.pathForDataDisplay = pathForDataDisplay;
     }
 
     @GetMapping("/edit/edit.html")
-    public String edit(Model model) {
+    public String edit(Model model, HttpServletRequest request) {
 
-        List<Collection> collections = editAPI.getCollections();
+        List<Workspace> workspaces = new ArrayList<>();
+        Hashtable<String,Collection> collections = new Hashtable<>();
+
+        // Get the workspaces the user has access to.
+        for (Workspace workspace: workspaceRepository.findAll()) {
+            String workspaceMemberRole =  RolesPrefix.WORKSPACE_MEMBER.role+workspace.getId();
+            String workspaceManagerRole = RolesPrefix.WORKSPACE_MANAGER.role+workspace.getId();
+
+            if (request.isUserInRole(workspaceMemberRole) || request.isUserInRole(workspaceManagerRole)) {
+                workspaces.add(workspace);
+
+                // Get the collections in those workspaces
+                for (String collectionId: workspace.getCollectionIds() ) {
+                    Collection collection = editAPI.getCollection(collectionId);
+                    collections.put(collectionId,collection);
+                }
+            }
+        }
+
+        model.addAttribute("workspaces", workspaces);
         model.addAttribute("collections", collections);
 
         return "edit";
