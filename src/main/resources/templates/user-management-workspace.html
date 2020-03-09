@@ -51,7 +51,7 @@
                     <div class="card-body">
 
                         <form method="post" id="updateworkspaceform"
-                              th:action="@{'/user-management/updateworkspace'}"
+                              th:action="@{'/user-management/workspace/update'}"
                               th:object="${form}">
                             <input type="hidden" name="id" th:value="*{id}">
                             <div class="form-group w-auto">
@@ -74,15 +74,17 @@
 
                                         <div class="row">
                                             <div class="col-4 m-2 text-right">
-                                                <label for="collectionIds">Collections</label>
+                                                <label>Collections</label>
                                             </div>
                                             <div class="col-6 m-2">
-                                                <div class="alert-danger" th:if="${#fields.hasErrors('collectionIds')}"
-                                                     th:errors="*{collectionIds}"></div>
-                                                <input class="form-control" type="text" name="collectionIds"
-                                                       id="collectionIds"
-                                                       maxlength="30"
-                                                       th:value="*{collectionIds}">
+
+                                                <div th:each="collection: ${allCollections}">
+                                                    <input type="checkbox"
+                                                           th:field="*{collectionIds}"
+                                                           name="collectionId"
+                                                           th:value="${collection.getCollectionId()}"/>
+                                                    <label th:text="${collection.getCollectionId()}"></label>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -105,11 +107,11 @@
                             <div class="row mt-6">
                                 <div class="col">
 
-                                    <button type="button" id="collectioneditform-reset" class="btn btn-secondary
+                                    <button type="button" id="umform-reset" class="btn btn-secondary
                                                 float-right
                                         m-1">Reset
                                     </button>
-                                    <button type="button" id="collectioneditform-submit" class="btn btn-primary
+                                    <button type="button" id="umform-submit" class="btn btn-primary
                                                 float-right m-1">Update
                                     </button>
                                 </div>
@@ -135,45 +137,6 @@
         </div>
     </div>
 
-    <div class="modal fade" id="deleteItemModal" tabindex="-1" role="dialog" aria-labelledby="deleteItemModal"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteItemModalLabel">Remove this item?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    This will remove the item from this collection and delete the item if there are no other
-                    collections it is contained in.
-                </div>
-                <div class="modal-footer">
-                    <button value="value" class="btn btn-danger" id="confirmDeleteItemButton">
-                        Remove Item
-                    </button>
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="replaceImageModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div style="--aspect-ratio: 16/9;">
-                        <iframe src="/editor/browse/images" width="1000px" height="500px" frameborder="0"></iframe>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- /.container-fluid -->
 
     <!-- Sticky Footer -->
@@ -189,8 +152,7 @@
 <!-- /.content-wrapper -->
 
 <div id="page_js" layout:fragment="page_js">
-    <script type="text/javascript" src="/webjars/ckeditor/standard/ckeditor.js"></script>
-    <script type="text/javascript" src="/js/edit-collection.js"></script>
+    <script type="text/javascript" src="/js/user-management-workspace.js"></script>
 </div>
 </body>
 </html>

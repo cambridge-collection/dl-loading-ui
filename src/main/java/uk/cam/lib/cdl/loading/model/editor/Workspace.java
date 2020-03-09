@@ -1,8 +1,5 @@
 package uk.cam.lib.cdl.loading.model.editor;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,21 +16,21 @@ public class Workspace {
     @Column(nullable = false, name = "name")
     private String name;
 
-    @OneToMany(
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
+    @ElementCollection
+    @CollectionTable(
+        name="collections_in_workspaces",
+        joinColumns=@JoinColumn(name="workspace_id")
     )
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @JoinColumn(name = "workspace_id")
-    private List<WorkspaceCollectionMapping> collectionMappings;
+    @Column(name="collection_id")
+    private List<String> collectionIds = new ArrayList<>();
 
-    @OneToMany(
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
+    @ElementCollection
+    @CollectionTable(
+        name="items_in_workspaces",
+        joinColumns=@JoinColumn(name="workspace_id")
     )
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @JoinColumn(name = "workspace_id")
-    private List<WorkspaceItemMapping> itemMappings;
+    @Column(name="item_id")
+    private List<String> itemIds = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -51,35 +48,19 @@ public class Workspace {
         this.id = workspaceId;
     }
 
-    public List<WorkspaceCollectionMapping> getCollectionMappings() {
-        return collectionMappings;
+    public List<String> getItemIds() {
+        return itemIds;
     }
 
-    public void setCollectionMappings(List<WorkspaceCollectionMapping> collectionMappings) {
-        this.collectionMappings = collectionMappings;
-    }
-
-    public List<WorkspaceItemMapping> getItemMappings() {
-        return itemMappings;
-    }
-
-    public void setItemMappings(List<WorkspaceItemMapping> itemMappings) {
-        this.itemMappings = itemMappings;
+    public void setItemIds(List<String> itemIds) {
+        this.itemIds = itemIds;
     }
 
     public List<String> getCollectionIds() {
-        List<String> collectionIds = new ArrayList<>();
-        for (WorkspaceCollectionMapping map: collectionMappings) {
-            collectionIds.add(map.getCollectionId());
-        }
         return collectionIds;
     }
 
-    public List<String> getItemIds() {
-        List<String> itemIds = new ArrayList<>();
-        for (WorkspaceItemMapping map: itemMappings) {
-            itemIds.add(map.getItemId());
-        }
-        return itemIds;
+    public void setCollectionIds(List<String> collectionIds) {
+        this.collectionIds = collectionIds;
     }
 }

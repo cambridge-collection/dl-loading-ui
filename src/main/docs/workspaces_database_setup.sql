@@ -11,14 +11,16 @@ create table workspaces(
 create table items_in_workspaces (
     item_id varchar not null,
 	workspace_id bigint not null,
-	constraint fk_items_workspaces foreign key(workspace_id) references workspaces(workspace_id)
+	constraint fk_items_workspaces foreign key(workspace_id) references workspaces(workspace_id),
+    primary key (item_id, workspace_id)
 );
 create unique index ix_items_workspaces on items_in_workspaces (item_id,workspace_id);
 
 create table collections_in_workspaces (
     collection_id varchar not null,
 	workspace_id bigint not null,
-	constraint fk_collections_workspaces foreign key(workspace_id) references workspaces(workspace_id)
+	constraint fk_collections_workspaces foreign key(workspace_id) references workspaces(workspace_id),
+    primary key (collection_id, workspace_id)
 );
 create unique index ix_collections_workspaces on collections_in_workspaces (collection_id, workspace_id);
 

@@ -217,6 +217,10 @@ public class EditAPI {
         return itemMap.get(FilenameUtils.getBaseName(id));
     }
 
+    public java.util.Collection<Item> getItems() {
+        return itemMap.values();
+    }
+
     public boolean validate(MultipartFile file) {
 
         // Validate content

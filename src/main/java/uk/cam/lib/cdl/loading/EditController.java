@@ -26,10 +26,7 @@ import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
 import uk.cam.lib.cdl.loading.forms.CollectionForm;
 import uk.cam.lib.cdl.loading.model.RolesPrefix;
-import uk.cam.lib.cdl.loading.model.editor.Collection;
-import uk.cam.lib.cdl.loading.model.editor.Id;
-import uk.cam.lib.cdl.loading.model.editor.Item;
-import uk.cam.lib.cdl.loading.model.editor.Workspace;
+import uk.cam.lib.cdl.loading.model.editor.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -72,7 +69,7 @@ public class EditController {
                 workspaces.add(workspace);
 
                 // Get the collections in those workspaces
-                for (String collectionId: workspace.getCollectionIds() ) {
+                for (String collectionId: workspace.getCollectionIds()) {
                     Collection collection = editAPI.getCollection(collectionId);
                     collections.put(collectionId,collection);
                 }

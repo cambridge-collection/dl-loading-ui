@@ -30,7 +30,26 @@
                         <h6 class="m-0 font-weight-bold">Users</h6>
                     </div>
                     <div class="card-body">
-                        List of users
+                        <table class="table table-hover table-bordered" id="usersDataTable">
+                            <thead>
+                            <tr>
+                                <th> Id</th>
+                                <th> Username</th>
+                                <th> First Name</th>
+                                <th> Last Name</th>
+                                <th> </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user : ${users}">
+                                <td><span th:text="${user.id}"> Id </span></td>
+                                <td><span th:text="${user.username}"> Username </span></td>
+                                <td><span th:text="${user.firstName}"> First Name </span></td>
+                                <td><span th:text="${user.lastName}"> Last Name </span></td>
+                                <td><a th:href="'/user-management/user/edit?id='+${user.id}">Edit</a></td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -39,11 +58,24 @@
                         <h6 class="m-0 font-weight-bold">Workspaces</h6>
                     </div>
                     <div class="card-body">
-                        List of workspaces
-                        e.g. <a href="/user-management/updateworkspace/1">1</a>
+                        <table class="table table-hover table-bordered" id="workspacesDataTable">
+                            <thead>
+                            <tr>
+                                <th> Id </th>
+                                <th> Name </th>
+                                <th> </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="workspace : ${workspaces}">
+                                <td><span th:text="${workspace.id}"> Id </span></td>
+                                <td><span th:text="${workspace.name}"> Name </span></td>
+                                <td><a th:href="'/user-management/workspace/edit?id='+${workspace.id}">Edit</a></td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -60,6 +92,8 @@
 
 </div>
 <!-- /.content-wrapper -->
-
+<div id="page_js" layout:fragment="page_js">
+    <script type="text/javascript" src="/js/user-management.js"></script>
+</div>
 </body>
 </html>
