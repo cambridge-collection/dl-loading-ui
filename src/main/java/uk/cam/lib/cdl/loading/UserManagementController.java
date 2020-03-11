@@ -13,9 +13,11 @@ import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.forms.UserForm;
 import uk.cam.lib.cdl.loading.forms.WorkspaceForm;
 import uk.cam.lib.cdl.loading.model.editor.Workspace;
+import uk.cam.lib.cdl.loading.model.security.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.security.InvalidParameterException;
 
 @Controller
 public class UserManagementController {
@@ -41,17 +43,68 @@ public class UserManagementController {
         return "user-management";
     }
 
-    @GetMapping(value = {"/user-management/adduser/"})
-    public String addUser(Model model) {
+    @RequestMapping(value = {"/user-management/user/edit"})
+    public String updateUsers(Model model, @RequestParam(required = false, name = "id") Long id) {
 
-        UserForm form = (UserForm) model.asMap().get("form");
-        if (form == null) {
-            form = new UserForm();
+        User user;
+        UserForm form = new UserForm();
+
+        if (id != null) {
+            user = userRepository.findById(id.longValue());
+            if (user != null) {
+                form = new UserForm(user);
+            }
         }
 
         model.addAttribute("form", form);
-        return "user-management-adduser";
+        return "user-management-user";
     }
+
+    @PostMapping(value = {"/user-management/user/update"})
+    public RedirectView updateUserFromForm(RedirectAttributes attributes,
+                                                @Valid @ModelAttribute UserForm userForm,
+                                                final BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
+                "details.");
+            attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
+            attributes.addFlashAttribute("form", userForm);
+            attributes.addAttribute("id", userForm.getId());
+
+            return new RedirectView("/user-management/user/edit");
+        }
+
+        User user = userForm.toUser();
+        User userFromRepo = userRepository.findById(user.getId());
+        if (userFromRepo == null) {
+            userRepository.save(user);
+        } else {
+            userFromRepo.setUsername(user.getUsername());
+            userFromRepo.setFirstName(user.getFirstName());
+            userFromRepo.setLastName(user.getLastName());
+            userFromRepo.setEmail(user.getEmail());
+            userFromRepo.setEnabled(user.isEnabled());
+            //TODO set ROLES
+            userRepository.save(userFromRepo);
+        }
+
+        attributes.addFlashAttribute("form", userForm);
+        attributes.addAttribute("id", userForm.getId());
+        return new RedirectView("/user-management/user/edit");
+    }
+
+    @PostMapping(value = {"/user-management/user/delete"})
+    public RedirectView deleteUser(@RequestParam("id") Long id) {
+        User userFromRepo = userRepository.findById(id.longValue());
+        if (userFromRepo != null) {
+            userRepository.delete(userFromRepo);
+        } else {
+            throw new InvalidParameterException("Unknown user id: "+id);
+        }
+        return new RedirectView("/user-management/");
+    }
+
 
     @RequestMapping(value = {"/user-management/workspace/edit"})
     public String updateWorkspace(Model model, @RequestParam(required = false, name = "id") Long id) {
@@ -102,4 +155,16 @@ public class UserManagementController {
         attributes.addAttribute("id", workspaceForm.getId());
         return new RedirectView("/user-management/workspace/edit");
     }
+
+    @PostMapping(value = {"/user-management/workspace/delete"})
+    public RedirectView deleteWorkspace(@RequestParam("id") Long id) {
+        Workspace workspaceFromRepo = workspaceRepository.findWorkspaceById(id);
+        if (workspaceFromRepo != null) {
+            workspaceRepository.delete(workspaceFromRepo);
+        } else {
+            throw new InvalidParameterException("Unknown workspace id: "+id);
+        }
+        return new RedirectView("/user-management/");
+    }
+
 }

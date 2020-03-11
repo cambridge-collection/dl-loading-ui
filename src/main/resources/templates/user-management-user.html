@@ -21,11 +21,11 @@
             <li class="breadcrumb-item">
                 <a href="/user-management/">User Management</a>
             </li>
-            <li class="breadcrumb-item active">Edit Workspace</li>
+            <li class="breadcrumb-item active">Edit User</li>
         </ol>
 
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800 ml-3">Edit Workspace</h1>
+            <h1 class="h3 mb-0 text-gray-800 ml-3">Edit User</h1>
         </div>
 
         <div class="col-lg-11" style="max-width: 1200px">
@@ -46,59 +46,91 @@
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-dark float-left">
-                            <span th:text="${form.name}"></span></h6>
+                            <span th:text="${form.username}"></span></h6>
                     </div>
                     <div class="card-body">
 
-                        <form method="post" id="updateworkspaceform"
-                              th:action="@{'/user-management/workspace/update'}"
+                        <form method="post" id="updateuserform"
+                              th:action="@{'/user-management/user/update'}"
                               th:object="${form}">
                             <input type="hidden" name="id" th:value="*{id}">
+                            <input type="hidden" name="password" th:value="*{password}">
                             <div class="form-group w-auto">
                                 <div class="row">
                                     <div class="col">
                                         <div class="row">
-                                            <div class="col-4 m-2 text-right">Name</div>
+                                            <div class="col-4 m-2 text-right">Username</div>
                                             <div class="col m-2">
                                                 <div class="alert-danger"
-                                                     th:if="${#fields.hasErrors('name')}"
-                                                     th:errors="*{name}"></div>
+                                                     th:if="${#fields.hasErrors('username')}"
+                                                     th:errors="*{username}"></div>
 
                                                 <input class="form-control"
-                                                       type="text" name="name"
-                                                       id="name"
+                                                       type="text" name="username"
+                                                       id="username"
                                                        maxlength="30"
-                                                       th:value="*{name}">
+                                                       th:value="*{username}">
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-4 m-2 text-right">First Name</div>
+                                            <div class="col m-2">
+                                                <div class="alert-danger"
+                                                     th:if="${#fields.hasErrors('firstName')}"
+                                                     th:errors="*{firstName}"></div>
+
+                                                <input class="form-control"
+                                                       type="text" name="firstName"
+                                                       id="firstName"
+                                                       maxlength="30"
+                                                       th:value="*{firstName}">
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-4 m-2 text-right">Last Name</div>
+                                            <div class="col m-2">
+                                                <div class="alert-danger"
+                                                     th:if="${#fields.hasErrors('lastName')}"
+                                                     th:errors="*{lastName}"></div>
+
+                                                <input class="form-control"
+                                                       type="text" name="lastName"
+                                                       id="lastName"
+                                                       maxlength="30"
+                                                       th:value="*{lastName}">
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-4 m-2 text-right">Email</div>
+                                            <div class="col m-2">
+                                                <div class="alert-danger"
+                                                     th:if="${#fields.hasErrors('email')}"
+                                                     th:errors="*{email}"></div>
+
+                                                <input class="form-control"
+                                                       type="text" name="email"
+                                                       id="email"
+                                                       maxlength="30"
+                                                       th:value="*{email}">
                                             </div>
                                         </div>
 
                                         <div class="row">
                                             <div class="col-4 m-2 text-right">
-                                                <label>Collections</label>
+                                                <label>Enabled</label>
                                             </div>
                                             <div class="col-6 m-2">
-                                                <div class="alert-danger" th:if="${#fields.hasErrors('collectionIds')}"
-                                                     th:errors="*{collectionIds}"></div>
-                                                <div th:each="collection: ${allCollections}">
-                                                    <input type="checkbox"
-                                                           th:field="*{collectionIds}"
-                                                           name="collectionId"
-                                                           th:value="${collection.getCollectionId()}"/>
-                                                    <label th:text="${collection.getCollectionId()}"></label>
-                                                </div>
-                                            </div>
-                                        </div>
+                                                <div class="alert-danger" th:if="${#fields.hasErrors('enabled')}"
+                                                     th:errors="*{enabled}"></div>
 
-                                        <div class="row">
-                                            <div class="col-4 m-2 text-right">
-                                                <label for="itemIds">Items</label>
-                                            </div>
-                                            <div class="col-6 m-2">
-                                                <div class="alert-danger" th:if="${#fields.hasErrors('itemIds')}"
-                                                     th:errors="*{itemIds}"></div>
-                                                <input class="form-control" type="text" name="itemIds"
-                                                       id="itemIds"
-                                                       th:value="*{itemIds}">
+                                                <input type="checkbox"
+                                                       th:field="*{enabled}"
+                                                       name="enabled"
+                                                       th:value="*{enabled}"/>
+
                                             </div>
                                         </div>
                                     </div>
@@ -117,7 +149,7 @@
                                 </div>
                             </div>
                         </form>
-                        <form method="post" id="deleteworkspaceform" th:action="@{'/user-management/workspace/delete'}"
+                        <form method="post" id="deleteuserform" th:action="@{'/user-management/user/delete'}"
                               th:object="${form}">
                             <input type="hidden" name="id" th:value="*{id}">
                             <div class="row mt-6">
@@ -155,17 +187,17 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Delete this Workspace?</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">Delete this User?</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    This will delete the workspace. This action cannot be undone.
+                    This will delete the user. This action cannot be undone.
                 </div>
                 <div class="modal-footer">
                     <button value="value" class="btn btn-danger" id="confirmDeleteButton">
-                        Delete workspace
+                        Delete user
                     </button>
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
                 </div>
@@ -188,7 +220,7 @@
 <!-- /.content-wrapper -->
 
 <div id="page_js" layout:fragment="page_js">
-    <script type="text/javascript" src="/js/user-management-workspace.js"></script>
+    <script type="text/javascript" src="/js/user-management-user.js"></script>
 </div>
 </body>
 </html>

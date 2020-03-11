@@ -1,99 +1,79 @@
 package uk.cam.lib.cdl.loading.forms;
 
+import uk.cam.lib.cdl.loading.model.security.User;
+
 import javax.validation.constraints.NotBlank;
 
 public class UserForm {
 
-    private long id;
-
-    @NotBlank(message = "Must specify a user name (nameID).")
-    private String username;
-
-    private String password;
-
-    @NotBlank(message = "Must specify a first name.")
-    private String firstName;
-
-    @NotBlank(message = "Must specify a last name.")
-    private String lastName;
-
-    @NotBlank(message = "Must specify an email")
-    private String email;
-
-    private boolean isEnabled = true;
+    private User user;
 
     public UserForm() {
-
+        this.user = new User();
     }
 
-    public UserForm(long id, @NotBlank(message = "Must specify a user name (nameID).") String username,
-                    String password, @NotBlank(message = "Must specify a first name.") String firstName,
-                    @NotBlank(message = "Must specify a last name.") String lastName,
-                    @NotBlank(message = "Must specify an email") String email, boolean isEnabled) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.isEnabled = isEnabled;
+    public UserForm(User user) {
+        this.user = user;
     }
-
 
     public long getId() {
-        return id;
+        return user.getId();
     }
 
     public void setId(long id) {
-        this.id = id;
+        user.setId(id);
     }
 
     public String getUsername() {
-        return username;
+        return user.getUsername();
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUsername(@NotBlank(message = "Must specify a user name (nameID).") String username) {
+        user.setUsername(username);
     }
 
     public String getPassword() {
-        return password;
+        return user.getPassword();
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        user.setPassword(password);
     }
 
     public String getFirstName() {
-        return firstName;
+        return user.getFirstName();
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setFirstName(@NotBlank(message = "Must specify a first name.") String firstName) {
+        user.setFirstName(firstName);
     }
 
     public String getLastName() {
-        return lastName;
+        return user.getLastName();
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setLastName(@NotBlank(message = "Must specify a last name.") String lastName) {
+        user.setLastName(lastName);
     }
 
     public String getEmail() {
-        return email;
+        return user.getEmail();
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setEmail(@NotBlank(message = "Must specify an email") String email) {
+        user.setEmail(email);
     }
 
-    public boolean isEnabled() {
-        return isEnabled;
+    public boolean getEnabled() {
+        return user.isEnabled();
     }
 
     public void setEnabled(boolean enabled) {
-        isEnabled = enabled;
+        user.setEnabled(enabled);
+    }
+
+    public User toUser() {
+        return user;
     }
 }
 

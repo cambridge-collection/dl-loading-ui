@@ -7,4 +7,5 @@ import uk.cam.lib.cdl.loading.model.security.User;
 public interface UserRepository extends CrudRepository<User, Long> {
 
     User findByUsername(String username);
+    User findById(long id);
 }

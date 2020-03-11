@@ -1,4 +1,4 @@
-loading_ui_um_workspace = {}
+loading_ui_um_user = {};
 
 $(document).ready(function () {
 
@@ -10,16 +10,16 @@ $(document).ready(function () {
 
     $('#umform-submit').on('click', function () {
         updateModal.modal('show');
-        $('#updateworkspaceform').submit();
+        $('#updateuserform').submit();
     });
     $('#umform-reset').on('click', function () {
-        $('#updateworkspaceform')[0].reset();
+        $('#updateuserform')[0].reset();
     });
     $('#umform-delete').on('click', function () {
-         return loading_ui_um_workspace.showDeleteModal(this);
+        return loading_ui_um_user.showDeleteModal(this);
     });
 
-    loading_ui_um_workspace.showDeleteModal = function (button) {
+    loading_ui_um_user.showDeleteModal = function (button) {
         deleteModal.modal('show');
         let form = button.form;
         $('#confirmDeleteButton').on('click', function () {
