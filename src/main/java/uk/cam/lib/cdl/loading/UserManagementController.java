@@ -41,7 +41,6 @@ public class UserManagementController {
         return "user-management";
     }
 
-
     @GetMapping(value = {"/user-management/adduser/"})
     public String addUser(Model model) {
 

@@ -1,10 +1,14 @@
 package uk.cam.lib.cdl.loading.forms;
 
+import org.apache.commons.lang.StringUtils;
 import uk.cam.lib.cdl.loading.model.editor.Workspace;
 
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+// TODO validation
 public class WorkspaceForm {
 
     private Workspace workspace;
@@ -33,7 +37,6 @@ public class WorkspaceForm {
         workspace.setName(name);
     }
 
-
     public List<String> getCollectionIds() {
         return workspace.getCollectionIds();
     }
@@ -42,12 +45,15 @@ public class WorkspaceForm {
         workspace.setCollectionIds(collectionIds);
     }
 
-    public List<String> getItemIds() {
-        return workspace.getItemIds();
+    public String getItemIds() {
+        return StringUtils.join(workspace.getItemIds(), ",");
     }
 
-    public void setItemIds(List<String> itemIds) {
-        workspace.setItemIds(itemIds);
+    public void setItemIds(String itemIds) {
+        // NOTE: Do not replace with Arrays.asList as we need a modifiable list here.
+        List<String> list = new ArrayList<>();
+        Collections.addAll(list, itemIds.split("\\s*,\\s*"));
+        workspace.setItemIds(list);
     }
 
     public Workspace toWorkspace() {

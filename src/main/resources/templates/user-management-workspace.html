@@ -77,7 +77,8 @@
                                                 <label>Collections</label>
                                             </div>
                                             <div class="col-6 m-2">
-
+                                                <div class="alert-danger" th:if="${#fields.hasErrors('collectionIds')}"
+                                                     th:errors="*{collectionIds}"></div>
                                                 <div th:each="collection: ${allCollections}">
                                                     <input type="checkbox"
                                                            th:field="*{collectionIds}"
@@ -97,7 +98,6 @@
                                                      th:errors="*{itemIds}"></div>
                                                 <input class="form-control" type="text" name="itemIds"
                                                        id="itemIds"
-                                                       maxlength="30"
                                                        th:value="*{itemIds}">
                                             </div>
                                         </div>
