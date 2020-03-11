@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.security.saml;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import java.lang.annotation.ElementType;
@@ -12,5 +13,5 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
-@ConditionalOnProperty(prefix = "auth.saml", name="enabled", havingValue="true")
+@ConditionalOnExpression("T(org.springframework.util.StringUtils).commaDelimitedListToSet(@environment.getProperty('auth.methods')).contains('saml')")
 public @interface ConditionalOnSAMLAuth { }

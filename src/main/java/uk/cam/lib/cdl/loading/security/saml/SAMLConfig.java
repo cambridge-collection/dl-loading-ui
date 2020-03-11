@@ -17,13 +17,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
 import org.springframework.security.saml.SAMLBootstrap;
 import org.springframework.security.saml.SAMLDiscovery;
@@ -74,6 +74,7 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import uk.cam.lib.cdl.loading.security.WebSecurityConfig;
 
@@ -83,7 +84,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 
@@ -91,7 +91,7 @@ import java.util.Timer;
 @ConditionalOnSAMLAuth
 public class SAMLConfig implements InitializingBean, DisposableBean {
 
-    private static final String SAML_FILTER_NAME = "uk.cam.lib.cdl.loading.security.saml.SAMLConfig#SAML_FILTER_NAME";
+    static final String SAML_FILTER_NAME = "uk.cam.lib.cdl.loading.security.saml.SAMLConfig#SAML_FILTER_NAME";
 
     private Timer backgroundTaskTimer;
     private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
@@ -486,21 +486,22 @@ public class SAMLConfig implements InitializingBean, DisposableBean {
         shutdown();
     }
 
-    @Bean
-    public SAMLConfigurer samlWebSecurityConfigurer(@Qualifier(SAMLConfig.SAML_FILTER_NAME) Filter samlFilter) {
-        return new SAMLConfigurer(samlFilter);
-    }
+    @Component
+    @ConditionalOnSAMLAuth
+    @Qualifier(WebSecurityConfig.QUALIFIER_HTTP_SUB_CONFIGURER)
+    @Order(0)
+    public static class SAMLAuthenticationWebSecurityConfigurer extends
+        AbstractHttpConfigurer<SAMLAuthenticationWebSecurityConfigurer, HttpSecurity> {
 
-    static class SAMLConfigurer extends WebSecurityConfig.AutoOrderedSecurityConfigurerAdapter {
         private Filter samlFilter;
 
-        public SAMLConfigurer(Filter samlFilter) {
+        public SAMLAuthenticationWebSecurityConfigurer(@Qualifier(SAMLConfig.SAML_FILTER_NAME) Filter samlFilter) {
             Assert.notNull(samlFilter, "samlFilter is required");
             this.samlFilter = samlFilter;
         }
 
         @Override
-        protected void configure(HttpSecurity http) throws Exception {
+        public void configure(HttpSecurity http) throws Exception {
             http.addFilterAfter(this.samlFilter, BasicAuthenticationFilter.class);
 
             http.authorizeRequests()
