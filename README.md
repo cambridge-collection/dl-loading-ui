@@ -1,17 +1,44 @@
 # Cambridge Digital Library: Content Loader
 
-This is a project for editing and loading data into the Cambridge Digital Library Platform.
+This is a web application providing a GUI for editing and loading data into the Cambridge Digital Library Platform.
 
-## Configure:
+## Running
 
-Look at properties in **src/main/resources/application.properties**
-In particular set **'git.sourcedata.checkout.path'** to a local dir to
-checkout the source data.
+1. Build the project:
 
-## Authentication:
+        $ mvn package
 
-### Setting up your Idp
-This application requires a SAML IdP to provide user authentication.
+2. See the Configuration section to create a config file
+
+3. Run the executable war, pointing it to a configuration dir (containing `application.{yml,properties}`):
+
+        $ java -jar target/ui-0.1.0-SNAPSHOT.war --spring.config.additional-location=./conf/
+
+    The application will start an HTTP server listening on http://localhost:8081.
+
+[Externalized Configuration]: https://docs.spring.io/spring-boot/docs/2.1.8.RELEASE/reference/html/boot-features-external-config.html
+
+## Configuration:
+
+A configuration file template is at [`conf/EXAMPLE-application.properties`](conf/application.properties.example). Copy it to `conf/application.properties` and edit it.
+
+In particular set `git.sourcedata.checkout.path` to a local dir containing a checkout the source data.
+
+> #### Note
+>
+> The application can be configured using the methods described in the [Externalized Configuration] section of the  Spring Boot docs.
+
+## Authentication / Authorisation:
+
+The `auth.methods` configuration property controls which authentication method(s) are enabled. It's a comma-separated list of method names. Available methods are:
+
+* `basic` — HTTP basic authentication; suitable for development/testing only
+* `saml` — SAML 2.0 authentication
+
+### SAML 2.0 Authentication Guide
+
+#### Setting up your Idp
+This application can use a SAML IdP to provide user authentication.
 I have used the standalone version of Keycloak from https://www.keycloak.org/
 (tested with Keycloak 9.0).
 
@@ -69,15 +96,3 @@ You can now update the application.properties to point to this installation e.g.
 auth.saml.keycloak.auth-server-url=http://your-keycloak-host/auth/realms/demo
 
 You can now start the loading ui and log in using the user account you have created.
-
-## Package:
-
-    mvn clean package
-
-## Run:
-
-    mvn spring-boot:run
-
-This will run the application on:
-
-    http://localhost:8081
