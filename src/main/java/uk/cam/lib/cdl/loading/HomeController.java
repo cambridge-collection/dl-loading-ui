@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,14 +12,13 @@ import uk.cam.lib.cdl.loading.security.MyUserDetails;
 public class HomeController {
 
     @GetMapping({"/", "/index.html"})
-    public String index(Model model) {
+    public String index(Model model, Authentication authentication) {
 
-        Object authentication =  SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = "Unknown";
         String firstName = "";
         String lastName = "";
-        if (authentication instanceof MyUserDetails) {
-            User user = ((MyUserDetails) authentication).getUser();
+        if (authentication.getDetails() instanceof MyUserDetails) {
+            User user = ((MyUserDetails) authentication.getDetails()).getUser();
             username = user.getUsername();
             firstName = user.getFirstName();
             lastName = user.getLastName();

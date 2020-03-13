@@ -25,8 +25,11 @@ import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
 import uk.cam.lib.cdl.loading.forms.CollectionForm;
-import uk.cam.lib.cdl.loading.model.RolesPrefix;
-import uk.cam.lib.cdl.loading.model.editor.*;
+import uk.cam.lib.cdl.loading.model.editor.Collection;
+import uk.cam.lib.cdl.loading.model.editor.Id;
+import uk.cam.lib.cdl.loading.model.editor.Item;
+import uk.cam.lib.cdl.loading.model.editor.Workspace;
+import uk.cam.lib.cdl.loading.utils.RoleHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -58,20 +61,21 @@ public class EditController {
     public String edit(Model model, HttpServletRequest request) {
 
         List<Workspace> workspaces = new ArrayList<>();
-        Hashtable<String,Collection> collections = new Hashtable<>();
+        Hashtable<String, Collection> collections = new Hashtable<>();
+        RoleHelper roleHelper = new RoleHelper(workspaceRepository);
 
         // Get the workspaces the user has access to.
-        for (Workspace workspace: workspaceRepository.findAll()) {
-            String workspaceMemberRole =  RolesPrefix.WORKSPACE_MEMBER.role+workspace.getId();
-            String workspaceManagerRole = RolesPrefix.WORKSPACE_MANAGER.role+workspace.getId();
+        for (Workspace workspace : workspaceRepository.findAll()) {
+            String workspaceMemberRole = roleHelper.getWorkspaceMemberRole(workspace);
+            String workspaceManagerRole = roleHelper.getWorkspaceManagerRole(workspace);
 
             if (request.isUserInRole(workspaceMemberRole) || request.isUserInRole(workspaceManagerRole)) {
                 workspaces.add(workspace);
 
                 // Get the collections in those workspaces
-                for (String collectionId: workspace.getCollectionIds()) {
+                for (String collectionId : workspace.getCollectionIds()) {
                     Collection collection = editAPI.getCollection(collectionId);
-                    collections.put(collectionId,collection);
+                    collections.put(collectionId, collection);
                 }
             }
         }

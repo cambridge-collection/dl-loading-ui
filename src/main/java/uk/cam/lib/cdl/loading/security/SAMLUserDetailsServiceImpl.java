@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.model.security.User;
 
-import javax.transaction.Transactional;
-
 @Service
 public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
 
@@ -27,13 +25,15 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
-    public UserDetails loadUserBySAML(SAMLCredential credential)  throws UsernameNotFoundException {
+    public UserDetails loadUserBySAML(SAMLCredential credential) throws UsernameNotFoundException {
 
         String userID = credential.getNameID().getValue();
 
+        /* // Not currently using other attributes values.
         String givenName = credential.getAttributeAsString(attrFirstName);
         String surname = credential.getAttributeAsString(attrLastName);
         String email = credential.getAttributeAsString(attrEmail);
+        */
 
         UserDetails userDetails = null;
         try {
@@ -53,18 +53,6 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
             throw new UsernameNotFoundException(username);
         }
         return new MyUserDetails(user);
-    }
-
-    @Transactional
-    public boolean addUser(User user) {
-        userRepository.save(user);
-        return true;
-    }
-
-    @Transactional
-    public boolean deleteUser(User user) {
-        userRepository.delete(user);
-        return true;
     }
 }
 

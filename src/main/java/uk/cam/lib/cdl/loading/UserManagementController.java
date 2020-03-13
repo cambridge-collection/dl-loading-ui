@@ -12,14 +12,15 @@ import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.forms.UserForm;
 import uk.cam.lib.cdl.loading.forms.WorkspaceForm;
-import uk.cam.lib.cdl.loading.model.RolesPrefix;
 import uk.cam.lib.cdl.loading.model.editor.Workspace;
+import uk.cam.lib.cdl.loading.model.security.Role;
 import uk.cam.lib.cdl.loading.model.security.User;
+import uk.cam.lib.cdl.loading.utils.RoleHelper;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -59,16 +60,8 @@ public class UserManagementController {
             }
         }
 
-        //TODO Make this less hacky.
-        List<String> allRoles = new ArrayList<>();
-        for (Workspace workspace: workspaceRepository.findAll()) {
-            String workspaceMemberRole = RolesPrefix.WORKSPACE_MEMBER.role + workspace.getId();
-            String workspaceManagerRole = RolesPrefix.WORKSPACE_MANAGER.role + workspace.getId();
-            allRoles.add(workspaceMemberRole);
-            allRoles.add(workspaceManagerRole);
-        }
-        allRoles.add("ROLE_DEPLOYMENT_ALL_MANAGER");
-        allRoles.add("ROLE_SITE_MANAGER");
+        RoleHelper roleHelper = new RoleHelper(workspaceRepository);
+        List<Role> allRoles = roleHelper.getAllRoles();
 
         model.addAttribute("form", form);
         model.addAttribute("allRoles", allRoles);
@@ -76,9 +69,10 @@ public class UserManagementController {
     }
 
     @PostMapping(value = {"/user-management/user/update"})
+    @Transactional
     public RedirectView updateUserFromForm(RedirectAttributes attributes,
-                                                @Valid @ModelAttribute UserForm userForm,
-                                                final BindingResult bindingResult) {
+                                           @Valid @ModelAttribute UserForm userForm,
+                                           final BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
@@ -110,12 +104,13 @@ public class UserManagementController {
     }
 
     @PostMapping(value = {"/user-management/user/delete"})
+    @Transactional
     public RedirectView deleteUser(@RequestParam("id") Long id) {
         User userFromRepo = userRepository.findById(id.longValue());
         if (userFromRepo != null) {
             userRepository.delete(userFromRepo);
         } else {
-            throw new InvalidParameterException("Unknown user id: "+id);
+            throw new InvalidParameterException("Unknown user id: " + id);
         }
         return new RedirectView("/user-management/");
     }
@@ -141,6 +136,7 @@ public class UserManagementController {
     }
 
     @PostMapping(value = {"/user-management/workspace/update"})
+    @Transactional
     public RedirectView updateWorkspaceFromForm(RedirectAttributes attributes,
                                                 @Valid @ModelAttribute WorkspaceForm workspaceForm,
                                                 final BindingResult bindingResult) {
@@ -172,12 +168,13 @@ public class UserManagementController {
     }
 
     @PostMapping(value = {"/user-management/workspace/delete"})
+    @Transactional
     public RedirectView deleteWorkspace(@RequestParam("id") Long id) {
         Workspace workspaceFromRepo = workspaceRepository.findWorkspaceById(id);
         if (workspaceFromRepo != null) {
             workspaceRepository.delete(workspaceFromRepo);
         } else {
-            throw new InvalidParameterException("Unknown workspace id: "+id);
+            throw new InvalidParameterException("Unknown workspace id: " + id);
         }
         return new RedirectView("/user-management/");
     }
