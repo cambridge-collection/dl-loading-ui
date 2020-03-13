@@ -8,13 +8,9 @@ import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.stereotype.Service;
 import uk.cam.lib.cdl.loading.dao.UserRepository;
-import uk.cam.lib.cdl.loading.model.RolesPrefix;
-import uk.cam.lib.cdl.loading.model.security.Role;
 import uk.cam.lib.cdl.loading.model.security.User;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
@@ -31,7 +27,7 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
-    public UserDetails loadUserBySAML(SAMLCredential credential) {
+    public UserDetails loadUserBySAML(SAMLCredential credential)  throws UsernameNotFoundException {
 
         String userID = credential.getNameID().getValue();
 
@@ -44,34 +40,10 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
             userDetails = loadUserByUsername(userID);
 
         } catch (UsernameNotFoundException e) {
-
-            //TODO deny access
-            User user = new User();
-            user.setUsername(userID);
-            user.setEmail(email);
-            user.setFirstName(givenName);
-            user.setLastName(surname);
-            user.setPassword("");
-            user.setEnabled(true);
-
-            // Give everyone UNKNOWN ROLE when they log in;
-            List<Role> authorities = new ArrayList<>();
-            Role role = new Role();
-            role.setUser(user);
-            role.setAuthority("ROLE_UNKNOWN");
-            authorities.add(role);
-            user.setAuthorities(authorities);
-
-            boolean success = addUser(user);
-            if (!success) {
-                throw new SecurityException("Problem adding user to database. ");
-            }
-
-            userDetails = new MyUserDetails(user);
+            throw e;
+            // TODO fix deny access nicely
         }
 
-
-        // TODO Allow the recording of roles for specific users
         return userDetails;
     }
 

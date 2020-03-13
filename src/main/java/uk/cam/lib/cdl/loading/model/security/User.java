@@ -1,5 +1,8 @@
 package uk.cam.lib.cdl.loading.model.security;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +34,20 @@ public class User {
     @Column(nullable = false,  name = "enabled")
     private boolean isEnabled;
 
-    @OneToMany(
+/*    @OneToMany(
         cascade = CascadeType.ALL,
         orphanRemoval = true,
         fetch = FetchType.EAGER
     )
-    @JoinColumn(name = "id")
-    private List<Role> authorities = new ArrayList<>();
+    @JoinColumn(name = "id")*/
+    @ElementCollection
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @CollectionTable(
+        name="authorities",
+        joinColumns=@JoinColumn(name="id")
+    )
+    @Column(name="authority")
+    private List<String> authorities = new ArrayList<>();
 
     public String getUsername() {
         return username;
@@ -87,11 +97,11 @@ public class User {
         isEnabled = enabled;
     }
 
-    public List<Role> getAuthorities() {
+    public List<String> getAuthorities() {
         return authorities;
     }
 
-    public void setAuthorities(List<Role> authorities) {
+    public void setAuthorities(List<String> authorities) {
         this.authorities = authorities;
     }
 

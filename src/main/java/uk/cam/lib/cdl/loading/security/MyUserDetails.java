@@ -3,7 +3,6 @@ package uk.cam.lib.cdl.loading.security;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import uk.cam.lib.cdl.loading.model.security.Role;
 import uk.cam.lib.cdl.loading.model.security.User;
 
 import java.util.Collection;
@@ -28,8 +27,8 @@ public class MyUserDetails implements UserDetails {
         if (user.getAuthorities() == null) {
             return;
         }
-        for (Role role : user.getAuthorities()) {
-            authorities.add(new SimpleGrantedAuthority(role.getAuthority()));
+        for (String authority : user.getAuthorities()) {
+            authorities.add(new SimpleGrantedAuthority(authority));
         }
     }
 

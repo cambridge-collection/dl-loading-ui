@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading.forms;
 import uk.cam.lib.cdl.loading.model.security.User;
 
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 public class UserForm {
 
@@ -70,6 +71,14 @@ public class UserForm {
 
     public void setEnabled(boolean enabled) {
         user.setEnabled(enabled);
+    }
+
+    public List<String> getAuthorities() {
+        return user.getAuthorities();
+    }
+
+    public void setAuthorities(List<String> authorities) {
+        user.setAuthorities(authorities);
     }
 
     public User toUser() {

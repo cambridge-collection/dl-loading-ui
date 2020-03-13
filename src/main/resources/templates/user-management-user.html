@@ -133,6 +133,25 @@
 
                                             </div>
                                         </div>
+
+                                        <div class="row">
+                                            <div class="col-4 m-2 text-right">
+                                                <label>ROLES</label>
+                                            </div>
+                                            <div class="col-6 m-2">
+                                                <div class="alert-danger" th:if="${#fields.hasErrors('authorities')}"
+                                                     th:errors="*{authorities}"></div>
+
+                                                <div th:each="role: ${allRoles}">
+                                                    <input type="checkbox"
+                                                           th:field="*{authorities}"
+                                                           name="authorities"
+                                                           th:value="${role}"/>
+                                                    <label th:text="${role}"></label>
+                                                </div>
+
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

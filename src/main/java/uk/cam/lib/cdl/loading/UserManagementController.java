@@ -12,12 +12,15 @@ import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.forms.UserForm;
 import uk.cam.lib.cdl.loading.forms.WorkspaceForm;
+import uk.cam.lib.cdl.loading.model.RolesPrefix;
 import uk.cam.lib.cdl.loading.model.editor.Workspace;
 import uk.cam.lib.cdl.loading.model.security.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class UserManagementController {
@@ -56,7 +59,19 @@ public class UserManagementController {
             }
         }
 
+        //TODO Make this less hacky.
+        List<String> allRoles = new ArrayList<>();
+        for (Workspace workspace: workspaceRepository.findAll()) {
+            String workspaceMemberRole = RolesPrefix.WORKSPACE_MEMBER.role + workspace.getId();
+            String workspaceManagerRole = RolesPrefix.WORKSPACE_MANAGER.role + workspace.getId();
+            allRoles.add(workspaceMemberRole);
+            allRoles.add(workspaceManagerRole);
+        }
+        allRoles.add("ROLE_DEPLOYMENT_ALL_MANAGER");
+        allRoles.add("ROLE_SITE_MANAGER");
+
         model.addAttribute("form", form);
+        model.addAttribute("allRoles", allRoles);
         return "user-management-user";
     }
 
@@ -85,7 +100,7 @@ public class UserManagementController {
             userFromRepo.setLastName(user.getLastName());
             userFromRepo.setEmail(user.getEmail());
             userFromRepo.setEnabled(user.isEnabled());
-            //TODO set ROLES
+            userFromRepo.setAuthorities(user.getAuthorities());
             userRepository.save(userFromRepo);
         }
 

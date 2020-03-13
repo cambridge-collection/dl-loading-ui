@@ -1,29 +1,39 @@
+/*
 package uk.cam.lib.cdl.loading.model.security;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
-@Entity(name = "Role")
+*/
+/*@Entity(name = "Role")*//*
+
 @Table(name = "authorities")
+@Embeddable
 public class Role implements Serializable {
 
     private static final long serialVersionUID = 5049309976642437603L;
 
-    @Id
+*/
+/*    @Id
     @ManyToOne
-    @JoinColumn(name ="id")
-    private User user;
+    @JoinColumn(name ="id")*//*
 
     @Id
-    @Column(nullable = false, name = "authority")
+    private long id;
+
+*/
+/*    @Id
+    @Column(nullable = false, name = "authority")*//*
+
+    @Id
     private String authority;
 
-    public User getUser() {
-        return user;
+    public long getId() {
+        return id;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getAuthority() {
@@ -34,3 +44,5 @@ public class Role implements Serializable {
         this.authority = authority;
     }
 }
+
+*/
