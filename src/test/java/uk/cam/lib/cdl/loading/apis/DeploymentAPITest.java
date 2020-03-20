@@ -1,34 +1,34 @@
 package uk.cam.lib.cdl.loading.apis;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.cam.lib.cdl.loading.config.EditConfig;
-import uk.cam.lib.cdl.loading.config.GitConfig;
+import org.springframework.web.util.UriComponentsBuilder;
 import uk.cam.lib.cdl.loading.model.deployment.Instance;
 import uk.cam.lib.cdl.loading.model.deployment.Status;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = {EditConfig.class, GitConfig.class})
-@AutoConfigureWireMock(port = 8089)
+@AutoConfigureWireMock(port = 0)
 class DeploymentAPITest {
+
+    @Autowired
+    private WireMockServer wireMockServer;
 
     private DeploymentAPI deploymentAPI;
 
-    public DeploymentAPITest() throws MalformedURLException {
-
-        String url = "http://localhost:8089/api/deploy/v0.1/";
-        deploymentAPI = new DeploymentAPI(new URL(url));
-
+    @BeforeEach
+    public void setup() throws MalformedURLException {
+        URI apiURL = UriComponentsBuilder.fromHttpUrl(wireMockServer.baseUrl())
+            .path("/api/deploy/v0.1/").build().toUri();
+        this.deploymentAPI = new DeploymentAPI(apiURL.toURL());
     }
 
     @Test

@@ -29,7 +29,10 @@ create table persistent_logins (
 
 -- Insert default admin user (please change / remove before putting into production!!)
 insert into users (username, firstname, lastname, password, email, enabled)
-values ('test@test.com', 'Default', 'Admin', '', 'test@test.com', true);
+values ('test@test.com', 'Default', 'Admin', 'password', 'test@test.com', true);
+
+insert into users (username, firstname, lastname, password, email, enabled)
+values ('test-user', 'Test', 'User', 'password', 'test-user@test.com', true);
 
 insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test@test.com'),
                                                 'ROLE_SITE_MANAGER');
@@ -38,3 +41,7 @@ insert into authorities (id, authority) values ((SELECT id FROM users WHERE user
 insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test@test.com'),
                                                 'ROLE_WORKSPACE_MEMBER2');
 
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-user'),
+                                                'ROLE_WORKSPACE_MEMBER2');
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-user'),
+                                                'ROLE_WORKSPACE_MEMBER1');

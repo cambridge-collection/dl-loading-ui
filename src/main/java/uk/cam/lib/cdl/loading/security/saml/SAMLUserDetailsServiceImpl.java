@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.security;
+package uk.cam.lib.cdl.loading.security.saml;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,8 +9,10 @@ import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.stereotype.Service;
 import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.model.security.User;
+import uk.cam.lib.cdl.loading.security.MyUserDetails;
 
 @Service
+@ConditionalOnSAMLAuth
 public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
 
     @Value("${auth.saml.attr.firstName}")
@@ -47,7 +49,7 @@ public class SAMLUserDetailsServiceImpl implements SAMLUserDetailsService {
         return userDetails;
     }
 
-    public MyUserDetails loadUserByUsername(String username) {
+    private MyUserDetails loadUserByUsername(String username) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException(username);
