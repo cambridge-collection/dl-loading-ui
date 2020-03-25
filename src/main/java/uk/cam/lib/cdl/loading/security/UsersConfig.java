@@ -17,7 +17,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import uk.cam.lib.cdl.loading.security.basic.BasicUserDetailsServiceImpl;
 
 import java.io.IOException;
 import java.lang.annotation.ElementType;
@@ -79,10 +78,9 @@ public class UsersConfig {
             }).collect(ImmutableMap.toImmutableMap(UserDetails::getUsername, u -> u));
         }
 
-        @Bean(name = {QUALIFIER + "#userDetailsService", QUALIFIER})
-        @Qualifier(QUALIFIER)
-        public UserDetailsService basicUserDetailsService() {
-            return new BasicUserDetailsServiceImpl();
+        @Bean(name = {QUALIFIER+"#DBUserDetailsService", QUALIFIER})
+        public UserDetailsService dbUserDetailsService() {
+            return new DBUserDetailsService();
         }
 
         @Component
@@ -91,24 +89,24 @@ public class UsersConfig {
         public static class HardcodedUsersAuthSecurityConfigurer
             extends SecurityConfigurerAdapter<AuthenticationManager, AuthenticationManagerBuilder> {
 
-           // private final InMemoryUserDetailsManager inMemoryUserDetailsManager;
             private final PasswordEncoder passwordEncoder;
             private final UserDetailsService userDetailsService;
 
             public HardcodedUsersAuthSecurityConfigurer(
-                @Qualifier(QUALIFIER) UserDetailsService userDetailsService,
+                @Qualifier(QUALIFIER + "#DBUserDetailsService") UserDetailsService userDetailsService,
                 PasswordEncoder passwordEncoder
             ) {
-               // this.inMemoryUserDetailsManager = checkNotNull(inMemoryUserDetailsManager);
                 this.passwordEncoder = checkNotNull(passwordEncoder);
                 this.userDetailsService = userDetailsService;
             }
 
             @Override
             public void configure(AuthenticationManagerBuilder auth) throws Exception {
+
                 auth.userDetailsService(this.userDetailsService)
                     .passwordEncoder(this.passwordEncoder);
             }
         }
     }
+
 }
