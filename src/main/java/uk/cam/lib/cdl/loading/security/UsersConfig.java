@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Component;
+import uk.cam.lib.cdl.loading.dao.UserRepository;
 
 import java.io.IOException;
 import java.lang.annotation.ElementType;
@@ -33,6 +34,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 @Configuration
 public class UsersConfig {
+
+    /** A bean name assigned to the configured {@link UserDetailsService} instance, regardless of user source. */
+    public static final String USER_DETAILS_SERVICE = "uk.cam.lib.cdl.loading.security.UsersConfig#USER_DETAILS_SERVICE_NAME";
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE, ElementType.METHOD})
@@ -88,14 +92,13 @@ public class UsersConfig {
         /**
          * The UserDetailsService for authn/authz - backed by a fixed list of users from a config file.
          */
-        @Bean(name = {QUALIFIER + "#userDetailsManager", QUALIFIER})
+        @Bean(name = {QUALIFIER + "#userDetailsManager", QUALIFIER, USER_DETAILS_SERVICE})
         @ConditionalOnExpression("!(@environment.getProperty('users.hardcoded-users-file', '').isEmpty())")
-        @Qualifier(QUALIFIER)
         public InMemoryUserDetailsManager userDetailsManager(@Qualifier(HARDCODED_USERS) Map<String, UserDetails> hardcodedUsers) {
             return new InMemoryUserDetailsManager(hardcodedUsers.values());
         }
 
-        @Bean(name = {QUALIFIER + "#emptyUserDetailsManager", QUALIFIER})
+        @Bean(name = {QUALIFIER + "#emptyUserDetailsManager", QUALIFIER, USER_DETAILS_SERVICE})
         @ConditionalOnExpression("@environment.getProperty('users.hardcoded-users-file', '') == ''")
         public InMemoryUserDetailsManager emptyUserDetailsManager() {
             LOG.warn("Property users.hardcoded-users-file not set, no users will be defined");
@@ -129,12 +132,11 @@ public class UsersConfig {
 
     @ConditionalOnDatabaseUsersSource
     public static class DatabaseUsersConfig {
-        private static final Logger LOG = LoggerFactory.getLogger(DatabaseUsersConfig.class);
         private static final String QUALIFIER = "uk.cam.lib.cdl.loading.security.UsersConfig.DatabaseUsersConfig";
 
-        @Bean(name = {QUALIFIER+"#DBUserDetailsService", QUALIFIER})
-        public UserDetailsService dbUserDetailsService() {
-            return new DBUserDetailsService();
+        @Bean(name = {QUALIFIER, USER_DETAILS_SERVICE})
+        public UserDetailsService dbUserDetailsService(UserRepository userRepository) {
+            return new DBUserDetailsService(userRepository);
         }
 
         @Component
@@ -146,9 +148,9 @@ public class UsersConfig {
             private final UserDetailsService userDetailsService;
 
             public DatabaseUsersAuthSecurityConfigurer(
-                @Qualifier(QUALIFIER + "#DBUserDetailsService") UserDetailsService userDetailsService
+                @Qualifier(QUALIFIER) UserDetailsService userDetailsService
             ) {
-                this.userDetailsService = userDetailsService;
+                this.userDetailsService = checkNotNull(userDetailsService);
             }
 
             @Override
