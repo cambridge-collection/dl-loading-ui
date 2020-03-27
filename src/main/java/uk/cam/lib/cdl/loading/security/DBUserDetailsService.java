@@ -16,11 +16,16 @@ public class DBUserDetailsService implements UserDetailsService {
 
     @Override
     public MyUserDetails loadUserByUsername(String username) {
-
         User user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new UsernameNotFoundException(username);
+            throw new UsernameNotFoundException("No user exists with username: " + username);
         }
-        return new MyUserDetails(user);
+        var userDetails = new MyUserDetails(user);
+
+        // The UserDetailsService contract requires we throw if a user has no authorities
+        if(userDetails.getAuthorities().isEmpty()) {
+            throw new UsernameNotFoundException("User has no granted authorities: " + username);
+        }
+        return userDetails;
     }
 }
