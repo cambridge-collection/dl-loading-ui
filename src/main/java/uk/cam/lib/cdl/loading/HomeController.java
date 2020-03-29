@@ -29,28 +29,10 @@ public class HomeController {
         return "home";
     }
 
-    @GetMapping("/blank.html")
-    public String blank(Model model) {
-
-        return "blank";
-    }
-
     @GetMapping("/login/login.html")
     public String login(Model model) {
 
         return "login";
-    }
-
-    @GetMapping("/login/forgot-password.html")
-    public String forgotPassword(Model model) {
-
-        return "forgot-password";
-    }
-
-    @GetMapping("/login/register.html")
-    public String register(Model model) {
-
-        return "register";
     }
 
 }

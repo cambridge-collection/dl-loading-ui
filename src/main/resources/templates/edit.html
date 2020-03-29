@@ -95,7 +95,7 @@
                                                 <div class="col mr-2">
                                                     <div
                                                         class="text-s font-weight-bold text-uppercase mb-1">
-                                                        <a class="text-gray-800" href="/edit/collection/"
+                                                        <a class="text-gray-800" th:href="'/edit/collection/?workspaceIds='+${workspace.id}"
                                                         >Add
                                                             Collection</a></div>
                                                     <div class="text-xs mb-0 text-gray-800 text-left">
@@ -106,7 +106,7 @@
                                             <div class="row align-items-end float-right" style="position:
                                                 absolute; bottom: 0; right:7px;">
                                                 <div class="col-auto">
-                                                    <a href="/edit/collection/">
+                                                    <a th:href="'/edit/collection/?workspaceIds='+${workspace.id}" >
                                                         <i class="fas fa-plus fa-2x"></i>
                                                     </a>
                                                 </div>

@@ -31,5 +31,6 @@ public class UserTests {
 
         assertNotNull(foundEntity);
         assertEquals(user.getUsername(), foundEntity.getUsername());
+
     }
 }

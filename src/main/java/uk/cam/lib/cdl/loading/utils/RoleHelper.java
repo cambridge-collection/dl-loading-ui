@@ -39,7 +39,7 @@ public class RoleHelper {
         return WorkspaceRolesPrefix.WORKSPACE_MANAGER.stringValue +workspace.getId();
     }
 
-    private enum WorkspaceRolesPrefix {
+    public enum WorkspaceRolesPrefix {
         WORKSPACE_MANAGER("ROLE_WORKSPACE_MANAGER"),
         WORKSPACE_MEMBER("ROLE_WORKSPACE_MEMBER");
 

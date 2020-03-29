@@ -11,16 +11,17 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+import uk.cam.lib.cdl.loading.annotations.CanEditCollection;
+import uk.cam.lib.cdl.loading.annotations.CanEditWorkspace;
+import uk.cam.lib.cdl.loading.annotations.HasRoleWorkspaceMemberOrManager;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
@@ -31,6 +32,7 @@ import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.model.editor.Workspace;
 import uk.cam.lib.cdl.loading.utils.RoleHelper;
 
+import javax.management.InvalidAttributeValueException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.File;
@@ -40,9 +42,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Controller
+@EnableWebSecurity
 public class EditController {
 
     private final EditAPI editAPI;
@@ -57,6 +61,7 @@ public class EditController {
         this.pathForDataDisplay = pathForDataDisplay;
     }
 
+    @HasRoleWorkspaceMemberOrManager
     @GetMapping("/edit/edit.html")
     public String edit(Model model, HttpServletRequest request) {
 
@@ -95,7 +100,9 @@ public class EditController {
      * @throws IOException Cannot read collection HTML
      */
     @GetMapping(value = {"/edit/collection/"})
-    public String editCollection(Model model, @RequestParam(required = false) String collectionId)
+    @CanEditCollection // requires collectionForm or collectionId or workspaceIds
+    public String editCollection(Model model, @RequestParam(required = false) String collectionId,
+                                 @RequestParam(required = false) List<Long> workspaceIds)
         throws IOException {
 
         CollectionForm form;
@@ -142,12 +149,19 @@ public class EditController {
                 "-blank.jpg"; // TODO read from UI properties.
         }
 
+        // Set workspaceIds
+        if (workspaceIds==null) {
+            List<Workspace> workspaces = workspaceRepository.findWorkspaceByCollectionIds(collectionId);
+            workspaceIds = workspaces.stream().map(Workspace::getId).collect(Collectors.toList());
+        }
+
         model.addAttribute("newCollection", newCollection);
         model.addAttribute("thumbnailURL", thumbnailURL);
         model.addAttribute("form", form);
         model.addAttribute("items", items);
         model.addAttribute("dataLocalPath", editAPI.getDataLocalPath());
         model.addAttribute("pathForDataDisplay", pathForDataDisplay);
+        model.addAttribute("workspaceIds", workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
 
         return "edit-collection";
     }
@@ -193,6 +207,7 @@ public class EditController {
      * @throws BadRequestException If requested resource is not within the dataLocalSourcePath
      * @throws IOException         Unable to find resource
      */
+    // TODO Authenticate this
     @GetMapping(value = "${data.url.display}**")
     public ResponseEntity<Resource> editSourceData(HttpServletRequest request)
         throws BadRequestException, IOException {
@@ -240,11 +255,13 @@ public class EditController {
      * @param collectionForm Validated collectionForm from edit Collection page
      * @return RedirectView to the collections page (after updates have been saved).
      */
-    // TODO make sure we have permission to edit the collection being edited.
     @PostMapping("/edit/collection/update")
+    @CanEditCollection // requires collectionForm or collectionId or workspaceIds
     public RedirectView updateCollection(RedirectAttributes attributes,
-                                         @Valid @ModelAttribute CollectionForm collectionForm,
-                                         final BindingResult bindingResult) throws IOException {
+                                         @RequestBody @Valid @ModelAttribute CollectionForm collectionForm,
+                                         @RequestParam List<Long> workspaceIds,
+                                         final BindingResult bindingResult)
+        throws Exception {
 
         if (bindingResult.hasErrors()) {
             attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
@@ -263,13 +280,8 @@ public class EditController {
         if (collectionId == null || collectionId.trim().equals("")) {
 
             // new collection
-            String urlSlug = collection.getName().getUrlSlug();
-
-            // TODO Allow these paths to be set in properties file
-            collectionId = "collections/" + urlSlug + ".collection.json";
-            collection.setCollectionId(collectionId);
-            collection.getDescription().setFull(new Id("../pages/html/collections/" + urlSlug + "/summary.html"));
-            collection.getCredit().setProse(new Id("../pages/html/collections/" + urlSlug + "/sponsors.html"));
+            collection = newCollection(attributes,collectionForm);
+            collectionId = collection.getCollectionId();
         }
 
         // Update links in HTML
@@ -287,6 +299,17 @@ public class EditController {
         boolean success = editAPI.updateCollection(collection, fullDescriptionHTML,
             proseCreditHTML);
 
+        // Add to workspaces
+        for (long workspaceId: workspaceIds) {
+            Workspace workspace = workspaceRepository.findWorkspaceById(workspaceId);
+            List<String> collectionIds = workspace.getCollectionIds();
+            if (!collectionIds.contains(collectionId)) {
+                collectionIds.add(collectionId);
+                workspace.setCollectionIds(collectionIds);
+                workspaceRepository.save(workspace);
+            }
+        }
+
         if (success) {
             attributes.addFlashAttribute("message", "Collection Updated.");
         } else {
@@ -294,7 +317,32 @@ public class EditController {
         }
 
         attributes.addAttribute("collectionId", collection.getCollectionId());
+        attributes.addAttribute("workspaceIds", workspaceIds);
         return new RedirectView("/edit/collection/");
+    }
+
+    @CanEditWorkspace // requires workspaceIds
+    private Collection newCollection(RedirectAttributes attributes,
+                                         @Valid @ModelAttribute CollectionForm collectionForm
+                                         ) throws Exception {
+
+        Collection collection = collectionForm.toCollection();
+        String collectionId = collectionForm.getCollectionId();
+        if (collectionId == null || !collectionId.trim().equals("")) {
+
+            throw new InvalidAttributeValueException("This collection already exists");
+        }
+
+        // new collection
+        String urlSlug = collection.getName().getUrlSlug();
+
+        // TODO Allow these paths to be set in properties file
+        collectionId = "collections/" + urlSlug + ".collection.json";
+        collection.setCollectionId(collectionId);
+        collection.getDescription().setFull(new Id("../pages/html/collections/" + urlSlug + "/summary.html"));
+        collection.getCredit().setProse(new Id("../pages/html/collections/" + urlSlug + "/sponsors.html"));
+
+        return collection;
     }
 
     @PostMapping("/edit/collection/addItem")

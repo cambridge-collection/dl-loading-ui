@@ -2,6 +2,7 @@ package uk.cam.lib.cdl.loading;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +36,7 @@ public class DeployController {
      * @param model
      * @return
      */
+    @Secured("ROLE_DEPLOYMENT_MANAGER")
     @GetMapping ("/deploy/deploy.html")
     public String deploy(Model model, @ModelAttribute("message") String message,
                          @ModelAttribute("error") String error) {
@@ -57,6 +59,7 @@ public class DeployController {
         return "deploy";
     }
 
+    @Secured("ROLE_DEPLOYMENT_MANAGER")
     @GetMapping("/deploy/cache/refresh")
     public String deployRefreshCache(Model model, @ModelAttribute("message") String message,
                                      @ModelAttribute("error") String error) {
@@ -74,6 +77,7 @@ public class DeployController {
      * @return
      * @throws JSONException
      */
+    @Secured("ROLE_DEPLOYMENT_MANAGER")
     @PostMapping("/deploy/{instanceId}")
     public RedirectView deployVersion(RedirectAttributes attributes, @PathVariable("instanceId") String instanceId,
                                       @RequestParam String version) throws JSONException {
@@ -96,6 +100,7 @@ public class DeployController {
         return new RedirectView("/deploy/status/" + instanceId + "/");
     }
 
+    @Secured("ROLE_DEPLOYMENT_MANAGER")
     @GetMapping("/deploy/status/{instanceId}")
     public String deployStatus(Model model, @PathVariable("instanceId") String instanceId) {
 

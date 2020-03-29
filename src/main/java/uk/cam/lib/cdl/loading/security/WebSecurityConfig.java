@@ -35,7 +35,7 @@ import java.util.Optional;
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true)
+@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
 public class WebSecurityConfig {
 
     public static final String AUTHENTICATION_MANAGER = "uk.cam.lib.cdl.loading.security.WebSecurityConfig#authenticationManager";
