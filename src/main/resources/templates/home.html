@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml"
-      xmlns:sec="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.w3.org/1999/xhtml" xmlns:dl-loading-ui="http://www.w3.org/1999/xhtml"
       layout:decorate="~{fragments/main-layout}">
 <head>
     <!-- TODO: fix the flash of unstyled content that happens if these styles are not included here -->
@@ -32,17 +32,17 @@
                 <!-- Cards -->
                 <div class="card shadow mb-4 mt-4 ">
                     <div class="card-header">
-                        <h6 class="m-0 font-weight-bold"><a href="/edit/edit.html">Edit your content</a></h6>
+                        <h6 class="m-0 font-weight-bold"><a dl-loading-ui:role="EnableIfRoleWorkspaceMemberOrManager" href="/edit/edit.html">Edit your content</a></h6>
                     </div>
                     <div class="card-body">
-                        Browse items and collection data, and <a href="/edit/edit.html">edit</a> your content.
+                        Browse items and collection data, and <a dl-loading-ui:role="EnableIfRoleWorkspaceMemberOrManager" href="/edit/edit.html">edit</a> your content.
                         This is the place to start.
                     </div>
                 </div>
 
                 <div class="card shadow mb-4">
                     <div class="card-header">
-                        <h6 class="m-0 font-weight-bold"><a href="/package/package.html">Package your content</a></h6>
+                        <h6 class="m-0 font-weight-bold"><a dl-loading-ui:role="EnableIfRoleDeploymentManager" href="/package/package.html">Package your content</a></h6>
                     </div>
                     <div class="card-body">
                         Package up content so it's ready to to deployed to your server.
@@ -52,11 +52,11 @@
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6
-                            class="m-0 font-weight-bold text-primary"><a href="/deploy/deploy.html">Deploy your
+                            class="m-0 font-weight-bold text-primary"><a dl-loading-ui:role="EnableIfRoleDeploymentManager" href="/deploy/deploy.html">Deploy your
                             content</a></h6>
                     </div>
                     <div class="card-body">
-                        Once you have a package, you can <a href="/deploy/deploy.html">deploy it</a> to one of your
+                        Once you have a package, you can <a dl-loading-ui:role="EnableIfRoleDeploymentManager" href="/deploy/deploy.html">deploy it</a> to one of your
                         servers for
                         review.
                     </div>

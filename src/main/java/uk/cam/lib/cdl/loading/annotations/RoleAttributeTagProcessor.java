@@ -37,29 +37,35 @@ public class RoleAttributeTagProcessor extends AbstractAttributeTagProcessor {
 
         Authentication authentication = SpringSecurityContextUtils.getAuthenticationObject(context);
 
+        String classAttr, classAttrNotDisabled = "";
+        if (tag.getAttribute("class")!=null) {
+            classAttr = tag.getAttribute("class").getValue();
+            classAttrNotDisabled = classAttr.replaceAll("\\s*disabled\\s*", "");
+        }
+
         if (attributeValue.equals("EnableIfRoleWorkspaceMemberOrManager")) {
             if (roleService.hasRoleRegex("ROLE_WORKSPACE_MEMBER\\d+", authentication) ||
                 roleService.hasRoleRegex("ROLE_WORKSPACE_MANAGER\\d+", authentication)) {
-                structureHandler.setAttribute("class", "nav-link");
+                structureHandler.setAttribute("class", classAttrNotDisabled);
             } else {
-                structureHandler.setAttribute("class", "nav-link disabled");
+                structureHandler.setAttribute("class", "disabled "+classAttrNotDisabled);
             }
         }
 
         if (attributeValue.equals("EnableIfRoleDeploymentManager")) {
             if (roleService.hasRoleRegex("ROLE_DEPLOYMENT_MANAGER", authentication)) {
-                structureHandler.setAttribute("class", "nav-link");
+               structureHandler.setAttribute("class", classAttrNotDisabled);
             } else {
-                structureHandler.setAttribute("class", "nav-link disabled");
+                structureHandler.setAttribute("class", "disabled "+classAttrNotDisabled);
             }
         }
 
         if (attributeValue.equals("EnableIfRoleSiteManagerOrWorkspaceManager")) {
             if (roleService.hasRoleRegex("ROLE_SITE_MANGER", authentication) ||
                 roleService.hasRoleRegex("ROLE_WORKSPACE_MANAGER\\d+", authentication)) {
-                structureHandler.setAttribute("class", "nav-link");
+                structureHandler.setAttribute("class", classAttrNotDisabled);
             } else {
-                structureHandler.setAttribute("class", "nav-link disabled");
+                structureHandler.setAttribute("class", "disabled "+classAttrNotDisabled);
             }
         }
     }
