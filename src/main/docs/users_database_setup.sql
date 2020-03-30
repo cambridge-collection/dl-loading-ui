@@ -45,3 +45,5 @@ insert into authorities (id, authority) values ((SELECT id FROM users WHERE user
                                                 'ROLE_WORKSPACE_MEMBER2');
 insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-user'),
                                                 'ROLE_WORKSPACE_MEMBER1');
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-user'),
+                                                'ROLE_WORKSPACE_MANAGER2');

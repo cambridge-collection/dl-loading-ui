@@ -39,7 +39,9 @@ public class RoleService {
     public boolean hasRoleRegex(String regex, Authentication authentication) {
         Pattern p = Pattern.compile(regex);
         for (GrantedAuthority authority : authentication.getAuthorities()) {
-            return p.matcher(authority.getAuthority()).matches();
+            if (p.matcher(authority.getAuthority()).matches()) {
+              return true;
+            }
         }
         return false;
 

@@ -16,8 +16,8 @@ public class HomeController {
         String username = "Unknown";
         String firstName = "";
         String lastName = "";
-        if (authentication.getDetails() instanceof MyUserDetails) {
-            User user = ((MyUserDetails) authentication.getDetails()).getUser();
+        if (authentication.getPrincipal() instanceof MyUserDetails) {
+            User user = ((MyUserDetails) authentication.getPrincipal()).getUser();
             username = user.getUsername();
             firstName = user.getFirstName();
             lastName = user.getLastName();

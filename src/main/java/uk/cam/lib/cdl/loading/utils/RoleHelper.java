@@ -25,7 +25,7 @@ public class RoleHelper {
             allRoles.add(new Role(workspaceMemberRole, "Member of Workspace: "+workspace.getName()));
             allRoles.add(new Role(workspaceManagerRole, "Admin of Workspace: "+workspace.getName()));
         }
-        allRoles.add(new Role("ROLE_DEPLOYMENT_ALL_MANAGER","Deployment Manager"));
+        allRoles.add(new Role("ROLE_DEPLOYMENT_MANAGER","Deployment Manager"));
         allRoles.add(new Role("ROLE_SITE_MANAGER", "Site Manager"));
 
         return allRoles;
