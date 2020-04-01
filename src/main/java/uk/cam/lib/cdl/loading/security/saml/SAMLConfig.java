@@ -504,12 +504,12 @@ public class SAMLConfig implements InitializingBean, DisposableBean {
     @ConditionalOnSAMLAuth
     @Qualifier(WebSecurityConfig.QUALIFIER_HTTP_SUB_CONFIGURER)
     @Order(0)
-    public static class SAMLAuthenticationWebSecurityConfigurer extends
-        AbstractHttpConfigurer<SAMLAuthenticationWebSecurityConfigurer, HttpSecurity> {
+    public static class SAMLAuthenticationHttpSecurityConfigurer extends
+        AbstractHttpConfigurer<SAMLAuthenticationHttpSecurityConfigurer, HttpSecurity> {
 
         private Filter samlFilter;
 
-        public SAMLAuthenticationWebSecurityConfigurer(@Qualifier(SAMLConfig.SAML_FILTER_NAME) Filter samlFilter) {
+        public SAMLAuthenticationHttpSecurityConfigurer(@Qualifier(SAMLConfig.SAML_FILTER_NAME) Filter samlFilter) {
             Assert.notNull(samlFilter, "samlFilter is required");
             this.samlFilter = samlFilter;
         }
