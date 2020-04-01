@@ -37,10 +37,13 @@ public class RoleService {
     // TODO get ROLE prefix properly.
 
     public boolean hasRoleRegex(String regex, Authentication authentication) {
+
         Pattern p = Pattern.compile(regex);
-        for (GrantedAuthority authority : authentication.getAuthorities()) {
-            if (p.matcher(authority.getAuthority()).matches()) {
-              return true;
+        if (authentication!=null) {
+            for (GrantedAuthority authority : authentication.getAuthorities()) {
+                if (p.matcher(authority.getAuthority()).matches()) {
+                    return true;
+                }
             }
         }
         return false;

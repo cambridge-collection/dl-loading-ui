@@ -61,7 +61,7 @@ public class RoleAttributeTagProcessor extends AbstractAttributeTagProcessor {
         }
 
         if (attributeValue.equals("EnableIfRoleSiteManagerOrWorkspaceManager")) {
-            if (roleService.hasRoleRegex("ROLE_SITE_MANGER", authentication) ||
+            if (roleService.hasRoleRegex("ROLE_SITE_MANAGER", authentication) ||
                 roleService.hasRoleRegex("ROLE_WORKSPACE_MANAGER\\d+", authentication)) {
                 structureHandler.setAttribute("class", classAttrNotDisabled);
             } else {

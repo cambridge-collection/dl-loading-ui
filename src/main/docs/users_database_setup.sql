@@ -48,6 +48,10 @@ values ('test-site-manager', 'Site', 'Manager', 'password', 'dm@test.com', true)
 
 insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-workspace-member1'),
                                                 'ROLE_WORKSPACE_MEMBER1');
+
+--- test-workspace-member2 is a member of workspace 1 and 2
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-workspace-member2'),
+                                                'ROLE_WORKSPACE_MEMBER1');
 insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-workspace-member2'),
                                                 'ROLE_WORKSPACE_MEMBER2');
 insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-workspace-manager1'),
