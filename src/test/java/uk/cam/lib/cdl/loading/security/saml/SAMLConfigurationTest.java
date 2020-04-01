@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.security.saml;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -7,8 +8,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.saml.SAMLAuthenticationToken;
+import org.springframework.security.saml.context.SAMLMessageContext;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.web.FilterChainProxy;
 import uk.cam.lib.cdl.loading.security.UsersConfig;
@@ -37,6 +42,28 @@ public class SAMLConfigurationTest {
 
         assertThat(filterChain.getFilters("/")).contains(samlAuthFilter);
     }
+
+    @SpringBootTest(properties = "auth.methods=saml")
+    public static class SAMLAuthenticationProviderRegistrationTest {
+        @Autowired
+        private AuthenticationManager authenticationManager;
+
+        @Test
+        public void samlAuthenticationProviderIsRegistered() {
+            var samlMessageContext = mock(SAMLMessageContext.class);
+            when(samlMessageContext.getCommunicationProfileId()).thenReturn("[fake profile ID]");
+            var samlToken = new SAMLAuthenticationToken(samlMessageContext);
+
+            // The authentication flow is not fully mocked, we just check that authenticating a SAML token
+            // hits a SAMLAuthenticationProvider which will fail predictably due to our unsupported profile ID.
+            var thrown = Assertions.assertThrows(AuthenticationServiceException.class, () ->
+                    authenticationManager.authenticate(samlToken));
+            assertThat(thrown).hasMessageThat().isEqualTo("Error validating SAML message");
+            assertThat(thrown.getCause()).hasMessageThat().isEqualTo("Unsupported profile encountered in the context [fake profile ID]");
+        }
+    }
+
+
 
     @SpringBootTest(properties = {
             "auth.methods=saml",
