@@ -8,6 +8,7 @@ import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.model.editor.Workspace;
 import uk.cam.lib.cdl.loading.utils.RoleHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -79,11 +80,17 @@ public class RoleService {
         return false;
     }
 
+    public boolean canEditWorkspace(Long workspaceId, Authentication authentication) {
+        List<Long> workspaceIds = new ArrayList<>();
+        workspaceIds.add(workspaceId);
+        return canEditWorkspace(workspaceIds, authentication);
+    }
+
     public boolean canEditWorkspace(List<Long> workspaceIds, Authentication authentication) {
 
         if (workspaceIds==null) { return false; }
 
-        for (long workspaceId: workspaceIds) {
+        for (Long workspaceId: workspaceIds) {
             String workspaceManagerRole = "ROLE_" + RoleHelper.WorkspaceRolesPrefix.WORKSPACE_MANAGER.toString() + workspaceId;
             // does user have manager role for this workspace
             for (GrantedAuthority authority : authentication.getAuthorities()) {

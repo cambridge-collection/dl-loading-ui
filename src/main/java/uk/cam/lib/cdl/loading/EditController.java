@@ -346,6 +346,7 @@ public class EditController {
     }
 
     @PostMapping("/edit/collection/addItem")
+    // TODO auth
     public RedirectView addCollectionItem(RedirectAttributes attributes, @RequestParam String collectionId,
                                           @RequestParam("file") MultipartFile file) throws IOException {
 
@@ -381,6 +382,7 @@ public class EditController {
     }
 
     @PostMapping("/edit/collection/deleteItem")
+    // TODO auth
     public RedirectView deleteCollectionItem(RedirectAttributes attributes, @RequestParam String collectionId,
                                              @RequestParam String itemName) {
 

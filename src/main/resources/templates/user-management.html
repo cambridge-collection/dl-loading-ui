@@ -1,5 +1,6 @@
 <!DOCTYPE HTML>
 <html xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml"
+      xmlns:dl-loading-ui="http://www.w3.org/1999/xhtml"
       layout:decorate="~{fragments/main-layout}">
 <head>
     <!-- TODO: fix the flash of unstyled content that happens if these styles are not included here -->
@@ -72,11 +73,11 @@
                             <tr th:each="workspace : ${workspaces}">
                                 <td><span th:text="${workspace.id}"> Id </span></td>
                                 <td><span th:text="${workspace.name}"> Name </span></td>
-                                <td><a th:href="'/user-management/workspace/edit?id='+${workspace.id}">Edit</a></td>
+                                <td><a th:dl-loading-ui:role="'EnableIfRoleSiteOrWorkspaceManager'+${workspace.id}" th:href="'/user-management/workspace/edit?id='+${workspace.id}">Edit</a></td>
                             </tr>
                             </tbody>
                         </table>
-                        <div class="float-right"><a href="/user-management/workspace/edit"><i class="fas fa-plus"></i>
+                        <div class="float-right"><a dl-loading-ui:role="EnableIfRoleSiteManager" href="/user-management/workspace/edit"><i class="fas fa-plus"></i>
                             Create new workspace</a></div>
                     </div>
                 </div>

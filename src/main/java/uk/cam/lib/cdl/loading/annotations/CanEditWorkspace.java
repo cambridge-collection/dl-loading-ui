@@ -10,8 +10,10 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
-@PreAuthorize("@roleService.canEditWorkspace(#workspaceIds, authentication)")
+@PreAuthorize("(@roleService.canEditWorkspace(#workspaceIds, authentication) or " +
+    "@roleService.canEditWorkspace(#workspaceId, authentication) or " +
+    " (#workspaceForm!=null && @roleService.canEditWorkspace(#workspaceForm.getId(), authentication)) or " +
+    " hasRole(\"ROLE_SITE_MANAGER\"))")
 public @interface CanEditWorkspace {
-
 }
 

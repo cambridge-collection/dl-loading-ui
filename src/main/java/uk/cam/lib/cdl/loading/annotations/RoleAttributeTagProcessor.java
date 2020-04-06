@@ -10,6 +10,9 @@ import org.thymeleaf.processor.element.IElementTagStructureHandler;
 import org.thymeleaf.templatemode.TemplateMode;
 import uk.cam.lib.cdl.loading.security.RoleService;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class RoleAttributeTagProcessor extends AbstractAttributeTagProcessor {
 
     private static final String ATTR_NAME = "role";
@@ -60,9 +63,30 @@ public class RoleAttributeTagProcessor extends AbstractAttributeTagProcessor {
             }
         }
 
+        Pattern p = Pattern.compile("EnableIfRoleSiteOrWorkspaceManager(\\d+)");
+        Matcher m = p.matcher(attributeValue);
+        if (m.find()) {
+
+            String workspaceId = m.toMatchResult().group(0).replace("EnableIfRoleSiteOrWorkspaceManager", "");
+            if (roleService.hasRoleRegex("ROLE_WORKSPACE_MANAGER"+workspaceId, authentication) ||
+            roleService.hasRoleRegex("ROLE_SITE_MANAGER", authentication)) {
+                structureHandler.setAttribute("class", classAttrNotDisabled);
+            } else {
+                structureHandler.setAttribute("class", "disabled "+classAttrNotDisabled);
+            }
+        }
+
         if (attributeValue.equals("EnableIfRoleSiteManagerOrWorkspaceManager")) {
             if (roleService.hasRoleRegex("ROLE_SITE_MANAGER", authentication) ||
                 roleService.hasRoleRegex("ROLE_WORKSPACE_MANAGER\\d+", authentication)) {
+                structureHandler.setAttribute("class", classAttrNotDisabled);
+            } else {
+                structureHandler.setAttribute("class", "disabled "+classAttrNotDisabled);
+            }
+        }
+
+        if (attributeValue.equals("EnableIfRoleSiteManager")) {
+            if (roleService.hasRoleRegex("ROLE_SITE_MANAGER", authentication)) {
                 structureHandler.setAttribute("class", classAttrNotDisabled);
             } else {
                 structureHandler.setAttribute("class", "disabled "+classAttrNotDisabled);

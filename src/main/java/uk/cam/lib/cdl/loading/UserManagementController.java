@@ -1,12 +1,15 @@
 package uk.cam.lib.cdl.loading;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+import uk.cam.lib.cdl.loading.annotations.CanEditWorkspace;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
@@ -40,6 +43,8 @@ public class UserManagementController {
     }
 
     @GetMapping("/user-management/")
+    @PreAuthorize("@roleService.hasRoleRegex(\"ROLE_SITE_MANAGER\", authentication) or " +
+        "          @roleService.hasRoleRegex(\"ROLE_WORKSPACE_MANAGER\\d+\", authentication)")
     public String usermanagement(Model model, HttpServletRequest request) {
 
         model.addAttribute("users", userRepository.findAll());
@@ -48,7 +53,11 @@ public class UserManagementController {
     }
 
     @RequestMapping(value = {"/user-management/user/edit"})
+    @PreAuthorize("@roleService.hasRoleRegex(\"ROLE_SITE_MANAGER\", authentication) or " +
+        "          @roleService.hasRoleRegex(\"ROLE_WORKSPACE_MANAGER\\d+\", authentication)")
     public String updateUsers(Model model, @RequestParam(required = false, name = "id") Long id) {
+
+        // TODO separate out roles to display and set
 
         User user;
         UserForm form = new UserForm();
@@ -69,6 +78,8 @@ public class UserManagementController {
     }
 
     @PostMapping(value = {"/user-management/user/update"})
+    @PreAuthorize("@roleService.hasRoleRegex(\"ROLE_SITE_MANAGER\", authentication) or " +
+        "          @roleService.hasRoleRegex(\"ROLE_WORKSPACE_MANAGER\\d+\", authentication)")
     @Transactional
     public RedirectView updateUserFromForm(RedirectAttributes attributes,
                                            @Valid @ModelAttribute UserForm userForm,
@@ -83,6 +94,7 @@ public class UserManagementController {
 
             return new RedirectView("/user-management/user/edit");
         }
+        // TODO separate out roles to display and set
 
         User user = userForm.toUser();
         User userFromRepo = userRepository.findById(user.getId());
@@ -104,6 +116,8 @@ public class UserManagementController {
     }
 
     @PostMapping(value = {"/user-management/user/delete"})
+    @PreAuthorize("@roleService.hasRoleRegex(\"ROLE_SITE_MANAGER\", authentication) or " +
+        "          @roleService.hasRoleRegex(\"ROLE_WORKSPACE_MANAGER\\d+\", authentication)")
     @Transactional
     public RedirectView deleteUser(@RequestParam("id") Long id) {
         User userFromRepo = userRepository.findById(id.longValue());
@@ -117,13 +131,16 @@ public class UserManagementController {
 
 
     @RequestMapping(value = {"/user-management/workspace/edit"})
-    public String updateWorkspace(Model model, @RequestParam(required = false, name = "id") Long id) {
+    @CanEditWorkspace // requires workspaceIds or workspaceId or workspaceForm
+    public String updateWorkspace(Model model, @RequestParam(required = false, name = "id") Long workspaceId) {
+
+        // TODO only allow site manager to add workspace
 
         Workspace workspace;
         WorkspaceForm form = new WorkspaceForm();
 
-        if (id != null) {
-            workspace = workspaceRepository.findWorkspaceById(id);
+        if (workspaceId != null) {
+            workspace = workspaceRepository.findWorkspaceById(workspaceId);
             if (workspace != null) {
                 form = new WorkspaceForm(workspace);
             }
@@ -137,9 +154,12 @@ public class UserManagementController {
 
     @PostMapping(value = {"/user-management/workspace/update"})
     @Transactional
+    @CanEditWorkspace // requires workspaceIds workspaceId or workspaceForm
     public RedirectView updateWorkspaceFromForm(RedirectAttributes attributes,
                                                 @Valid @ModelAttribute WorkspaceForm workspaceForm,
                                                 final BindingResult bindingResult) {
+
+        // TODO only allow site manager to add workspace
 
         if (bindingResult.hasErrors()) {
             attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
@@ -169,6 +189,7 @@ public class UserManagementController {
 
     @PostMapping(value = {"/user-management/workspace/delete"})
     @Transactional
+    @Secured("ROLE_SITE_MANAGER")
     public RedirectView deleteWorkspace(@RequestParam("id") Long id) {
         Workspace workspaceFromRepo = workspaceRepository.findWorkspaceById(id);
         if (workspaceFromRepo != null) {
