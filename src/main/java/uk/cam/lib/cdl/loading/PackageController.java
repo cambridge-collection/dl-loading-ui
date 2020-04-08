@@ -1,7 +1,7 @@
 package uk.cam.lib.cdl.loading;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +30,7 @@ public class PackageController {
     }
 
     @GetMapping ("/package/package.html")
-    @Secured("ROLE_DEPLOYMENT_MANAGER")
+    @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public String pack(Model model) {
 
         List<Update> updates = packagingAPI.updatesSinceLastPackage();
@@ -71,7 +71,7 @@ public class PackageController {
     }
 
     @GetMapping ("/package/startProcess")
-    @Secured("ROLE_DEPLOYMENT_MANAGER")
+    @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public RedirectView startProcess(Model model) {
         String processId = packagingAPI.startProcess();
 
@@ -79,7 +79,7 @@ public class PackageController {
     }
 
     @GetMapping("/package/{id}/status")
-    @Secured("ROLE_DEPLOYMENT_MANAGER")
+    @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public String status(Model model, @PathVariable("id") String id) {
         PackagingStatus status = packagingAPI.getStatus(id);
         model.addAttribute("status", status);

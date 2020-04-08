@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.annotations;
+package uk.cam.lib.cdl.loading.tags;
 
 import org.thymeleaf.dialect.AbstractProcessorDialect;
 import org.thymeleaf.processor.IProcessor;

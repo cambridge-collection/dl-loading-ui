@@ -73,11 +73,11 @@
                             <tr th:each="workspace : ${workspaces}">
                                 <td><span th:text="${workspace.id}"> Id </span></td>
                                 <td><span th:text="${workspace.name}"> Name </span></td>
-                                <td><a th:dl-loading-ui:role="'EnableIfRoleSiteOrWorkspaceManager'+${workspace.id}" th:href="'/user-management/workspace/edit?id='+${workspace.id}">Edit</a></td>
+                                <td><a th:dl-loading-ui:role="'EnableIfCanEditWorkspace'+${workspace.id}" th:href="'/user-management/workspace/edit?id='+${workspace.id}">Edit</a></td>
                             </tr>
                             </tbody>
                         </table>
-                        <div class="float-right"><a dl-loading-ui:role="EnableIfRoleSiteManager" href="/user-management/workspace/edit"><i class="fas fa-plus"></i>
+                        <div class="float-right"><a dl-loading-ui:role="EnableIfCanAddWorkspaces" href="/user-management/workspace/edit"><i class="fas fa-plus"></i>
                             Create new workspace</a></div>
                     </div>
                 </div>

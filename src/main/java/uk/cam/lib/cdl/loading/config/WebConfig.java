@@ -14,7 +14,7 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
-import uk.cam.lib.cdl.loading.annotations.RoleDialect;
+import uk.cam.lib.cdl.loading.tags.RoleDialect;
 
 @Configuration
 @EnableWebMvc

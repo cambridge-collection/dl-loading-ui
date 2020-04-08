@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.annotations;
+package uk.cam.lib.cdl.loading.tags;
 
 import org.springframework.security.core.Authentication;
 import org.thymeleaf.context.ITemplateContext;
@@ -46,47 +46,45 @@ public class RoleAttributeTagProcessor extends AbstractAttributeTagProcessor {
             classAttrNotDisabled = classAttr.replaceAll("\\s*disabled\\s*", "");
         }
 
-        if (attributeValue.equals("EnableIfRoleWorkspaceMemberOrManager")) {
-            if (roleService.hasRoleRegex("ROLE_WORKSPACE_MEMBER\\d+", authentication) ||
-                roleService.hasRoleRegex("ROLE_WORKSPACE_MANAGER\\d+", authentication)) {
+        if (attributeValue.equals("EnableIfCanViewWorkspaces")) {
+            if (roleService.canViewWorkspaces(authentication)) {
                 structureHandler.setAttribute("class", classAttrNotDisabled);
             } else {
                 structureHandler.setAttribute("class", "disabled "+classAttrNotDisabled);
             }
         }
 
-        if (attributeValue.equals("EnableIfRoleDeploymentManager")) {
-            if (roleService.hasRoleRegex("ROLE_DEPLOYMENT_MANAGER", authentication)) {
+        if (attributeValue.equals("EnableIfCanDeploySites") ||
+            attributeValue.equals("EnableIfCanBuildPackages")) {
+            if (roleService.canDeploySites(authentication)) {
                structureHandler.setAttribute("class", classAttrNotDisabled);
             } else {
                 structureHandler.setAttribute("class", "disabled "+classAttrNotDisabled);
             }
         }
 
-        Pattern p = Pattern.compile("EnableIfRoleSiteOrWorkspaceManager(\\d+)");
+        Pattern p = Pattern.compile("EnableIfCanEditWorkspace(\\d+)");
         Matcher m = p.matcher(attributeValue);
         if (m.find()) {
 
-            String workspaceId = m.toMatchResult().group(0).replace("EnableIfRoleSiteOrWorkspaceManager", "");
-            if (roleService.hasRoleRegex("ROLE_WORKSPACE_MANAGER"+workspaceId, authentication) ||
-            roleService.hasRoleRegex("ROLE_SITE_MANAGER", authentication)) {
+            String workspaceId = m.toMatchResult().group(0).replace("EnableIfCanEditWorkspace", "");
+            if (roleService.canEditWorkspace(Long.valueOf(workspaceId), authentication)) {
                 structureHandler.setAttribute("class", classAttrNotDisabled);
             } else {
                 structureHandler.setAttribute("class", "disabled "+classAttrNotDisabled);
             }
         }
 
-        if (attributeValue.equals("EnableIfRoleSiteManagerOrWorkspaceManager")) {
-            if (roleService.hasRoleRegex("ROLE_SITE_MANAGER", authentication) ||
-                roleService.hasRoleRegex("ROLE_WORKSPACE_MANAGER\\d+", authentication)) {
+        if (attributeValue.equals("EnableIfCanEditWorkspaces")) {
+            if (roleService.canEditWorkspaces(authentication)) {
                 structureHandler.setAttribute("class", classAttrNotDisabled);
             } else {
                 structureHandler.setAttribute("class", "disabled "+classAttrNotDisabled);
             }
         }
 
-        if (attributeValue.equals("EnableIfRoleSiteManager")) {
-            if (roleService.hasRoleRegex("ROLE_SITE_MANAGER", authentication)) {
+        if (attributeValue.equals("EnableIfCanAddWorkspaces")) {
+            if (roleService.canAddWorkspaces(authentication)) {
                 structureHandler.setAttribute("class", classAttrNotDisabled);
             } else {
                 structureHandler.setAttribute("class", "disabled "+classAttrNotDisabled);

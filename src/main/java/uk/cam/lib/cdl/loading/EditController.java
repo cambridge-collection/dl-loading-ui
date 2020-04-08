@@ -11,6 +11,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,9 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-import uk.cam.lib.cdl.loading.annotations.CanEditCollection;
-import uk.cam.lib.cdl.loading.annotations.CanEditWorkspace;
-import uk.cam.lib.cdl.loading.annotations.HasRoleWorkspaceMemberOrManager;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
@@ -61,18 +59,17 @@ public class EditController {
         this.pathForDataDisplay = pathForDataDisplay;
     }
 
-    @HasRoleWorkspaceMemberOrManager
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
     @GetMapping("/edit/edit.html")
     public String edit(Model model, HttpServletRequest request) {
 
         List<Workspace> workspaces = new ArrayList<>();
         Hashtable<String, Collection> collections = new Hashtable<>();
-        RoleHelper roleHelper = new RoleHelper(workspaceRepository);
 
         // Get the workspaces the user has access to.
         for (Workspace workspace : workspaceRepository.findAll()) {
-            String workspaceMemberRole = roleHelper.getWorkspaceMemberRole(workspace);
-            String workspaceManagerRole = roleHelper.getWorkspaceManagerRole(workspace);
+            String workspaceMemberRole = RoleHelper.getWorkspaceMemberRole(workspace);
+            String workspaceManagerRole = RoleHelper.getWorkspaceManagerRole(workspace);
 
             if (request.isUserInRole(workspaceMemberRole) || request.isUserInRole(workspaceManagerRole)) {
                 workspaces.add(workspace);
@@ -100,7 +97,7 @@ public class EditController {
      * @throws IOException Cannot read collection HTML
      */
     @GetMapping(value = {"/edit/collection/"})
-    @CanEditCollection // requires collectionForm or collectionId or workspaceIds
+    @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication)")
     public String editCollection(Model model, @RequestParam(required = false) String collectionId,
                                  @RequestParam(required = false) List<Long> workspaceIds)
         throws IOException {
@@ -207,8 +204,9 @@ public class EditController {
      * @throws BadRequestException If requested resource is not within the dataLocalSourcePath
      * @throws IOException         Unable to find resource
      */
-    // TODO Authenticate this
+    // IMPORTANT: Please Note anyone who can view any workspaces can read all git data using this.
     @GetMapping(value = "${data.url.display}**")
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
     public ResponseEntity<Resource> editSourceData(HttpServletRequest request)
         throws BadRequestException, IOException {
 
@@ -256,7 +254,7 @@ public class EditController {
      * @return RedirectView to the collections page (after updates have been saved).
      */
     @PostMapping("/edit/collection/update")
-    @CanEditCollection // requires collectionForm or collectionId or workspaceIds
+    @PreAuthorize("@roleService.canEditCollection(#collectionForm.getCollectionId(), authentication)")
     public RedirectView updateCollection(RedirectAttributes attributes,
                                          @RequestBody @Valid @ModelAttribute CollectionForm collectionForm,
                                          @RequestParam List<Long> workspaceIds,
@@ -280,7 +278,7 @@ public class EditController {
         if (collectionId == null || collectionId.trim().equals("")) {
 
             // new collection
-            collection = newCollection(attributes,collectionForm);
+            collection = newCollection(attributes,workspaceIds,collectionForm);
             collectionId = collection.getCollectionId();
         }
 
@@ -321,8 +319,9 @@ public class EditController {
         return new RedirectView("/edit/collection/");
     }
 
-    @CanEditWorkspace // requires workspaceIds
+    @PreAuthorize("@roleService.canEditWorkspace(#workspaceIds, authentication)")
     private Collection newCollection(RedirectAttributes attributes,
+                                         List<Long> workspaceIds,
                                          @Valid @ModelAttribute CollectionForm collectionForm
                                          ) throws Exception {
 
@@ -346,7 +345,7 @@ public class EditController {
     }
 
     @PostMapping("/edit/collection/addItem")
-    // TODO auth
+    @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication)")
     public RedirectView addCollectionItem(RedirectAttributes attributes, @RequestParam String collectionId,
                                           @RequestParam("file") MultipartFile file) throws IOException {
 
@@ -382,7 +381,7 @@ public class EditController {
     }
 
     @PostMapping("/edit/collection/deleteItem")
-    // TODO auth
+    @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication)")
     public RedirectView deleteCollectionItem(RedirectAttributes attributes, @RequestParam String collectionId,
                                              @RequestParam String itemName) {
 
