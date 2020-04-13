@@ -27,17 +27,18 @@ import java.util.List;
 @Controller
 public class UserManagementController {
 
-    @Autowired
     private WorkspaceRepository workspaceRepository;
 
-    @Autowired
     private UserRepository userRepository;
 
     private final EditAPI editAPI;
 
     @Autowired
-    public UserManagementController(EditAPI editAPI) {
+    public UserManagementController(EditAPI editAPI, UserRepository userRepository,
+                                    WorkspaceRepository workspaceRepository) {
         this.editAPI = editAPI;
+        this.workspaceRepository = workspaceRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/user-management/")
