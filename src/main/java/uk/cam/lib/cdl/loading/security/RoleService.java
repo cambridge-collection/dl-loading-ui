@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.model.editor.Workspace;
@@ -74,7 +75,9 @@ public class RoleService {
     // This is used when editing an item or collection which is in multiple workspaces.
     public boolean canEditWorkspace(List<Long> workspaceIds, Authentication authentication) {
 
-        if (workspaceIds==null) { return false; }
+        if (workspaceIds==null) {
+            return authentication.getAuthorities().contains(new SimpleGrantedAuthority(RoleHelper.getRoleSiteManager()));
+        }
 
         for (Long workspaceId: workspaceIds) {
             // does user have manager role for this workspace

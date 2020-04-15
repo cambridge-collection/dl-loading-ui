@@ -1,6 +1,7 @@
 package uk.cam.lib.cdl.loading;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +14,8 @@ import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.forms.UserForm;
 import uk.cam.lib.cdl.loading.forms.WorkspaceForm;
+import uk.cam.lib.cdl.loading.model.editor.Collection;
+import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.model.editor.Workspace;
 import uk.cam.lib.cdl.loading.model.security.Role;
 import uk.cam.lib.cdl.loading.model.security.User;
@@ -33,12 +36,16 @@ public class UserManagementController {
 
     private final EditAPI editAPI;
 
+    private ApplicationContext appContext;
+
     @Autowired
     public UserManagementController(EditAPI editAPI, UserRepository userRepository,
-                                    WorkspaceRepository workspaceRepository) {
+                                    WorkspaceRepository workspaceRepository, ApplicationContext
+                                    context) {
         this.editAPI = editAPI;
-        this.workspaceRepository = workspaceRepository;
         this.userRepository = userRepository;
+        this.workspaceRepository = workspaceRepository;
+        this.appContext = context;
     }
 
     @GetMapping("/user-management/")
@@ -129,10 +136,8 @@ public class UserManagementController {
     @PreAuthorize("@roleService.canEditWorkspace(#workspaceId, authentication)")
     public String updateWorkspace(Model model, @RequestParam(required = false, name = "id") Long workspaceId) {
 
-        // TODO only allow site manager to add workspace
-
         Workspace workspace;
-        WorkspaceForm form = new WorkspaceForm();
+        WorkspaceForm form = null;
 
         if (workspaceId != null) {
             workspace = workspaceRepository.findWorkspaceById(workspaceId);
@@ -141,9 +146,24 @@ public class UserManagementController {
             }
         }
 
+        // New workspace
+        if (form==null) {
+            return appContext.getBean(UserManagementController.class).addWorkspace(model,
+                editAPI.getCollections(), editAPI.getItems());
+        }
+
         model.addAttribute("form", form);
         model.addAttribute("allCollections", editAPI.getCollections());
         model.addAttribute("allItems", editAPI.getItems());
+        return "user-management-workspace";
+    }
+
+
+    @PreAuthorize("@roleService.canAddWorkspaces(authentication)")
+    private String addWorkspace(Model model, Iterable<Collection> collections, Iterable<Item> items ) {
+        model.addAttribute("form", new WorkspaceForm());
+        model.addAttribute("allCollections", collections);
+        model.addAttribute("allItems", items);
         return "user-management-workspace";
     }
 
@@ -154,9 +174,7 @@ public class UserManagementController {
                                                 @Valid @ModelAttribute WorkspaceForm workspaceForm,
                                                 final BindingResult bindingResult) {
 
-        // TODO only allow site manager to add workspace
-
-        if (bindingResult.hasErrors()) {
+       if (bindingResult.hasErrors()) {
             attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
                 "details.");
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
@@ -169,7 +187,8 @@ public class UserManagementController {
         Workspace workspace = workspaceForm.toWorkspace();
         Workspace workspaceFromRepo = workspaceRepository.findWorkspaceById(workspace.getId());
         if (workspaceFromRepo == null) {
-            workspaceRepository.save(workspace);
+            // New Workspace
+            return appContext.getBean(UserManagementController.class).addWorkspaceFromForm(attributes, workspace, workspaceForm);
         } else {
             workspaceFromRepo.setName(workspace.getName());
             workspaceFromRepo.setCollectionIds(workspace.getCollectionIds());
@@ -180,6 +199,17 @@ public class UserManagementController {
         attributes.addFlashAttribute("form", workspaceForm);
         attributes.addAttribute("id", workspaceForm.getId());
         return new RedirectView("/user-management/workspace/edit");
+    }
+
+    @Transactional
+    @PreAuthorize("@roleService.canAddWorkspaces(authentication)")
+    protected RedirectView addWorkspaceFromForm(RedirectAttributes attributes, Workspace workspace,
+                                                WorkspaceForm workspaceForm) {
+        workspaceRepository.save(workspace);
+        attributes.addFlashAttribute("form", workspaceForm);
+        attributes.addAttribute("id", workspaceForm.getId());
+        return new RedirectView("/user-management/workspace/edit");
+
     }
 
     @PostMapping(value = {"/user-management/workspace/delete"})

@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -30,6 +31,7 @@ import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,6 +66,7 @@ class UserManagementControllerAuthenticationTest {
         workspaces.add(workspace);
 
         when(workspaceRepository.findWorkspaceById(1)).thenReturn(workspace);
+        when(workspaceRepository.findWorkspaceById(2)).thenReturn(null);
         when(workspaceRepository.findWorkspaceByCollectionIds("collections/test.collection.json")).thenReturn(workspaces);
 
         mvc = MockMvcBuilders
@@ -75,7 +78,7 @@ class UserManagementControllerAuthenticationTest {
     @Test
     void UnauthorisedUserManagementScreen_shouldFailWith401() throws Exception {
 
-        mvc.perform(get("/user-management/").contentType(MediaType.TEXT_HTML))
+        mvc.perform(get("/user-management/"))
             .andExpect(MockMvcResultMatchers.status().isUnauthorized());
 
     }
@@ -83,7 +86,7 @@ class UserManagementControllerAuthenticationTest {
     @WithMockUser(username="test-site-manager", roles = {"SITE_MANAGER"})
     @Test
     void givenAuthRequestOnUserManagementScreenSiteManager_shouldSucceedWith200() throws Exception {
-        mvc.perform(get("/user-management/").contentType(MediaType.TEXT_HTML))
+        mvc.perform(get("/user-management/"))
             .andExpect(MockMvcResultMatchers.status().isOk());
 
     }
@@ -91,7 +94,7 @@ class UserManagementControllerAuthenticationTest {
     @WithMockUser(username="test-workspace-manager1", roles = {"WORKSPACE_MANAGER1"})
     @Test
     void givenAuthRequestOnUserManagementScreenWorkspaceManager_shouldSucceedWith200() throws Exception {
-        mvc.perform(get("/user-management/").contentType(MediaType.TEXT_HTML))
+        mvc.perform(get("/user-management/"))
             .andExpect(MockMvcResultMatchers.status().isOk());
 
     }
@@ -99,35 +102,35 @@ class UserManagementControllerAuthenticationTest {
     @WithMockUser(username="test-workspace-member1", roles = {"WORKSPACE_MEMBER1"})
     @Test
     void givenAuthRequestOnUserManagementScreen_shouldFailWith403() throws Exception {
-        mvc.perform(get("/user-management/").contentType(MediaType.TEXT_HTML))
+        mvc.perform(get("/user-management/"))
             .andExpect(MockMvcResultMatchers.status().isForbidden());
 
     }
 
     @Test
     void UnauthorisedEditUser_shouldFailWith401() throws Exception {
-        mvc.perform(get("/user-management/user/edit").contentType(MediaType.TEXT_HTML))
+        mvc.perform(get("/user-management/user/edit"))
             .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(username="test-workspace-member1", roles = {"WORKSPACE_MEMBER1"})
     void AuthorisedEditUser_shouldFailWith403() throws Exception {
-        mvc.perform(get("/user-management/user/edit").contentType(MediaType.TEXT_HTML))
+        mvc.perform(get("/user-management/user/edit"))
             .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 
     @Test
     @WithMockUser(username="test-site-manager", roles = {"SITE_MANAGER"})
     void AuthorisedEditUserSiteManager_shouldSucceedWith200() throws Exception {
-        mvc.perform(get("/user-management/user/edit").contentType(MediaType.TEXT_HTML))
+        mvc.perform(get("/user-management/user/edit"))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     @WithMockUser(username="test-workspace-manager1", roles = {"WORKSPACE_MANAGER1"})
     void AuthorisedEditUserWorkspaceManager_shouldSucceedWith200() throws Exception {
-        mvc.perform(get("/user-management/user/edit").contentType(MediaType.TEXT_HTML))
+        mvc.perform(get("/user-management/user/edit"))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -145,35 +148,42 @@ class UserManagementControllerAuthenticationTest {
 
     @Test
     void UnauthorisedEditWorkspace_shouldFailWith401() throws Exception {
-        mvc.perform(get("/user-management/workspace/edit").contentType(MediaType.TEXT_HTML))
+        mvc.perform(get("/user-management/workspace/edit?id=1"))
             .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(username="test-workspace-manager1", roles = {"WORKSPACE_MANAGER1"})
-    void AuthorisedWorkspaceManagerEditWorkspace_shouldFailWith403() throws Exception {
-        mvc.perform(get("/user-management/workspace/edit").contentType(MediaType.TEXT_HTML))
-            .andExpect(MockMvcResultMatchers.status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(username="test-workspace-manager1", roles = {"WORKSPACE_MANAGER1"})
-    void AuthorisedWorkspaceManagerEditWorkspaceWIthId_shouldSucceedWith200() throws Exception {
-        mvc.perform(get("/user-management/workspace/edit?id=1").contentType(MediaType.TEXT_HTML))
+    void AuthorisedWorkspaceManagerEditWorkspaceWithId_shouldSucceedWith200() throws Exception {
+        mvc.perform(get("/user-management/workspace/edit?id=1"))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     @WithMockUser(username="test-workspace-manager2", roles = {"WORKSPACE_MANAGER2"})
-    void AuthorisedWorkspaceManagerEditWorkspaceWIthId_shouldFailWith403() throws Exception {
-        mvc.perform(get("/user-management/workspace/edit?id=1").contentType(MediaType.TEXT_HTML))
+    void AuthorisedWorkspaceManagerEditWorkspaceWithId_shouldFailWith403() throws Exception {
+        mvc.perform(get("/user-management/workspace/edit?id=1"))
+            .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username="test-workspace-manager1", roles = {"WORKSPACE_MANAGER1"})
+    void AuthorisedWorkspaceManagerEditNewWorkspaceWithId_shouldFailWith403() throws Exception {
+        mvc.perform(get("/user-management/workspace/edit"))
             .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 
     @Test
     @WithMockUser(username="test-site-manager", roles = {"SITE_MANAGER"})
+    void AuthorisedSiteManagerEditNewWorkspaceWithId_shouldSucceedWith200() throws Exception {
+        mvc.perform(get("/user-management/workspace/edit"))
+            .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username="test-site-manager", roles = {"SITE_MANAGER"})
     void AuthorisedSiteManagerEditWorkspaceWIthId_shouldSucceedWith200() throws Exception {
-        mvc.perform(get("/user-management/workspace/edit?id=1").contentType(MediaType.TEXT_HTML))
+        mvc.perform(get("/user-management/workspace/edit?id=1"))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -221,22 +231,54 @@ class UserManagementControllerAuthenticationTest {
     }
 
     @Test
+    void UnauthorisedUpdateNewWorkspaceFromForm_shouldFailWith401() throws Exception {
+        mvc.perform(post("/user-management/workspace/update")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("id", "2")
+            .param("name", "Workspace Two")
+            .param("collectionIds", "test/test-collection.json"))
+            .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username="test-workspace-manager2", roles = {"WORKSPACE_MANAGER2"})
+    void AuthorisedUpdateNewWorkspaceFromForm_shouldFailWith403() throws Exception {
+        mvc.perform(post("/user-management/workspace/update")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("id", "2")
+            .param("name", "Workspace Two")
+            .param("collectionIds", "test/test-collection.json"))
+            .andExpect(MockMvcResultMatchers.status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username="test-site-manager", roles = {"SITE_MANAGER"})
+    void AuthorisedUpdateNewWorkspaceFromForm_shouldSucceedWith302() throws Exception {
+        mvc.perform(post("/user-management/workspace/update")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+            .param("id", "2")
+            .param("name", "Workspace Two")
+            .param("collectionIds", "test/test-collection.json"))
+            .andExpect(MockMvcResultMatchers.status().isFound());
+    }
+
+    @Test
     void unauthorisedDeleteWorkspace_shouldFailWith401() throws Exception {
-        mvc.perform(post("/user-management/workspace/delete?id=1").contentType(MediaType.TEXT_HTML))
+        mvc.perform(post("/user-management/workspace/delete?id=1"))
             .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(username="test-workspace-manager1", roles = {"WORKSPACE_MANAGER1"})
     void AuthorisedDeleteWorkspace_shouldFailWith403() throws Exception {
-        mvc.perform(post("/user-management/workspace/delete?id=1").contentType(MediaType.TEXT_HTML))
+        mvc.perform(post("/user-management/workspace/delete?id=1"))
             .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 
     @Test
     @WithMockUser(username="test-site-manager", roles = {"SITE_MANAGER"})
     void AuthorisedSiteManagerDeleteWorkspace_shouldSucceedWith302() throws Exception {
-        mvc.perform(post("/user-management/workspace/delete?id=1").contentType(MediaType.TEXT_HTML))
+        mvc.perform(post("/user-management/workspace/delete?id=1"))
             .andExpect(MockMvcResultMatchers.status().isFound());
     }
 
@@ -246,9 +288,11 @@ class UserManagementControllerAuthenticationTest {
     @ComponentScan(basePackages = "uk.cam.lib.cdl.loading")
     static class Config {
 
-        @Bean
-        public EditAPI MockEditAPI() throws IOException, GitAPIException {
+        private GitLocalVariables gitLocalVariables;
+        private String dataPath;
+        private GitHelper gitHelper;
 
+        public Config() throws IOException, GitAPIException {
             MockGitRepo gitRepo = new MockGitRepo();
             Git git = gitRepo.getGit();
 
@@ -260,19 +304,45 @@ class UserManagementControllerAuthenticationTest {
             git.add().addFilepattern(".").call();
             git.commit().setMessage("Adding Test Data").setAuthor("testuser", "test@example.com ").call();
 
-
-            GitLocalVariables gitSourceVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "/data",
+            dataPath = gitRepo.getCloneDir().getCanonicalPath() + "/data/";
+            gitLocalVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "/data/",
                 "gitSourceURL", "gitSourceURLUserame",
                 "gitSourceURLPassword", "gitBranch");
 
+            gitHelper = new GitHelper(git, gitLocalVariables);
 
-            GitHelper gitHelper = new GitHelper(git, gitSourceVariables);
+        }
 
-            return new EditAPI(gitRepo.getCloneDir().getCanonicalPath() + "/data",
+        @Bean
+        @Primary
+        public GitLocalVariables getGitLocalVariables() {
+            return gitLocalVariables;
+        }
+
+        @Bean
+        public Path dlDatasetFilename() {
+            return new File(dataPath+"test.dl-dataset.json").toPath();
+        }
+
+        @Bean
+        public Path dlUIFilename() {
+            return new File(dataPath+"test.ui.json5").toPath();
+        }
+
+        @Bean
+        public Path dataItemPath() {
+            return new File(dataPath+"data/items/data/tei/").toPath();
+        }
+
+        @Bean
+        @Primary
+        public EditAPI editAPI(GitLocalVariables gitLocalVariables, Path dlDatasetFilename, Path dlUIFilename, Path dataItemPath) {
+            return new EditAPI(dataPath,
                 "test.dl-dataset.json", "test.ui.json5",
-                gitSourceVariables.getGitSourcePath() + "/data/items/data/tei/", gitHelper);
+                gitLocalVariables.getGitSourcePath() + "/data/items/data/tei/", gitHelper);
 
         }
     }
+
 
 }
