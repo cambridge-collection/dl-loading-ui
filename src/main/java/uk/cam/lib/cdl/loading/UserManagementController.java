@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -59,7 +60,8 @@ public class UserManagementController {
 
     @RequestMapping(value = {"/user-management/user/edit"})
     @PreAuthorize("@roleService.canEditWorkspaces(authentication)")
-    public String updateUsers(Model model, @RequestParam(required = false, name = "id") Long id) {
+    public String updateUsers(Model model, @RequestParam(required = false, name = "id") Long id,
+                              Authentication authentication) {
 
         // TODO separate out roles to display and set
 
@@ -75,9 +77,10 @@ public class UserManagementController {
 
         RoleHelper roleHelper = new RoleHelper(workspaceRepository);
         List<Role> allRoles = roleHelper.getAllRoles();
-
+        List<Role> roles = roleHelper.getRolesUserCanAssign(authentication);
         model.addAttribute("form", form);
         model.addAttribute("allRoles", allRoles);
+        model.addAttribute("roles", roles);
         return "user-management-user";
     }
 

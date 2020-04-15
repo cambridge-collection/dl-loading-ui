@@ -1,6 +1,8 @@
 package uk.cam.lib.cdl.loading.model.security;
 
-public class Role {
+import java.util.Objects;
+
+public class Role implements Comparable<Role>{
 
     private final String name;
     private final String display;
@@ -17,4 +19,25 @@ public class Role {
     public String getDisplay() {
         return display;
     }
+
+    @Override
+    public int compareTo(Role role) {
+        return name.compareTo(role.name);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof Role) {
+            Role r = (Role) object;
+            return Objects.equals(getName(), r.getName()) &&
+                Objects.equals(getDisplay(), r.getDisplay());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, display);
+    }
+
 }

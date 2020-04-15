@@ -143,11 +143,14 @@
                                                      th:errors="*{authorities}"></div>
 
                                                 <div th:each="role: ${allRoles}">
+
                                                     <input type="checkbox"
                                                            th:field="*{authorities}"
+                                                           th:disabled="${!#lists.contains(roles, role)}"
                                                            name="authorities"
                                                            th:value="${role.name}"/>
-                                                    <label th:text="${role.display}"></label>
+                                                    <label th:text="${role.display}" class="text-gray-500" th:if="${!#lists.contains(roles, role)}"></label>
+                                                    <label th:text="${role.display}" th:if="${#lists.contains(roles, role)}"></label>
                                                 </div>
 
                                             </div>

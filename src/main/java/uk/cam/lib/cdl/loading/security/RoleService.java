@@ -117,16 +117,28 @@ public class RoleService {
         return hasRoleRegex(RoleHelper.getRoleDeploymentManager(), authentication);
     }
 
-    public boolean canAssignRoleDeploymentManager(Authentication authentication) {
-        return hasRoleRegex(RoleHelper.getRoleSiteManager(), authentication);
-    }
-
     public boolean canAddWorkspaces(Authentication authentication) {
         return hasRoleRegex(RoleHelper.getRoleSiteManager(), authentication);
     }
 
-/*    public boolean canAssignRoleWorkspaceManager(Authentication authentication) {
+    public boolean canAssignRoleWorkspaceManager(Authentication authentication) {
         return hasRoleRegex(RoleHelper.getRoleSiteManager(), authentication);
-    }*/
+    }
 
+    public boolean canAssignRoleWorkspaceManager(Long workspaceId, Authentication authentication) {
+        return hasRoleRegex(RoleHelper.getRoleSiteManager(), authentication);
+    }
+
+    public boolean canAssignRoleWorkspaceMember(Long workspaceId, Authentication authentication) {
+        return hasRoleRegex(RoleHelper.getWorkspaceManagerPrefix()+workspaceId, authentication) ||
+            hasRoleRegex(RoleHelper.getRoleSiteManager(), authentication);
+    }
+
+    public boolean canAssignRoleDeploymentManager(Authentication authentication) {
+        return hasRoleRegex(RoleHelper.getRoleSiteManager(), authentication);
+    }
+
+    public boolean canAssignRoleSiteManager(Authentication authentication) {
+        return hasRoleRegex(RoleHelper.getRoleSiteManager(), authentication);
+    }
 }
