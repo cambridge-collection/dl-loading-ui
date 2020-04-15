@@ -206,13 +206,6 @@
             <artifactId>truth</artifactId>
             <version>1.0.1</version>
             <scope>test</scope>
-            <exclusions>
-                <!-- Exclude junit 4.x as we use 5.x (jupiter) -->
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
     <build>

@@ -1,9 +1,8 @@
-package uk.cam.lib.cdl.loading.usermanagment;
+package uk.cam.lib.cdl.loading.dao;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.model.security.User;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

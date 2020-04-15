@@ -49,14 +49,14 @@ public class EditController {
 
     private final EditAPI editAPI;
     private final String pathForDataDisplay;
-
-    @Autowired
     private WorkspaceRepository workspaceRepository;
 
     @Autowired
-    public EditController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay) {
+    public EditController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay,
+                          WorkspaceRepository workspaceRepository) {
         this.editAPI = editAPI;
         this.pathForDataDisplay = pathForDataDisplay;
+        this.workspaceRepository = workspaceRepository;
     }
 
     @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
@@ -97,7 +97,8 @@ public class EditController {
      * @throws IOException Cannot read collection HTML
      */
     @GetMapping(value = {"/edit/collection/"})
-    @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication)")
+    @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication) ||" +
+                " @roleService.canEditWorkspace(#workspaceIds, authentication)")
     public String editCollection(Model model, @RequestParam(required = false) String collectionId,
                                  @RequestParam(required = false) List<Long> workspaceIds)
         throws IOException {
@@ -106,7 +107,7 @@ public class EditController {
         boolean newCollection = true;
         List<Item> items = new ArrayList<>();
 
-        if (collectionId == null) {
+        if (collectionId == null || collectionId.trim().equals("")) {
             form = new CollectionForm();
         } else {
             Collection collection = editAPI.getCollection(collectionId);
@@ -254,7 +255,8 @@ public class EditController {
      * @return RedirectView to the collections page (after updates have been saved).
      */
     @PostMapping("/edit/collection/update")
-    @PreAuthorize("@roleService.canEditCollection(#collectionForm.getCollectionId(), authentication)")
+    @PreAuthorize("@roleService.canEditCollection(#collectionForm.getCollectionId(), authentication) ||" +
+        " @roleService.canEditWorkspace(#workspaceIds, authentication)")
     public RedirectView updateCollection(RedirectAttributes attributes,
                                          @RequestBody @Valid @ModelAttribute CollectionForm collectionForm,
                                          @RequestParam List<Long> workspaceIds,

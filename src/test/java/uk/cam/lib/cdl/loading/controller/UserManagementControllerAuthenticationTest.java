@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.usermanagment;
+package uk.cam.lib.cdl.loading.controller;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
@@ -26,22 +26,21 @@ import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.model.editor.Workspace;
-import uk.cam.lib.cdl.loading.model.security.User;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
-import uk.cam.lib.cdl.loading.utils.RoleHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @SpringJUnitConfig
 @WebMvcTest(controllers = UserManagementController.class)
-class UserManagementControllerTest {
+class UserManagementControllerAuthenticationTest {
 
     @MockBean
     private UserRepository userRepository;
@@ -54,123 +53,18 @@ class UserManagementControllerTest {
 
     private MockMvc mvc;
 
-    private void setupUsers() {
-
-        // User 1
-        User user1 = new User();
-        user1.setUsername("test-workspace-member1");
-        user1.setFirstName("Workspace");
-        user1.setLastName("Member");
-        user1.setEmail("wm1@test.com");
-        user1.setPassword("password");
-        user1.setEnabled(true);
-
-        List<String> authorities1 = new ArrayList<>();
-        authorities1.add(RoleHelper.getWorkspaceMemberRole((long) 1));
-        user1.setAuthorities(authorities1);
-
-        userRepository.save(user1);
-
-        // User 2
-        User user2 = new User();
-        user2.setUsername("test-workspace-member2");
-        user2.setFirstName("Workspace");
-        user2.setLastName("Member");
-        user2.setEmail("wm2@test.com");
-        user2.setPassword("password");
-        user2.setEnabled(true);
-
-        List<String> authorities2 = new ArrayList<>();
-        authorities2.add(RoleHelper.getWorkspaceMemberRole((long) 1));
-        authorities2.add(RoleHelper.getWorkspaceMemberRole((long) 2));
-        user2.setAuthorities(authorities2);
-
-        userRepository.save(user2);
-
-        // User 3
-        User user3 = new User();
-        user3.setUsername("test-workspace-manager1");
-        user3.setFirstName("Workspace");
-        user3.setLastName("Manager");
-        user3.setEmail("wm3@test.com");
-        user3.setPassword("password");
-        user3.setEnabled(true);
-
-        List<String> authorities3 = new ArrayList<>();
-        authorities3.add(RoleHelper.getWorkspaceManagerRole((long) 1));
-        user3.setAuthorities(authorities3);
-
-        userRepository.save(user3);
-
-        // User 4
-        User user4 = new User();
-        user4.setUsername("test-workspace-manager2");
-        user4.setFirstName("Workspace");
-        user4.setLastName("Manager");
-        user4.setEmail("wm4@test.com");
-        user4.setPassword("password");
-        user4.setEnabled(true);
-
-        List<String> authorities4 = new ArrayList<>();
-        authorities4.add(RoleHelper.getWorkspaceManagerRole((long) 2));
-        user4.setAuthorities(authorities4);
-
-        userRepository.save(user4);
-
-        // User 5
-        User user5 = new User();
-        user5.setUsername("test-deployment-manager");
-        user5.setFirstName("Deployment");
-        user5.setLastName("Manager");
-        user5.setEmail("dm@test.com");
-        user5.setPassword("password");
-        user5.setEnabled(true);
-
-        List<String> authorities5 = new ArrayList<>();
-        authorities5.add(RoleHelper.getRoleDeploymentManager());
-        user5.setAuthorities(authorities5);
-
-        userRepository.save(user5);
-
-        // User 6
-        User user6 = new User();
-        user6.setUsername("test-site-manager");
-        user6.setFirstName("Site");
-        user6.setLastName("Manager");
-        user6.setEmail("sm@test.com");
-        user6.setPassword("password");
-        user6.setEnabled(true);
-
-        List<String> authorities6 = new ArrayList<>();
-        authorities6.add(RoleHelper.getRoleSiteManager());
-        user6.setAuthorities(authorities6);
-
-        userRepository.save(user6);
-    }
-
-    private void setupWorkspaces() {
-
-        // Workspace 1
-        Workspace workspace1 = new Workspace();
-        workspace1.setName("Workspace 1");
-        workspace1.setId(1);
-        workspace1.setCollectionIds(ImmutableList.of("collections/test.collection.json"));
-        workspace1.setItemIds(ImmutableList.of("MS-TEST-00001-00001", "MS-TEST-00001-00002"));
-        workspaceRepository.save(workspace1);
-
-        // Workspace 2
-        Workspace workspace2 = new Workspace();
-        workspace2.setName("Workspace 2");
-        workspace2.setId(2);
-        workspace2.setItemIds(ImmutableList.of("MS-TEST-00001-00003"));
-        workspaceRepository.save(workspace2);
-    }
-
     @BeforeEach
-    void setup() throws IOException, GitAPIException {
+    void setup() {
 
-        setupWorkspaces();
-        //setupUsers();
+        Workspace workspace = new Workspace();
+        workspace.setId(1);
+        workspace.setName("Workspace One");
+        workspace.setCollectionIds(ImmutableList.of("collections/test.collection.json"));
+        List<Workspace> workspaces = new ArrayList<>();
+        workspaces.add(workspace);
+
+        when(workspaceRepository.findWorkspaceById(1)).thenReturn(workspace);
+        when(workspaceRepository.findWorkspaceByCollectionIds("collections/test.collection.json")).thenReturn(workspaces);
 
         mvc = MockMvcBuilders
             .webAppContextSetup(context)
@@ -258,9 +152,8 @@ class UserManagementControllerTest {
     @Test
     @WithMockUser(username="test-workspace-manager1", roles = {"WORKSPACE_MANAGER1"})
     void AuthorisedWorkspaceManagerEditWorkspace_shouldFailWith403() throws Exception {
-        // TODO should fail - site manager only can add workspaces
-        //mvc.perform(get("/user-management/workspace/edit").contentType(MediaType.TEXT_HTML))
-        //    .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+        mvc.perform(get("/user-management/workspace/edit").contentType(MediaType.TEXT_HTML))
+            .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 
     @Test
@@ -342,11 +235,9 @@ class UserManagementControllerTest {
 
     @Test
     @WithMockUser(username="test-site-manager", roles = {"SITE_MANAGER"})
-    void AuthorisedSiteManagerDeleteWorkspace_shouldSucceedWith200() throws Exception {
-
-        // TODO not picking up existing workspace
-        //mvc.perform(post("/user-management/workspace/delete?id=1").contentType(MediaType.TEXT_HTML))
-        //    .andExpect(MockMvcResultMatchers.status().isOk());
+    void AuthorisedSiteManagerDeleteWorkspace_shouldSucceedWith302() throws Exception {
+        mvc.perform(post("/user-management/workspace/delete?id=1").contentType(MediaType.TEXT_HTML))
+            .andExpect(MockMvcResultMatchers.status().isFound());
     }
 
     // Bare repo represents a mock version of the remote repo and it is cloned locally for testing.
@@ -361,7 +252,6 @@ class UserManagementControllerTest {
             MockGitRepo gitRepo = new MockGitRepo();
             Git git = gitRepo.getGit();
 
-            // Let's do our first commit
             // Create a new file
             File testSourceDir = new File("./src/test/resources/source-data");
             FileUtils.copyDirectory(testSourceDir, gitRepo.getCloneDir());
