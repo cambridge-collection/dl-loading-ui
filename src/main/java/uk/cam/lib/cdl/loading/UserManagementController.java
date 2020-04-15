@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -63,8 +64,6 @@ public class UserManagementController {
     public String updateUsers(Model model, @RequestParam(required = false, name = "id") Long id,
                               Authentication authentication) {
 
-        // TODO separate out roles to display and set
-
         User user;
         UserForm form = new UserForm();
 
@@ -89,7 +88,8 @@ public class UserManagementController {
     @Transactional
     public RedirectView updateUserFromForm(RedirectAttributes attributes,
                                            @Valid @ModelAttribute UserForm userForm,
-                                           final BindingResult bindingResult) {
+                                           final BindingResult bindingResult,
+                                           Authentication authentication) {
 
         if (bindingResult.hasErrors()) {
             attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
@@ -100,10 +100,25 @@ public class UserManagementController {
 
             return new RedirectView("/user-management/user/edit");
         }
-        // TODO separate out roles to display and set
 
+        RoleHelper roleHelper = new RoleHelper(workspaceRepository);
         User user = userForm.toUser();
         User userFromRepo = userRepository.findById(user.getId());
+
+        // Ensure user has permission to set roles
+        List<Role> allowedRoles = roleHelper.getRolesUserCanAssign(authentication);
+        List<String> allowedAuthorities = new ArrayList<>();
+        for (Role role: roleHelper.getAllRoles()) {
+            if (allowedRoles.contains(role) && user.getAuthorities().contains(role.getName())) {
+                allowedAuthorities.add(role.getName());
+            } else
+            if (!allowedRoles.contains(role) && userFromRepo!=null && userFromRepo.getAuthorities().contains(role.getName())) {
+                allowedAuthorities.add(role.getName());
+            }
+        }
+
+        user.setAuthorities(allowedAuthorities);
+
         if (userFromRepo == null) {
             userRepository.save(user);
         } else {
