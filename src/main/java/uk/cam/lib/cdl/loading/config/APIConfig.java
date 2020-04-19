@@ -7,32 +7,18 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
 import uk.cam.lib.cdl.loading.apis.PackagingAPI;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 @Configuration
 @EnableScheduling
 public class APIConfig {
-
-    private final DeploymentAPI deploymentAPI;
-    private final PackagingAPI packagingAPI;
-
-    public APIConfig(@Value("${deployment.api.url}") URL deploymentURL,
-                     GitAPIVariables gitAPIVariables,
-                     GitLocalVariables gitSourceVariables
-    ) {
-        this.deploymentAPI = new DeploymentAPI(deploymentURL);
-        this.packagingAPI = new PackagingAPI(gitSourceVariables, gitAPIVariables);
+    @Bean
+    public DeploymentAPI deploymentAPI(@Value("${deployment.api.url}") URL deploymentURL) {
+        return new DeploymentAPI(deploymentURL);
     }
 
     @Bean
-    public DeploymentAPI deploymentAPI() {
-        return deploymentAPI;
+    public PackagingAPI packagingAPI(GitLocalVariables gitSourceVariables, GitAPIVariables gitAPIVariables) {
+        return new PackagingAPI(gitSourceVariables, gitAPIVariables);
     }
-
-    @Bean
-    public PackagingAPI packagingAPI() {
-        return packagingAPI;
-    }
-
 }
