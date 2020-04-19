@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.security.saml;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -21,6 +22,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -504,12 +507,12 @@ public class SAMLConfig implements InitializingBean, DisposableBean {
     @ConditionalOnSAMLAuth
     @Qualifier(WebSecurityConfig.QUALIFIER_HTTP_SUB_CONFIGURER)
     @Order(0)
-    public static class SAMLAuthenticationWebSecurityConfigurer extends
-        AbstractHttpConfigurer<SAMLAuthenticationWebSecurityConfigurer, HttpSecurity> {
+    public static class SAMLAuthenticationHttpSecurityConfigurer extends
+        AbstractHttpConfigurer<SAMLAuthenticationHttpSecurityConfigurer, HttpSecurity> {
 
         private Filter samlFilter;
 
-        public SAMLAuthenticationWebSecurityConfigurer(@Qualifier(SAMLConfig.SAML_FILTER_NAME) Filter samlFilter) {
+        public SAMLAuthenticationHttpSecurityConfigurer(@Qualifier(SAMLConfig.SAML_FILTER_NAME) Filter samlFilter) {
             Assert.notNull(samlFilter, "samlFilter is required");
             this.samlFilter = samlFilter;
         }
@@ -523,6 +526,23 @@ public class SAMLConfig implements InitializingBean, DisposableBean {
 
             http.logout()
                 .disable(); // The logout procedure is already handled by SAML filters.
+        }
+    }
+
+    @Component
+    @ConditionalOnSAMLAuth
+    @Qualifier(WebSecurityConfig.QUALIFIER_AUTH_SUB_CONFIGURER)
+    public static class SAMLAuthenticationAuthSecurityConfigurer extends
+            SecurityConfigurerAdapter<AuthenticationManager, AuthenticationManagerBuilder> {
+        private final SAMLAuthenticationProvider samlAuthenticationProvider;
+
+        public SAMLAuthenticationAuthSecurityConfigurer(SAMLAuthenticationProvider samlAuthenticationProvider) {
+            this.samlAuthenticationProvider = Preconditions.checkNotNull(samlAuthenticationProvider);
+        }
+
+        @Override
+        public void configure(AuthenticationManagerBuilder builder) {
+            builder.authenticationProvider(this.samlAuthenticationProvider);
         }
     }
 }
