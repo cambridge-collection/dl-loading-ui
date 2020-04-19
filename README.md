@@ -18,7 +18,21 @@ This is a web application providing a GUI for editing and loading data into the 
 
 [Externalized Configuration]: https://docs.spring.io/spring-boot/docs/2.1.8.RELEASE/reference/html/boot-features-external-config.html
 
-## Configuration:
+## Developing
+
+The Maven build is the definitive way to compile/test the project. Your IDE should be able to import the project from the `pom.xml`.
+
+In addition, compile-time annotation processing is used by the [Immutables] library. This works automatically with Maven, but **your IDE may need some configuration to enable & configure annotation processing feature of the java compiler**.
+
+[Immutables]: https://immutables.github.io/
+
+* Instructions for enabling compile-time annotation processing in IDEs are available here: https://immutables.github.io/apt.html
+* The annotation processor is expected to generate code at:
+    * `target/generated-sources/annotations`
+    * `target/generated-test-sources/test-annotations`
+* These locations are added to the build path via the `build-helper-maven-plugin` and should be picked up by IDEs automatically
+
+## Configuration
 
 A configuration file template is at [`conf/EXAMPLE-application.properties`](conf/application.properties.example). Copy it to `conf/application.properties` and edit it.
 
@@ -28,7 +42,7 @@ In particular set `git.sourcedata.checkout.path` to a local dir containing a che
 >
 > The application can be configured using the methods described in the [Externalized Configuration] section of the  Spring Boot docs.
 
-## Authentication / Authorisation:
+## Authentication / Authorisation
 
 The `auth.methods` configuration property controls which authentication method(s) are enabled. It's a comma-separated list of method names. Available methods are:
 
