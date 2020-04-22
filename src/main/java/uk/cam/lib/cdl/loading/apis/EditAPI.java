@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -199,11 +200,12 @@ public class EditAPI {
 
     }
 
-
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
     public List<Collection> getCollections() {
         return new ArrayList<>(collectionMap.values());
     }
 
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
     public Collection getCollection(String collectionId) {
         return collectionMap.get(collectionId);
     }
@@ -213,10 +215,12 @@ public class EditAPI {
         return new Item(FilenameUtils.getBaseName(f.getName()), f.getCanonicalPath(), new Id(id));
     }
 
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
     public Item getItem(String id) {
         return itemMap.get(FilenameUtils.getBaseName(id));
     }
 
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
     public java.util.Collection<Item> getItems() {
         return itemMap.values();
     }
@@ -279,6 +283,7 @@ public class EditAPI {
         return false;
     }
 
+    @PreAuthorize("@roleService.canEditCollection(#collectionId,authentication)")
     public boolean addItemToCollection(String itemName, String fileExtension, InputStream contents, String collectionId) {
 
         try {
@@ -340,6 +345,7 @@ public class EditAPI {
         return false;
     }
 
+    @PreAuthorize("@roleService.canEditCollection(#collectionId,authentication)")
     public boolean deleteItemFromCollection(String itemName, String collectionId) {
 
         try {
@@ -392,7 +398,10 @@ public class EditAPI {
         return null;
     }
 
-    public boolean updateCollection(Collection collection, String descriptionHTML, String creditHTML) {
+    @PreAuthorize("@roleService.canEditCollection(#collection.collectionId, authentication) ||" +
+            " @roleService.canEditWorkspace(#workspaceIds, authentication)")
+    public boolean updateCollection(Collection collection, String descriptionHTML, String creditHTML,
+                                    List<Long> workspaceIds) {
         try {
 
             ObjectMapper mapper = new ObjectMapper();

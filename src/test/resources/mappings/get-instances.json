@@ -5,7 +5,7 @@
     },
     "response" : {
         "status" : 200,
-        "body" : "[  {  \"displayOrder\": 0,    \"instanceId\": \"string\",    \"url\": \"string\",    \"version\": \"string\"  }]",
+        "body" : "[  {  \"displayOrder\": 0,    \"instanceId\": \"testid\",    \"url\": \"string\",    \"version\": \"string\"  }]",
         "headers" : {
             "Content-Type" : "application/json"
         }

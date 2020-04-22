@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.SecurityConfigurer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -34,8 +35,9 @@ import java.util.Optional;
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true)
+@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
 public class WebSecurityConfig {
+
     public static final String AUTHENTICATION_MANAGER = "uk.cam.lib.cdl.loading.security.WebSecurityConfig#authenticationManager";
     private static final String REAL_AUTHENTICATION_MANAGER = "uk.cam.lib.cdl.loading.security.WebSecurityConfig#realAuthenticationManager";
 
@@ -51,6 +53,7 @@ public class WebSecurityConfig {
      */
     @Qualifier
     @Bean(name = AUTHENTICATION_MANAGER)
+    @Primary
     public AuthenticationManager authenticationManagerProxy() {
         return new DelegatingAuthenticationManager();
     }

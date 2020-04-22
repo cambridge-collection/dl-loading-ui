@@ -7,17 +7,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
@@ -25,9 +24,13 @@ import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
 import uk.cam.lib.cdl.loading.forms.CollectionForm;
-import uk.cam.lib.cdl.loading.model.RolesPrefix;
-import uk.cam.lib.cdl.loading.model.editor.*;
+import uk.cam.lib.cdl.loading.model.editor.Collection;
+import uk.cam.lib.cdl.loading.model.editor.Id;
+import uk.cam.lib.cdl.loading.model.editor.Item;
+import uk.cam.lib.cdl.loading.model.editor.Workspace;
+import uk.cam.lib.cdl.loading.utils.RoleHelper;
 
+import javax.management.InvalidAttributeValueException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.File;
@@ -37,41 +40,47 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Controller
+@RequestMapping ("/edit")
 public class EditController {
 
     private final EditAPI editAPI;
     private final String pathForDataDisplay;
-
-    @Autowired
     private WorkspaceRepository workspaceRepository;
+    private ApplicationContext appContext;
 
     @Autowired
-    public EditController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay) {
+    public EditController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay,
+                          WorkspaceRepository workspaceRepository, ApplicationContext appContext) {
         this.editAPI = editAPI;
-        this.pathForDataDisplay = pathForDataDisplay;
+        this.pathForDataDisplay = "/edit"+pathForDataDisplay;
+        this.workspaceRepository = workspaceRepository;
+        this.appContext = appContext;
+
     }
 
-    @GetMapping("/edit/edit.html")
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
+    @GetMapping("/edit.html")
     public String edit(Model model, HttpServletRequest request) {
 
         List<Workspace> workspaces = new ArrayList<>();
-        Hashtable<String,Collection> collections = new Hashtable<>();
+        Hashtable<String, Collection> collections = new Hashtable<>();
 
         // Get the workspaces the user has access to.
-        for (Workspace workspace: workspaceRepository.findAll()) {
-            String workspaceMemberRole =  RolesPrefix.WORKSPACE_MEMBER.role+workspace.getId();
-            String workspaceManagerRole = RolesPrefix.WORKSPACE_MANAGER.role+workspace.getId();
+        for (Workspace workspace : workspaceRepository.findAll()) {
+            String workspaceMemberRole = RoleHelper.getWorkspaceMemberRole(workspace);
+            String workspaceManagerRole = RoleHelper.getWorkspaceManagerRole(workspace);
 
             if (request.isUserInRole(workspaceMemberRole) || request.isUserInRole(workspaceManagerRole)) {
                 workspaces.add(workspace);
 
                 // Get the collections in those workspaces
-                for (String collectionId: workspace.getCollectionIds()) {
+                for (String collectionId : workspace.getCollectionIds()) {
                     Collection collection = editAPI.getCollection(collectionId);
-                    collections.put(collectionId,collection);
+                    collections.put(collectionId, collection);
                 }
             }
         }
@@ -90,15 +99,18 @@ public class EditController {
      * @return edit collection view
      * @throws IOException Cannot read collection HTML
      */
-    @GetMapping(value = {"/edit/collection/"})
-    public String editCollection(Model model, @RequestParam(required = false) String collectionId)
+    @GetMapping(value = {"/collection/"})
+    @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication) ||" +
+                " @roleService.canEditWorkspace(#workspaceIds, authentication)")
+    public String editCollection(Model model, @RequestParam(required = false) String collectionId,
+                                 @RequestParam(required = false) List<Long> workspaceIds)
         throws IOException {
 
         CollectionForm form;
         boolean newCollection = true;
         List<Item> items = new ArrayList<>();
 
-        if (collectionId == null) {
+        if (collectionId == null || collectionId.trim().equals("")) {
             form = new CollectionForm();
         } else {
             Collection collection = editAPI.getCollection(collectionId);
@@ -138,12 +150,19 @@ public class EditController {
                 "-blank.jpg"; // TODO read from UI properties.
         }
 
+        // Set workspaceIds
+        if (workspaceIds==null) {
+            List<Workspace> workspaces = workspaceRepository.findWorkspaceByCollectionIds(collectionId);
+            workspaceIds = workspaces.stream().map(Workspace::getId).collect(Collectors.toList());
+        }
+
         model.addAttribute("newCollection", newCollection);
         model.addAttribute("thumbnailURL", thumbnailURL);
         model.addAttribute("form", form);
         model.addAttribute("items", items);
         model.addAttribute("dataLocalPath", editAPI.getDataLocalPath());
         model.addAttribute("pathForDataDisplay", pathForDataDisplay);
+        model.addAttribute("workspaceIds", workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
 
         return "edit-collection";
     }
@@ -189,7 +208,9 @@ public class EditController {
      * @throws BadRequestException If requested resource is not within the dataLocalSourcePath
      * @throws IOException         Unable to find resource
      */
+    // IMPORTANT: Please Note anyone who can view any workspaces can read all git data using this.
     @GetMapping(value = "${data.url.display}**")
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
     public ResponseEntity<Resource> editSourceData(HttpServletRequest request)
         throws BadRequestException, IOException {
 
@@ -236,11 +257,14 @@ public class EditController {
      * @param collectionForm Validated collectionForm from edit Collection page
      * @return RedirectView to the collections page (after updates have been saved).
      */
-    // TODO make sure we have permission to edit the collection being edited.
-    @PostMapping("/edit/collection/update")
+    @PostMapping("/collection/update")
+    @PreAuthorize("@roleService.canEditCollection(#collectionForm.getCollectionId(), authentication) ||" +
+        " @roleService.canEditWorkspace(#workspaceIds, authentication)")
     public RedirectView updateCollection(RedirectAttributes attributes,
-                                         @Valid @ModelAttribute CollectionForm collectionForm,
-                                         final BindingResult bindingResult) throws IOException {
+                                         @RequestBody @Valid @ModelAttribute CollectionForm collectionForm,
+                                         @RequestParam List<Long> workspaceIds,
+                                         final BindingResult bindingResult)
+        throws Exception {
 
         if (bindingResult.hasErrors()) {
             attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
@@ -259,13 +283,8 @@ public class EditController {
         if (collectionId == null || collectionId.trim().equals("")) {
 
             // new collection
-            String urlSlug = collection.getName().getUrlSlug();
-
-            // TODO Allow these paths to be set in properties file
-            collectionId = "collections/" + urlSlug + ".collection.json";
-            collection.setCollectionId(collectionId);
-            collection.getDescription().setFull(new Id("../pages/html/collections/" + urlSlug + "/summary.html"));
-            collection.getCredit().setProse(new Id("../pages/html/collections/" + urlSlug + "/sponsors.html"));
+            collection = appContext.getBean(EditController.class).newCollection(attributes,workspaceIds,collectionForm);
+            collectionId = collection.getCollectionId();
         }
 
         // Update links in HTML
@@ -281,7 +300,18 @@ public class EditController {
 
         // Save collection file
         boolean success = editAPI.updateCollection(collection, fullDescriptionHTML,
-            proseCreditHTML);
+            proseCreditHTML, workspaceIds);
+
+        // Add to workspaces
+        for (long workspaceId: workspaceIds) {
+            Workspace workspace = workspaceRepository.findWorkspaceById(workspaceId);
+            List<String> collectionIds = workspace.getCollectionIds();
+            if (!collectionIds.contains(collectionId)) {
+                collectionIds.add(collectionId);
+                workspace.setCollectionIds(collectionIds);
+                workspaceRepository.save(workspace);
+            }
+        }
 
         if (success) {
             attributes.addFlashAttribute("message", "Collection Updated.");
@@ -290,10 +320,38 @@ public class EditController {
         }
 
         attributes.addAttribute("collectionId", collection.getCollectionId());
+        attributes.addAttribute("workspaceIds", workspaceIds);
         return new RedirectView("/edit/collection/");
     }
 
-    @PostMapping("/edit/collection/addItem")
+    // Note do not call this directly as preauthorise annotation will not run.
+    @PreAuthorize("@roleService.canEditWorkspace(#workspaceIds, authentication)")
+    private Collection newCollection(RedirectAttributes attributes,
+                                         List<Long> workspaceIds,
+                                         @Valid @ModelAttribute CollectionForm collectionForm
+                                         ) throws Exception {
+
+        Collection collection = collectionForm.toCollection();
+        String collectionId = collectionForm.getCollectionId();
+        if (collectionId == null || !collectionId.trim().equals("")) {
+
+            throw new InvalidAttributeValueException("This collection already exists");
+        }
+
+        // new collection
+        String urlSlug = collection.getName().getUrlSlug();
+
+        // TODO Allow these paths to be set in properties file
+        collectionId = "collections/" + urlSlug + ".collection.json";
+        collection.setCollectionId(collectionId);
+        collection.getDescription().setFull(new Id("../pages/html/collections/" + urlSlug + "/summary.html"));
+        collection.getCredit().setProse(new Id("../pages/html/collections/" + urlSlug + "/sponsors.html"));
+
+        return collection;
+    }
+
+    @PostMapping("/collection/addItem")
+    @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication)")
     public RedirectView addCollectionItem(RedirectAttributes attributes, @RequestParam String collectionId,
                                           @RequestParam("file") MultipartFile file) throws IOException {
 
@@ -328,7 +386,8 @@ public class EditController {
         return new RedirectView("/edit/collection/");
     }
 
-    @PostMapping("/edit/collection/deleteItem")
+    @PostMapping("/collection/deleteItem")
+    @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication)")
     public RedirectView deleteCollectionItem(RedirectAttributes attributes, @RequestParam String collectionId,
                                              @RequestParam String itemName) {
 

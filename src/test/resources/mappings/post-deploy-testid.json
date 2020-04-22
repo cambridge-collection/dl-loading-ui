@@ -1,0 +1,10 @@
+{
+    "request" : {
+        "url" : "/api/deploy/v0.1/instances/testid",
+        "method" : "POST"
+    },
+    "response" : {
+        "status" : 200
+    }
+}
+
