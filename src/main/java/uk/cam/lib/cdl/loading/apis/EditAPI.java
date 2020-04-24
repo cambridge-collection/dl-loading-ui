@@ -1,6 +1,7 @@
 package uk.cam.lib.cdl.loading.apis;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -406,7 +407,7 @@ public class EditAPI {
 
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
-            mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
+            mapper.enable(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature());
             ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
 
             String collectionId = collection.getCollectionId();
