@@ -2,6 +2,7 @@ package uk.cam.lib.cdl.loading;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Controller
+@RequestMapping ("/deploy")
 public class DeployController {
 
     private final DeploymentAPI deploymentAPI;
@@ -35,7 +37,8 @@ public class DeployController {
      * @param model
      * @return
      */
-    @GetMapping ("/deploy/deploy.html")
+    @PreAuthorize("@roleService.canDeploySites(authentication)")
+    @GetMapping ("/deploy.html")
     public String deploy(Model model, @ModelAttribute("message") String message,
                          @ModelAttribute("error") String error) {
 
@@ -57,7 +60,8 @@ public class DeployController {
         return "deploy";
     }
 
-    @GetMapping("/deploy/cache/refresh")
+    @PreAuthorize("@roleService.canDeploySites(authentication)")
+    @GetMapping("/cache/refresh")
     public String deployRefreshCache(Model model, @ModelAttribute("message") String message,
                                      @ModelAttribute("error") String error) {
 
@@ -74,7 +78,8 @@ public class DeployController {
      * @return
      * @throws JSONException
      */
-    @PostMapping("/deploy/{instanceId}")
+    @PreAuthorize("@roleService.canDeploySites(authentication)")
+    @PostMapping("/{instanceId}")
     public RedirectView deployVersion(RedirectAttributes attributes, @PathVariable("instanceId") String instanceId,
                                       @RequestParam String version) throws JSONException {
         /** TODO validate input **/
@@ -96,7 +101,8 @@ public class DeployController {
         return new RedirectView("/deploy/status/" + instanceId + "/");
     }
 
-    @GetMapping("/deploy/status/{instanceId}")
+    @PreAuthorize("@roleService.canDeploySites(authentication)")
+    @GetMapping("/status/{instanceId}")
     public String deployStatus(Model model, @PathVariable("instanceId") String instanceId) {
 
         Deployment deployment = new Deployment();

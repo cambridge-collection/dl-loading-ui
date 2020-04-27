@@ -1,6 +1,9 @@
 package uk.cam.lib.cdl.loading;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -12,33 +15,45 @@ import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
 import uk.cam.lib.cdl.loading.forms.UserForm;
 import uk.cam.lib.cdl.loading.forms.WorkspaceForm;
-import uk.cam.lib.cdl.loading.model.RolesPrefix;
+import uk.cam.lib.cdl.loading.model.editor.Collection;
+import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.model.editor.Workspace;
+import uk.cam.lib.cdl.loading.model.security.Role;
 import uk.cam.lib.cdl.loading.model.security.User;
+import uk.cam.lib.cdl.loading.utils.RoleHelper;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Controller
+@RequestMapping("/user-management")
 public class UserManagementController {
 
-    @Autowired
     private WorkspaceRepository workspaceRepository;
 
-    @Autowired
     private UserRepository userRepository;
 
     private final EditAPI editAPI;
 
+    private ApplicationContext appContext;
+
     @Autowired
-    public UserManagementController(EditAPI editAPI) {
+    public UserManagementController(EditAPI editAPI, UserRepository userRepository,
+                                    WorkspaceRepository workspaceRepository, ApplicationContext
+                                    context) {
         this.editAPI = editAPI;
+        this.userRepository = userRepository;
+        this.workspaceRepository = workspaceRepository;
+        this.appContext = context;
     }
 
-    @GetMapping("/user-management/")
+    @GetMapping("/")
+    @PreAuthorize("@roleService.canEditWorkspaces(authentication) || " +
+            " @roleService.canAddOrUpdateUsers(authentication)")
     public String usermanagement(Model model, HttpServletRequest request) {
 
         model.addAttribute("users", userRepository.findAll());
@@ -46,8 +61,10 @@ public class UserManagementController {
         return "user-management";
     }
 
-    @RequestMapping(value = {"/user-management/user/edit"})
-    public String updateUsers(Model model, @RequestParam(required = false, name = "id") Long id) {
+    @GetMapping(value = {"/user/edit"})
+    @PreAuthorize("@roleService.canAddOrUpdateUsers(authentication)")
+    public String updateUsers(Model model, @RequestParam(required = false, name = "id") Long id,
+                              Authentication authentication) {
 
         User user;
         UserForm form = new UserForm();
@@ -59,26 +76,22 @@ public class UserManagementController {
             }
         }
 
-        //TODO Make this less hacky.
-        List<String> allRoles = new ArrayList<>();
-        for (Workspace workspace: workspaceRepository.findAll()) {
-            String workspaceMemberRole = RolesPrefix.WORKSPACE_MEMBER.role + workspace.getId();
-            String workspaceManagerRole = RolesPrefix.WORKSPACE_MANAGER.role + workspace.getId();
-            allRoles.add(workspaceMemberRole);
-            allRoles.add(workspaceManagerRole);
-        }
-        allRoles.add("ROLE_DEPLOYMENT_ALL_MANAGER");
-        allRoles.add("ROLE_SITE_MANAGER");
-
+        RoleHelper roleHelper = new RoleHelper(workspaceRepository);
+        List<Role> allRoles = roleHelper.getAllRoles();
+        List<Role> roles = roleHelper.getRolesUserCanAssign(authentication);
         model.addAttribute("form", form);
         model.addAttribute("allRoles", allRoles);
+        model.addAttribute("roles", roles);
         return "user-management-user";
     }
 
-    @PostMapping(value = {"/user-management/user/update"})
+    @PostMapping(value = {"/user/update"})
+    @PreAuthorize("@roleService.canAddOrUpdateUsers(authentication)")
+    @Transactional
     public RedirectView updateUserFromForm(RedirectAttributes attributes,
-                                                @Valid @ModelAttribute UserForm userForm,
-                                                final BindingResult bindingResult) {
+                                           @Valid @ModelAttribute UserForm userForm,
+                                           final BindingResult bindingResult,
+                                           Authentication authentication) {
 
         if (bindingResult.hasErrors()) {
             attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
@@ -90,8 +103,24 @@ public class UserManagementController {
             return new RedirectView("/user-management/user/edit");
         }
 
+        RoleHelper roleHelper = new RoleHelper(workspaceRepository);
         User user = userForm.toUser();
         User userFromRepo = userRepository.findById(user.getId());
+
+        // Ensure user has permission to set roles
+        List<Role> allowedRoles = roleHelper.getRolesUserCanAssign(authentication);
+        List<String> allowedAuthorities = new ArrayList<>();
+        for (Role role: roleHelper.getAllRoles()) {
+            if (allowedRoles.contains(role) && user.getAuthorities().contains(role.getName())) {
+                allowedAuthorities.add(role.getName());
+            } else
+            if (!allowedRoles.contains(role) && userFromRepo!=null && userFromRepo.getAuthorities().contains(role.getName())) {
+                allowedAuthorities.add(role.getName());
+            }
+        }
+
+        user.setAuthorities(allowedAuthorities);
+
         if (userFromRepo == null) {
             userRepository.save(user);
         } else {
@@ -109,29 +138,38 @@ public class UserManagementController {
         return new RedirectView("/user-management/user/edit");
     }
 
-    @PostMapping(value = {"/user-management/user/delete"})
+    @PostMapping(value = {"/user/delete"})
+    @PreAuthorize("@roleService.canDeleteUsers(authentication)")
+    @Transactional
     public RedirectView deleteUser(@RequestParam("id") Long id) {
         User userFromRepo = userRepository.findById(id.longValue());
         if (userFromRepo != null) {
             userRepository.delete(userFromRepo);
         } else {
-            throw new InvalidParameterException("Unknown user id: "+id);
+            throw new InvalidParameterException("Unknown user id: " + id);
         }
         return new RedirectView("/user-management/");
     }
 
 
-    @RequestMapping(value = {"/user-management/workspace/edit"})
-    public String updateWorkspace(Model model, @RequestParam(required = false, name = "id") Long id) {
+    @GetMapping(value = {"/workspace/edit"})
+    @PreAuthorize("@roleService.canEditWorkspace(#workspaceId, authentication)")
+    public String updateWorkspace(Model model, @RequestParam(required = false, name = "id") Long workspaceId) {
 
         Workspace workspace;
-        WorkspaceForm form = new WorkspaceForm();
+        WorkspaceForm form = null;
 
-        if (id != null) {
-            workspace = workspaceRepository.findWorkspaceById(id);
+        if (workspaceId != null) {
+            workspace = workspaceRepository.findWorkspaceById(workspaceId);
             if (workspace != null) {
                 form = new WorkspaceForm(workspace);
             }
+        }
+
+        // New workspace
+        if (form==null) {
+            return appContext.getBean(UserManagementController.class).addWorkspace(model,
+                editAPI.getCollections(), editAPI.getItems());
         }
 
         model.addAttribute("form", form);
@@ -140,25 +178,37 @@ public class UserManagementController {
         return "user-management-workspace";
     }
 
-    @PostMapping(value = {"/user-management/workspace/update"})
+    // Do not call directly as PreAuthorise annotation will ot run
+    @PreAuthorize("@roleService.canAddWorkspaces(authentication)")
+    private String addWorkspace(Model model, Iterable<Collection> collections, Iterable<Item> items ) {
+        model.addAttribute("form", new WorkspaceForm());
+        model.addAttribute("allCollections", collections);
+        model.addAttribute("allItems", items);
+        return "user-management-workspace";
+    }
+
+    @PostMapping(value = {"/workspace/update"})
+    @Transactional
+    @PreAuthorize("@roleService.canEditWorkspace(#workspaceForm.id, authentication)")
     public RedirectView updateWorkspaceFromForm(RedirectAttributes attributes,
                                                 @Valid @ModelAttribute WorkspaceForm workspaceForm,
                                                 final BindingResult bindingResult) {
 
-        if (bindingResult.hasErrors()) {
+       if (bindingResult.hasErrors()) {
             attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
                 "details.");
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
             attributes.addFlashAttribute("form", workspaceForm);
             attributes.addAttribute("id", workspaceForm.getId());
 
-            return new RedirectView("/user-management/workspace/edit");
+            return new RedirectView("/workspace/edit");
         }
 
         Workspace workspace = workspaceForm.toWorkspace();
         Workspace workspaceFromRepo = workspaceRepository.findWorkspaceById(workspace.getId());
         if (workspaceFromRepo == null) {
-            workspaceRepository.save(workspace);
+            // New Workspace
+            return appContext.getBean(UserManagementController.class).addWorkspaceFromForm(attributes, workspace, workspaceForm);
         } else {
             workspaceFromRepo.setName(workspace.getName());
             workspaceFromRepo.setCollectionIds(workspace.getCollectionIds());
@@ -171,13 +221,26 @@ public class UserManagementController {
         return new RedirectView("/user-management/workspace/edit");
     }
 
-    @PostMapping(value = {"/user-management/workspace/delete"})
+    @Transactional
+    @PreAuthorize("@roleService.canAddWorkspaces(authentication)")
+    protected RedirectView addWorkspaceFromForm(RedirectAttributes attributes, Workspace workspace,
+                                                WorkspaceForm workspaceForm) {
+        workspaceRepository.save(workspace);
+        attributes.addFlashAttribute("form", workspaceForm);
+        attributes.addAttribute("id", workspaceForm.getId());
+        return new RedirectView("/user-management/workspace/edit");
+
+    }
+
+    @PostMapping(value = {"/workspace/delete"})
+    @Transactional
+    @PreAuthorize("@roleService.canAddWorkspaces(authentication)")
     public RedirectView deleteWorkspace(@RequestParam("id") Long id) {
         Workspace workspaceFromRepo = workspaceRepository.findWorkspaceById(id);
         if (workspaceFromRepo != null) {
             workspaceRepository.delete(workspaceFromRepo);
         } else {
-            throw new InvalidParameterException("Unknown workspace id: "+id);
+            throw new InvalidParameterException("Unknown workspace id: " + id);
         }
         return new RedirectView("/user-management/");
     }

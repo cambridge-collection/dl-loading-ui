@@ -13,14 +13,14 @@ import uk.cam.lib.cdl.loading.security.WebSecurityConfig;
 public class BasicAuthenticationConfig {
 
     @Bean
-    public BasicAuthenticationWebSecurityConfigurer basicAuthenticationWebSecurityConfigurer() {
-        return new BasicAuthenticationWebSecurityConfigurer();
+    public BasicAuthenticationHttpSecurityConfigurer basicAuthenticationWebSecurityConfigurer() {
+        return new BasicAuthenticationHttpSecurityConfigurer();
     }
 
     @Qualifier(WebSecurityConfig.QUALIFIER_HTTP_SUB_CONFIGURER)
     @Order(0)
-    public static class BasicAuthenticationWebSecurityConfigurer extends
-        AbstractHttpConfigurer<BasicAuthenticationWebSecurityConfigurer, HttpSecurity> {
+    public static class BasicAuthenticationHttpSecurityConfigurer extends
+        AbstractHttpConfigurer<BasicAuthenticationHttpSecurityConfigurer, HttpSecurity> {
 
         @Override
         public void configure(HttpSecurity http) throws Exception {

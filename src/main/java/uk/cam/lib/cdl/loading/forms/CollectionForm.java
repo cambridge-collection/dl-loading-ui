@@ -78,7 +78,9 @@ public class CollectionForm {
 
         List<String> itemIds = new ArrayList<>();
         for (Id id : collection.getItemIds()) {
-            itemIds.add(id.getId());
+            if (id.getId()!=null && !id.getId().trim().equals("")) {
+                itemIds.add(id.getId());
+            }
         }
         this.itemIds = itemIds;
     }
@@ -150,7 +152,9 @@ public class CollectionForm {
 
         List<Id> itemIds = new ArrayList<>();
         for (String id : getItemIds()) {
-            itemIds.add(new Id(id));
+            if (id!=null && !id.trim().equals("")) {
+                itemIds.add(new Id(id));
+            }
         }
         Collection c = new Collection(collectionType, name, description, credit, itemIds);
         c.setThumbnailURL(thumbnailURL);

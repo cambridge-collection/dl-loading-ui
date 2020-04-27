@@ -38,7 +38,7 @@ class DeploymentAPITest {
         Instance instance = instances.get(0);
         assert (instance.toString().equals("class Instance {\n" +
             "    displayOrder: 0\n" +
-            "    instanceId: string\n" +
+            "    instanceId: testid\n" +
             "    version: string\n" +
             "    url: string\n" +
             "}"));

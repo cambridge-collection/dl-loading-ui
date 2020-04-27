@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.apis;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -179,7 +180,7 @@ class EditAPITest {
         Collection collection = makeCollection("test");
         String descriptionHTML = "<html>test description</html>";
         String creditHTML = "<html>test credit</html>";
-        editAPI.updateCollection(collection, descriptionHTML, creditHTML);
+        editAPI.updateCollection(collection, descriptionHTML, creditHTML, ImmutableList.of((long)-1));
         assert ("sortName".equals(editAPI.getCollection("collections/test.collection.json").getName().getSort()));
     }
 
@@ -190,7 +191,7 @@ class EditAPITest {
         assert (!editAPI.getCollections().contains(collection));
         String descriptionHTML = "<html>test description</html>";
         String creditHTML = "<html>test credit</html>";
-        editAPI.updateCollection(collection, descriptionHTML, creditHTML);
+        editAPI.updateCollection(collection, descriptionHTML, creditHTML, ImmutableList.of((long)-1));
         assert (editAPI.getCollections().contains(collection));
     }
 

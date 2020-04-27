@@ -1,10 +1,11 @@
-package uk.cam.lib.cdl.loading.editing;
+package uk.cam.lib.cdl.loading;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
+import uk.cam.lib.cdl.loading.editing.BrowseFile;
+import uk.cam.lib.cdl.loading.editing.FileSave;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import javax.validation.Valid;
@@ -27,8 +30,6 @@ import java.util.Objects;
 
 /**
  * Controller for editing content through CKEditor on path /editor
- *
- * @author jennie
  */
 @Controller
 @RequestMapping("/editor")
@@ -46,8 +47,8 @@ public class ContentEditorController {
                                    @Value("${data.path.html}") String htmlPath,
                                    GitLocalVariables gitSourceVariables) {
 
-        this.pathForDataDisplay = pathForDataDisplay;
-        this.contentImagesURL = pathForDataDisplay + imagePath;
+        this.pathForDataDisplay = "/edit"+pathForDataDisplay;
+        this.contentImagesURL = "/edit"+pathForDataDisplay + imagePath;
         this.contentImagesPath = editAPI.getDataLocalPath() + imagePath;
         this.contentHTMLPath = editAPI.getDataLocalPath() + htmlPath;
         this.gitHelper = new GitHelper(gitSourceVariables);
@@ -63,8 +64,8 @@ public class ContentEditorController {
      * @return HTML with JS to set the CKEditor value
      * @throws IOException on a binding error
      */
-    //@Secured("hasRole('ROLE_ADMIN')")
     @PostMapping("/add/image")
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
     public ResponseEntity<String> handleAddImageRequest(@Valid @ModelAttribute() AddImagesParameters addParams,
                                                         BindingResult bindResult) throws IOException {
 
@@ -117,8 +118,8 @@ public class ContentEditorController {
      * @param langCode        language code from CKEditor
      * @return browse image view
      */
-    //@Secured("hasRole('ROLE_ADMIN')")
     @GetMapping("/browse/images")
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
     public String handleBrowseImagesRequest(
         Model model,
         @RequestParam(defaultValue = "None") String CKEditor,
@@ -160,8 +161,8 @@ public class ContentEditorController {
      * @return JSON response
      * @throws IOException on binding error
      */
-    //@Secured("hasRole('ROLE_ADMIN')")
     @PostMapping("/delete/image")
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
     public ResponseEntity<String> handleDeleteImageRequest(
         @Valid @ModelAttribute() DeleteImagesParameters deleteParams,
         BindingResult bindResult) throws IOException {

@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.security.saml;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -11,7 +12,6 @@ import org.opensaml.xml.parse.ParserPool;
 import org.opensaml.xml.parse.StaticBasicParserPool;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -22,8 +22,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.saml.SAMLAuthenticationProvider;
 import org.springframework.security.saml.SAMLBootstrap;
 import org.springframework.security.saml.SAMLDiscovery;
@@ -51,6 +54,7 @@ import org.springframework.security.saml.processor.HTTPSOAP11Binding;
 import org.springframework.security.saml.processor.SAMLBinding;
 import org.springframework.security.saml.processor.SAMLProcessorImpl;
 import org.springframework.security.saml.trust.httpclient.TLSProtocolConfigurer;
+import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
 import org.springframework.security.saml.util.VelocityFactory;
 import org.springframework.security.saml.websso.ArtifactResolutionProfile;
 import org.springframework.security.saml.websso.ArtifactResolutionProfileImpl;
@@ -76,6 +80,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import uk.cam.lib.cdl.loading.security.UsersConfig;
 import uk.cam.lib.cdl.loading.security.WebSecurityConfig;
 
 import javax.servlet.Filter;
@@ -84,6 +89,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 
@@ -95,9 +101,6 @@ public class SAMLConfig implements InitializingBean, DisposableBean {
 
     private Timer backgroundTaskTimer;
     private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
-
-    @Autowired
-    private SAMLUserDetailsServiceImpl samlUserDetailsServiceImpl;
 
     @Value("${auth.saml.keycloak.auth-server-url}")
     private String keycloakAuthServerURL;
@@ -115,6 +118,20 @@ public class SAMLConfig implements InitializingBean, DisposableBean {
         this.backgroundTaskTimer.purge();
         this.backgroundTaskTimer.cancel();
         this.multiThreadedHttpConnectionManager.shutdown();
+    }
+
+    @Bean
+    public SAMLUserDetailsService samlUserDetailsService(
+        @Qualifier(UsersConfig.USER_DETAILS_SERVICE) UserDetailsService userDetailsService,
+        @Value("${auth.saml.attr.firstName}") Optional<String> firstNameAttribute,
+        @Value("${auth.saml.attr.lastName}") Optional<String> lastNameAttribute,
+        @Value("${auth.saml.attr.email}") Optional<String> emailAttribute
+    ) {
+        return new SAMLUserDetailsServiceImpl(
+                userDetailsService,
+                firstNameAttribute.orElse(SAMLUserDetailsServiceImpl.DEFAULT_FIRST_NAME_ATTRIBUTE),
+                lastNameAttribute.orElse(SAMLUserDetailsServiceImpl.DEFAULT_LAST_NAME_ATTRIBUTE),
+                emailAttribute.orElse(SAMLUserDetailsServiceImpl.DEFAULT_EMAIL_ATTRIBUTE));
     }
 
     // Initialization of the velocity engine
@@ -143,9 +160,9 @@ public class SAMLConfig implements InitializingBean, DisposableBean {
     // SAML Authentication Provider responsible for validating of received SAML
     // messages
     @Bean
-    public SAMLAuthenticationProvider samlAuthenticationProvider() {
+    public SAMLAuthenticationProvider samlAuthenticationProvider(SAMLUserDetailsService samlUserDetailsService) {
         SAMLAuthenticationProvider samlAuthenticationProvider = new SAMLAuthenticationProvider();
-        samlAuthenticationProvider.setUserDetails(samlUserDetailsServiceImpl);
+        samlAuthenticationProvider.setUserDetails(samlUserDetailsService);
         samlAuthenticationProvider.setForcePrincipalAsString(false);
         return samlAuthenticationProvider;
     }
@@ -490,12 +507,12 @@ public class SAMLConfig implements InitializingBean, DisposableBean {
     @ConditionalOnSAMLAuth
     @Qualifier(WebSecurityConfig.QUALIFIER_HTTP_SUB_CONFIGURER)
     @Order(0)
-    public static class SAMLAuthenticationWebSecurityConfigurer extends
-        AbstractHttpConfigurer<SAMLAuthenticationWebSecurityConfigurer, HttpSecurity> {
+    public static class SAMLAuthenticationHttpSecurityConfigurer extends
+        AbstractHttpConfigurer<SAMLAuthenticationHttpSecurityConfigurer, HttpSecurity> {
 
         private Filter samlFilter;
 
-        public SAMLAuthenticationWebSecurityConfigurer(@Qualifier(SAMLConfig.SAML_FILTER_NAME) Filter samlFilter) {
+        public SAMLAuthenticationHttpSecurityConfigurer(@Qualifier(SAMLConfig.SAML_FILTER_NAME) Filter samlFilter) {
             Assert.notNull(samlFilter, "samlFilter is required");
             this.samlFilter = samlFilter;
         }
@@ -509,6 +526,23 @@ public class SAMLConfig implements InitializingBean, DisposableBean {
 
             http.logout()
                 .disable(); // The logout procedure is already handled by SAML filters.
+        }
+    }
+
+    @Component
+    @ConditionalOnSAMLAuth
+    @Qualifier(WebSecurityConfig.QUALIFIER_AUTH_SUB_CONFIGURER)
+    public static class SAMLAuthenticationAuthSecurityConfigurer extends
+            SecurityConfigurerAdapter<AuthenticationManager, AuthenticationManagerBuilder> {
+        private final SAMLAuthenticationProvider samlAuthenticationProvider;
+
+        public SAMLAuthenticationAuthSecurityConfigurer(SAMLAuthenticationProvider samlAuthenticationProvider) {
+            this.samlAuthenticationProvider = Preconditions.checkNotNull(samlAuthenticationProvider);
+        }
+
+        @Override
+        public void configure(AuthenticationManagerBuilder builder) {
+            builder.authenticationProvider(this.samlAuthenticationProvider);
         }
     }
 }

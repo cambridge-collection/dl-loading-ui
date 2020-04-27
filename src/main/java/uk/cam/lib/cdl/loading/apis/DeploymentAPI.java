@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import uk.cam.lib.cdl.loading.model.WebResponse;
 import uk.cam.lib.cdl.loading.model.deployment.Instance;
 import uk.cam.lib.cdl.loading.model.deployment.Status;
@@ -29,6 +30,7 @@ public class DeploymentAPI {
     }
 
     @Cacheable(cacheName)
+    @PreAuthorize("@roleService.canDeploySites(authentication)")
     public List<Instance> getInstances() {
 
         try {
@@ -52,6 +54,7 @@ public class DeploymentAPI {
     }
 
     @Cacheable(cacheName)
+    @PreAuthorize("@roleService.canDeploySites(authentication)")
     /** TODO validate input **/
     public Instance getInstance(String instanceId) {
 
@@ -79,6 +82,7 @@ public class DeploymentAPI {
     /**
      * TODO validate input
      **/
+    @PreAuthorize("@roleService.canDeploySites(authentication)")
     public boolean setInstance(Instance instance) {
 
         try {
@@ -109,7 +113,7 @@ public class DeploymentAPI {
         System.out.println("Flush Cache " + DateFormat.getInstance().format(new Date()));
     }
 
-
+    @PreAuthorize("@roleService.canDeploySites(authentication)")
     public Status getStatus(String instanceId) {
 
         try {

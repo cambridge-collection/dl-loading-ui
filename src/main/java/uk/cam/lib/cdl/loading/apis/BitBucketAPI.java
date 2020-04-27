@@ -5,8 +5,8 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.util.UriUtils;
 import uk.cam.lib.cdl.loading.model.WebResponse;
 import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
@@ -76,6 +76,7 @@ class BitBucketAPI {
      *
      * @return List of last 10 pipelines.
      */
+    @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public List<Pipeline> getPipelines() {
 
         List<Pipeline> output = new ArrayList<>();
@@ -128,6 +129,7 @@ class BitBucketAPI {
      *
      * @return Pipeline response
      */
+    @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public WebResponse triggerPipeline() {
 
         JSONObject jsonObject = new JSONObject("{ 'target': {'type': 'pipeline_ref_target','ref_type': 'branch'," +
@@ -145,6 +147,7 @@ class BitBucketAPI {
      * @param id for Pipeline build
      * @return PackagingStatus object for this pipeline build.
      */
+    @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public PackagingStatus getStatus(String id) {
         try {
             String json = webHelper.requestGET(new URL(pipelinesURL,

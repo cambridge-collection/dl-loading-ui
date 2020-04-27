@@ -1,7 +1,6 @@
 package uk.cam.lib.cdl.loading.security.saml;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

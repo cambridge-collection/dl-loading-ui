@@ -15,6 +15,7 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
+import org.springframework.security.access.prepost.PreAuthorize;
 import uk.cam.lib.cdl.loading.config.GitAPIVariables;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.model.Tag;
@@ -50,10 +51,12 @@ public class PackagingAPI {
             gitAPIVariables.getGitUsername(), gitAPIVariables.getGitPassword());
     }
 
+    @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public List<Pipeline> getHistory() {
         return sourceBitBucketAPI.getPipelines();
     }
 
+    @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public List<Tag> getTags() {
 
         List<RevObject> revs = gitHelper.getTags();
@@ -80,6 +83,7 @@ public class PackagingAPI {
     /**
      * Get a list of updates since the last package was made
      */
+    @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public List<Update> updatesSinceLastPackage() {
 
         try {
@@ -126,6 +130,7 @@ public class PackagingAPI {
     /**
      * @return UUID String for pipeline
      */
+    @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public String startProcess() {
 
         // Trigger pipeline and return UUID
@@ -136,6 +141,7 @@ public class PackagingAPI {
 
     }
 
+    @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public PackagingStatus getStatus(String UUID) {
 
         return sourceBitBucketAPI.getStatus(UUID);

@@ -1,48 +1,43 @@
-/*
 package uk.cam.lib.cdl.loading.model.security;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import java.util.Objects;
 
-*/
-/*@Entity(name = "Role")*//*
+public class Role implements Comparable<Role>{
 
-@Table(name = "authorities")
-@Embeddable
-public class Role implements Serializable {
+    private final String name;
+    private final String display;
 
-    private static final long serialVersionUID = 5049309976642437603L;
-
-*/
-/*    @Id
-    @ManyToOne
-    @JoinColumn(name ="id")*//*
-
-    @Id
-    private long id;
-
-*/
-/*    @Id
-    @Column(nullable = false, name = "authority")*//*
-
-    @Id
-    private String authority;
-
-    public long getId() {
-        return id;
+    public Role(String name, String display) {
+        this.name = name;
+        this.display = display;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public String getName() {
+        return name;
     }
 
-    public String getAuthority() {
-        return authority;
+    public String getDisplay() {
+        return display;
     }
 
-    public void setAuthority(String authority) {
-        this.authority = authority;
+    @Override
+    public int compareTo(Role role) {
+        return name.compareTo(role.name);
     }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof Role) {
+            Role r = (Role) object;
+            return Objects.equals(getName(), r.getName()) &&
+                Objects.equals(getDisplay(), r.getDisplay());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, display);
+    }
+
 }
-
-*/

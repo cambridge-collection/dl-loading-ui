@@ -1,6 +1,5 @@
 package uk.cam.lib.cdl.loading.security;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,17 +9,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Component;
+import uk.cam.lib.cdl.loading.dao.UserRepository;
 
 import java.io.IOException;
 import java.lang.annotation.ElementType;
@@ -29,20 +27,26 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @Configuration
 public class UsersConfig {
 
+    /** A bean name assigned to the configured {@link UserDetailsService} instance, regardless of user source. */
+    public static final String USER_DETAILS_SERVICE = "uk.cam.lib.cdl.loading.security.UsersConfig#USER_DETAILS_SERVICE_NAME";
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE, ElementType.METHOD})
     @ConditionalOnExpression("@environment.getProperty('users.source') == 'hardcoded' || !@environment.containsProperty('users.source')")
     public @interface ConditionalOnHardcodedUsersSource { }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.TYPE, ElementType.METHOD})
+    @ConditionalOnExpression("@environment.getProperty('users.source') == 'database'")
+    public @interface ConditionalOnDatabaseUsersSource { }
 
     @ConditionalOnHardcodedUsersSource
     public static class HardcodedUsersConfig {
@@ -88,14 +92,13 @@ public class UsersConfig {
         /**
          * The UserDetailsService for authn/authz - backed by a fixed list of users from a config file.
          */
-        @Bean(name = {QUALIFIER + "#userDetailsManager", QUALIFIER})
+        @Bean(name = {QUALIFIER + "#userDetailsManager", QUALIFIER, USER_DETAILS_SERVICE})
         @ConditionalOnExpression("!(@environment.getProperty('users.hardcoded-users-file', '').isEmpty())")
-        @Qualifier(QUALIFIER)
         public InMemoryUserDetailsManager userDetailsManager(@Qualifier(HARDCODED_USERS) Map<String, UserDetails> hardcodedUsers) {
             return new InMemoryUserDetailsManager(hardcodedUsers.values());
         }
 
-        @Bean(name = {QUALIFIER + "#emptyUserDetailsManager", QUALIFIER})
+        @Bean(name = {QUALIFIER + "#emptyUserDetailsManager", QUALIFIER, USER_DETAILS_SERVICE})
         @ConditionalOnExpression("@environment.getProperty('users.hardcoded-users-file', '') == ''")
         public InMemoryUserDetailsManager emptyUserDetailsManager() {
             LOG.warn("Property users.hardcoded-users-file not set, no users will be defined");
@@ -123,6 +126,37 @@ public class UsersConfig {
             public void configure(AuthenticationManagerBuilder auth) throws Exception {
                 auth.userDetailsService(this.inMemoryUserDetailsManager)
                     .passwordEncoder(this.passwordEncoder);
+            }
+        }
+    }
+
+    @ConditionalOnDatabaseUsersSource
+    public static class DatabaseUsersConfig {
+        private static final String QUALIFIER = "uk.cam.lib.cdl.loading.security.UsersConfig.DatabaseUsersConfig";
+
+        @Bean(name = {QUALIFIER, USER_DETAILS_SERVICE})
+        public UserDetailsService dbUserDetailsService(UserRepository userRepository) {
+            return new DBUserDetailsService(userRepository);
+        }
+
+        @Component
+        @ConditionalOnDatabaseUsersSource
+        @Qualifier(WebSecurityConfig.QUALIFIER_AUTH_SUB_CONFIGURER)
+        public static class DatabaseUsersAuthSecurityConfigurer
+            extends SecurityConfigurerAdapter<AuthenticationManager, AuthenticationManagerBuilder> {
+
+            private final UserDetailsService userDetailsService;
+
+            public DatabaseUsersAuthSecurityConfigurer(
+                @Qualifier(QUALIFIER) UserDetailsService userDetailsService
+            ) {
+                this.userDetailsService = checkNotNull(userDetailsService);
+            }
+
+            @Override
+            public void configure(AuthenticationManagerBuilder auth) throws Exception {
+
+                auth.userDetailsService(this.userDetailsService);
             }
         }
     }

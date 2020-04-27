@@ -55,7 +55,7 @@
                         <div class="card-body">
 
                             <form method="post" id="collectioneditform"
-                                  th:action="@{'/edit/collection/update'}"
+                                  th:action="@{'/edit/collection/update?workspaceIds='+${workspaceIds}}"
                                   th:object="${form}">
                                 <input type="hidden" name="itemIds" th:value="*{ItemIds}">
                                 <input type="hidden" name="collectionId" th:value="*{collectionId}">
