@@ -68,7 +68,9 @@ public class WorkspaceForm {
 
         // NOTE: We need a modifiable list here.
         List<String> list = new ArrayList<>();
-        Collections.addAll(list, itemIds.split("\\s*,\\s*"));
+        if (itemIds!=null && !itemIds.trim().equals("")) {
+            Collections.addAll(list, itemIds.split("\\s*,\\s*"));
+        }
         workspace.setItemIds(list);
         return workspace;
     }
