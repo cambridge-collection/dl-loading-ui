@@ -72,7 +72,11 @@ public class UserManagementController {
         if (id != null) {
             user = userRepository.findById(id.longValue());
             if (user != null) {
-                form = new UserForm(user);
+                if (model.asMap().get("form") == null) {
+                    form = new UserForm(user);
+                } else {
+                    form = (UserForm) model.asMap().get("form");
+                }
             }
         }
 
@@ -162,7 +166,11 @@ public class UserManagementController {
         if (workspaceId != null) {
             workspace = workspaceRepository.findWorkspaceById(workspaceId);
             if (workspace != null) {
-                form = new WorkspaceForm(workspace);
+                if (model.asMap().get("form") == null) {
+                    form = new WorkspaceForm(workspace);
+                } else {
+                    form = (WorkspaceForm) model.asMap().get("form");
+                }
             }
         }
 

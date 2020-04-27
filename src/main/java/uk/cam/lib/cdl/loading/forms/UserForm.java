@@ -7,81 +7,113 @@ import java.util.List;
 
 public class UserForm {
 
-    private User user;
+    private long id;
+
+    @NotBlank(message = "Must specify a user name (nameID).")
+    private String username;
+    private String password;
+
+    @NotBlank(message = "Must specify a first name.")
+    private String firstName;
+
+    @NotBlank(message = "Must specify a last name.")
+    private String lastName;
+
+    @NotBlank(message = "Must specify an email")
+    private String email;
+
+    private boolean enabled;
+    private List<String> authorities;
 
     public UserForm() {
-        this.user = new User();
     }
 
     public UserForm(User user) {
-        this.user = user;
+        this.id = user.getId();
+        this.username = user.getUsername();
+        this.password = user.getPassword();
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.email = user.getEmail();
+        this.enabled = user.isEnabled();
+        this.authorities = user.getAuthorities();
     }
 
     public long getId() {
-        return user.getId();
+        return id;
     }
 
     public void setId(long id) {
-        user.setId(id);
+        this.id = id;
     }
 
     public String getUsername() {
-        return user.getUsername();
+        return username;
     }
 
-    public void setUsername(@NotBlank(message = "Must specify a user name (nameID).") String username) {
-        user.setUsername(username);
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     public void setPassword(String password) {
-        user.setPassword(password);
+        this.password = password;
     }
 
     public String getFirstName() {
-        return user.getFirstName();
+        return firstName;
     }
 
-    public void setFirstName(@NotBlank(message = "Must specify a first name.") String firstName) {
-        user.setFirstName(firstName);
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getLastName() {
-        return user.getLastName();
+        return lastName;
     }
 
-    public void setLastName(@NotBlank(message = "Must specify a last name.") String lastName) {
-        user.setLastName(lastName);
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getEmail() {
-        return user.getEmail();
+        return email;
     }
 
-    public void setEmail(@NotBlank(message = "Must specify an email") String email) {
-        user.setEmail(email);
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public boolean getEnabled() {
-        return user.isEnabled();
+        return enabled;
     }
 
     public void setEnabled(boolean enabled) {
-        user.setEnabled(enabled);
+        this.enabled = enabled;
     }
 
     public List<String> getAuthorities() {
-        return user.getAuthorities();
+        return authorities;
     }
 
     public void setAuthorities(List<String> authorities) {
-        user.setAuthorities(authorities);
+        this.authorities = authorities;
     }
 
     public User toUser() {
+        User user = new User();
+        user.setId(id);
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEnabled(enabled);
+        user.setAuthorities(authorities);
+        user.setEmail(email);
+
         return user;
     }
 }

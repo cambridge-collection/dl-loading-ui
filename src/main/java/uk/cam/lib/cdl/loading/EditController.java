@@ -261,8 +261,8 @@ public class EditController {
     @PreAuthorize("@roleService.canEditCollection(#collectionForm.getCollectionId(), authentication) ||" +
         " @roleService.canEditWorkspace(#workspaceIds, authentication)")
     public RedirectView updateCollection(RedirectAttributes attributes,
-                                         @RequestBody @Valid @ModelAttribute CollectionForm collectionForm,
                                          @RequestParam List<Long> workspaceIds,
+                                         @RequestBody @Valid @ModelAttribute CollectionForm collectionForm,
                                          final BindingResult bindingResult)
         throws Exception {
 
