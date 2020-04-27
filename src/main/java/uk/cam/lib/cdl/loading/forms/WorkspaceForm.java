@@ -11,52 +11,67 @@ import java.util.List;
 // TODO validation
 public class WorkspaceForm {
 
-    private Workspace workspace;
+    private long id;
+    @NotBlank(message = "Must specify a workspace name.")
+    private String name;
+    private List<String> collectionIds;
+    private String itemIds;
 
     public WorkspaceForm() {
-        workspace = new Workspace();
     }
 
     public WorkspaceForm(Workspace workspace) {
-        this.workspace = workspace;
+
+        this.id = workspace.getId();
+        this.name = workspace.getName();
+        this.collectionIds = workspace.getCollectionIds();
+        this.itemIds = StringUtils.join(workspace.getItemIds(), ",");
     }
 
     public long getId() {
-        return workspace.getId();
+        return id;
     }
 
     public void setId(long id) {
-        workspace.setId(id);
+        this.id = id;
     }
 
     public String getName() {
-        return workspace.getName();
+        return name;
     }
 
-    public void setName(@NotBlank(message = "Must specify a workspace name.") String name) {
-        workspace.setName(name);
+    public void setName(String name) {
+        this.name = name;
     }
 
     public List<String> getCollectionIds() {
-        return workspace.getCollectionIds();
+        return collectionIds;
     }
 
     public void setCollectionIds(List<String> collectionIds) {
-        workspace.setCollectionIds(collectionIds);
+        this.collectionIds = collectionIds;
     }
 
     public String getItemIds() {
-        return StringUtils.join(workspace.getItemIds(), ",");
+        return itemIds;
     }
 
     public void setItemIds(String itemIds) {
-        // NOTE: Do not replace with Arrays.asList as we need a modifiable list here.
-        List<String> list = new ArrayList<>();
-        Collections.addAll(list, itemIds.split("\\s*,\\s*"));
-        workspace.setItemIds(list);
+        this.itemIds = itemIds;
     }
 
     public Workspace toWorkspace() {
+        Workspace workspace = new Workspace();
+        workspace.setId(id);
+        workspace.setName(name);
+        workspace.setCollectionIds(collectionIds);
+
+        // NOTE: We need a modifiable list here.
+        List<String> list = new ArrayList<>();
+        if (itemIds!=null && !itemIds.trim().equals("")) {
+            Collections.addAll(list, itemIds.split("\\s*,\\s*"));
+        }
+        workspace.setItemIds(list);
         return workspace;
     }
 }
