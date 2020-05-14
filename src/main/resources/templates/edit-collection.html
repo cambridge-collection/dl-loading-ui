@@ -127,7 +127,7 @@
                                                     <div class="row">
                                                         <div style="width: 150px">
                                                             <img id="thumbnailImage" class="img-thumbnail"
-                                                                 th:src="${pathForDataDisplay + thumbnailURL}"
+                                                                 th:src="${pathForDataDisplay.resolve(thumbnailURL)}"
                                                                  width="150px"
                                                                  height="150px">
                                                             <input id="thumbnailImageInput" type="hidden"
@@ -238,8 +238,8 @@
                                         <tbody>
                                         <tr th:each="item : ${items}">
                                             <td
-                                                th:with="relativeFilePath=${item.filepath.replace(dataLocalPath, '')}">
-                                                <a th:href="${pathForDataDisplay + relativeFilePath}"
+                                                th:with="relativeFilePath=${dataLocalPath.relativize(item.filepath)}">
+                                                <a th:href="${pathForDataDisplay.resolve(relativeFilePath)}"
                                                    th:text="${item.name}">
                                                 </a>
                                             </td>

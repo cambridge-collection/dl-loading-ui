@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -13,7 +14,10 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
-import uk.cam.lib.cdl.loading.model.editor.*;
+import uk.cam.lib.cdl.loading.model.editor.Dataset;
+import uk.cam.lib.cdl.loading.model.editor.Id;
+import uk.cam.lib.cdl.loading.model.editor.Item;
+import uk.cam.lib.cdl.loading.model.editor.UI;
 import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
@@ -21,13 +25,19 @@ import javax.validation.constraints.NotNull;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.*;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,26 +47,21 @@ Access info from the git data directly for now.
 */
 public class EditAPI {
 
-    private final String dataPath;
-    private final String dataItemPath;
-    private final File datasetFile;
-    private final File uiFile;
+    private final Path dataPath;
+    private final Path dataItemPath;
+    private final Path datasetFile;
+    private final Path uiFile;
     private final GitHelper gitHelper;
 
     private Map<String, Collection> collectionMap = Collections.synchronizedMap(new HashMap<>());
-    private Map<String, String> collectionFilepaths = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, Path> collectionFilepaths = Collections.synchronizedMap(new HashMap<>());
     private Map<String, Item> itemMap = Collections.synchronizedMap(new HashMap<>());
     private Map<String, String> thumbnailImageURLs = Collections.synchronizedMap(new HashMap<>());
     private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
 
     public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath,
                    GitLocalVariables gitSourceVariables) {
-        this.gitHelper = new GitHelper(gitSourceVariables);
-        this.dataPath = dataPath;
-        this.datasetFile = new File(dataPath + File.separator + dlDatasetFilename);
-        this.uiFile = new File(dataPath + File.separator + dlUIFilename);
-        this.dataItemPath = dataItemPath;
-        setup();
+        this(dataPath, dlDatasetFilename, dlUIFilename, dataItemPath, new GitHelper(gitSourceVariables));
     }
 
     /**
@@ -70,17 +75,19 @@ public class EditAPI {
     public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath,
                    GitHelper gitHelper) {
         this.gitHelper = gitHelper;
-        this.dataPath = dataPath;
-        this.datasetFile = new File(dataPath + File.separator + dlDatasetFilename);
-        this.uiFile = new File(dataPath + File.separator + dlUIFilename);
-        this.dataItemPath = dataItemPath;
+        this.dataPath = Path.of(dataPath).normalize();
+        Preconditions.checkArgument(this.dataPath.isAbsolute(), "dataPath is not absolute: %s", dataPath);
+        this.datasetFile = this.dataPath.resolve(dlDatasetFilename).normalize();
+        this.uiFile = this.dataPath.resolve(dlUIFilename).normalize();
+        this.dataItemPath = Path.of(dataItemPath).normalize();
+        Preconditions.checkArgument(this.dataItemPath.startsWith(this.dataPath), "dataItemPath is not under dataPath");
         setup();
     }
 
     private void setup() {
         try {
-            if (!datasetFile.exists()) {
-                throw new FileNotFoundException("Dataset file cannot be found at: " + datasetFile.toPath());
+            if (!Files.exists(datasetFile)) {
+                throw new FileNotFoundException("Dataset file cannot be found at: " + datasetFile);
             }
 
             updateModel();
@@ -105,31 +112,31 @@ public class EditAPI {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
         mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
-        Dataset dataset = mapper.readValue(datasetFile, Dataset.class);
+        Dataset dataset = mapper.readValue(datasetFile.toFile(), Dataset.class);
         Map<String, Collection> newCollectionMap = Collections.synchronizedMap(new HashMap<>());
-        Map<String, String> newCollectionFilepaths = Collections.synchronizedMap(new HashMap<>());
+        Map<String, Path> newCollectionFilepaths = Collections.synchronizedMap(new HashMap<>());
         Map<String, Item> newItemMap = Collections.synchronizedMap(new HashMap<>());
 
         // Setup collections
         for (Id id : dataset.getCollections()) {
 
             String collectionId = id.getId();
-            File collectionFile = new File(dataPath + File.separator + collectionId);
-            if (!collectionFile.exists()) {
-                throw new FileNotFoundException("Collection file cannot be found at: " + collectionFile.toPath());
+            var collectionFile = dataPath.resolve(collectionId).normalize();
+            Preconditions.checkState(collectionFile.startsWith(dataPath), "Collection '%s' is not under dataPath", collectionId);
+            if (!Files.exists(collectionFile)) {
+                throw new FileNotFoundException("Collection file cannot be found at: " + collectionFile);
             }
 
-            Collection c = mapper.readValue(collectionFile, Collection.class);
+            Collection c = mapper.readValue(collectionFile.toFile(), Collection.class);
             c.setCollectionId(collectionId);
 
             // Setup collection maps
             newCollectionMap.put(collectionId, c);
-            newCollectionFilepaths.put(collectionId, collectionFile.getCanonicalPath());
+            newCollectionFilepaths.put(collectionId, collectionFile);
 
             for (Id itemId : c.getItemIds()) {
                 newItemMap.put(FilenameUtils.getBaseName(itemId.getId()), createItem(itemId.getId(), collectionFile));
             }
-
         }
 
         this.collectionMap = newCollectionMap;
@@ -138,7 +145,7 @@ public class EditAPI {
 
         // Update UI
         Map<String, String> newThumbnailImageURLs = Collections.synchronizedMap(new HashMap<>());
-        UI ui = mapper.readValue(uiFile, UI.class);
+        UI ui = mapper.readValue(uiFile.toFile(), UI.class);
         for (UICollection collection : ui.getThemeData().getCollections()) {
 
             // Get collection Id from the filepath
@@ -180,7 +187,7 @@ public class EditAPI {
 
             mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
             mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
-            UI ui = mapper.readValue(uiFile, UI.class);
+            UI ui = mapper.readValue(uiFile.toFile(), UI.class);
             for (UICollection collection : ui.getThemeData().getCollections()) {
                 String thisCollectionPath = collection.getCollection().getId();
 
@@ -188,7 +195,7 @@ public class EditAPI {
 
                     collection.setThumbnail(new Id(thumbnailURL));
                     ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-                    writer.writeValue(uiFile, ui);
+                    writer.writeValue(uiFile.toFile(), ui);
                     break;
                 }
             }
@@ -208,9 +215,9 @@ public class EditAPI {
         return collectionMap.get(collectionId);
     }
 
-    private Item createItem(String id, File collectionFile) throws IOException {
-        File f = new File(collectionFile.getParentFile().getCanonicalPath(), id);
-        return new Item(FilenameUtils.getBaseName(f.getName()), f.getCanonicalPath(), new Id(id));
+    private Item createItem(String id, Path collectionFile) throws IOException {
+        var itemFile = collectionFile.getParent().resolve(id).normalize();
+        return new Item(FilenameUtils.getBaseName(itemFile.getFileName().toString()), itemFile, new Id(id));
     }
 
     public Item getItem(String id) {
@@ -263,7 +270,7 @@ public class EditAPI {
         return false;
     }
 
-    private String getDataItemPath() {
+    private Path getDataItemPath() {
         return dataItemPath;
     }
 
@@ -282,45 +289,44 @@ public class EditAPI {
 
             Collection collection = getCollection(collectionId);
 
-            File output;
+            Path output;
 
             // Check to see if the file already exists
             boolean itemAlreadyInCollection = itemInCollection(itemName, collection);
             if (itemMap.containsKey(itemName)) {
 
                 // Overwrite existing Item
-                output = new File(itemMap.get(itemName).getFilepath());
+                output = itemMap.get(itemName).getFilepath();
 
             } else {
 
                 // new Item
-                output = new File(getDataItemPath() +
-                    FilenameUtils.getBaseName(itemName) +
-                    File.separator + itemName + "." + fileExtension);
-                output.getParentFile().mkdirs();
+                output = dataItemPath.resolve(FilenameUtils.getBaseName(itemName)).resolve(itemName + "." + fileExtension);
+                Files.createDirectories(output.getParent());
 
             }
 
             // Write out file.
-            FileUtils.copyInputStreamToFile(contents, output);
+            FileUtils.copyInputStreamToFile(contents, output.toFile());
 
             if (!itemAlreadyInCollection) {
 
-                String collectionFilePath = collectionFilepaths.get(collection.getCollectionId());
+                Path collectionFilePath = Preconditions.checkNotNull(
+                    collectionFilepaths.get(collection.getCollectionId()));
                 // Add itemId to collection
                 if (itemMap.containsKey(itemName)) {
                     collection.getItemIds().add(itemMap.get(itemName).getId());
                 } else {
-                    String collectionDir = new File(collectionFilePath).getParentFile().getPath();
-                    String itemPath = Paths.get(collectionDir).relativize(Paths.get(output.getCanonicalPath())).toString();
-                    Id id = new Id(itemPath);
+                    Path collectionDir = collectionFilePath.getParent();
+                    Path itemPath = collectionDir.relativize(output);
+                    Id id = new Id(itemPath.toString());
                     collection.getItemIds().add(id);
                 }
 
                 // Write out collection file
                 ObjectMapper mapper = new ObjectMapper();
                 ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-                writer.writeValue(new File(collectionFilePath), collection);
+                writer.writeValue(collectionFilePath.toFile(), collection);
 
             }
 
@@ -348,22 +354,22 @@ public class EditAPI {
             // Write out collection file
             ObjectMapper mapper = new ObjectMapper();
             ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-            String collectionFilePath = collectionFilepaths.get(collectionId);
-            writer.writeValue(new File(collectionFilePath), collection);
+            Path collectionFilePath = Preconditions.checkNotNull(collectionFilepaths.get(collectionId));
+            writer.writeValue(collectionFilePath.toFile(), collection);
 
             // Delete file for item if it exists in no other collection
             if (getFirstCollectionForItem(item) == null) {
-                File f = new File(item.getFilepath());
-                if (!f.delete()) {
+                var f = item.getFilepath();
+                if (!Files.deleteIfExists(f)) {
                     return false;
                 }
                 // remove parent dir if empty
-                File parentFile = f.getParentFile();
-                if (parentFile != null && f.getParentFile().isDirectory() &&
-                    Objects.requireNonNull(parentFile.list()).length == 0) {
-                    if (!parentFile.delete()) {
-                        return false;
+                var parentFile = f.getParent();
+                if (Files.isDirectory(parentFile)) {
+                    try {
+                        Files.deleteIfExists(parentFile);
                     }
+                    catch (DirectoryNotEmptyException e) { /* ignore */ }
                 }
             }
 
@@ -398,40 +404,42 @@ public class EditAPI {
 
             String collectionId = collection.getCollectionId();
 
-            String collectionFilepath = collectionFilepaths.get(collectionId);
+            Path collectionFilepath = collectionFilepaths.get(collectionId);
             if (collectionFilepath == null) {
                 // New item so create filepath
-                collectionFilepath = dataPath + File.separator + collectionId;
+                collectionFilepath = dataPath.resolve(collectionId).normalize();
+                Preconditions.checkState(collectionFilepath.startsWith(dataPath), "collection path is not under dataPath: '%s'", collectionFilepath);
             }
 
             // If collection is not in dataset file add it.
-            Dataset dataset = mapper.readValue(datasetFile, Dataset.class);
+            Dataset dataset = mapper.readValue(datasetFile.toFile(), Dataset.class);
             List<Id> collectionIds = dataset.getCollections();
             if (!collectionIds.contains(new Id(collectionId))) {
                 collectionIds.add(new Id(collectionId));
-                writer.writeValue(datasetFile, dataset);
+                writer.writeValue(datasetFile.toFile(), dataset);
             }
 
             // If collectionThumbnail is not in uiFile add it
             // TODO: Allow settings or collection form to define UI layout for new collections
-            UI ui = mapper.readValue(uiFile, UI.class);
+            UI ui = mapper.readValue(uiFile.toFile(), UI.class);
             List<UICollection> uiCollections = ui.getThemeData().getCollections();
             if (!UICollectionContains(collectionId, uiCollections)) {
                 uiCollections.add(new UICollection(new Id(collectionId),
                     "organisation", new Id(collection.getThumbnailURL())));
-                writer.writeValue(uiFile, ui);
+                writer.writeValue(uiFile.toFile(), ui);
             }
 
             // Write out collection file
-            File collectionFile = new File(collectionFilepath);
-            writer.writeValue(collectionFile, collection);
+            writer.writeValue(collectionFilepath.toFile(), collection);
 
             // Write out HTML section files
-            File descriptionHTMLFile = new File(collectionFile.getParent(), collection.getDescription().getFull().getId());
-            FileUtils.write(descriptionHTMLFile, descriptionHTML, "UTF-8");
+            var descriptionHTMLFile = collectionFilepath.getParent().resolve(collection.getDescription().getFull().getId()).normalize();
+            Preconditions.checkState(descriptionHTMLFile.startsWith(dataPath), "descriptionHTMLFile is not under dataPath: %s", descriptionHTMLFile);
+            FileUtils.write(descriptionHTMLFile.toFile(), descriptionHTML, "UTF-8");
 
-            File creditHTMLFile = new File(collectionFile.getParent(), collection.getCredit().getProse().getId());
-            FileUtils.write(creditHTMLFile, creditHTML, "UTF-8");
+            var creditHTMLFile = collectionFilepath.getParent().resolve(collection.getCredit().getProse().getId()).normalize();
+            Preconditions.checkState(creditHTMLFile.startsWith(dataPath), "creditHTMLFile is not under dataPath: %s", creditHTMLFile);
+            FileUtils.write(creditHTMLFile.toFile(), creditHTML, "UTF-8");
 
             // Update collection thumbnail in the UI
             setCollectionThumbnailURL(collection.getThumbnailURL(), collectionId);
@@ -447,15 +455,18 @@ public class EditAPI {
         return false;
     }
 
-    public String getDataLocalPath() {
-        return gitHelper.getDataLocalPath();
+    public Path getDataLocalPath() {
+        var result = Path.of(gitHelper.getDataLocalPath());
+        Preconditions.checkState(result.isAbsolute() && result.normalize().equals(result),
+            "gitHelper.getDataLocalPath() is not a normalised absolute path: %s", result);
+        return result;
     }
 
-    public String getCollectionPath(String collectionId) {
+    public Path getCollectionPath(String collectionId) {
         return collectionFilepaths.get(collectionId);
     }
 
-    public File getDatasetFile() {
+    public Path getDatasetFile() {
         return datasetFile;
     }
 

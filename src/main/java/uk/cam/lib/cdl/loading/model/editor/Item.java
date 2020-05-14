@@ -1,16 +1,21 @@
 package uk.cam.lib.cdl.loading.model.editor;
 
+import com.google.common.base.Preconditions;
+
+import java.nio.file.Path;
+
 /**
  * Not used for Jackson serialisation
  */
 public class Item {
 
     private final String name;
-    private final String filepath;
+    private final Path filepath;
     private final Id id;
 
-    public Item(String name, String filepath, Id id) {
-        this.filepath = filepath;
+    public Item(String name, Path filepath, Id id) {
+        Preconditions.checkArgument(filepath.isAbsolute(), "filepath is not absolute: %s", filepath);
+        this.filepath = filepath.normalize();
         this.name = name;
         this.id = id;
     }
@@ -19,7 +24,7 @@ public class Item {
         return name;
     }
 
-    public String getFilepath() {
+    public Path getFilepath() {
         return filepath;
     }
 

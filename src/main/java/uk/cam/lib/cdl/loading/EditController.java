@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading;
 
+import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
@@ -30,24 +31,27 @@ import uk.cam.lib.cdl.loading.model.editor.Item;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 
 @Controller
 public class EditController {
-
     private final EditAPI editAPI;
-    private final String pathForDataDisplay;
+    private final Path pathForDataDisplay;
 
     @Autowired
     public EditController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay) {
         this.editAPI = editAPI;
-        this.pathForDataDisplay = pathForDataDisplay;
+        this.pathForDataDisplay = Path.of(pathForDataDisplay);
+        Preconditions.checkArgument(
+            this.pathForDataDisplay.isAbsolute() &&
+                this.pathForDataDisplay.normalize().equals(this.pathForDataDisplay),
+            "pathForDataDisplay must start with / and not contain relative segments");
     }
 
     @GetMapping("/edit/edit.html")
@@ -81,19 +85,17 @@ public class EditController {
             Collection collection = editAPI.getCollection(collectionId);
             if (model.asMap().get("form") == null) {
 
-                File collectionFile = new File(editAPI.getCollectionPath(collectionId));
+                var collectionFile = editAPI.getCollectionPath(collectionId);
 
                 // Description HTML
-                File fullDescription = new File(collectionFile.getParentFile(),
-                    collection.getDescription().getFull().getId());
-                String descriptionHTML = FileUtils.readFileToString(fullDescription, "UTF-8");
-                descriptionHTML = prepareHTMLForDisplay(descriptionHTML, fullDescription.getCanonicalPath());
+                var fullDescription = collectionFile.getParent().resolve(collection.getDescription().getFull().getId()).normalize();
+                String descriptionHTML = FileUtils.readFileToString(fullDescription.toFile(), "UTF-8");
+                descriptionHTML = prepareHTMLForDisplay(descriptionHTML, fullDescription);
 
                 // Credit HTML
-                File credit = new File(collectionFile.getParentFile(),
-                    collection.getCredit().getProse().getId());
-                String creditHTML = FileUtils.readFileToString(credit, "UTF-8");
-                creditHTML = prepareHTMLForDisplay(creditHTML, credit.getCanonicalPath());
+                var credit = collectionFile.getParent().resolve(collection.getCredit().getProse().getId()).normalize();
+                String creditHTML = FileUtils.readFileToString(credit.toFile(), "UTF-8");
+                creditHTML = prepareHTMLForDisplay(creditHTML, credit);
 
                 form = new CollectionForm(collectionId, collection, descriptionHTML, creditHTML);
             } else {
@@ -126,16 +128,16 @@ public class EditController {
     }
 
     // Need to parse relative links to add in 'pathForDataDisplay' for local viewing.
-    private String prepareHTMLForDisplay(String html, String HTMLFilePath) {
+    private String prepareHTMLForDisplay(String html, Path HTMLFilePath) {
         Document doc = Jsoup.parse(html);
         for (Element img : doc.select("img[src]")) {
             String src = img.attr("src");
 
-            String collectionRelativePath =
-                new File(HTMLFilePath).getParent().replaceAll(editAPI.getDataLocalPath()
-                    , "");
+            var collectionRelativePath =
+                editAPI.getDataLocalPath().relativize(HTMLFilePath.getParent());
+            var imageRelativePath = collectionRelativePath.resolve(src);
 
-            img.attr("src", pathForDataDisplay + collectionRelativePath + "/" + src);
+            img.attr("src", pathForDataDisplay.resolve(imageRelativePath).normalize().toString());
         }
         return doc.outerHtml();
     }
@@ -143,16 +145,17 @@ public class EditController {
     // Need to parse links from display to format to be saved.
     // replace 'pathForDataDisplay' with file path to data
     // Generate relative path from collections
-    private String prepareHTMLForSaving(String html, String HTMLFilePath) throws IOException {
+    private String prepareHTMLForSaving(String html, Path HTMLFilePath) throws IOException {
+        Preconditions.checkArgument(HTMLFilePath.isAbsolute(), "HTMLFilePath is not absolute: %s", HTMLFilePath);
         Document doc = Jsoup.parse(html);
         for (Element img : doc.select("img[src]")) {
-            String src = img.attr("src");
-            src = src.replace(pathForDataDisplay, "");
-            File imageFile = new File(editAPI.getDataLocalPath(), src);
-            String relativePath =
-                Paths.get(HTMLFilePath).getParent().relativize(Paths.get(imageFile.getCanonicalPath())).toString();
+            var src = Path.of(img.attr("src"));
+            Preconditions.checkState(src.startsWith(pathForDataDisplay));
+            var imgPath = pathForDataDisplay.relativize(src);
+            var imageFile = editAPI.getDataLocalPath().resolve(imgPath).normalize();
+            Path relativePath = HTMLFilePath.getParent().relativize(imageFile);
 
-            img.attr("src", relativePath.replace(editAPI.getDataLocalPath(), ""));
+            img.attr("src", relativePath.toString());
         }
         return doc.outerHtml();
     }
@@ -170,18 +173,19 @@ public class EditController {
     public ResponseEntity<Resource> editSourceData(HttpServletRequest request)
         throws BadRequestException, IOException {
 
-        String filepath = request.getRequestURI().split(request.getContextPath() + pathForDataDisplay)[1];
+        var filepath = Path.of(request.getContextPath(), pathForDataDisplay.toString())
+            .relativize(Path.of(request.getRequestURI()));
 
-        File file = new File(editAPI.getDataLocalPath() + filepath);
+        var file = editAPI.getDataLocalPath().resolve(filepath).normalize();
 
         // Allow access to git dir checkout only.
-        if (!file.exists() || !file.toPath().toAbsolutePath().startsWith(editAPI.getDataLocalPath())) {
+        if (!Files.exists(file) || !file.startsWith(editAPI.getDataLocalPath())) {
             throw new BadRequestException(new Exception("File needs to be subdir of git file source."));
         }
 
         // Assume content type from extension
-        String ext = FilenameUtils.getExtension(filepath);
-        String filename = FilenameUtils.getName(filepath);
+        String ext = FilenameUtils.getExtension(filepath.toString());
+        String filename = FilenameUtils.getName(filepath.toString());
 
         // Interpret data as a stream for display.
         String contentType = "application/octet-stream";
@@ -194,10 +198,10 @@ public class EditController {
             contentType = "application/xml";
         }
 
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(file.getCanonicalPath()));
+        InputStreamResource resource = new InputStreamResource(new BufferedInputStream(Files.newInputStream(file)));
 
         return ResponseEntity.ok()
-            .contentLength(file.length())
+            .contentLength(Files.size(file))
             .header("Content-Disposition", "attachment; filename=" + filename)
             .contentType(MediaType.parseMediaType(contentType))
             .body(resource);
@@ -237,6 +241,7 @@ public class EditController {
 
             // new collection
             String urlSlug = collection.getName().getUrlSlug();
+            Preconditions.checkState(!urlSlug.contains("/"));
 
             // TODO Allow these paths to be set in properties file
             collectionId = "collections/" + urlSlug + ".collection.json";
@@ -249,9 +254,12 @@ public class EditController {
         String summaryId = collection.getDescription().getFull().getId();
         String creditId = collection.getCredit().getProse().getId();
 
-        String collectionPath = new File(editAPI.getDataLocalPath() + File.separator + collectionId).getParent();
-        String collectionHTMLPath = new File(collectionPath, summaryId).getCanonicalPath();
-        String creditHTMLPath = new File(collectionPath, creditId).getCanonicalPath();
+        var collectionPath = editAPI.getDataLocalPath().resolve(collectionId).getParent();
+        Preconditions.checkState(collectionPath.startsWith(editAPI.getDataLocalPath()));
+        var collectionHTMLPath = collectionPath.resolve(summaryId).normalize();
+        Preconditions.checkState(collectionHTMLPath.startsWith(editAPI.getDataLocalPath()));
+        var creditHTMLPath = collectionPath.resolve(creditId).normalize();
+        Preconditions.checkState(creditHTMLPath.startsWith(editAPI.getDataLocalPath()));
 
         String fullDescriptionHTML = prepareHTMLForSaving(collectionForm.getFullDescriptionHTML(), collectionHTMLPath);
         String proseCreditHTML = prepareHTMLForSaving(collectionForm.getProseCreditHTML(), creditHTMLPath);

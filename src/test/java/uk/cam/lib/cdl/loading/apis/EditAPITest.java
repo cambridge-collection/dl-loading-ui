@@ -196,9 +196,9 @@ class EditAPITest {
 
     @Test
     void getDataLocalPath() {
-        String dataLocalPath = editAPI.getDataLocalPath();
+        var dataLocalPath = editAPI.getDataLocalPath();
         LOG.info("dataLocalPath: " + dataLocalPath);
-        assert (dataLocalPath.equals(gitSourceVariables.getGitSourcePath() + gitSourceVariables.getGitSourceDataSubpath()));
+        assert (dataLocalPath.toString().equals(gitSourceVariables.getGitSourcePath() + gitSourceVariables.getGitSourceDataSubpath()));
     }
 
     private Collection makeCollection(String urlSlugName) {
