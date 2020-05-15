@@ -24,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
+import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.forms.CollectionForm;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Id;
@@ -37,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Controller
@@ -329,5 +331,29 @@ public class EditController {
         return new RedirectView("/edit/collection/");
     }
 
-}
+    @org.immutables.value.Value.Modifiable
+    @org.immutables.value.Value.Style(create = "new")
+    interface ItemForm {
 
+    }
+
+    @GetMapping("/edit/item")
+    public String editItem(Model model, @RequestParam(required = false, name = "id") Optional<String> itemId) {
+        var item = itemId.map(id -> {
+            var _item = editAPI.getItem(id);
+            if(_item == null) {
+                throw new NotFoundException(String.format("Item does not exist: '%s'", id));
+            }
+            return _item;
+
+        }).orElse(null);
+
+        var form = new ModifiableItemForm();
+
+        model.addAttribute("modeLabel", item == null ? "Create" : "Edit");
+        model.addAttribute("item", item);
+        model.addAttribute("form", form);
+
+        return "edit-item";
+    }
+}
