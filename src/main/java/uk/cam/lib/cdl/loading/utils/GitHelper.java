@@ -1,5 +1,8 @@
 package uk.cam.lib.cdl.loading.utils;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.ResetCommand;
@@ -15,37 +18,86 @@ import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
  * Class for help with git requests
  */
 public class GitHelper {
+    // Shared per-repo objects to synchronise against. Both keys and values are
+    // weak so no memory is leaked - references are kept alive by active
+    // GitHelper instances.
+    private static final Map<String, Object> REPO_LOCKS =
+        new MapMaker().weakKeys().weakValues().makeMap();
+
+    private static Map.Entry<String, Object> findOrCreateRepoLock(String repositoryPath) {
+        Preconditions.checkNotNull(repositoryPath);
+        var path = Path.of(repositoryPath);
+        Preconditions.checkArgument(
+            path.isAbsolute() && path.normalize().equals(path),
+            "repository path is not an absolute, normalised path: %s",
+            repositoryPath);
+
+        synchronized (REPO_LOCKS) {
+            // We can't use normal map get() method to look up our key as it
+            // checks via reference equality. We could use interned strings as
+            // an alternative to this, but then we might as well just not use a
+            // weak map anyway...
+            var entry = REPO_LOCKS.entrySet().stream()
+                .filter(e -> repositoryPath.equals(e.getKey())).findFirst();
+            return entry.orElseGet(() -> {
+                // Create a lock with our key
+                var lock = new Object();
+                REPO_LOCKS.put(repositoryPath, lock);
+                return Maps.immutableEntry(repositoryPath, lock);
+            });
+        }
+    }
+
+    private final String lockKey; // retained as lock map keys are weak
+    /**
+     * An object which will be reference-equal for any GitHelper instance with
+     * the same git repo filesystem path. We can synchronise against this object
+     * to maintain isolation between multiple instances of GitHelper acting on
+     * the same repo.
+     */
+    private final Object lock;
     private final Git git;
     private final GitLocalVariables gitSourceVariables;
 
     public GitHelper(GitLocalVariables gitSourceVariables) {
-        this.gitSourceVariables = gitSourceVariables;
-        git = setupRepo(gitSourceVariables.getGitSourcePath(), gitSourceVariables.getGitSourceURL(),
-            gitSourceVariables.getGitSourceURLUsername(),
-            gitSourceVariables.getGitSourceURLPassword());
+        this(findOrCreateRepoLock(gitSourceVariables.getGitSourcePath()), gitSourceVariables, null);
     }
 
     public GitHelper(Git git, GitLocalVariables gitSourceVariables) {
+        this(findOrCreateRepoLock(gitSourceVariables.getGitSourcePath()), gitSourceVariables, Preconditions.checkNotNull(git));
+    }
+
+    private GitHelper(Map.Entry<String, Object> lock, GitLocalVariables gitSourceVariables, Git git) {
+        this.lockKey = lock.getKey();
+        this.lock = lock.getValue();
         this.gitSourceVariables = gitSourceVariables;
-        this.git = git;
+
+        this.git = git != null ? git : setupRepo(
+            gitSourceVariables.getGitSourcePath(),
+            gitSourceVariables.getGitSourceURL(),
+            gitSourceVariables.getGitSourceURLUsername(),
+            gitSourceVariables.getGitSourceURLPassword());
     }
 
     public Git getGitInstance() {
         return git;
     }
 
-    private synchronized Git setupRepo(String gitSourcePath, String gitSourceURL, String gitSourceURLUsername,
-                                       String gitSourceURLPassword) {
+    private Git setupRepo(String gitSourcePath, String gitSourceURL, String gitSourceURLUsername,
+                                       String gitSourceURLPassword) { synchronized (lock) {
         try {
             File dir = new File(gitSourcePath);
             if (dir.exists()) {
@@ -68,7 +120,7 @@ public class GitHelper {
             e.printStackTrace();
         }
         return null;
-    }
+    }}
 
     /**
      * Execute an operation which creates commits in this git repository, with
@@ -78,41 +130,35 @@ public class GitHelper {
      * <p>{@link #pushGitChanges()} is invoked after the operation, and the
      * changes are rolled back if pushing fails.
      *
-     * <p>Note that this function is synchronised per GitHelper instance, so
-     * applications should ensure only one instance is created per repository
-     * to ensure mutual exclusion.
-     *
      * @param operation An arbitrary function to execute.
      * @return The value returned from the operation.
      */
-    public synchronized <T> T writeFilesAndPushOrRollBack(Supplier<T> operation) {
+    public <T> T writeFilesAndPushOrRollBack(Supplier<T> operation) { synchronized (lock) {
         T result;
         ObjectId initialRevision = null;
         try {
             initialRevision = git.getRepository().resolve(Constants.HEAD);
             result = operation.get();
-            if(!pushGitChanges()) {
+            if (!pushGitChanges()) {
                 throw new RuntimeException("pushGitChanges() failed");
             }
             return result;
-        }
-        catch (RuntimeException | IOException e) {
+        } catch (RuntimeException | IOException e) {
             rollbackUncommittedChanges(initialRevision == null ? Constants.HEAD : initialRevision.getName());
 
-            if(e instanceof RuntimeException) {
-                throw (RuntimeException)e;
-            }
-            else {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            } else {
                 throw new RuntimeException("git operation failed: " + e.getMessage());
             }
         }
-    }
+    }}
 
     /**
      * Wipe uncommitted changes in the git repository, returning it to the
      * committed state of the current branch HEAD.
      */
-    public synchronized void rollbackUncommittedChanges(String ref) {
+    public void rollbackUncommittedChanges(String ref) { synchronized (lock) {
         try {
             git.reset().setMode(ResetCommand.ResetType.HARD).setRef(ref).call();
         }
@@ -124,7 +170,7 @@ public class GitHelper {
                     ref, e.getMessage()),
                 e);
         }
-    }
+    }}
 
     /**
      * Returns true if there were any changes.
@@ -134,7 +180,7 @@ public class GitHelper {
      * @throws GitAPIException
      * @throws IOException
      */
-    public synchronized boolean pullGitChanges() throws GitAPIException {
+    public boolean pullGitChanges() throws GitAPIException { synchronized (lock) {
 
         FetchResult fetchResult = git.fetch().setCredentialsProvider(
             new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUsername(),
@@ -153,12 +199,12 @@ public class GitHelper {
         }
         return true;
 
-    }
+    }}
 
     /**
      * @return
      */
-    public synchronized boolean pushGitChanges() {
+    public boolean pushGitChanges() { synchronized (lock) {
         try {
             boolean pullSuccess = pullGitChanges();
             if (!pullSuccess) {
@@ -186,9 +232,9 @@ public class GitHelper {
             e.printStackTrace();
             return false;
         }
-    }
+    }}
 
-    public List<RevObject> getTags() {
+    public List<RevObject> getTags() { synchronized (lock) {
         try {
             List<Ref> refs = git.tagList().call();
             List<RevObject> output = new ArrayList<>();
@@ -203,7 +249,7 @@ public class GitHelper {
             e.printStackTrace();
         }
         return null;
-    }
+    }}
 
     public String getDataLocalPath() {
         return gitSourceVariables.getGitSourcePath() + gitSourceVariables.getGitSourceDataSubpath();
