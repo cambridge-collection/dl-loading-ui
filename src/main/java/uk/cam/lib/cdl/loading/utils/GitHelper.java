@@ -2,7 +2,10 @@ package uk.cam.lib.cdl.loading.utils;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -16,12 +19,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Class for help with git requests
  */
 public class GitHelper {
-
     private final Git git;
     private final GitLocalVariables gitSourceVariables;
 
@@ -68,6 +71,62 @@ public class GitHelper {
     }
 
     /**
+     * Execute an operation which creates commits in this git repository, with
+     * automatic roll-back to the state of the previous repo HEAD commit if an
+     * error occurs.
+     *
+     * <p>{@link #pushGitChanges()} is invoked after the operation, and the
+     * changes are rolled back if pushing fails.
+     *
+     * <p>Note that this function is synchronised per GitHelper instance, so
+     * applications should ensure only one instance is created per repository
+     * to ensure mutual exclusion.
+     *
+     * @param operation An arbitrary function to execute.
+     * @return The value returned from the operation.
+     */
+    public synchronized <T> T writeFilesAndPushOrRollBack(Supplier<T> operation) {
+        T result;
+        ObjectId initialRevision = null;
+        try {
+            initialRevision = git.getRepository().resolve(Constants.HEAD);
+            result = operation.get();
+            if(!pushGitChanges()) {
+                throw new RuntimeException("pushGitChanges() failed");
+            }
+            return result;
+        }
+        catch (RuntimeException | IOException e) {
+            rollbackUncommittedChanges(initialRevision == null ? Constants.HEAD : initialRevision.getName());
+
+            if(e instanceof RuntimeException) {
+                throw (RuntimeException)e;
+            }
+            else {
+                throw new RuntimeException("git operation failed: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Wipe uncommitted changes in the git repository, returning it to the
+     * committed state of the current branch HEAD.
+     */
+    public synchronized void rollbackUncommittedChanges(String ref) {
+        try {
+            git.reset().setMode(ResetCommand.ResetType.HARD).setRef(ref).call();
+        }
+        catch (GitAPIException e) {
+            throw new RuntimeException(
+                String.format(
+                    "Failed to roll back uncommitted changes to git repository: " +
+                        "git hard reset to %s failed: %s",
+                    ref, e.getMessage()),
+                e);
+        }
+    }
+
+    /**
      * Returns true if there were any changes.
      * Runs on a schedule form EditConfig
      *
@@ -75,7 +134,7 @@ public class GitHelper {
      * @throws GitAPIException
      * @throws IOException
      */
-    public boolean pullGitChanges() throws GitAPIException {
+    public synchronized boolean pullGitChanges() throws GitAPIException {
 
         FetchResult fetchResult = git.fetch().setCredentialsProvider(
             new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUsername(),
@@ -99,7 +158,7 @@ public class GitHelper {
     /**
      * @return
      */
-    public boolean pushGitChanges() {
+    public synchronized boolean pushGitChanges() {
         try {
             boolean pullSuccess = pullGitChanges();
             if (!pullSuccess) {
