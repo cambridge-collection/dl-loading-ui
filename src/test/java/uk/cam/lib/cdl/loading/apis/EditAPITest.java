@@ -211,7 +211,7 @@ class EditAPITest {
         List<Id> itemIds = new ArrayList<>();
         itemIds.add(new Id("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml"));
 
-        Collection c = new Collection("collectionType", name, description, credit, itemIds);
+        Collection c = new Collection(name, description, credit, itemIds);
         String filePath =
             gitSourceVariables.getGitSourcePath() + "/data/"+collectionId;
         c.setThumbnailURL("thumbnailURL");

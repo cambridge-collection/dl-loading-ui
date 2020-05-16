@@ -2,6 +2,7 @@ package uk.cam.lib.cdl.loading.model.editor;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.beans.ConstructorProperties;
@@ -10,9 +11,9 @@ import java.util.List;
 /**
  * TODO Make this a full implementation
  */
+@JsonIgnoreProperties(value = {"@type"}, allowGetters = true)
 public class Collection implements Comparable<Collection> {
-
-    private final String type;
+    public static final String TYPE = "https://schemas.cudl.lib.cam.ac.uk/package/v1/collection.json";
     private final CollectionName name;
     private final CollectionDescription description;
     private final CollectionCredit credit;
@@ -20,14 +21,12 @@ public class Collection implements Comparable<Collection> {
     private String thumbnailURL;
     private String collectionId;
 
-    @ConstructorProperties({"type", "name", "description", "credit", "items"})
+    @ConstructorProperties({"name", "description", "credit", "items"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public Collection(@JsonProperty("@type") String type,
-                      @JsonProperty("name") CollectionName name,
+    public Collection(@JsonProperty("name") CollectionName name,
                       @JsonProperty("description") CollectionDescription description,
                       @JsonProperty("credit") CollectionCredit credit,
                       @JsonProperty("items") List<Id> ids) {
-        this.type = type;
         this.name = name;
         this.description = description;
         this.credit = credit;
@@ -35,8 +34,8 @@ public class Collection implements Comparable<Collection> {
     }
 
     @JsonProperty("@type")
-    public String getType() {
-        return type;
+    protected String getType() {
+        return TYPE;
     }
 
     public CollectionName getName() {
@@ -70,7 +69,7 @@ public class Collection implements Comparable<Collection> {
         StringBuffer sb = new StringBuffer();
         sb.append("class Collection {\n");
 
-        sb.append("    @type: ").append(toIndentedString(type)).append("\n");
+        sb.append("    @type: ").append(toIndentedString(getType())).append("\n");
         sb.append("    name: ").append(toIndentedString(name)).append("\n");
         sb.append("    description: ").append(toIndentedString(description)).append("\n");
         sb.append("    credit: ").append(toIndentedString(credit)).append("\n");
