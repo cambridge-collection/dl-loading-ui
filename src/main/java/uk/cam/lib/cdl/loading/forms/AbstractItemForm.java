@@ -6,12 +6,12 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Item;
-import uk.cam.lib.cdl.loading.model.editor.Model;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.Arrays;
 import java.util.stream.Stream;
+
+import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 
 @org.immutables.value.Value.Modifiable
 @org.immutables.value.Value.Style(
@@ -31,14 +31,14 @@ abstract class AbstractItemForm {
     public static ItemForm forItem(EditAPI editAPI, Item item) {
         var form = new ItemForm();
         try {
-            form.setMetadata(Model.itemMetadataAsString(item));
+            form.setMetadata(ModelOps().itemMetadataAsString(item));
         }
         catch (IOException e) {
             throw new UncheckedIOException(e);
         }
 
         form.setCollections(editAPI.getCollections().stream()
-            .filter(c -> Model.collectionContainsItem(c, item))
+            .filter(c -> ModelOps().isItemInCollection(item, c))
             .map(Collection::getCollectionId)
             .toArray(String[]::new));
 
