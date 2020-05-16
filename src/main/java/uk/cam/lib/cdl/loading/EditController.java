@@ -1,6 +1,8 @@
 package uk.cam.lib.cdl.loading;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
@@ -18,20 +20,25 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
 import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.forms.CollectionForm;
+import uk.cam.lib.cdl.loading.forms.ItemForm;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -331,29 +338,65 @@ public class EditController {
         return new RedirectView("/edit/collection/");
     }
 
-    @org.immutables.value.Value.Modifiable
-    @org.immutables.value.Value.Style(create = "new")
-    interface ItemForm {
+    static boolean isMultipartFileProvided(MultipartFile mpf) {
+        return !(mpf.isEmpty() && Strings.isNullOrEmpty(mpf.getOriginalFilename()));
+    }
 
+    @PostMapping("/edit/item")
+    public Object saveItem(
+        RedirectAttributes attributes,
+        @RequestParam(required = false, name = "id") Optional<String> itemId,
+        @Valid @ModelAttribute ItemForm itemForm
+    ) throws IOException {
+        Preconditions.checkNotNull(itemForm.metadataFile());
+        Preconditions.checkNotNull(itemForm.paginationFile());
+
+        try {
+            if(itemId.isEmpty()) {
+                if(!isMultipartFileProvided(itemForm.metadataFile())) {
+                    throw new ValidationException("Please select an item metadata file to upload.");
+                }
+
+                // TODO: Create item and add to selected collections
+            }
+        }
+        catch(ValidationException e) {
+            var mav = getEditItemMav(itemId, Optional.of(itemForm));
+            mav.getModel().put("error", e.getMessage());
+            return mav;
+        }
+//        return new RedirectView("/edit/item");
+        throw new AssertionError();
     }
 
     @GetMapping("/edit/item")
-    public String editItem(Model model, @RequestParam(required = false, name = "id") Optional<String> itemId) {
+    public ModelAndView editItem(@RequestParam(required = false, name = "id") Optional<String> itemId) {
+        return getEditItemMav(itemId, Optional.empty());
+    }
+
+    ModelAndView getEditItemMav(Optional<String> itemId, Optional<ItemForm> populatedItemForm) {
+        Preconditions.checkNotNull(itemId);
+        Preconditions.checkNotNull(populatedItemForm);
+
         var item = itemId.map(id -> {
             var _item = editAPI.getItem(id);
             if(_item == null) {
                 throw new NotFoundException(String.format("Item does not exist: '%s'", id));
             }
             return _item;
+        });
+        var form = populatedItemForm
+            .or(() -> item.map(i -> ItemForm.forItem(editAPI, i)))
+            .orElseGet(ItemForm::new);
 
-        }).orElse(null);
-
-        var form = new ModifiableItemForm();
-
-        model.addAttribute("modeLabel", item == null ? "Create" : "Edit");
-        model.addAttribute("item", item);
-        model.addAttribute("form", form);
-
-        return "edit-item";
+        var mav = new ModelAndView("edit-item");
+        var model = mav.getModel();
+        model.put("mode", item.isEmpty() ? "create" : "update");
+        model.put("modeLabel", item.isEmpty() ? "Create" : "Edit");
+        model.put("itemId", itemId.orElse(null));
+        model.put("item", item);
+        model.put("form", form);
+        model.put("collections", editAPI.getCollections());
+        return mav;
     }
 }

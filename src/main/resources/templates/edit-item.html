@@ -32,8 +32,9 @@
         </div>
 
         <form method="post" id="item-edit-form"
-              th:action="@{'/edit/item/inline'}"
-              th:object="${form}">
+              th:action="${itemId}? @{/edit/item(id=${itemId})} : @{/edit/item}"
+              th:object="${form}"
+              enctype="multipart/form-data">
             <div class="col-lg-11" style="max-width: 1200px">
                 <div class="mb-4">
                     <div th:if="${message}">
@@ -53,19 +54,19 @@
                         <h6 class="m-0 font-weight-bold text-dark float-left">Item Metadata</h6>
                     </div>
                     <div class="card-body">
-                            <div class="form-group w-auto">
-                                <label for="item-edit-form.metadata">Descriptive metadata</label>
-                                <textarea class="form-control text-monospace" name="metadata"
-                                          id="item-edit-form.metadata"
-                                          rows="8" cols="80"
-                                          th:text="'Lorem ipsum'"></textarea>
-                                <small id="item-edit-form.metadata.help" class="form-text text-muted"><span th:text="${modeLabel}">Create/Edit</span> the item metadata directly.</small>
-                            </div>
-                            <div class="form-group w-auto">
-                                <label for="item-edit-form.metadata-file">Upload descriptive metadata file</label>
-                                <input type="file" class="form-control-file" id="item-edit-form.metadata-file" name="metadata-file">
-                                <small id="item-edit-form.metadata-file.help" class="form-text text-muted">This will replace any existing metadata.</small>
-                            </div>
+                        <div class="form-group" th:if="${mode == 'update'}">
+                            <label for="item-edit-form.metadata">Descriptive metadata</label>
+                            <textarea class="form-control text-monospace" name="metadata"
+                                      id="item-edit-form.metadata"
+                                      rows="8" cols="80"
+                                      th:text="'Lorem ipsum'"></textarea>
+                            <small id="item-edit-form.metadata.help" class="form-text text-muted"><span th:text="${modeLabel}">Create/Edit</span> the item metadata directly.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-edit-form.metadata-file">Upload descriptive metadata file</label>
+                            <input type="file" class="form-control-file" id="item-edit-form.metadata-file" name="metadataFile">
+                            <small id="item-edit-form.metadata-file.help" class="form-text text-muted">This will replace any existing metadata.</small>
+                        </div>
                     </div>
                 </div>
 
@@ -75,8 +76,8 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group w-auto">
-                            <label for="item-edit-form.metadata-file">Generate Pagination</label>
-                            <input type="file" class="form-control-file" id="item-edit-form.pagination-file" name="pagination-file">
+                            <label for="item-edit-form.metadata-file">Generate pagination</label>
+                            <input type="file" class="form-control-file" id="item-edit-form.pagination-file" name="paginationFile">
                             <small id="item-edit-form.pagination-file.help" class="form-text text-muted">
                                 TEI pagination can be generated from a CSV file containing columns named <strong><code>label</code></strong> and <strong><code>image</code></strong>.
                             </small>
@@ -91,74 +92,29 @@
                     <div class="card-body">
                         <div class="form-group">
                             <small>This item will appear in the Collections selected here.</small>
-                            <div class="d-flex _mb-3 ">
+                            <div th:each="col, iteration : ${collections}" class="d-flex _mb-3 ">
                                 <div class="align-self-center">
                                     <div class="form-check">
-                                        <input class="form-check-input align-middle" type="checkbox" name="collections" value="hebrew.collection.json" id="item-edit-form.collections_flex.1">&nbsp;
+                                        <input class="form-check-input align-middle" type="checkbox" name="collections"
+                                               th:checked="${item}? ${form.isCollectionSelected(col)}"
+                                               th:value="${col.collectionId}" value="collections/hebrew.collection.json"
+                                               th:id="|item-edit-form.collections.${iteration.count}|" id="item-edit-form.collections.1">&nbsp;
                                     </div>
                                 </div>
                                 <div class="align-self-center p-2">
-                                    <label class="form-check-label" for="item-edit-form.collections_flex.1">
-                                        <img src="/edit/source/pages/images/collectionsView/collection-hebrew.jpg" alt="Collection icon" class="rounded-circle" width="50" height="50">
-                                        Hebrew Manuscripts <a href="/edit/collection/?collectionId=collections/hebrew.collection.json" target="_blank" class="badge badge-primary ml-1">Edit</a>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="d-flex _mb-3">
-                                <div class="align-self-center">
-                                    <div class="form-check">
-                                        <input class="form-check-input align-middle" type="checkbox" name="collections" value="hebrew.collection.json" id="item-edit-form.collections_flex.1">&nbsp;
-                                    </div>
-                                </div>
-                                <div class="align-self-center p-2">
-                                    <label class="form-check-label" for="item-edit-form.collections_flex.1">
-                                        <img src="/edit/source/pages/images/collectionsView/collection-hebrew.jpg" alt="Collection icon" class="rounded-circle" width="50" height="50">
-                                        Hebrew Manuscripts <a href="/edit/collection/?collectionId=collections/hebrew.collection.json" target="_blank" class="badge badge-primary ml-1">Edit</a>
+                                    <label class="form-check-label" th:for="|item-edit-form.collections.${iteration.count}|" for="item-edit-form.collections.1">
+                                        <img th:src="@{/edit/source/{imgPath}(imgPath=${col.thumbnailURL})}" src="/edit/source/pages/images/collectionsView/collection-hebrew.jpg" alt="Collection icon" class="rounded-circle" width="50" height="50">
+                                        <span th:text="${col.name.shortName}">Hebrew Manuscripts</span> <a href="/edit/collection/?collectionId=collections/hebrew.collection.json" target="_blank" class="badge badge-primary ml-1">Edit</a>
                                     </label>
                                 </div>
                             </div>
                         </div>
-
-
-<!--                        <table class="table table-borderless">-->
-<!--                            <tbody>-->
-<!--                            <tr>-->
-<!--                                <td class="w-25">-->
-<!--                                    <label class="">-->
-<!--                                        <input class="form-check-input align-middle" type="checkbox" name="collections" value="hebrew.collection.json" id="item-edit-form.collections_.1">-->
-<!--                                    </label>-->
-<!--                                </td>-->
-<!--                                <td>-->
-<!--                                    <label class="form-check-label" for="item-edit-form.collections_.1">-->
-<!--                                        <img src="/edit/source/pages/images/collectionsView/collection-hebrew.jpg" alt="Collection icon" class="rounded-circle" width="50" height="50"> Hebrew Manuscripts-->
-<!--                                    </label>-->
-<!--                                </td>-->
-<!--                            </tr>-->
-<!--                            </tbody>-->
-<!--                        </table>-->
-
-<!--                        <hr>-->
-
-<!--                        <div class="form-group w-auto">-->
-<!--                            <div class="form-check">-->
-<!--                                <label class="form-check-label" for="item-edit-form.collections.1">-->
-<!--                                    <input class="form-check-input" type="checkbox" name="collections" value="hebrew.collection.json" id="item-edit-form.collections.1">-->
-<!--                                    <img src="/edit/source/pages/images/collectionsView/collection-hebrew.jpg" alt="Collection icon" class="rounded-circle" width="50" height="50"> Hebrew Manuscripts-->
-<!--                                </label>-->
-<!--                            </div>-->
-<!--                            <div class="form-check">-->
-<!--                                <input class="form-check-input" type="checkbox" name="collections" value="peterloo.collection.json" id="item-edit-form.collections.2">-->
-<!--                                <label class="form-check-label" for="item-edit-form.collections.2">-->
-<!--                                    Peterloo-->
-<!--                                </label>-->
-<!--                            </div>-->
-<!--                        </div>-->
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col">
-                        <button type="button" id="collectioneditform-submit" class="btn btn-primary">Save</button>
+                        <button type="submit" id="item-edit-form.submit" class="btn btn-primary">Save</button>
                     </div>
                 </div>
             </div>
