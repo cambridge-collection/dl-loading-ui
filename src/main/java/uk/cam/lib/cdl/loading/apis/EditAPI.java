@@ -120,9 +120,9 @@ public class EditAPI {
         // Setup collections
         for (Id id : dataset.getCollections()) {
 
-            String collectionId = id.getId();
-            var collectionFile = dataPath.resolve(collectionId).normalize();
-            Preconditions.checkState(collectionFile.startsWith(dataPath), "Collection '%s' is not under dataPath", collectionId);
+            var collectionFile = datasetFile.resolveSibling(id.getId()).normalize();
+            Preconditions.checkState(collectionFile.startsWith(dataPath), "Collection '%s' is not under dataPath", id.getId());
+            String collectionId = dataPath.relativize(collectionFile).toString();
             if (!Files.exists(collectionFile)) {
                 throw new FileNotFoundException("Collection file cannot be found at: " + collectionFile);
             }
@@ -134,8 +134,10 @@ public class EditAPI {
             newCollectionMap.put(collectionId, c);
             newCollectionFilepaths.put(collectionId, collectionFile);
 
-            for (Id itemId : c.getItemIds()) {
-                newItemMap.put(FilenameUtils.getBaseName(itemId.getId()), createItem(itemId.getId(), collectionFile));
+            for (Id relativeItemId : c.getItemIds()) {
+                var itemFile = collectionFile.resolveSibling(relativeItemId.getId());
+                var itemId = dataPath.relativize(itemFile);
+                newItemMap.put(itemId.toString(), new Item(itemId, itemFile));
             }
         }
 
@@ -215,11 +217,6 @@ public class EditAPI {
         return collectionMap.get(collectionId);
     }
 
-    private Item createItem(String id, Path collectionFile) throws IOException {
-        var itemFile = collectionFile.getParent().resolve(id).normalize();
-        return new Item(FilenameUtils.getBaseName(itemFile.getFileName().toString()), itemFile, new Id(id));
-    }
-
     public Item getItem(String id) {
         return itemMap.get(FilenameUtils.getBaseName(id));
     }
@@ -241,6 +238,10 @@ public class EditAPI {
         }
 
         return valid;
+    }
+
+    private boolean isValidFileExtension(String extension) {
+        return !extension.isEmpty() && !extension.startsWith(".") && !extension.contains("/");
     }
 
     public boolean validateFilename(String filename) {
@@ -274,16 +275,26 @@ public class EditAPI {
         return dataItemPath;
     }
 
-    private boolean itemInCollection(String itemName, Collection collection) {
-        Item item = itemMap.get(itemName);
-        if (item != null) {
-            return collection.getItemIds().contains(item.getId());
-        }
-        return false;
+    private boolean itemInCollection(String itemId, Collection collection) {
+        return collection.getResolvedItemIds().contains(itemId);
+    }
+
+    private Path getNewItemPath(String itemName, String fileExtension) {
+        Preconditions.checkArgument(validateFilename(itemName), "invalid item name: %s", itemName);
+        Preconditions.checkArgument(isValidFileExtension(fileExtension), "invalid file extension: %s", fileExtension);
+        return dataItemPath.resolve(Path.of(itemName, itemName + "." + fileExtension));
+    }
+
+    private Path getItemId(Path absoluteItemPath) {
+        Preconditions.checkArgument(absoluteItemPath.isAbsolute());
+        Preconditions.checkArgument(absoluteItemPath.startsWith(dataItemPath));
+        return dataPath.relativize(absoluteItemPath);
     }
 
     public boolean addItemToCollection(String itemName, String fileExtension, InputStream contents, String collectionId) {
 
+        var itemFile = getNewItemPath(itemName, fileExtension);
+        var itemId = getItemId(itemFile).toString();
         try {
             gitHelper.pullGitChanges();
 
@@ -292,11 +303,11 @@ public class EditAPI {
             Path output;
 
             // Check to see if the file already exists
-            boolean itemAlreadyInCollection = itemInCollection(itemName, collection);
-            if (itemMap.containsKey(itemName)) {
+            boolean itemAlreadyInCollection = itemInCollection(itemId, collection);
+            if (itemMap.containsKey(itemId)) {
 
                 // Overwrite existing Item
-                output = itemMap.get(itemName).getFilepath();
+                output = itemMap.get(itemId).getFilepath();
 
             } else {
 
