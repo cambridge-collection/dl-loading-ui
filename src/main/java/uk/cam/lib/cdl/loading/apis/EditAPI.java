@@ -470,10 +470,7 @@ public class EditAPI {
     }
 
     public Path getDataLocalPath() {
-        var result = Path.of(gitHelper.getDataLocalPath());
-        Preconditions.checkState(result.isAbsolute() && result.normalize().equals(result),
-            "gitHelper.getDataLocalPath() is not a normalised absolute path: %s", result);
-        return result;
+        return dataPath;
     }
 
     public Path getCollectionPath(String collectionId) {

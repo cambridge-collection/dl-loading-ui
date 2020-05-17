@@ -252,9 +252,5 @@ public class GitHelper {
         }
         return null;
     }}
-
-    public String getDataLocalPath() {
-        return gitSourceVariables.getGitSourcePath() + gitSourceVariables.getGitSourceDataSubpath();
-    }
 }
 
