@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.apis;
 
+import com.google.common.truth.Truth;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -21,8 +22,11 @@ import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.common.truth.Truth.assertThat;
 
 /**
  * Uses a Bare Repository for testing jgit commands.
@@ -52,7 +56,7 @@ class EditAPITest {
         git.commit().setMessage("Adding Test Data").setAuthor("testuser", "test@example.com ").call();
 
 
-        gitSourceVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "/data",
+        gitSourceVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "data",
             "gitSourceURL", "gitSourceURLUserame",
             "gitSourceURLPassword", "gitBranch");
 
@@ -198,7 +202,8 @@ class EditAPITest {
     void getDataLocalPath() {
         var dataLocalPath = editAPI.getDataLocalPath();
         LOG.info("dataLocalPath: " + dataLocalPath);
-        assert (dataLocalPath.toString().equals(gitSourceVariables.getGitSourcePath() + gitSourceVariables.getGitSourceDataSubpath()));
+        assertThat((Object)dataLocalPath)
+            .isEqualTo(Path.of(gitSourceVariables.getGitSourcePath(), gitSourceVariables.getGitSourceDataSubpath()));
     }
 
     private Collection makeCollection(String urlSlugName) {

@@ -35,7 +35,7 @@ class PackagingAPITest {
 
         MockGitRepo gitRepo = new MockGitRepo();
 
-        gitSourceVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "/data",
+        gitSourceVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "data",
             "gitSourceURL", "gitSourceURLUserame",
             "gitSourceURLPassword", "gitBranch");
 
