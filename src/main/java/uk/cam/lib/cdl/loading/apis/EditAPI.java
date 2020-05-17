@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
+import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Dataset;
 import uk.cam.lib.cdl.loading.model.editor.Id;
@@ -209,12 +210,28 @@ public class EditAPI {
         return new ArrayList<>(collectionMap.values());
     }
 
+    public Collection getCollection(Path id) {
+        ModelOps().validatePathForId(id);
+        var collection = collectionMap.get(id.toString());
+        if(collection == null) {
+            throw new NotFoundException(String.format("Colletion not found: '%s'", id));
+        }
+        return collection;
+    }
     public Collection getCollection(String collectionId) {
-        return collectionMap.get(collectionId);
+        return getCollection(Path.of(collectionId));
     }
 
+    public Item getItem(Path id) {
+        ModelOps().validatePathForId(id);
+        var item = itemMap.get(id.toString());
+        if(item == null) {
+            throw new NotFoundException(String.format("Item not found: '%s'", id));
+        }
+        return item;
+    }
     public Item getItem(String id) {
-        return itemMap.get(FilenameUtils.getBaseName(id));
+        return getItem(Path.of(id));
     }
 
     public boolean validate(MultipartFile file) {
@@ -349,32 +366,33 @@ public class EditAPI {
         return false;
     }
 
-    public boolean deleteItemFromCollection(String itemName, String collectionId) {
+    public boolean deleteItemFromCollection(Path itemId, Path collectionId) {
 
         try {
             gitHelper.pullGitChanges();
 
             Collection collection = getCollection(collectionId);
-            Item item = itemMap.get(itemName);
-            collection.getItemIds().remove(item.getId());
+            Item item = getItem(itemId);
+            var itemReference = ModelOps().relativizeIdAsReference(collectionId, itemId);
+            collection.getItemIds().remove(new Id(itemReference.toString()));
 
             // Write out collection file
             ObjectMapper mapper = new ObjectMapper();
             ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-            Path collectionFilePath = Preconditions.checkNotNull(collectionFilepaths.get(collectionId));
+            Path collectionFilePath = ModelOps().resolveIdToIOPath(dataPath, collectionId);
             writer.writeValue(collectionFilePath.toFile(), collection);
 
             // Delete file for item if it exists in no other collection
             if (getFirstCollectionForItem(item) == null) {
-                var f = item.getFilepath();
-                if (!Files.deleteIfExists(f)) {
+                Path itemFile = ModelOps().resolveIdToIOPath(dataPath, itemId);
+                if (!Files.deleteIfExists(itemFile)) {
                     return false;
                 }
                 // remove parent dir if empty
-                var parentFile = f.getParent();
-                if (Files.isDirectory(parentFile)) {
+                var itemDir = itemFile.getParent();
+                if (Files.isDirectory(itemDir)) {
                     try {
-                        Files.deleteIfExists(parentFile);
+                        Files.deleteIfExists(itemDir);
                     }
                     catch (DirectoryNotEmptyException e) { /* ignore */ }
                 }
@@ -394,7 +412,7 @@ public class EditAPI {
     private Collection getFirstCollectionForItem(Item i) {
 
         for (Collection c : getCollections()) {
-            if (c.getItemIds().contains(i.getId())) {
+            if(ModelOps().isItemInCollection(i, c))  {
                 return c;
             }
         }

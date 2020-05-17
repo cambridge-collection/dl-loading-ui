@@ -1,6 +1,5 @@
 package uk.cam.lib.cdl.loading.apis;
 
-import com.google.common.truth.Truth;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -12,21 +11,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
+import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.CollectionCredit;
 import uk.cam.lib.cdl.loading.model.editor.CollectionDescription;
 import uk.cam.lib.cdl.loading.model.editor.CollectionName;
 import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.Item;
+import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Uses a Bare Repository for testing jgit commands.
@@ -101,19 +104,37 @@ class EditAPITest {
 
     @Test
     void getCollection() {
-        Collection test = editAPI.getCollection("collections/test.collection.json");
-        assert (test != null);
-        assert (test.getName().getUrlSlug().equals("test"));
-        assert (test.getItemIds().size() == 5);
+        Collection a = editAPI.getCollection("collections/test.collection.json");
+        Collection b = editAPI.getCollection(Path.of("collections/test.collection.json"));
+        assertThat(a).isSameInstanceAs(b);
+        assertThat(a.getName().getUrlSlug().equals("test"));
+        assertThat(a.getItemIds()).hasSize(5);
+    }
+
+    @Test
+    void getCollectionThrowsOnUnknownId() {
+        assertThrows(NotFoundException.class, () -> editAPI.getCollection(Path.of("sdfsd")));
+        assertThrows(NotFoundException.class, () -> editAPI.getCollection(("sdfsd")));
     }
 
     @Test
     void getItem() {
-        Item item = editAPI.getItem("MS-TEST-00001");
-        assert (item != null);
-        assert (item.getId().getId().equals("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml"));
-        assert (item.getName().equals("MS-TEST-00001"));
-        assert (item.getFilepath().endsWith("/data/items/data/tei/MS-TEST-00001/MS-TEST-00001.xml"));
+        var id = Path.of("items/data/tei/MS-TEST-00001/MS-TEST-00001.xml");
+        Item item = editAPI.getItem(id);
+        Item itemFromStringId = editAPI.getItem(id.toString());
+        assertThat(item).isSameInstanceAs(itemFromStringId);
+        assertThat((Object)item.getIdAsPath()).isEqualTo(id);
+        assertThat(item.getId().getId()).isEqualTo(id.toString());
+        assertThat(item.getName()).isEqualTo("MS-TEST-00001");
+
+        var exc = assertThrows(UnsupportedOperationException.class, () -> item.getFilepath());
+        assertThat(exc).hasMessageThat().isEqualTo("getFilepath() called on Item constructed with ID-only constructor");
+    }
+
+    @Test
+    void getItemThrowsOnUnknownId() {
+        assertThrows(NotFoundException.class, () -> editAPI.getItem(Path.of("sdfsd")));
+        assertThrows(NotFoundException.class, () -> editAPI.getItem(("sdfsd")));
     }
 
     @Test
@@ -152,28 +173,34 @@ class EditAPITest {
 
     @Test
     void addItemToCollection() throws IOException {
-        assert (editAPI.getItem("MS-MYITEMTEST-00001") == null);
+        var itemId = Path.of("items/data/tei/MS-MYITEMTEST-00001/MS-MYITEMTEST-00001.xml");
+        assertThrows(NotFoundException.class, () -> editAPI.getItem(itemId));
 
         MockMultipartFile xmlFile2 = new MockMultipartFile("xml", "filename.xml", "text/xml", ("<?xml " +
             "version=\"1.0\" encoding=\"UTF-8\"?><test></test>").getBytes());
 
         editAPI.addItemToCollection("MS-MYITEMTEST-00001", "xml", xmlFile2.getInputStream(), "collections/test.collection.json");
 
-        Item item = editAPI.getItem("MS-MYITEMTEST-00001");
-        assert (item != null);
-        assert (item.getId().getId().equals("../items/data/tei/MS-MYITEMTEST-00001/MS-MYITEMTEST-00001.xml"));
-        assert (item.getName().equals("MS-MYITEMTEST-00001"));
-        assert (item.getFilepath().endsWith("/data/items/data/tei/MS-MYITEMTEST-00001/MS-MYITEMTEST-00001.xml"));
+        Item item = editAPI.getItem(itemId);
+        assertThat((Object)item.getIdAsPath()).isEqualTo(itemId);
         Id id = new Id("../items/data/tei/MS-MYITEMTEST-00001/MS-MYITEMTEST-00001.xml");
         assert (editAPI.getCollection("collections/test.collection.json").getItemIds().contains(id));
     }
 
     @Test
     void deleteItemFromCollection() {
+        var itemId = Path.of("items/data/tei/MS-TEST-00001/MS-TEST-00001.xml");
+        var itemFile = ModelOps.ModelOps().resolveIdToIOPath(editAPI.getDataLocalPath(), itemId);
+        var collectionId = Path.of("collections/test.collection.json");
+        var itemReference = new Id("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml");
 
-        assert (editAPI.getCollection("collections/test.collection.json").getItemIds().contains(new Id("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml")));
-        editAPI.deleteItemFromCollection("MS-TEST-00001", "collections/test.collection.json");
-        assert (!editAPI.getCollection("collections/test.collection.json").getItemIds().contains(new Id("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml")));
+        assertThat(editAPI.getCollection(collectionId).getItemIds()).contains(itemReference);
+        assertThat(Files.isRegularFile(itemFile));
+
+        editAPI.deleteItemFromCollection(itemId, Path.of("collections/test.collection.json"));
+
+        assertThat(editAPI.getCollection(collectionId).getItemIds()).doesNotContain(itemReference);
+        assertThat(Files.notExists(itemFile)).isTrue();
     }
 
     @Test

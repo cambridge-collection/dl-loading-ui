@@ -2,7 +2,7 @@ package uk.cam.lib.cdl.loading;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
@@ -20,8 +20,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -35,6 +33,7 @@ import uk.cam.lib.cdl.loading.forms.ItemForm;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.Item;
+import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -43,9 +42,10 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 
 
 @Controller
@@ -86,7 +86,7 @@ public class EditController {
 
         CollectionForm form;
         boolean newCollection = true;
-        List<Item> items = new ArrayList<>();
+        List<Item> items = ImmutableList.of();
 
         if (collectionId == null) {
             form = new CollectionForm();
@@ -113,9 +113,9 @@ public class EditController {
             // Get Item names from Ids
             if (collection != null) {
                 newCollection = false;
-                for (Id id : collection.getItemIds()) {
-                    items.add(editAPI.getItem(id.getId()));
-                }
+                items = ModelOps().streamResolvedItemIds(collection)
+                    .map(editAPI::getItem)
+                    .collect(ImmutableList.toImmutableList());
             }
         }
 
@@ -324,11 +324,20 @@ public class EditController {
 
     @PostMapping("/edit/collection/deleteItem")
     public RedirectView deleteCollectionItem(RedirectAttributes attributes, @RequestParam String collectionId,
-                                             @RequestParam String itemName) {
+                                             @RequestParam String itemId) {
+
+        Path _itemId, _collectionId;
+        try {
+            _itemId = ModelOps.ModelOps().validatePathForId(Path.of(itemId));
+            _collectionId = ModelOps.ModelOps().validatePathForId(Path.of(collectionId));
+        }
+        catch (IllegalStateException e) {
+            throw new BadRequestException(e);
+        }
 
         attributes.addAttribute("collectionId", collectionId);
 
-        boolean success = editAPI.deleteItemFromCollection(itemName, collectionId);
+        boolean success = editAPI.deleteItemFromCollection(_itemId, _collectionId);
         if (success) {
             attributes.addFlashAttribute("message", "Item deleted from collection.");
         } else {
