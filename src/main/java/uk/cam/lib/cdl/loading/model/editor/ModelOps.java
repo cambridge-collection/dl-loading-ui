@@ -1,12 +1,20 @@
 package uk.cam.lib.cdl.loading.model.editor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Streams;
+import com.google.common.io.ByteStreams;
 import org.immutables.value.Value;
 
+import javax.validation.ValidationException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @Value.Immutable(singleton = true)
@@ -32,6 +40,27 @@ public interface ModelOps {
         Preconditions.checkState(pathIsNormalised(path), "path '%s' is not a valid ID: path is not normalised", path);
         Preconditions.checkState(!path.toString().equals(""), "path '%s' is not a valid ID: path is empty", path);
         return path;
+    }
+
+    default Path validateSubpath(Path path) {
+        Preconditions.checkState(!path.isAbsolute(), "path '%s' is not a valid sub path: path is absolute", path);
+        Preconditions.checkState(pathIsNormalised(path), "path '%s' is not a valid sub path: path is not normalised", path);
+        Preconditions.checkState(!path.toString().equals(""), "path '%s' is not a valid sub path: path is empty", path);
+        return path;
+    }
+
+    default Path validatePathForIO(Path path) {
+        Preconditions.checkState(path.isAbsolute(), "path '%s' is not valid for IO: path is not absolute", path);
+        // This isn't necessary really, but a non-normalised path is probably a sign of mishandling
+        Preconditions.checkState(pathIsNormalised(path), "path '%s' is not valid for IO: path is not normalised", path);
+        return path;
+    }
+
+    default Path resolveIdToIOPath(Path dataRoot, Path id) {
+        validatePathForIO(dataRoot);
+        validatePathForId(id);
+        // No need to normalise as both paths already are normalised
+        return validatePathForIO(dataRoot.resolve(id));
     }
 
     default Path resolveReferenceAsId(Path contextFileId, Path reference) {
