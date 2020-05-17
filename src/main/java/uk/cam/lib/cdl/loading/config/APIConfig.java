@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
 import uk.cam.lib.cdl.loading.apis.PackagingAPI;
+import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.net.URL;
 
@@ -18,7 +19,7 @@ public class APIConfig {
     }
 
     @Bean
-    public PackagingAPI packagingAPI(GitLocalVariables gitSourceVariables, GitAPIVariables gitAPIVariables) {
-        return new PackagingAPI(gitSourceVariables, gitAPIVariables);
+    public PackagingAPI packagingAPI(GitHelper gitHelper, GitAPIVariables gitAPIVariables) {
+        return new PackagingAPI(gitHelper, gitAPIVariables);
     }
 }

@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.editing;
 
+import com.google.common.base.Preconditions;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,13 +45,13 @@ public class ContentEditorController {
     public ContentEditorController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay,
                                    @Value("${data.path.images}") String imagePath,
                                    @Value("${data.path.html}") String htmlPath,
-                                   GitLocalVariables gitSourceVariables) {
+                                   GitHelper gitHelper) {
 
         this.pathForDataDisplay = pathForDataDisplay;
         this.contentImagesURL = pathForDataDisplay + imagePath;
         this.contentImagesPath = editAPI.getDataLocalPath() + imagePath;
         this.contentHTMLPath = editAPI.getDataLocalPath() + htmlPath;
-        this.gitHelper = new GitHelper(gitSourceVariables);
+        this.gitHelper = Preconditions.checkNotNull(gitHelper);
     }
 
     /**

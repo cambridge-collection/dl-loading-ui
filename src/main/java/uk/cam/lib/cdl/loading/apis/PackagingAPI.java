@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.apis;
 
+import com.google.common.base.Preconditions;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -42,8 +43,9 @@ public class PackagingAPI {
     private final GitHelper gitHelper;
     private final BitBucketAPI sourceBitBucketAPI;
 
-    public PackagingAPI(GitLocalVariables gitSourceVariables, GitAPIVariables gitAPIVariables) {
-        this.gitHelper = new GitHelper(gitSourceVariables);
+    public PackagingAPI(GitHelper gitHelper, GitAPIVariables gitAPIVariables) {
+        Preconditions.checkNotNull(gitHelper);
+        this.gitHelper = gitHelper;
 
         this.sourceBitBucketAPI = new BitBucketAPI(gitAPIVariables.getGitAPIURL(), gitAPIVariables.getGitBranch(),
             gitAPIVariables.getRepoURL(), gitAPIVariables.getTagsURL(), gitAPIVariables.getPipelinesURL(),

@@ -62,14 +62,7 @@ public class EditAPI {
     private Map<String, String> thumbnailImageURLs = Collections.synchronizedMap(new HashMap<>());
     private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
 
-    public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath,
-                   GitLocalVariables gitSourceVariables) {
-        this(dataPath, dlDatasetFilename, dlUIFilename, dataItemPath, new GitHelper(gitSourceVariables));
-    }
-
     /**
-     * Used for testing Edit API
-     *
      * @param dataPath          File path to source data
      * @param dlDatasetFilename Filename for the root JSON file for this dataset.
      * @param dataItemPath      File path to the item TEI directory.

@@ -13,6 +13,7 @@ import uk.cam.lib.cdl.loading.config.GitAPIVariables;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
 import uk.cam.lib.cdl.loading.model.packaging.Pipeline;
+import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.io.IOException;
 import java.net.URL;
@@ -49,7 +50,7 @@ class PackagingAPITest {
             "gitUsername",
             "gitPassword");
 
-        packagingAPI = new PackagingAPI(gitSourceVariables, gitAPIVariables);
+        packagingAPI = new PackagingAPI(new GitHelper(gitSourceVariables), gitAPIVariables);
     }
 
     @Test

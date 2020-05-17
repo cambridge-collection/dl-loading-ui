@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.apis.EditAPIUpdater;
+import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.nio.file.Path;
 
@@ -31,11 +32,11 @@ public class EditConfig {
     }
 
     @Bean
-    public EditAPI editAPI(GitLocalVariables gitSourceVariables, Path dlDatasetFilename, Path dlUIFilename, Path dataItemPath) {
+    public EditAPI editAPI(GitHelper gitHelper, GitLocalVariables gitSourceVariables, Path dlDatasetFilename, Path dlUIFilename, Path dataItemPath) {
         return new EditAPI(Path.of(gitSourceVariables.getGitSourcePath(), gitSourceVariables.getGitSourceDataSubpath()).toString(),
             dlDatasetFilename.toString(), dlUIFilename.toString(),
             Path.of(gitSourceVariables.getGitSourcePath()).resolve(dataItemPath).toString(),
-            gitSourceVariables);
+            gitHelper);
     }
 
     @ConditionalOnProperty(
