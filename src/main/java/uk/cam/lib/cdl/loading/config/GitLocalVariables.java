@@ -1,5 +1,9 @@
 package uk.cam.lib.cdl.loading.config;
 
+import uk.cam.lib.cdl.loading.model.editor.ModelOps;
+
+import java.nio.file.Path;
+
 public class GitLocalVariables {
     private final String gitSourcePath;
     private final String gitSourceDataSubpath;
@@ -15,6 +19,8 @@ public class GitLocalVariables {
                              String gitSourceURLPassword,
                              String gitBranch
     ) {
+        ModelOps.ModelOps().validatePathForIO(Path.of(gitSourcePath));
+        ModelOps.ModelOps().validateSubpath(Path.of(gitSourceDataSubpath));
         this.gitSourcePath = gitSourcePath;
         this.gitSourceDataSubpath = gitSourceDataSubpath;
         this.gitSourceURL = gitSourceURL;
