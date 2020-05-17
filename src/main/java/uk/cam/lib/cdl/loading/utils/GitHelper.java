@@ -45,6 +45,8 @@ public class GitHelper {
             "repository path is not an absolute, normalised path: %s",
             repositoryPath);
 
+        // Could do this without locking if we call ourselves recursively after
+        // inserting a lock to return the first (i.e. canonical) match.
         synchronized (REPO_LOCKS) {
             // We can't use normal map get() method to look up our key as it
             // checks via reference equality. We could use interned strings as
