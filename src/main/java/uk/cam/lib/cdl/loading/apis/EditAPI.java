@@ -12,13 +12,12 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import uk.cam.lib.cdl.loading.config.GitLocalVariables;
+import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Dataset;
 import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.Item;
-import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 import uk.cam.lib.cdl.loading.model.editor.UI;
 import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
@@ -50,7 +49,6 @@ TODO This should be refactored out to talk to a external API.
 Access info from the git data directly for now.
 */
 public class EditAPI {
-
     private final Path dataPath;
     private final Path dataItemPath;
     private final Path datasetFile;
@@ -88,8 +86,8 @@ public class EditAPI {
             }
 
             updateModel();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (EditApiException | IOException e) {
+            throw new EditApiException("setup() failed - unable to initialise: " + e.getMessage(), e);
         }
     }
 
@@ -103,7 +101,8 @@ public class EditAPI {
         try {
             gitHelper.pullGitChanges();
         } catch (GitAPIException e) {
-            e.printStackTrace();
+            throw new EditApiException(
+                "Updating model failed: Update git repo failed: " + e.getMessage(), e);
         }
 
         ObjectMapper mapper = new ObjectMapper();
