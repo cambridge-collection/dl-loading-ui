@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.web.multipart.MultipartFile;
@@ -287,10 +286,6 @@ public class EditAPI {
         return dataItemPath;
     }
 
-    private boolean itemInCollection(String itemId, Collection collection) {
-        return ModelOps().isItemInCollection(Path.of(itemId), collection);
-    }
-
     private Path getNewItemPath(String itemName, String fileExtension) {
         Preconditions.checkArgument(validateFilename(itemName), "invalid item name: %s", itemName);
         Preconditions.checkArgument(isValidFileExtension(fileExtension), "invalid file extension: %s", fileExtension);
@@ -306,51 +301,19 @@ public class EditAPI {
     public boolean addItemToCollection(String itemName, String fileExtension, InputStream contents, String collectionId) {
 
         var itemFile = getNewItemPath(itemName, fileExtension);
-        var itemId = getItemId(itemFile).toString();
+        var itemId = getItemId(itemFile);
         try {
             gitHelper.pullGitChanges();
 
             Collection collection = getCollection(collectionId);
+            Path output = ModelOps().resolveIdToIOPath(dataPath, itemId);
+            Files.createDirectories(output.getParent());
 
-            Path output;
-
-            // Check to see if the file already exists
-            boolean itemAlreadyInCollection = itemInCollection(itemId, collection);
-            if (itemMap.containsKey(itemId)) {
-
-                // Overwrite existing Item
-                output = itemMap.get(itemId).getFilepath();
-
-            } else {
-
-                // new Item
-                output = dataItemPath.resolve(FilenameUtils.getBaseName(itemName)).resolve(itemName + "." + fileExtension);
-                Files.createDirectories(output.getParent());
-
-            }
-
-            // Write out file.
-            FileUtils.copyInputStreamToFile(contents, output.toFile());
-
-            if (!itemAlreadyInCollection) {
-
-                Path collectionFilePath = Preconditions.checkNotNull(
-                    collectionFilepaths.get(collection.getCollectionId()));
-                // Add itemId to collection
-                if (itemMap.containsKey(itemName)) {
-                    collection.getItemIds().add(itemMap.get(itemName).getId());
-                } else {
-                    Path collectionDir = collectionFilePath.getParent();
-                    Path itemPath = collectionDir.relativize(output);
-                    Id id = new Id(itemPath.toString());
-                    collection.getItemIds().add(id);
+            ModelOps().writeMetadata(dataPath, itemId, contents);
+            if (!ModelOps().isItemInCollection(itemId, collection)) {
+                if(ModelOps().addItemToCollection(collection, itemId)) {
+                    ModelOps().writeCollectionJson(new ObjectMapper(), dataPath, collection);
                 }
-
-                // Write out collection file
-                ObjectMapper mapper = new ObjectMapper();
-                ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-                writer.writeValue(collectionFilePath.toFile(), collection);
-
             }
 
             gitHelper.pushGitChanges();
@@ -360,9 +323,10 @@ public class EditAPI {
             return true;
 
         } catch (IOException | GitAPIException e) {
-            e.printStackTrace();
+            throw new EditApiException(String.format(
+                "Failed to add item '%s' to collection '%s': %s",
+                itemId, collectionId, e.getMessage()), e);
         }
-        return false;
     }
 
     public boolean deleteItemFromCollection(Path itemId, Path collectionId) {

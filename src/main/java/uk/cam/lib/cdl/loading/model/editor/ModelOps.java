@@ -1,20 +1,17 @@
 package uk.cam.lib.cdl.loading.model.editor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Streams;
-import com.google.common.io.ByteStreams;
+import com.google.common.io.CharSource;
 import org.immutables.value.Value;
 
-import javax.validation.ValidationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
 @Value.Immutable(singleton = true)
@@ -26,8 +23,29 @@ public interface ModelOps {
         return DefaultModelOps.of();
     }
 
-    default String itemMetadataAsString(Item item) throws IOException {
-        return Files.readString(item.getFilepath());
+    default String readItemMetadataAsString(Path dataRoot, Item item) throws IOException {
+        Preconditions.checkNotNull(dataRoot);
+        Preconditions.checkNotNull(item);
+        return readMetadataAsString(dataRoot, item.getIdAsPath());
+    }
+
+    default String readMetadataAsString(Path dataRoot, Path id) throws IOException {
+        Preconditions.checkNotNull(dataRoot);
+        Preconditions.checkNotNull(id);
+        return Files.readString(resolveIdToIOPath(dataRoot, id));
+    }
+
+    default void writeMetadata(Path dataRoot, Path id, InputStream metadata) throws IOException {
+        Preconditions.checkNotNull(dataRoot);
+        Preconditions.checkNotNull(id);
+        Preconditions.checkNotNull(metadata);
+        var destination = resolveIdToIOPath(dataRoot, id);
+        Files.createDirectories(destination.getParent());
+        Files.copy(metadata, destination, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    default void writeMetadata(Path dataRoot, Path id, String metadata) throws IOException {
+        writeMetadata(dataRoot, id, CharSource.wrap(metadata).asByteSource(Charsets.UTF_8).openBufferedStream());
     }
 
     default boolean pathIsNormalised(Path path) {
@@ -88,10 +106,37 @@ public interface ModelOps {
     }
 
     default boolean isItemInCollection(Item item, Collection collection) {
-        return isItemInCollection(Path.of(item.getId().getId()), collection);
+        return isItemInCollection(item.getIdAsPath(), collection);
     }
     default boolean isItemInCollection(Path itemId, Collection collection) {
         validatePathForId(itemId);
         return streamResolvedItemIds(collection).anyMatch(itemId::equals);
+    }
+
+    default boolean addItemToCollection(Collection collection, Item item) {
+        return addItemToCollection(collection, item.getIdAsPath());
+    }
+
+    default boolean addItemToCollection(Collection collection, Path itemId) {
+        Preconditions.checkNotNull(collection);
+        validatePathForId(itemId);
+        if(isItemInCollection(itemId, collection)) {
+            return false;
+        }
+
+        collection.getItemIds().add(new Id(relativizeIdAsReference(collection.getIdAsPath(), itemId).toString()));
+        return true;
+    }
+
+    default void writeCollectionJson(ObjectMapper mapper, Path dataRoot, Collection collection) throws IOException {
+        Preconditions.checkNotNull(mapper);
+        Preconditions.checkNotNull(dataRoot);
+        Preconditions.checkNotNull(collection);
+        validatePathForIO(dataRoot);
+
+        var destination = resolveIdToIOPath(dataRoot, collection.getIdAsPath());
+        Files.createDirectories(destination.getParent());
+        mapper.writerWithDefaultPrettyPrinter()
+            .writeValue(destination.toFile(), collection);
     }
 }

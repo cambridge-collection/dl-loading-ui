@@ -1,13 +1,20 @@
 package uk.cam.lib.cdl.loading.model.editor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
+import com.google.common.io.CharSource;
 import com.google.common.truth.Truth;
 import org.immutables.value.Value;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.lang.Nullable;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
@@ -16,9 +23,6 @@ import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 import static uk.cam.lib.cdl.loading.testutils.Models.exampleCollection;
 
 public class ModelOpsTest {
-
-    private ModelOps modelOps = ModelOps();
-
     @Test
     public void instanceAccessFunction() {
         Truth.assertThat(ModelOps()).isInstanceOf(ModelOps.class);
@@ -52,6 +56,45 @@ public class ModelOpsTest {
         }
         else {
             Assertions.assertThrows(IllegalStateException.class, () -> ModelOps().validatePathForId(path));
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "'',false",
+        "'/foo',false",
+        "'foo/../bar',false",
+        "'foo',true",
+        "'foo/bar',true",
+        // paths can have extensions, but the intent is that this is used for directory references
+        "'foo/bar.txt',true"
+    })
+    public void validateSubpath(Path path, boolean isValid) {
+        if(isValid) {
+            Truth.assertThat((Object)ModelOps().validateSubpath(path)).isSameInstanceAs(path);
+        }
+        else {
+            Assertions.assertThrows(IllegalStateException.class, () -> ModelOps().validateSubpath(path));
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "/,foo,/foo,true",
+        "/foo,bar,/foo/bar,true",
+        "/foo/bar,baz/boz,/foo/bar/baz/boz",
+        // Invalid:
+        "foo,bar,",
+        "/foo/../bar,baz,",
+        "/foo,/bar,",
+        "/foo,bar/../baz,"
+    })
+    public void resolveIdToIOPath(Path root, Path id, @Nullable Path expected) {
+        if(expected != null) {
+            Truth.assertThat((Object)ModelOps().resolveIdToIOPath(root, id)).isEqualTo(expected);
+        }
+        else {
+            Assertions.assertThrows(IllegalStateException.class, () -> ModelOps().resolveIdToIOPath(root, id));
         }
     }
 
@@ -129,5 +172,96 @@ public class ModelOpsTest {
 
         Truth.assertThat(ModelOps().streamResolvedItemIds(col).collect(ImmutableList.toImmutableList()))
             .isEqualTo(ImmutableList.of(Path.of("items/foo1.xml"), Path.of("items/foo3.xml")));
+    }
+
+    @Test
+    public void addItemToCollection() {
+        var colId = Path.of("collections/foo.json");
+        var itemId = Path.of("items/item.json");
+        var col = exampleCollection(colId);
+        var item = new Item(itemId);
+
+        Truth.assertThat(col.getItemIds()).isEmpty();
+
+        // When
+        Truth.assertThat(ModelOps().addItemToCollection(col, item)).isTrue();
+        // Then
+        Truth.assertThat(col.getItemIds()).hasSize(1);
+        Truth.assertThat(ModelOps().isItemInCollection(item, col)).isTrue();
+
+        // Item is not added twice
+        Truth.assertThat(ModelOps().addItemToCollection(col, item)).isFalse();
+        Truth.assertThat(col.getItemIds()).hasSize(1);
+    }
+
+    @Test
+    public void writeCollectionJson(@TempDir Path dataDir) throws IOException {
+        Truth.assertThat(Files.list(dataDir).count()).isEqualTo(0);
+
+        var colId = Path.of("collections/foo.json");
+
+        for(var mode : List.of("new", "overwrite")) {
+            var col = exampleCollection(colId, "col-" + mode);
+            ModelOps().writeCollectionJson(new ObjectMapper(), dataDir, col);
+
+            Truth.assertThat(Files.isDirectory(dataDir.resolve("collections"))).isTrue();
+            Truth.assertThat(new ObjectMapper().readValue(ModelOps().resolveIdToIOPath(dataDir, colId).toFile(), Collection.class))
+                .isEqualTo(col);
+        }
+    }
+
+    @Test
+    public void writeMetadata_String(@TempDir Path dataDir) throws IOException {
+        testWriteMetadata(dataDir, ModelOps()::writeMetadata);
+    }
+
+    @Test
+    public void writeMetadata_InputStream(@TempDir Path dataDir) throws IOException {
+        testWriteMetadata(dataDir, (_dataDir, id, content) -> ModelOps().writeMetadata(_dataDir, id,
+            CharSource.wrap(content)
+                .asByteSource(Charsets.UTF_8)
+                .openBufferedStream()));
+    }
+
+    @FunctionalInterface interface WriteMetadataOverload { void callViaString(Path dir, Path id, String content) throws IOException; }
+
+    void testWriteMetadata(Path dataDir, WriteMetadataOverload writeMetadataOverload) throws IOException {
+        var id = Path.of("some/dir/file.txt");
+        var content = "some\ncontent\n∂ƒß¬˚∆ß∂åƒ\n";
+        var ioPath = ModelOps().resolveIdToIOPath(dataDir, id);
+
+        Truth.assertThat(Files.isDirectory(ioPath.getParent())).isFalse();
+        Truth.assertThat(Files.exists(ioPath)).isFalse();
+
+        for(var mode : List.of("new", "overwrite")) {
+            writeMetadataOverload.callViaString(dataDir, id, content + mode);
+
+            Truth.assertWithMessage(mode).that(Files.isDirectory(ioPath.getParent())).isTrue();
+            Truth.assertWithMessage(mode).that(Files.readString(ioPath)).isEqualTo(content + mode);
+        }
+    }
+
+    @Test
+    public void readMetadataAsString(@TempDir Path dataDir) throws IOException {
+        var id = Path.of("some/dir/file.txt");
+        var content = "some\ncontent\n∂ƒß¬˚∆ß∂åƒ\n";
+        var ioPath = ModelOps().resolveIdToIOPath(dataDir, id);
+
+        Files.createDirectories(ioPath.getParent());
+        Files.writeString(ioPath, content);
+
+        Truth.assertThat(ModelOps().readMetadataAsString(dataDir, id)).isEqualTo(content);
+    }
+
+    @Test
+    public void readItemMetadataAsString(@TempDir Path dataDir) throws IOException {
+        var id = Path.of("some/dir/file.txt");
+        var content = "some\ncontent\n∂ƒß¬˚∆ß∂åƒ\n";
+        var ioPath = ModelOps().resolveIdToIOPath(dataDir, id);
+
+        Files.createDirectories(ioPath.getParent());
+        Files.writeString(ioPath, content);
+
+        Truth.assertThat(ModelOps().readItemMetadataAsString(dataDir, new Item(id))).isEqualTo(content);
     }
 }

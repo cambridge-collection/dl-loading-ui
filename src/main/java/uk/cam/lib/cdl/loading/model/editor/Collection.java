@@ -8,6 +8,7 @@ import com.google.common.base.Preconditions;
 
 import java.beans.ConstructorProperties;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
@@ -34,7 +35,8 @@ public class Collection implements Comparable<Collection> {
         this.name = name;
         this.description = description;
         this.credit = credit;
-        this.ids = ids;
+        // Ensure ids is a mutable list
+        this.ids = new ArrayList<>(ids);
     }
 
     @JsonProperty("@type")

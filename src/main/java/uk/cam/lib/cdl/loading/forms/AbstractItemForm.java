@@ -31,7 +31,7 @@ abstract class AbstractItemForm {
     public static ItemForm forItem(EditAPI editAPI, Item item) {
         var form = new ItemForm();
         try {
-            form.setMetadata(ModelOps().itemMetadataAsString(item));
+            form.setMetadata(ModelOps().readItemMetadataAsString(editAPI.getDataLocalPath(), item));
         }
         catch (IOException e) {
             throw new UncheckedIOException(e);
