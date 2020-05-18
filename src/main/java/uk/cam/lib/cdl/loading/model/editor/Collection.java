@@ -4,9 +4,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 
 import java.beans.ConstructorProperties;
+import java.nio.file.Path;
 import java.util.List;
+
+import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 
 /**
  * TODO Make this a full implementation
@@ -110,6 +114,12 @@ public class Collection implements Comparable<Collection> {
     @JsonIgnore
     public String getCollectionId() {
         return collectionId;
+    }
+
+    @JsonIgnore
+    public Path getIdAsPath() {
+        Preconditions.checkNotNull(collectionId, "collection has no ID set");
+        return ModelOps().validatePathForId(Path.of(collectionId));
     }
 
     @JsonIgnore
