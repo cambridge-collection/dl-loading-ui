@@ -54,6 +54,13 @@ public interface ModelOps {
         writeMetadata(dataRoot, id, CharSource.wrap(metadata).asByteSource(Charsets.UTF_8).openBufferedStream());
     }
 
+    default void writeItem(Path dataRoot, Item item) throws IOException {
+        Preconditions.checkNotNull(dataRoot);
+        Preconditions.checkNotNull(item);
+        Preconditions.checkArgument(item.fileData().isPresent(), "item has no file data: %s", item.id());
+        writeMetadata(dataRoot, item.id(), item.fileData().get());
+    }
+
     default boolean pathIsNormalised(Path path) {
         Preconditions.checkNotNull(path);
         return Streams.stream(path).map(Object::toString).noneMatch(segment -> ".".equals(segment) || "..".equals(segment));

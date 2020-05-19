@@ -234,6 +234,26 @@ public class ModelOpsTest {
     }
 
     @Test
+    public void writeItem(@TempDir Path dataDir) throws IOException {
+        var item = ImmutableItem.of(Path.of("items/foo/foo.txt"));
+        var itemFile = ModelOps().resolveIdToIOPath(dataDir, item.id());
+        boolean fileExists = false;
+        for(var content : List.of("foo\nß∂ƒ\n", "bar\n∆˚¬\n")) {
+            Truth.assertThat(Files.exists(itemFile)).isEqualTo(fileExists);
+            ModelOps().writeItem(dataDir, item.withFileData(content));
+            Truth.assertThat(Files.readString(itemFile)).isEqualTo(content);
+            fileExists = true;
+        }
+    }
+
+    @Test
+    public void writeItemRejectsItemWithoutFileData(@TempDir Path dataDir) {
+        var exc = Assertions.assertThrows(IllegalArgumentException.class,
+            () -> ModelOps().writeItem(dataDir, ImmutableItem.of(Path.of("items/foo/foo.txt"))));
+        Truth.assertThat(exc).hasMessageThat().startsWith("item has no file data");
+    }
+
+    @Test
     public void writeMetadata_String(@TempDir Path dataDir) throws IOException {
         testWriteMetadata(dataDir, ModelOps()::writeMetadata);
     }
