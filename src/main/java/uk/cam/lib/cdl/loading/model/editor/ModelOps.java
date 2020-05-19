@@ -3,15 +3,21 @@ package uk.cam.lib.cdl.loading.model.editor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.io.CharSource;
 import org.immutables.value.Value;
+import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @Value.Immutable(singleton = true)
@@ -153,5 +159,65 @@ public interface ModelOps {
         Files.createDirectories(destination.getParent());
         mapper.writerWithDefaultPrettyPrinter()
             .writeValue(destination.toFile(), collection);
+    }
+
+    /**
+     * Update the Collections an Item is a member of.
+     *
+     * <p>The specified Collection models are mutated to reflect the membership
+     * specified by the {@code membershipTransformation}.
+     *
+     * @param item The item who's membership state is to be enforced.
+     * @param collections The collection instances to enforce the state in.
+     * @return The set of Collections which were modified by the operation.
+     */
+    default MembershipDelta<Collection> transformItemCollectionMembership(
+        Item item,
+        Iterable<Collection> collections,
+        SetMembershipTransformation<Path> membershipTransformation) {
+
+        var delta = calculateCollectionMembershipTransformationDelta(item, collections, membershipTransformation);
+        delta.additions().forEach(col -> addItemToCollection(col, item));
+        delta.removals().forEach(col -> removeItemFromCollection(col, item));
+        return delta;
+    }
+
+    @Value.Immutable
+    @Value.Style(builtinContainerAttributes = false)
+    interface MembershipDelta<T> {
+        @Value.Default default Set<T> additions() { return ImmutableSet.of(); }
+        @Value.Default default Set<T> removals() { return ImmutableSet.of(); }
+        @Value.Default default Set<T> membership() { return ImmutableSet.of(); }
+    }
+
+    default MembershipDelta<Collection> calculateCollectionMembershipTransformationDelta(
+        Item item,
+        Iterable<Collection> collections,
+        SetMembershipTransformation<Path> membershipTransformation
+    ) {
+        var collectionsById = Streams.stream(collections)
+            .collect(ImmutableMap.toImmutableMap(Collection::getIdAsPath, Function.identity()));
+
+        var currentMembership = Streams.stream(collections)
+            .filter(col -> isItemInCollection(item, col))
+            .map(Collection::getIdAsPath)
+            .collect(ImmutableSet.toImmutableSet());
+        var newMembership = membershipTransformation.appliedTo(currentMembership, collectionsById.keySet());
+
+        Preconditions.checkState(newMembership.excludedAliens().isEmpty(),
+            "membershipTransformation dictates item be removed from non-existent collections: %s",
+            newMembership.excludedAliens());
+        Preconditions.checkState(newMembership.includedAliens().isEmpty(),
+            "membershipTransformation dictates item be added to non-existent collections: %s",
+            newMembership.includedAliens());
+
+        var additions = Sets.difference(newMembership.members(), currentMembership);
+        var removals = Sets.difference(currentMembership, newMembership.members());
+
+        return ImmutableMembershipDelta.<Collection>builder()
+            .additions(additions.stream().map(collectionsById::get).collect(ImmutableSet.toImmutableSet()))
+            .removals(removals.stream().map(collectionsById::get).collect(ImmutableSet.toImmutableSet()))
+            .membership(newMembership.members().stream().map(collectionsById::get).collect(ImmutableSet.toImmutableSet()))
+            .build();
     }
 }

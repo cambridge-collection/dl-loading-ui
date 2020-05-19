@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 import static uk.cam.lib.cdl.loading.testutils.Models.*;
 
@@ -170,7 +171,7 @@ public class ModelOpsTest {
 
         var col = example1.collection();
 
-        Truth.assertThat(ModelOps().streamResolvedItemIds(col).collect(ImmutableList.toImmutableList()))
+        Truth.assertThat(ModelOps().streamResolvedItemIds(col).collect(toImmutableList()))
             .isEqualTo(ImmutableList.of(Path.of("items/foo1.xml"), Path.of("items/foo3.xml")));
     }
 
@@ -226,7 +227,8 @@ public class ModelOpsTest {
             ModelOps().writeCollectionJson(new ObjectMapper(), dataDir, col);
 
             Truth.assertThat(Files.isDirectory(dataDir.resolve("collections"))).isTrue();
-            Truth.assertThat(new ObjectMapper().readValue(ModelOps().resolveIdToIOPath(dataDir, colId).toFile(), Collection.class))
+            Truth.assertThat(new ObjectMapper().readValue(
+                ModelOps().resolveIdToIOPath(dataDir, colId).toFile(), Collection.class))
                 .isEqualTo(col);
         }
     }
