@@ -134,16 +134,17 @@ public class ModelOpsTest {
     }
 
     public static CollectionItemsExample example1() {
-        var item1 = new Item("foo1", Path.of("/data/items/foo1.xml"), new Id("items/foo1.xml"));
-        var item2 = new Item("foo2", Path.of("/data/items/foo2.xml"), new Id("items/foo2.xml"));
-        var item3 = new Item("foo3", Path.of("/data/items/foo3.xml"), new Id("items/foo3.xml"));
+        var item1 = new Item(Path.of("items/foo1.xml"));
+        var item2 = new Item(Path.of("items/foo2.xml"));
+        var item3 = new Item(Path.of("items/foo3.xml"));
 
         var colId = Path.of("collections/example.json");
 
         return ImmutableCollectionItemsExample.builder()
             .addItems(item1, item2, item3)
             .collection(exampleCollection(colId,
-                Stream.of(item1, item3).map(Item::getId).map(Id::getId).map(Path::of)
+                Stream.of(item1, item3)
+                    .map(Item::getIdAsPath)
                     .map(itemId -> ModelOps().relativizeIdAsReference(colId, itemId)).map(Object::toString).map(Id::new)))
             .build();
     }

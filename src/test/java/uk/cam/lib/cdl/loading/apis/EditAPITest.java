@@ -124,11 +124,6 @@ class EditAPITest {
         Item itemFromStringId = editAPI.getItem(id.toString());
         assertThat(item).isSameInstanceAs(itemFromStringId);
         assertThat((Object)item.getIdAsPath()).isEqualTo(id);
-        assertThat(item.getId().getId()).isEqualTo(id.toString());
-        assertThat(item.getName()).isEqualTo("MS-TEST-00001");
-
-        var exc = assertThrows(UnsupportedOperationException.class, () -> item.getFilepath());
-        assertThat(exc).hasMessageThat().isEqualTo("getFilepath() called on Item constructed with ID-only constructor");
     }
 
     @Test
