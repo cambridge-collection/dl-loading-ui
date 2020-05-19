@@ -16,6 +16,7 @@ import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Dataset;
 import uk.cam.lib.cdl.loading.model.editor.Id;
+import uk.cam.lib.cdl.loading.model.editor.ImmutableItem;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.model.editor.UI;
 import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
@@ -132,7 +133,7 @@ public class EditAPI {
             for (Id relativeItemId : c.getItemIds()) {
                 var itemFile = collectionFile.resolveSibling(relativeItemId.getId());
                 var itemId = dataPath.relativize(itemFile);
-                newItemMap.put(itemId.toString(), new Item(itemId));
+                newItemMap.put(itemId.toString(), ImmutableItem.of(itemId));
             }
         }
 

@@ -134,9 +134,9 @@ public class ModelOpsTest {
     }
 
     public static CollectionItemsExample example1() {
-        var item1 = new Item(Path.of("items/foo1.xml"));
-        var item2 = new Item(Path.of("items/foo2.xml"));
-        var item3 = new Item(Path.of("items/foo3.xml"));
+        var item1 = ImmutableItem.of(Path.of("items/foo1.xml"));
+        var item2 = ImmutableItem.of(Path.of("items/foo2.xml"));
+        var item3 = ImmutableItem.of(Path.of("items/foo3.xml"));
 
         var colId = Path.of("collections/example.json");
 
@@ -180,7 +180,7 @@ public class ModelOpsTest {
         var colId = Path.of("collections/foo.json");
         var itemId = Path.of("items/item.json");
         var col = exampleCollection(colId);
-        var item = new Item(itemId);
+        var item = ImmutableItem.of(itemId);
 
         Truth.assertThat(col.getItemIds()).isEmpty();
 
@@ -263,6 +263,6 @@ public class ModelOpsTest {
         Files.createDirectories(ioPath.getParent());
         Files.writeString(ioPath, content);
 
-        Truth.assertThat(ModelOps().readItemMetadataAsString(dataDir, new Item(id))).isEqualTo(content);
+        Truth.assertThat(ModelOps().readItemMetadataAsString(dataDir, ImmutableItem.of(id))).isEqualTo(content);
     }
 }
