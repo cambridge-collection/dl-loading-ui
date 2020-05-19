@@ -128,6 +128,21 @@ public interface ModelOps {
         return true;
     }
 
+    default boolean removeItemFromCollection(Collection collection, Item item) {
+        return removeItemFromCollection(collection, item.id());
+    }
+    default boolean removeItemFromCollection(Collection collection, Path itemId) {
+        Preconditions.checkNotNull(collection);
+        validatePathForId(itemId);
+        if(!isItemInCollection(itemId, collection)) {
+            return false;
+        }
+
+        var wasRemoved = collection.getItemIds().remove(new Id(relativizeIdAsReference(collection.getIdAsPath(), itemId).toString()));
+        assert wasRemoved;
+        return true;
+    }
+
     default void writeCollectionJson(ObjectMapper mapper, Path dataRoot, Collection collection) throws IOException {
         Preconditions.checkNotNull(mapper);
         Preconditions.checkNotNull(dataRoot);

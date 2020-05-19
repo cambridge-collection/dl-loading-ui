@@ -2,6 +2,7 @@ package uk.cam.lib.cdl.loading.model.editor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharSource;
 import com.google.common.truth.Truth;
@@ -193,6 +194,27 @@ public class ModelOpsTest {
         // Item is not added twice
         Truth.assertThat(ModelOps().addItemToCollection(col, item)).isFalse();
         Truth.assertThat(col.getItemIds()).hasSize(1);
+    }
+
+    @Test
+    public void removeItemFromCollection() {
+        var colId = Path.of("collections/foo.json");
+        var itemId = Path.of("items/item-2.json");
+        // Collection with 3 items
+        var col = exampleCollection(colId, Stream.of(1, 2, 3)
+            .map(n -> "items/item-" + n + ".json").map(Path::of)
+            .map(id -> ModelOps().relativizeIdAsReference(colId, id)).map(Id::new));
+        var item = ImmutableItem.of(itemId);
+
+        Truth.assertThat(col.getItemIds()).hasSize(3);
+        Truth.assertThat(ModelOps().isItemInCollection(item, col)).isTrue();
+
+        Truth.assertThat(ModelOps().removeItemFromCollection(col, item)).isTrue();
+
+        Truth.assertThat(col.getItemIds()).hasSize(2);
+        Truth.assertThat(ModelOps().isItemInCollection(item, col)).isFalse();
+
+        Truth.assertThat(ModelOps().removeItemFromCollection(col, item)).isFalse();
     }
 
     @Test
