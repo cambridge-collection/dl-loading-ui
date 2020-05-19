@@ -23,4 +23,25 @@ public class CollectionTest {
         Truth.assertThat(Assertions.assertThrows(NullPointerException.class, col::getIdAsPath))
             .hasMessageThat().isEqualTo("collection has no ID set");
     }
+
+    @Test
+    public void toStringContainsCollectionIdIfSet() {
+        var colWithId = Models.exampleCollection(Path.of("collections/foo.json"));
+        Truth.assertThat(colWithId.toString()).contains("@id: collections/foo.json");
+
+        var colWithoutId = Models.exampleCollection(Path.of("collections/foo.json"));
+        colWithoutId.setCollectionId(null);
+        Truth.assertThat(colWithoutId.toString()).doesNotContain("@id: collections/foo.json");
+    }
+
+    @Test
+    public void equalsAndHashIgnoreId() {
+        var colWithId = Models.exampleCollection(Path.of("collections/foo.json"));
+        var colWithoutId = Models.exampleCollection(Path.of("collections/foo.json"));
+        colWithoutId.setCollectionId(null);
+
+        Truth.assertThat(colWithId.toString()).isNotEqualTo(colWithoutId.toString());
+        Truth.assertThat(colWithId).isEqualTo(colWithoutId);
+        Truth.assertThat(colWithId.hashCode()).isEqualTo(colWithoutId.hashCode());
+    }
 }

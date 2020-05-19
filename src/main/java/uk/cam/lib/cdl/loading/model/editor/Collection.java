@@ -72,9 +72,16 @@ public class Collection implements Comparable<Collection> {
     }
 
     public String toString() {
+        return toString(true);
+    }
+
+    private String toString(boolean includeId) {
         StringBuffer sb = new StringBuffer();
         sb.append("class Collection {\n");
 
+        if(includeId && this.collectionId != null) {
+            sb.append("    @id: ").append(toIndentedString(collectionId)).append("\n");
+        }
         sb.append("    @type: ").append(toIndentedString(getType())).append("\n");
         sb.append("    name: ").append(toIndentedString(name)).append("\n");
         sb.append("    description: ").append(toIndentedString(description)).append("\n");
@@ -103,14 +110,16 @@ public class Collection implements Comparable<Collection> {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Collection) {
-            return toString().equals(obj.toString());
+            // Ignore any collection id for equality/hash
+            return toString(false).equals(((Collection)obj).toString(false));
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return toString().hashCode();
+        // Ignore any collection id for equality/hash
+        return toString(false).hashCode();
     }
 
     @JsonIgnore
