@@ -18,7 +18,7 @@ public class Item {
         this.id = ModelOps().validatePathForId(id);
     }
 
-    public Path getIdAsPath() {
+    public Path id() {
         return this.id;
     }
 }

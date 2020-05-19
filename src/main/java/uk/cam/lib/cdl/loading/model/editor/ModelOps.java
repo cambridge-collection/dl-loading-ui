@@ -26,7 +26,7 @@ public interface ModelOps {
     default String readItemMetadataAsString(Path dataRoot, Item item) throws IOException {
         Preconditions.checkNotNull(dataRoot);
         Preconditions.checkNotNull(item);
-        return readMetadataAsString(dataRoot, item.getIdAsPath());
+        return readMetadataAsString(dataRoot, item.id());
     }
 
     default String readMetadataAsString(Path dataRoot, Path id) throws IOException {
@@ -106,7 +106,7 @@ public interface ModelOps {
     }
 
     default boolean isItemInCollection(Item item, Collection collection) {
-        return isItemInCollection(item.getIdAsPath(), collection);
+        return isItemInCollection(item.id(), collection);
     }
     default boolean isItemInCollection(Path itemId, Collection collection) {
         validatePathForId(itemId);
@@ -114,7 +114,7 @@ public interface ModelOps {
     }
 
     default boolean addItemToCollection(Collection collection, Item item) {
-        return addItemToCollection(collection, item.getIdAsPath());
+        return addItemToCollection(collection, item.id());
     }
 
     default boolean addItemToCollection(Collection collection, Path itemId) {

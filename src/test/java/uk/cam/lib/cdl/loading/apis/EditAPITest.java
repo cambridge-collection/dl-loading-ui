@@ -123,7 +123,7 @@ class EditAPITest {
         Item item = editAPI.getItem(id);
         Item itemFromStringId = editAPI.getItem(id.toString());
         assertThat(item).isSameInstanceAs(itemFromStringId);
-        assertThat((Object)item.getIdAsPath()).isEqualTo(id);
+        assertThat((Object)item.id()).isEqualTo(id);
     }
 
     @Test
@@ -177,7 +177,7 @@ class EditAPITest {
         editAPI.addItemToCollection("MS-MYITEMTEST-00001", "xml", xmlFile2.getInputStream(), "collections/test.collection.json");
 
         Item item = editAPI.getItem(itemId);
-        assertThat((Object)item.getIdAsPath()).isEqualTo(itemId);
+        assertThat((Object)item.id()).isEqualTo(itemId);
         Id id = new Id("../items/data/tei/MS-MYITEMTEST-00001/MS-MYITEMTEST-00001.xml");
         assert (editAPI.getCollection("collections/test.collection.json").getItemIds().contains(id));
     }

@@ -144,7 +144,7 @@ public class ModelOpsTest {
             .addItems(item1, item2, item3)
             .collection(exampleCollection(colId,
                 Stream.of(item1, item3)
-                    .map(Item::getIdAsPath)
+                    .map(Item::id)
                     .map(itemId -> ModelOps().relativizeIdAsReference(colId, itemId)).map(Object::toString).map(Id::new)))
             .build();
     }
