@@ -2,7 +2,6 @@ package uk.cam.lib.cdl.loading.model.editor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharSource;
 import com.google.common.truth.Truth;
@@ -21,7 +20,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
-import static uk.cam.lib.cdl.loading.testutils.Models.exampleCollection;
+import static uk.cam.lib.cdl.loading.testutils.Models.*;
 
 public class ModelOpsTest {
     @Test
@@ -145,8 +144,7 @@ public class ModelOpsTest {
             .addItems(item1, item2, item3)
             .collection(exampleCollection(colId,
                 Stream.of(item1, item3)
-                    .map(Item::id)
-                    .map(itemId -> ModelOps().relativizeIdAsReference(colId, itemId)).map(Object::toString).map(Id::new)))
+                    .map(itemToReferenceFrom(colId))))
             .build();
     }
 
@@ -203,7 +201,7 @@ public class ModelOpsTest {
         // Collection with 3 items
         var col = exampleCollection(colId, Stream.of(1, 2, 3)
             .map(n -> "items/item-" + n + ".json").map(Path::of)
-            .map(id -> ModelOps().relativizeIdAsReference(colId, id)).map(Id::new));
+            .map(idToReferenceFrom(colId)));
         var item = ImmutableItem.of(itemId);
 
         Truth.assertThat(col.getItemIds()).hasSize(3);

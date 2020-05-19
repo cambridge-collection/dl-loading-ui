@@ -7,8 +7,11 @@ import uk.cam.lib.cdl.loading.model.editor.CollectionCredit;
 import uk.cam.lib.cdl.loading.model.editor.CollectionDescription;
 import uk.cam.lib.cdl.loading.model.editor.CollectionName;
 import uk.cam.lib.cdl.loading.model.editor.Id;
+import uk.cam.lib.cdl.loading.model.editor.Item;
+import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 
 import java.nio.file.Path;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class Models {
@@ -33,5 +36,12 @@ public class Models {
 
         col.setCollectionId(id.toString());
         return col;
+    }
+
+    public static Function<Item, Id> itemToReferenceFrom(Path contextId) {
+        return idToReferenceFrom(contextId).compose(Item::id);
+    }
+    public static Function<Path, Id> idToReferenceFrom(Path contextId) {
+        return id -> new Id(ModelOps.ModelOps().relativizeIdAsReference(contextId, id));
     }
 }
