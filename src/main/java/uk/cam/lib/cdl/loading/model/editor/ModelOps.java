@@ -9,6 +9,8 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.io.CharSource;
 import org.immutables.value.Value;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateHandlerResolver;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
 import java.io.IOException;
@@ -16,6 +18,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -258,5 +262,55 @@ public interface ModelOps {
             .removals(removals.stream().map(collectionsById::get).collect(ImmutableSet.toImmutableSet()))
             .membership(newMembership.members().stream().map(collectionsById::get).collect(ImmutableSet.toImmutableSet()))
             .build();
+    }
+
+    /**
+     * Apply a list of model states using handlers
+     *
+     * @param states
+     * @param resolver
+     */
+    default void enforceModelState(List<ModelState<?>> states, ModelStateHandlerResolver resolver) {
+        states.parallelStream()
+            .map(state -> {
+                return resolver.resolveHandler(state)
+                    .flatMap(resolvedHandler -> {
+                        try {
+                            resolvedHandler.apply();
+                            return Optional.<ModelOpsException>empty();
+                        }
+                        catch (IOException e) {
+                            return Optional.of(new ModelOpsException(String.format(
+                                "Handler failed to handle state. state: %s, handler: %s, error: %s",
+                                resolvedHandler.state(), resolvedHandler.handler(), e.getMessage()), e));
+                        }
+                    })
+                    .or(() -> Optional.of(new ModelOpsException(String.format("No handler found for state: %s, using resolver: %s", state, resolver))));
+            })
+            .flatMap(Optional::stream) // flatten to a stream of ModelOpsException
+            .findFirst()
+                .ifPresent(err -> { throw err; });
+    }
+
+    class ModelOpsException extends RuntimeException {
+        public ModelOpsException() {
+            super();
+        }
+
+        public ModelOpsException(String message) {
+            super(message);
+        }
+
+        public ModelOpsException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public ModelOpsException(Throwable cause) {
+            super(cause);
+        }
+
+        protected ModelOpsException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+            super(message, cause, enableSuppression, writableStackTrace);
+        }
     }
 }
