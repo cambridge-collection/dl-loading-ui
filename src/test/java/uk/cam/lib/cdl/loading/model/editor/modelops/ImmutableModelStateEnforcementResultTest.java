@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 
 import java.util.Optional;
 
@@ -17,7 +16,7 @@ public class ImmutableModelStateEnforcementResultTest {
     @Mock private ModelState<?> state;
     @Mock private ResolvedModelStateHandler<?, ?> resolution;
     @Mock private Object handlerResult;
-    @Mock private ModelOps.ModelOpsException error;
+    @Mock private ModelOpsException error;
 
     @Test
     public void successfulFactory() {

@@ -3,7 +3,6 @@ package uk.cam.lib.cdl.loading.model.editor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -11,7 +10,9 @@ import com.google.common.collect.Streams;
 import com.google.common.io.CharSource;
 import org.immutables.value.Value;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ImmutableModelStateEnforcementResult;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelOpsException;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateEnforcementFailureException;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateEnforcementResult;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateHandlerResolver;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
@@ -325,39 +326,4 @@ public interface ModelOps {
                             "No handler found for state: %s, using resolver: %s", state, resolver)))));
     }
 
-    class ModelOpsException extends RuntimeException {
-        public ModelOpsException() {
-            super();
-        }
-
-        public ModelOpsException(String message) {
-            super(message);
-        }
-
-        public ModelOpsException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public ModelOpsException(Throwable cause) {
-            super(cause);
-        }
-
-        protected ModelOpsException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-            super(message, cause, enableSuppression, writableStackTrace);
-        }
-    }
-
-    class ModelStateEnforcementFailureException extends ModelOpsException {
-        private final List<ModelStateEnforcementResult> results;
-
-        public ModelStateEnforcementFailureException(
-            String message, Throwable cause, List<ModelStateEnforcementResult> results) {
-            super(message, cause);
-            this.results = ImmutableList.copyOf(results);
-        }
-
-        public List<ModelStateEnforcementResult> results() {
-            return results;
-        }
-    }
 }

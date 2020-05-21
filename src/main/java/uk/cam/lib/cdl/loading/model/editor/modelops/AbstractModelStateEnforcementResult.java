@@ -2,7 +2,6 @@ package uk.cam.lib.cdl.loading.model.editor.modelops;
 
 import com.google.common.base.Preconditions;
 import org.immutables.value.Value;
-import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 
 @Value.Immutable
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE)
@@ -32,13 +31,13 @@ public abstract class AbstractModelStateEnforcementResult implements ModelStateE
     }
 
     public static ImmutableModelStateEnforcementResult resolutionFailed(
-        ModelState<?> state, ModelOps.ModelOpsException error) {
+        ModelState<?> state, ModelOpsException error) {
         return ImmutableModelStateEnforcementResult.builder()
             .outcome(Outcome.RESOLUTION_FAILED).state(state).error(error).build();
     }
 
     public static ImmutableModelStateEnforcementResult handlerFailed(
-        ModelState<?> state, ResolvedModelStateHandler<?, ?> resolution, ModelOps.ModelOpsException error) {
+        ModelState<?> state, ResolvedModelStateHandler<?, ?> resolution, ModelOpsException error) {
         return ImmutableModelStateEnforcementResult.builder()
             .outcome(Outcome.HANDLER_FAILED).state(state).resolution(resolution).error(error).build();
     }

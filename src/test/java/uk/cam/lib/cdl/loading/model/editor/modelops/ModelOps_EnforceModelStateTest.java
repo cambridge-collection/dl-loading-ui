@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 
 import java.io.IOException;
 import java.util.List;
@@ -69,7 +68,7 @@ public class ModelOps_EnforceModelStateTest {
         List<ModelStateEnforcementResult.Outcome> outcomes = ImmutableList.of(
             SUCCESSFUL, SUCCESSFUL, RESOLUTION_FAILED, HANDLER_FAILED);
 
-        var exc = Assertions.assertThrows(ModelOps.ModelStateEnforcementFailureException.class, () ->
+        var exc = Assertions.assertThrows(ModelStateEnforcementFailureException.class, () ->
             ModelOps().enforceModelState(states, resolver));
 
         // The first state in the stream that failed is used for the message
@@ -86,7 +85,7 @@ public class ModelOps_EnforceModelStateTest {
             .isEqualTo(outcomes);
 
         // The exception's cause is also the first failure
-        assertThat(exc.getCause()).isInstanceOf(ModelOps.ModelOpsException.class);
+        assertThat(exc.getCause()).isInstanceOf(ModelOpsException.class);
         assertThat(exc.getCause()).isSameInstanceAs(exc.results().get(2).error().orElseThrow());
     }
 }
