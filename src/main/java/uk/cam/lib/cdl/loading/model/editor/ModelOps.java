@@ -3,26 +3,31 @@ package uk.cam.lib.cdl.loading.model.editor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.io.CharSource;
 import org.immutables.value.Value;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ImmutableModelStateEnforcementResult;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateEnforcementResult;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateHandlerResolver;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 @Value.Immutable(singleton = true)
 @Value.Style(
@@ -265,31 +270,59 @@ public interface ModelOps {
     }
 
     /**
-     * Apply a list of model states using handlers
+     * Modify resources by updating them to match a specified state.
      *
-     * @param states
-     * @param resolver
+     * The list of states represents the desired concrete state of the resources.
+     * The resolver matches states with handlers capable of making the state concrete by updating resources.
+     *
+     * @param states A list of states, representing the desired state of resources.
+     * @param resolver A resolver capable of matching each state to a handler.
+     * @return A list containing the outcome of applying each state.
+     * @throws ModelStateEnforcementFailureException When any of the states are not applied successfully. The full list of results is held by the exception.
      */
-    default void enforceModelState(List<ModelState<?>> states, ModelStateHandlerResolver resolver) {
-        states.parallelStream()
-            .map(state -> {
-                return resolver.resolveHandler(state)
-                    .flatMap(resolvedHandler -> {
+    default List<ModelStateEnforcementResult> enforceModelState(List<ModelState<?>> states, ModelStateHandlerResolver resolver) {
+        var results = enforceModelState(states.parallelStream(), resolver).collect(toImmutableList());
+
+        // Throw the first error if any occurred. Note that we always allow all handlers to be applied when an error
+        // occurs, we don't cut off mid way through. This deterministic behaviour makes reasoning about what happens
+        // easier, especially considering we can apply states in parallel.
+        var failedResult = results.stream().filter(result -> result.error().isPresent()).findFirst();
+        if(failedResult.isPresent()) {
+            var failedCount = results.stream().filter(result -> result.error().isPresent()).count();
+            assert failedResult.get().error().isPresent();
+            var firstFailure = failedResult.get().error().get();
+            throw new ModelStateEnforcementFailureException(
+                String.format(
+                    "Failed to enforce all model states: %d/%d states failed, initial failure: %s",
+                    failedCount, results.size(), firstFailure.getMessage()),
+                firstFailure, results);
+        }
+        return results;
+    }
+
+    /**
+     * As {@link #enforceModelState(List, ModelStateHandlerResolver)} except no
+     * exception is thrown on failure, the stream contains the full results of
+     * state enforcement.
+     */
+    default Stream<ModelStateEnforcementResult> enforceModelState(
+        Stream<ModelState<?>> states, ModelStateHandlerResolver resolver) {
+        return states.map(state ->
+            resolver.resolveHandler(state)
+                    .map(resolvedHandler -> {
                         try {
-                            resolvedHandler.apply();
-                            return Optional.<ModelOpsException>empty();
+                            return ImmutableModelStateEnforcementResult.successful(state, resolvedHandler, resolvedHandler.apply());
                         }
                         catch (IOException e) {
-                            return Optional.of(new ModelOpsException(String.format(
-                                "Handler failed to handle state. state: %s, handler: %s, error: %s",
-                                resolvedHandler.state(), resolvedHandler.handler(), e.getMessage()), e));
+                            return ImmutableModelStateEnforcementResult.handlerFailed(
+                                state, resolvedHandler, new ModelOpsException(String.format(
+                                    "Handler failed to handle state. state: %s, handler: %s, error: %s",
+                                    resolvedHandler.state(), resolvedHandler.handler(), e.getMessage()), e));
                         }
                     })
-                    .or(() -> Optional.of(new ModelOpsException(String.format("No handler found for state: %s, using resolver: %s", state, resolver))));
-            })
-            .flatMap(Optional::stream) // flatten to a stream of ModelOpsException
-            .findFirst()
-                .ifPresent(err -> { throw err; });
+                    .orElseGet(() -> ImmutableModelStateEnforcementResult.resolutionFailed(
+                        state, new ModelOpsException(String.format(
+                            "No handler found for state: %s, using resolver: %s", state, resolver)))));
     }
 
     class ModelOpsException extends RuntimeException {
@@ -311,6 +344,20 @@ public interface ModelOps {
 
         protected ModelOpsException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
             super(message, cause, enableSuppression, writableStackTrace);
+        }
+    }
+
+    class ModelStateEnforcementFailureException extends ModelOpsException {
+        private final List<ModelStateEnforcementResult> results;
+
+        public ModelStateEnforcementFailureException(
+            String message, Throwable cause, List<ModelStateEnforcementResult> results) {
+            super(message, cause);
+            this.results = ImmutableList.copyOf(results);
+        }
+
+        public List<ModelStateEnforcementResult> results() {
+            return results;
         }
     }
 }
