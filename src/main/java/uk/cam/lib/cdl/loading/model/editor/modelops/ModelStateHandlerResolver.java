@@ -6,5 +6,5 @@ import java.util.Optional;
  * @see DefaultModelStateHandlerResolver
  */
 public interface ModelStateHandlerResolver {
-    <T> Optional<ResolvedModelStateHandler<? super T>> resolveHandler(ModelState<T> state);
+    <T> Optional<ResolvedModelStateHandler<? super T, ?>> resolveHandler(ModelState<T> state);
 }

@@ -18,7 +18,7 @@ public class DefaultModelStateHandlerResolverTest {
     public void resolveHandler(
         DefaultModelStateHandlerResolver resolver,
         ModelState<?> state,
-        Optional<ModelStateHandler<?>> expected
+        Optional<ModelStateHandler<?, ?>> expected
     ) {
         resolver.resolveHandler(state).ifPresentOrElse(
             resolution -> {
@@ -34,9 +34,9 @@ public class DefaultModelStateHandlerResolverTest {
     }
 
     public static Stream<Arguments> resolveHandlerExamples() {
-        var presentNumber = DefaultModelStateHandler.of(Number.class, PRESENT, s -> {});
-        var anyNumber = DefaultModelStateHandler.of(Number.class, s -> {});
-        var anyString = DefaultModelStateHandler.of(String.class, s -> {});
+        var presentNumber = DefaultModelStateHandler.withoutResult(Number.class, PRESENT, s -> {});
+        var anyNumber = DefaultModelStateHandler.withoutResult(Number.class, s -> {});
+        var anyString = DefaultModelStateHandler.withoutResult(String.class, s -> {});
 
         var resolver = DefaultModelStateHandlerResolver.builder()
             .addHandlers(presentNumber, anyString, anyNumber)

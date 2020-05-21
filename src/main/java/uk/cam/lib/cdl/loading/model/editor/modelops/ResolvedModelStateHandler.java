@@ -5,14 +5,12 @@ import org.immutables.value.Value;
 import java.io.IOException;
 
 @Value.Immutable
-@Value.Style(typeImmutable = "Immutable*")
-public
-interface ResolvedModelStateHandler<T> {
+public interface ResolvedModelStateHandler<T, R> {
     @Value.Parameter(order = 0)
     ModelState<? extends T> state();
     @Value.Parameter(order = 1)
-    ModelStateHandler<? super T> handler();
-    default void apply() throws IOException {
-        handler().handle(state());
+    ModelStateHandler<? super T, ? extends R> handler();
+    default R apply() throws IOException {
+        return handler().handle(state());
     }
 }

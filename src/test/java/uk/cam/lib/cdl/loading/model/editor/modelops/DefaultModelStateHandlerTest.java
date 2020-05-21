@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.cam.lib.cdl.loading.model.editor.modelops._DefaultModelStateHandler.ThrowingConsumer;
+import uk.cam.lib.cdl.loading.utils.ThrowingConsumer;
 
 import java.io.IOException;
 import java.util.stream.Stream;
@@ -24,18 +24,19 @@ import static uk.cam.lib.cdl.loading.model.editor.modelops.ModelState.Ensure.PRE
 @ExtendWith(MockitoExtension.class)
 @TestInstance(PER_CLASS)
 public class DefaultModelStateHandlerTest {
-    private static final DefaultModelStateHandler<Object> NOOP_HANDLER = DefaultModelStateHandler.of(Object.class, (s) -> {});
+    private static final DefaultModelStateHandler<Object, Void> NOOP_HANDLER =
+        DefaultModelStateHandler.withoutResult(Object.class, (s) -> {});
 
     @Mock
     private ThrowingConsumer<ModelState<? extends Number>, IOException> handlerFunc;
 
-    DefaultModelStateHandler<Number> numberHandler;
-    DefaultModelStateHandler<Number> numberEnsurePresent;
-    DefaultModelStateHandler<Number> numberEnsureAbsent;
+    DefaultModelStateHandler<Number, Void> numberHandler;
+    DefaultModelStateHandler<Number, Void> numberEnsurePresent;
+    DefaultModelStateHandler<Number, Void> numberEnsureAbsent;
 
     @BeforeAll
     private void beforeAll() {
-        numberHandler = DefaultModelStateHandler.of(Number.class, s -> this.handlerFunc.accept(s));
+        numberHandler = DefaultModelStateHandler.withoutResult(Number.class, s -> this.handlerFunc.accept(s));
         numberEnsurePresent = numberHandler.withSupportedEnsureValues(PRESENT);
         numberEnsureAbsent = numberHandler.withSupportedEnsureValues(ABSENT);
     }
@@ -47,11 +48,11 @@ public class DefaultModelStateHandlerTest {
 
     @ParameterizedTest
     @MethodSource("match_matchesExpectedStatesExamples")
-    public <T> void match_matchesExpectedStates(DefaultModelStateHandler<?> handler, ModelState<T> state, boolean matches) {
+    public <T> void match_matchesExpectedStates(DefaultModelStateHandler<?, ?> handler, ModelState<T> state, boolean matches) {
         var match = handler.match(state);
 
         Truth.assertThat(match).isNotNull();
-        match.ifPresentOrElse((ModelStateHandler<? super T> typedHandler) -> {
+        match.ifPresentOrElse((ModelStateHandler<? super T, ?> typedHandler) -> {
             Truth.assertThat(matches).isTrue();
             Truth.assertThat(typedHandler).isSameInstanceAs(handler);
         }, () -> {
@@ -90,11 +91,11 @@ public class DefaultModelStateHandlerTest {
     @ParameterizedTest
     @MethodSource("handleCanBeCalledWithoutCastingAfterMatchingExamples")
     public <T extends Number> void handlerMethodInvocation(
-        DefaultModelStateHandler<?> handler, ModelState<T> state
+        DefaultModelStateHandler<?, ?> handler, ModelState<T> state
     ) throws IOException {
         var match = handler.match(state);
 
-        ModelStateHandler<? super T> typedHandler = match.orElseThrow();
+        ModelStateHandler<? super T, ?> typedHandler = match.orElseThrow();
         Assertions.assertDoesNotThrow(() -> typedHandler.handle(state));
         Mockito.verify(handlerFunc, Mockito.times(1)).accept(state);
         Mockito.verifyNoMoreInteractions(handlerFunc);
@@ -105,5 +106,21 @@ public class DefaultModelStateHandlerTest {
         return match_matchesExpectedStatesExamples()
             .filter(arg -> (boolean)arg.get()[2])
             .map(arg -> Arguments.of(arg.get()[0], arg.get()[1]));
+    }
+
+    @Test
+    public void handleReturnsNullForHandlersWithoutResult() throws IOException {
+        var state = ImmutableModelState.ensure(PRESENT, 42);
+        var sideEffect = new boolean[]{false};
+        Truth.assertThat(DefaultModelStateHandler.withoutResult(Integer.class, n -> sideEffect[0] = true).handle(state))
+            .isNull();
+        Truth.assertThat(sideEffect[0]).isTrue();
+    }
+
+    @Test
+    public void handleReturnsValueFromHandlerFunc() throws IOException {
+        var state = ImmutableModelState.ensure(PRESENT, 42);
+        Truth.assertThat(DefaultModelStateHandler.of(Integer.class, n -> n.model() / 2).handle(state))
+            .isEqualTo(21);
     }
 }

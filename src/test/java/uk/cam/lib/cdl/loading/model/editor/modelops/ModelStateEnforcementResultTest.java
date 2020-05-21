@@ -15,7 +15,7 @@ import static uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateEnforcement
 @ExtendWith(MockitoExtension.class)
 public class ModelStateEnforcementResultTest {
     @Mock private ModelState<?> state;
-    @Mock private ResolvedModelStateHandler<?> resolution;
+    @Mock private ResolvedModelStateHandler<?, ?> resolution;
     @Mock private Object handlerResult;
     @Mock private ModelOps.ModelOpsException error;
 

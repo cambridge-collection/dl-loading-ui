@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface ModelStateEnforcementResult {
     Outcome outcome();
     ModelState<?> state();
-    Optional<ResolvedModelStateHandler<?>> resolution();
+    Optional<ResolvedModelStateHandler<?, ?>> resolution();
     Optional<Object> handlerResult();
     Optional<ModelOps.ModelOpsException> error();
 

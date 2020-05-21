@@ -28,9 +28,9 @@ public class ModelStatesTest {
     private ModelOps mockModelOps;
     private final Path dataRoot = Path.of("/foo/bar");
 
-    private <T> void assertInvalidStatesAreRejected(ModelStateHandler<T> handler, Iterable<ModelState<?>> invalidStates) {
+    private <T> void assertInvalidStatesAreRejected(ModelStateHandler<T, ?> handler, Iterable<ModelState<?>> invalidStates) {
         @SuppressWarnings("unchecked")
-        var misTypedHandler = (ModelStateHandler<Object>) handler;
+        var misTypedHandler = (ModelStateHandler<Object, ?>) handler;
         for(var invalidState : invalidStates) {
             Assertions.assertThrows(IllegalArgumentException.class, () -> misTypedHandler.handle(invalidState));
             Mockito.verifyNoMoreInteractions(mockModelOps);
