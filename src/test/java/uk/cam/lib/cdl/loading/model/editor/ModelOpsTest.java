@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 import static uk.cam.lib.cdl.loading.testutils.Models.*;
 
@@ -282,6 +284,96 @@ public class ModelOpsTest {
             Truth.assertWithMessage(mode).that(Files.isDirectory(ioPath.getParent())).isTrue();
             Truth.assertWithMessage(mode).that(Files.readString(ioPath)).isEqualTo(content + mode);
         }
+    }
+
+    @Test
+    public void removeMetadataRemovesFileAndParentDirectories(@TempDir Path dataDir) throws IOException {
+        Path id = Path.of("some/dir/foo.txt");
+        Path file = ModelOps().resolveIdToIOPath(dataDir, id);
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, "content");
+        Truth.assertThat(Files.readString(file)).isEqualTo("content");
+
+        Truth.assertThat(ModelOps().removeMetadata(dataDir, id)).isTrue();
+        // dir and contents are gone
+        Truth.assertThat(Files.exists(dataDir.resolve("some"))).isFalse();
+        Truth.assertThat(Files.exists(dataDir)).isTrue();
+
+        // Removing a missing file succeeds but results false
+        Truth.assertThat(ModelOps().removeMetadata(dataDir, id)).isFalse();
+    }
+
+    @Test
+    public void removeMetadataDoesntRemoveDirectoriesWhenFileDoesNotExist(@TempDir Path dataDir) throws IOException {
+        Path id = Path.of("some/dir/foo.txt");
+        Path file = ModelOps().resolveIdToIOPath(dataDir, id);
+        Files.createDirectories(file.getParent());
+
+        Truth.assertThat(ModelOps().removeMetadata(dataDir, id)).isFalse();
+        Truth.assertThat(Files.exists(dataDir.resolve("some/dir"))).isTrue();
+    }
+
+    @Test
+    public void cleanEmptyDirectories(@TempDir Path dataDir) throws IOException {
+        Path rel = Path.of("some/dir/a/b/removed-file.txt");
+        Path abs = ModelOps().resolveIdToIOPath(dataDir, rel);
+        Files.createDirectories(abs.getParent());
+        Truth.assertThat(Files.isDirectory(abs.getParent())).isTrue();
+
+        ModelOps().cleanEmptyDirectories(dataDir, rel);
+
+        Truth.assertThat(Files.isDirectory(dataDir.resolve("some"))).isFalse();
+        Truth.assertThat(Files.isDirectory(dataDir)).isTrue();
+    }
+
+    @Test
+    public void cleanEmptyDirectoriesPreservesNonEmptyDirs(@TempDir Path dataDir) throws IOException {
+        Path id = Path.of("some/dir/a/b/removed-file.txt");
+        Path other = Path.of("some/dir/x");
+        Path absId = dataDir.resolve(id);
+        Path absOther = dataDir.resolve(other);
+        Files.createDirectories(absId.getParent());
+        Files.createDirectories(absOther);
+        Truth.assertThat(Files.isDirectory(absId.getParent())).isTrue();
+        Truth.assertThat(Files.isDirectory(absOther)).isTrue();
+
+        ModelOps().cleanEmptyDirectories(dataDir, id);
+
+        Truth.assertThat(Files.isDirectory(dataDir.resolve("some/dir"))).isTrue();
+        Truth.assertThat(Files.isDirectory(dataDir.resolve("some/dir/a"))).isFalse();
+        Truth.assertThat(Files.isDirectory(absOther)).isTrue();
+    }
+
+    @Test
+    public void removeItem() throws IOException {
+        var mockModelOps = mock(ModelOps.class);
+        when(mockModelOps.removeItem(any(), any())).thenCallRealMethod();
+        when(mockModelOps.removeMetadata(any(), any())).thenReturn(true);
+        var dataRoot = Path.of("/example/root");
+        var id = Path.of("items/item.json");
+        var item = ImmutableItem.of(id);
+
+        Truth.assertThat(mockModelOps.removeItem(dataRoot, item)).isTrue();
+
+        verify(mockModelOps, times(1)).removeItem(dataRoot, item);
+        verify(mockModelOps, times(1)).removeMetadata(dataRoot, id);
+        verifyNoMoreInteractions(mockModelOps);
+    }
+
+    @Test
+    public void removeCollection() throws IOException {
+        var mockModelOps = mock(ModelOps.class);
+        when(mockModelOps.removeCollection(any(), any())).thenCallRealMethod();
+        when(mockModelOps.removeMetadata(any(), any())).thenReturn(true);
+        var dataRoot = Path.of("/example/root");
+        var id = Path.of("collections/col.json");
+        var collection = exampleCollection(id);
+
+        Truth.assertThat(mockModelOps.removeCollection(dataRoot, collection)).isTrue();
+
+        verify(mockModelOps, times(1)).removeCollection(dataRoot, collection);
+        verify(mockModelOps, times(1)).removeMetadata(dataRoot, id);
+        verifyNoMoreInteractions(mockModelOps);
     }
 
     @Test

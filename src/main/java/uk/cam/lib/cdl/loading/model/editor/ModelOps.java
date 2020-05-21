@@ -61,6 +61,38 @@ public interface ModelOps {
         writeMetadata(dataRoot, item.id(), item.fileData().get());
     }
 
+    default boolean removeItem(Path dataRoot, Item item) throws IOException {
+        return removeMetadata(dataRoot, item.id());
+    }
+
+    default boolean removeCollection(Path dataRoot, Collection collection) throws IOException {
+        return removeMetadata(dataRoot, collection.getIdAsPath());
+    }
+
+    default boolean removeMetadata(Path dataRoot, Path id) throws IOException {
+        Preconditions.checkNotNull(dataRoot);
+        Preconditions.checkNotNull(id);
+        var wasRemoved = Files.deleteIfExists(resolveIdToIOPath(dataRoot, id));
+        if(wasRemoved) {
+            cleanEmptyDirectories(dataRoot, id);
+        }
+        return wasRemoved;
+    }
+
+    default void cleanEmptyDirectories(Path dataRoot, Path removedId) throws IOException {
+        var dir = resolveIdToIOPath(dataRoot, removedId).getParent();
+        assert dir.startsWith(dataRoot);
+        while(!dir.equals(dataRoot)) {
+            try {
+                Files.delete(dir);
+            }
+            catch(DirectoryNotEmptyException e) {
+                break;
+            }
+            dir = dir.getParent();
+        }
+    }
+
     default boolean pathIsNormalised(Path path) {
         Preconditions.checkNotNull(path);
         return Streams.stream(path).map(Object::toString).noneMatch(segment -> ".".equals(segment) || "..".equals(segment));
