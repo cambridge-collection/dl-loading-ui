@@ -44,4 +44,7 @@ public class Models {
     public static Function<Path, Id> idToReferenceFrom(Path contextId) {
         return id -> new Id(ModelOps.ModelOps().relativizeIdAsReference(contextId, id));
     }
+    public static Function<String, Id> idToReferenceFrom(String contextId) {
+        return idToReferenceFrom(ModelOps.ModelOps().validatePathForId(Path.of(contextId))).compose(Path::of);
+    }
 }

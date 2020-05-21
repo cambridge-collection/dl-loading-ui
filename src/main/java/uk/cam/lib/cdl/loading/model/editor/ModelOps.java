@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.io.CharSource;
 import org.immutables.value.Value;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ImmutableModelState;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ImmutableModelStateEnforcementResult;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ModelOpsException;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
@@ -29,6 +30,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static uk.cam.lib.cdl.loading.model.editor.modelops.ModelState.Ensure.ABSENT;
+import static uk.cam.lib.cdl.loading.model.editor.modelops.ModelState.Ensure.PRESENT;
 
 @Value.Immutable(singleton = true)
 @Value.Style(
@@ -224,15 +227,38 @@ public interface ModelOps {
      * @param collections The collection instances to enforce the state in.
      * @return The set of Collections which were modified by the operation.
      */
-    default MembershipDelta<Collection> transformItemCollectionMembership(
+    default List<ModelState<?>> transformItemCollectionMembership(
         Item item,
         Iterable<Collection> collections,
         SetMembershipTransformation<Path> membershipTransformation) {
 
         var delta = calculateCollectionMembershipTransformationDelta(item, collections, membershipTransformation);
-        delta.additions().forEach(col -> addItemToCollection(col, item));
-        delta.removals().forEach(col -> removeItemFromCollection(col, item));
-        return delta;
+        return targetStateForItemCollectionMembershipChange(item, delta);
+    }
+
+    default List<ModelState<?>> targetStateForItemCollectionMembershipChange(
+        Item item,
+        MembershipDelta<Collection> delta
+    ) {
+        Preconditions.checkNotNull(item);
+        Preconditions.checkNotNull(delta);
+        Preconditions.checkArgument(Sets.intersection(delta.additions(), delta.removals()).isEmpty(),
+            "The same collection occurs in additions and removals");
+
+        // Remove items not referenced by any collection
+        Stream<ModelState<?>> removeItem = delta.membership().isEmpty() ?
+            Stream.of(ImmutableModelState.ensure(ABSENT, item)) : Stream.empty();
+
+        Stream<ModelState<?>> collectionsWithItemAdded = delta.additions().stream()
+            .flatMap(col -> addItemToCollection(col, item) ? Stream.of(col) : Stream.empty())
+            .map(col -> ImmutableModelState.ensure(PRESENT, col));
+
+        Stream<ModelState<?>> collectionsWithItemsRemoved = delta.removals().stream()
+            .flatMap(col -> removeItemFromCollection(col, item) ? Stream.of(col) : Stream.empty())
+            .map(col -> ImmutableModelState.ensure(PRESENT, col));
+
+        return Streams.concat(removeItem, collectionsWithItemAdded, collectionsWithItemsRemoved)
+            .collect(toImmutableList());
     }
 
     @Value.Immutable
