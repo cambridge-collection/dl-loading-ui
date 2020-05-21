@@ -13,11 +13,35 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateEnforcementResult.Outcome.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ModelStateEnforcementResultTest {
+public class ImmutableModelStateEnforcementResultTest {
     @Mock private ModelState<?> state;
     @Mock private ResolvedModelStateHandler<?, ?> resolution;
     @Mock private Object handlerResult;
     @Mock private ModelOps.ModelOpsException error;
+
+    @Test
+    public void successfulFactory() {
+        var a = ImmutableModelStateEnforcementResult.builder().outcome(SUCCESSFUL).state(state)
+            .resolution(resolution).handlerResult(handlerResult).build();
+        var b = ImmutableModelStateEnforcementResult.successful(state, resolution, handlerResult);
+        assertThat(a).isEqualTo(b);
+    }
+
+    @Test
+    public void resolutionFailedFactory() {
+        var a = ImmutableModelStateEnforcementResult.builder().outcome(RESOLUTION_FAILED).state(state)
+            .error(error).build();
+        var b = ImmutableModelStateEnforcementResult.resolutionFailed(state, error);
+        assertThat(a).isEqualTo(b);
+    }
+
+    @Test
+    public void handlerFailedFactory() {
+        var a = ImmutableModelStateEnforcementResult.builder().outcome(HANDLER_FAILED).state(state)
+            .resolution(resolution).error(error).build();
+        var b = ImmutableModelStateEnforcementResult.handlerFailed(state, resolution, error);
+        assertThat(a).isEqualTo(b);
+    }
 
     @Test
     public void testPropertyCombinationValidation() {
