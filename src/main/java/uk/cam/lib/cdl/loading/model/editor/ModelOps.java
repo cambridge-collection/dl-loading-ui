@@ -149,6 +149,10 @@ public interface ModelOps {
     default Path relativizeIdAsReference(Path contextFileId, Path id) {
         validatePathForId(contextFileId);
         validatePathForId(id);
+        if(contextFileId.getNameCount() == 1) {
+            assert Path.of("").relativize(id).equals(id);
+            return id;
+        }
         return contextFileId.getParent().relativize(id);
     }
 

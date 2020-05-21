@@ -123,8 +123,11 @@ public class ModelOpsTest {
 
     @ParameterizedTest
     @CsvSource({
+        "root-file-a.json,root-file-b.json,root-file-b.json",
+        "root-file-a.json,sub/thing/file.json,sub/thing/file.json",
+        "root/collections/foo.json,root/collections/bar.json,bar.json",
         "collections/foo.json,items/item.json,../items/item.json",
-        "root/collections/foo.json,root/items/item.json,../items/item.json",
+        "root/collections/foo.json,root/items/item.json,../items/item.json"
     })
     public void relativizeIdAsReference(Path contextFileId, Path id, Path expected) {
         Truth.assertThat((Object)ModelOps().relativizeIdAsReference(contextFileId, id)).isEqualTo(expected);
