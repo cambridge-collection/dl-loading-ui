@@ -5,11 +5,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import org.springframework.lang.Nullable;
 
 import java.beans.ConstructorProperties;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 
@@ -20,10 +22,14 @@ import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 public class Collection implements Comparable<Collection> {
     public static final String TYPE = "https://schemas.cudl.lib.cam.ac.uk/package/v1/collection.json";
     private final CollectionName name;
+    @Nullable
     private final CollectionDescription description;
+    @Nullable
     private final CollectionCredit credit;
     private final List<Id> ids;
+    @Nullable
     private String thumbnailURL;
+    @Nullable
     private String collectionId;
 
     @ConstructorProperties({"name", "description", "credit", "items"})
@@ -32,11 +38,31 @@ public class Collection implements Comparable<Collection> {
                       @JsonProperty("description") CollectionDescription description,
                       @JsonProperty("credit") CollectionCredit credit,
                       @JsonProperty("items") List<Id> ids) {
+        Preconditions.checkNotNull(name, "name cannot be null");
+        Preconditions.checkNotNull(ids, "ids cannot be null");
         this.name = name;
         this.description = description;
         this.credit = credit;
         // Ensure ids is a mutable list
         this.ids = new ArrayList<>(ids);
+    }
+
+    /**
+     * Create a copy of a Collection.
+     *
+     * <p>Mutable members are deep-copied, while immutable members are reused.
+     */
+    public static Collection copyOf(Collection other) {
+        Preconditions.checkNotNull(other);
+        var copy = new Collection(
+            other.name, // immutable
+            other.description == null ? null : CollectionDescription.copyOf(other.description),
+            other.credit == null ? null : CollectionCredit.copyOf(other.credit),
+            other.ids // ids is cloned in the constructor
+        );
+        copy.setThumbnailURL(other.getThumbnailURL());
+        copy.setCollectionId(other.getCollectionId());
+        return copy;
     }
 
     @JsonProperty("@type")
@@ -48,10 +74,12 @@ public class Collection implements Comparable<Collection> {
         return name;
     }
 
+    @Nullable
     public CollectionDescription getDescription() {
         return description;
     }
 
+    @Nullable
     public CollectionCredit getCredit() {
         return credit;
     }
@@ -62,12 +90,13 @@ public class Collection implements Comparable<Collection> {
     }
 
     @JsonIgnore
+    @Nullable
     public String getThumbnailURL() {
         return this.thumbnailURL;
     }
 
     @JsonIgnore
-    public void setThumbnailURL(String thumbnailURL) {
+    public void setThumbnailURL(@Nullable String thumbnailURL) {
         this.thumbnailURL = thumbnailURL;
     }
 
@@ -104,7 +133,11 @@ public class Collection implements Comparable<Collection> {
 
     @Override
     public int compareTo(Collection collection) {
-        return getCollectionId().compareTo(collection.getCollectionId());
+        Preconditions.checkNotNull(collection);
+        var id = this.collectionId;
+        var otherId = collection.collectionId;
+        Preconditions.checkState(id != null && otherId != null, "Cannot compare Collections with no collectionId set");
+        return id.compareTo(otherId);
     }
 
     @Override
@@ -123,6 +156,7 @@ public class Collection implements Comparable<Collection> {
     }
 
     @JsonIgnore
+    @Nullable
     public String getCollectionId() {
         return collectionId;
     }
@@ -134,7 +168,7 @@ public class Collection implements Comparable<Collection> {
     }
 
     @JsonIgnore
-    public void setCollectionId(String collectionId) {
+    public void setCollectionId(@Nullable String collectionId) {
         this.collectionId = collectionId;
     }
 }

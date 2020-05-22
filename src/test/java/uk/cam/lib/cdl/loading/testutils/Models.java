@@ -34,6 +34,7 @@ public class Models {
             new CollectionCredit(new Id("prose.html")),
             itemIds.collect(ImmutableList.toImmutableList()));
 
+        col.setThumbnailURL("http://example.com/thumbnail.jpg");
         col.setCollectionId(id.toString());
         return col;
     }
