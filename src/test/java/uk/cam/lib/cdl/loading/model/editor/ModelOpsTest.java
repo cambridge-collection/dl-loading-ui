@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading.model.editor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharSource;
 import com.google.common.truth.Truth;
 import org.immutables.value.Value;
@@ -11,7 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.lang.Nullable;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
+import uk.cam.lib.cdl.loading.testutils.Models;
+import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -401,5 +406,48 @@ public class ModelOpsTest {
         Files.writeString(ioPath, content);
 
         Truth.assertThat(ModelOps().readItemMetadataAsString(dataDir, ImmutableItem.of(id))).isEqualTo(content);
+    }
+
+    @Test
+    public void transformItem_deletesItemWhenItHasNoCollections() {
+        var item = ImmutableItem.of(Path.of("i1"));
+        var col = Models.exampleCollection(Path.of("c1"), Stream.of("i1").map(Models.idToReferenceFrom("c1")));
+        var removeI1FromC1 = SetMembership.addingAndRemoving(ImmutableSet.of(), ImmutableSet.of(Path.of("c1")));
+
+        var requiredStateChanges = ModelOps().transformItem(item, ImmutableList.of(col), removeI1FromC1);
+
+        // input collections are not modified
+        Truth.assertThat(ModelOps().isItemInCollection(item, col)).isTrue();
+
+        Truth.assertThat(requiredStateChanges).hasSize(2);
+        var itemState = requiredStateChanges.stream().flatMap(state -> state.match(Item.class).stream()).findFirst().orElseThrow();
+        var colState = requiredStateChanges.stream().flatMap(state -> state.match(Collection.class).stream()).findFirst().orElseThrow();
+
+        Truth.assertThat(ModelOps().isItemInCollection(item, colState.model())).isFalse();
+        Truth.assertThat(itemState.model()).isEqualTo(item);
+        Truth.assertThat(itemState.ensure()).isEqualTo(ModelState.Ensure.ABSENT);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void transformItem_enforcesItemStateWhenFileDataPresent(boolean dataPresent) {
+        var item = ImmutableItem.of(Path.of("i1"));
+        if (dataPresent) {
+            item = item.withFileData("foo");
+        }
+        var col = Models.exampleCollection(Path.of("c1"), Stream.of("i1").map(Models.idToReferenceFrom("c1")));
+        var noColChanges = SetMembership.<Path>addingAndRemoving(ImmutableSet.of(), ImmutableSet.of());
+
+        var requiredStateChanges = ModelOps().transformItem(item, ImmutableList.of(col), noColChanges);
+
+        if(dataPresent) {
+            Truth.assertThat(requiredStateChanges).hasSize(1);
+            var itemState = requiredStateChanges.get(0);
+            Truth.assertThat(itemState.ensure()).isEqualTo(ModelState.Ensure.PRESENT);
+            Truth.assertThat(itemState.model()).isEqualTo(item);
+        }
+        else {
+            Truth.assertThat(requiredStateChanges).hasSize(0);
+        }
     }
 }

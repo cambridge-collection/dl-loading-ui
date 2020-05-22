@@ -358,4 +358,20 @@ public interface ModelOps {
                             "No handler found for state: %s, using resolver: %s", state, resolver)))));
     }
 
+    default List<ModelState<?>> transformItem(
+        Item item, Iterable<Collection> collections, SetMembershipTransformation<Path> collectionMembership) {
+        var requiredStateChanges = transformItemCollectionMembership(item, collections, collectionMembership);
+
+        // If the item ends up with no collections, one of the states will be enforcing the item's removal.
+        var itemRemoved = requiredStateChanges.stream()
+            .flatMap(state -> state.match(Item.class).stream())
+            .findFirst().isPresent();
+        // If it's not being removed we need to enforce the item's provided state to create/update the item.
+        if(!itemRemoved && item.fileData().isPresent()) {
+            var itemState = ImmutableModelState.ensure(ModelState.Ensure.PRESENT, item);
+            requiredStateChanges = Streams.concat(requiredStateChanges.stream(), Stream.of(itemState))
+                .collect(toImmutableList());
+        }
+        return requiredStateChanges;
+    }
 }
