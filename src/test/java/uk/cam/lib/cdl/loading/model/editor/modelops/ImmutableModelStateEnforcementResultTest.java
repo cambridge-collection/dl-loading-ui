@@ -27,6 +27,12 @@ public class ImmutableModelStateEnforcementResultTest {
     }
 
     @Test
+    public void successfulFactory_permitsNullHandlerResult() {
+        var successfulWithNoResult = ImmutableModelStateEnforcementResult.successful(state, resolution, null);
+        assertThat(successfulWithNoResult.handlerResult()).isEqualTo(Optional.empty());
+    }
+
+    @Test
     public void resolutionFailedFactory() {
         var a = ImmutableModelStateEnforcementResult.builder().outcome(RESOLUTION_FAILED).state(state)
             .error(error).build();
@@ -52,7 +58,7 @@ public class ImmutableModelStateEnforcementResultTest {
         var successful = ImmutableModelStateEnforcementResult.builder().outcome(SUCCESSFUL).state(state)
             .resolution(resolution).handlerResult(handlerResult).build();
         assertThrows(IllegalStateException.class, () -> successful.withResolution(Optional.empty()));
-        assertThrows(IllegalStateException.class, () -> successful.withHandlerResult(Optional.empty()));
+        assertThat(successful.withHandlerResult(Optional.empty()).handlerResult()).isEqualTo(Optional.empty());
         assertThrows(IllegalStateException.class, () -> successful.withError(error));
 
         var resolutionFailed = ImmutableModelStateEnforcementResult.builder().outcome(RESOLUTION_FAILED).state(state)
@@ -68,8 +74,8 @@ public class ImmutableModelStateEnforcementResultTest {
         assertThrows(IllegalStateException.class, () -> handlerFailed.withError(Optional.empty()));
 
         // messages
-        assertThat(assertThrows(IllegalStateException.class, () -> successful.withHandlerResult(Optional.empty())))
-            .hasMessageThat().isEqualTo("handlerResult must be present with outcome SUCCESSFUL");
+        assertThat(assertThrows(IllegalStateException.class, () -> resolutionFailed.withHandlerResult(Optional.of(1))))
+            .hasMessageThat().isEqualTo("handlerResult must not be present with outcome RESOLUTION_FAILED");
         assertThat(assertThrows(IllegalStateException.class, () -> successful.withError(error)))
             .hasMessageThat().isEqualTo("error must not be present with outcome SUCCESSFUL");
     }

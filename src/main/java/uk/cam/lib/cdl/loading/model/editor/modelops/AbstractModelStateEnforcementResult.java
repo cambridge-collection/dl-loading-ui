@@ -2,6 +2,9 @@ package uk.cam.lib.cdl.loading.model.editor.modelops;
 
 import com.google.common.base.Preconditions;
 import org.immutables.value.Value;
+import org.springframework.lang.Nullable;
+
+import java.util.Optional;
 
 @Value.Immutable
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE)
@@ -10,8 +13,8 @@ public abstract class AbstractModelStateEnforcementResult implements ModelStateE
     void validate() {
         checkState(resolution().isPresent(), outcome() == Outcome.SUCCESSFUL || outcome() == Outcome.HANDLER_FAILED,
             "resolution %s be present with outcome %s");
-        checkState(handlerResult().isPresent(), outcome() == Outcome.SUCCESSFUL,
-            "handlerResult %s be present with outcome %s");
+        Preconditions.checkState(outcome() == Outcome.SUCCESSFUL || handlerResult().isEmpty(),
+            "handlerResult must not be present with outcome %s", outcome());
         checkState(error().isPresent(), outcome() == Outcome.RESOLUTION_FAILED || outcome() == Outcome.HANDLER_FAILED,
             "error %s be present with outcome %s");
     }
@@ -25,9 +28,13 @@ public abstract class AbstractModelStateEnforcementResult implements ModelStateE
     }
 
     public static ImmutableModelStateEnforcementResult successful(
-        ModelState<?> state, ResolvedModelStateHandler<?, ?> resolution, Object handlerResult) {
+        ModelState<?> state, ResolvedModelStateHandler<?, ?> resolution, @Nullable Object handlerResult) {
         return ImmutableModelStateEnforcementResult.builder()
-            .outcome(Outcome.SUCCESSFUL).state(state).resolution(resolution).handlerResult(handlerResult).build();
+            .outcome(Outcome.SUCCESSFUL)
+            .state(state)
+            .resolution(resolution)
+            .handlerResult(Optional.ofNullable(handlerResult))
+            .build();
     }
 
     public static ImmutableModelStateEnforcementResult resolutionFailed(
