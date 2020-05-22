@@ -220,12 +220,12 @@ public interface ModelOps {
     /**
      * Update the Collections an Item is a member of.
      *
-     * <p>The specified Collection models are mutated to reflect the membership
-     * specified by the {@code membershipTransformation}.
+     * <p>The specified Collection models are not modified themselves, modified
+     * copies are returned in the state list.
      *
      * @param item The item who's membership state is to be enforced.
      * @param collections The collection instances to enforce the state in.
-     * @return The set of Collections which were modified by the operation.
+     * @return The list of state changes which would enact the transformation if applied.
      */
     default List<ModelState<?>> transformItemCollectionMembership(
         Item item,
@@ -250,10 +250,12 @@ public interface ModelOps {
             Stream.of(ImmutableModelState.ensure(ABSENT, item)) : Stream.empty();
 
         Stream<ModelState<?>> collectionsWithItemAdded = delta.additions().stream()
+            .map(Collection::copyOf)
             .flatMap(col -> addItemToCollection(col, item) ? Stream.of(col) : Stream.empty())
             .map(col -> ImmutableModelState.ensure(PRESENT, col));
 
         Stream<ModelState<?>> collectionsWithItemsRemoved = delta.removals().stream()
+            .map(Collection::copyOf)
             .flatMap(col -> removeItemFromCollection(col, item) ? Stream.of(col) : Stream.empty())
             .map(col -> ImmutableModelState.ensure(PRESENT, col));
 
