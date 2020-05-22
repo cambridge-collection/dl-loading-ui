@@ -213,7 +213,7 @@ public class EditAPI {
         ModelOps().validatePathForId(id);
         var collection = collectionMap.get(id.toString());
         if(collection == null) {
-            throw new NotFoundException(String.format("Colletion not found: '%s'", id));
+            throw new NotFoundException(String.format("Collection not found: '%s'", id));
         }
         return collection;
     }
