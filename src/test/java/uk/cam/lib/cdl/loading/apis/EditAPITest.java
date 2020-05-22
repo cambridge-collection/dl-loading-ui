@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.apis;
 
+import com.google.common.truth.Truth;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -95,18 +96,31 @@ class EditAPITest {
 
     @Test
     void getCollections() {
-        final List<Collection> collections = editAPI.getCollections();
-        LOG.info("Collections: " + collections.size());
-        assert (collections.size() == 1);
-        assert (collections.get(0).getName().getUrlSlug().equals("test"));
-        assert (collections.get(0).getItemIds().size() == 5);
+        var collections = editAPI.getCollections();
+        assertThat(collections).hasSize(1);
+        assertThat(collections).hasSize(1);
+        assertThat(collections.get(0).getName().getUrlSlug()).isEqualTo("test");
+        assertThat(collections.get(0).getItemIds()).hasSize(5);
+
+        // copies are returned
+        var collectionsB = editAPI.getCollections();
+        assertThat(collections).isEqualTo(collectionsB);
+        assertThat(collections.get(0)).isNotSameInstanceAs(collectionsB.get(0));
     }
 
     @Test
     void getCollection() {
-        Collection a = editAPI.getCollection("collections/test.collection.json");
-        Collection b = editAPI.getCollection(Path.of("collections/test.collection.json"));
-        assertThat(a).isSameInstanceAs(b);
+        var id = Path.of("collections/test.collection.json");
+        Collection a = editAPI.getCollection(id.toString());
+        Collection b = editAPI.getCollection(id.toString());
+        Collection c = editAPI.getCollection(id);
+        assertThat(a).isEqualTo(b);
+        assertThat(a).isEqualTo(c);
+        // copies are returned
+        assertThat(a).isNotSameInstanceAs(b);
+        assertThat(a).isNotSameInstanceAs(c);
+        assertThat(b).isNotSameInstanceAs(c);
+
         assertThat(a.getName().getUrlSlug().equals("test"));
         assertThat(a.getItemIds()).hasSize(5);
     }

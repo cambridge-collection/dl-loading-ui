@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
@@ -33,7 +34,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +41,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 
 /*
@@ -204,9 +206,13 @@ public class EditAPI {
 
     }
 
+    public Stream<Collection> streamCollections() {
+        return collectionMap.values().stream()
+            .map(Collection::copyOf);
+    }
 
     public List<Collection> getCollections() {
-        return new ArrayList<>(collectionMap.values());
+        return streamCollections().collect(toImmutableList());
     }
 
     public Collection getCollection(Path id) {
@@ -215,7 +221,9 @@ public class EditAPI {
         if(collection == null) {
             throw new NotFoundException(String.format("Collection not found: '%s'", id));
         }
-        return collection;
+        // Collections are mutable, so we need to copy collections we share to
+        // keep our data in a predictable state.
+        return Collection.copyOf(collection);
     }
     public Collection getCollection(String collectionId) {
         return getCollection(Path.of(collectionId));
@@ -331,7 +339,10 @@ public class EditAPI {
     }
 
     public boolean deleteItemFromCollection(Path itemId, Path collectionId) {
-
+        // FIXME: this fails to delete the item when it's no longer in any collections because getFirstCollectionForItem()
+        //      accesses the unmodified version of the collection now that we return copies from getCollection()
+        if(true)
+            throw new NotImplementedException("FIXME");
         try {
             gitHelper.pullGitChanges();
 
