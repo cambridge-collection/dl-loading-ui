@@ -23,4 +23,11 @@ abstract class AbstractItem implements Item {
     public static ImmutableItem of(Path id, String fileData) {
         return ImmutableItem.of(id).withFileData(fileData);
     }
+
+    public static ImmutableItem copyOf(Item item) {
+        if(item instanceof AbstractItem) {
+            return ImmutableItem.copyOf((AbstractItem)item);
+        }
+        return ImmutableItem.builder().from(item).build();
+    }
 }
