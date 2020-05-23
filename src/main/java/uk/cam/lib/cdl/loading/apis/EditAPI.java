@@ -64,13 +64,16 @@ public class EditAPI {
     private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
 
     /**
+     * Initialise an EditAPI instance by reading model data from a git repository.
+     *
      * @param dataPath          File path to source data
      * @param dlDatasetFilename Filename for the root JSON file for this dataset.
      * @param dataItemPath      File path to the item TEI directory.
      * @param gitHelper         Object for interacting with Git
+     * @throws IllegalStateException If the initial model load from the git repo fails.
      */
     public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath,
-                   GitHelper gitHelper) {
+                   GitHelper gitHelper) throws EditApiException {
         this.gitHelper = gitHelper;
         this.dataPath = Path.of(dataPath).normalize();
         Preconditions.checkArgument(this.dataPath.isAbsolute(), "dataPath is not absolute: %s", dataPath);
@@ -78,19 +81,8 @@ public class EditAPI {
         this.uiFile = this.dataPath.resolve(dlUIFilename).normalize();
         this.dataItemPath = Path.of(dataItemPath).normalize();
         Preconditions.checkArgument(this.dataItemPath.startsWith(this.dataPath), "dataItemPath is not under dataPath");
-        setup();
-    }
 
-    private void setup() {
-        try {
-            if (!Files.exists(datasetFile)) {
-                throw new FileNotFoundException("Dataset file cannot be found at: " + datasetFile);
-            }
-
-            updateModel();
-        } catch (EditApiException | IOException e) {
-            throw new EditApiException("setup() failed - unable to initialise: " + e.getMessage(), e);
-        }
+        updateModel();
     }
 
     /**
@@ -99,7 +91,15 @@ public class EditAPI {
      *
      * @throws IOException On problems accessing file system data
      */
-    public synchronized void updateModel() throws IOException {
+    public synchronized void updateModel() throws EditApiException {
+        try {
+            _updateModel();
+        }
+        catch (IOException e) {
+            throw new EditApiException("Updating model failed: " + e.getMessage(), e);
+        }
+    }
+    private synchronized void _updateModel() throws EditApiException, IOException {
         try {
             gitHelper.pullGitChanges();
         } catch (GitAPIException e) {
@@ -307,7 +307,7 @@ public class EditAPI {
         return dataPath.relativize(absoluteItemPath);
     }
 
-    public boolean addItemToCollection(String itemName, String fileExtension, InputStream contents, String collectionId) {
+    public void addItemToCollection(String itemName, String fileExtension, InputStream contents, String collectionId) throws EditApiException {
 
         var itemFile = getNewItemPath(itemName, fileExtension);
         var itemId = getItemId(itemFile);
@@ -328,9 +328,6 @@ public class EditAPI {
             gitHelper.pushGitChanges();
 
             updateModel();
-
-            return true;
-
         } catch (IOException | GitAPIException e) {
             throw new EditApiException(String.format(
                 "Failed to add item '%s' to collection '%s': %s",
@@ -338,7 +335,7 @@ public class EditAPI {
         }
     }
 
-    public boolean deleteItemFromCollection(Path itemId, Path collectionId) {
+    public void deleteItemFromCollection(Path itemId, Path collectionId) throws EditApiException {
         // FIXME: this fails to delete the item when it's no longer in any collections because getFirstCollectionForItem()
         //      accesses the unmodified version of the collection now that we return copies from getCollection()
         if(true)
@@ -360,9 +357,7 @@ public class EditAPI {
             // Delete file for item if it exists in no other collection
             if (getFirstCollectionForItem(item) == null) {
                 Path itemFile = ModelOps().resolveIdToIOPath(dataPath, itemId);
-                if (!Files.deleteIfExists(itemFile)) {
-                    return false;
-                }
+                Files.deleteIfExists(itemFile);
                 // remove parent dir if empty
                 var itemDir = itemFile.getParent();
                 if (Files.isDirectory(itemDir)) {
@@ -376,12 +371,9 @@ public class EditAPI {
             gitHelper.pushGitChanges();
 
             updateModel();
-
-            return true;
         } catch (IOException | GitAPIException e) {
-            e.printStackTrace();
+            throw new EditApiException(e);
         }
-        return false;
     }
 
     private Collection getFirstCollectionForItem(Item i) {
@@ -394,7 +386,7 @@ public class EditAPI {
         return null;
     }
 
-    public boolean updateCollection(Collection collection, String descriptionHTML, String creditHTML) {
+    public void updateCollection(Collection collection, String descriptionHTML, String creditHTML) throws EditApiException {
         try {
 
             ObjectMapper mapper = new ObjectMapper();
@@ -447,12 +439,12 @@ public class EditAPI {
             // Git Commit and push to remote repo.
             boolean success = gitHelper.pushGitChanges();
             updateModel();
-
-            return success;
+            if(!success) {
+                throw new EditApiException("pushGitChanges() failed");
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new EditApiException(e);
         }
-        return false;
     }
 
     public Path getDataLocalPath() {

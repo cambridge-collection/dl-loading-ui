@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
+import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.CollectionCredit;
@@ -45,7 +46,7 @@ class EditAPITest {
 
     // Bare repo represents a mock version of the remote repo and it is cloned locally for testing.
     // content is added from the resources source-data dir.
-    public EditAPITest() throws IOException, GitAPIException {
+    public EditAPITest() throws IOException, GitAPIException, EditApiException {
 
         MockGitRepo gitRepo = new MockGitRepo();
         Git git = gitRepo.getGit();
@@ -74,7 +75,7 @@ class EditAPITest {
     }
 
     @Test
-    void updateModel() throws IOException, JSONException {
+    void updateModel() throws IOException, JSONException, EditApiException {
 
         // update a file directly on the file system
         String filePath = gitSourceVariables.getGitSourcePath() + "/data/collections/test.collection.json";
@@ -181,7 +182,7 @@ class EditAPITest {
     }
 
     @Test
-    void addItemToCollection() throws IOException {
+    void addItemToCollection() throws IOException, EditApiException {
         var itemId = Path.of("items/data/tei/MS-MYITEMTEST-00001/MS-MYITEMTEST-00001.xml");
         assertThrows(NotFoundException.class, () -> editAPI.getItem(itemId));
 
@@ -197,7 +198,7 @@ class EditAPITest {
     }
 
     @Test
-    void deleteItemFromCollection() {
+    void deleteItemFromCollection() throws EditApiException {
         var itemId = Path.of("items/data/tei/MS-TEST-00001/MS-TEST-00001.xml");
         var itemFile = ModelOps.ModelOps().resolveIdToIOPath(editAPI.getDataLocalPath(), itemId);
         var collectionId = Path.of("collections/test.collection.json");
@@ -213,7 +214,7 @@ class EditAPITest {
     }
 
     @Test
-    void updateCollection() {
+    void updateCollection() throws EditApiException {
 
         assert ("Sorting Test Name".equals(editAPI.getCollection("collections/test.collection.json").getName().getSort()));
         Collection collection = makeCollection("test");
@@ -224,7 +225,7 @@ class EditAPITest {
     }
 
     @Test
-    void addCollection() {
+    void addCollection() throws EditApiException {
 
         Collection collection = makeCollection("newCollection");
         assert (!editAPI.getCollections().contains(collection));

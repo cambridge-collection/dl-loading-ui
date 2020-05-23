@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.apis.EditAPIUpdater;
+import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
@@ -35,7 +36,7 @@ public class EditConfig {
 
     @Bean
     @Profile("!test")
-    public EditAPI editAPI(GitHelper gitHelper, GitLocalVariables gitSourceVariables, Path dlDatasetFilename, Path dlUIFilename, Path dataItemPath) {
+    public EditAPI editAPI(GitHelper gitHelper, GitLocalVariables gitSourceVariables, Path dlDatasetFilename, Path dlUIFilename, Path dataItemPath) throws EditApiException {
         return new EditAPI(Path.of(gitSourceVariables.getGitSourcePath(), gitSourceVariables.getGitSourceDataSubpath()).toString(),
             dlDatasetFilename.toString(), dlUIFilename.toString(),
             Path.of(gitSourceVariables.getGitSourcePath()).resolve(dataItemPath).toString(),

@@ -8,6 +8,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -27,6 +29,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
+import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.forms.CollectionForm;
 import uk.cam.lib.cdl.loading.forms.ItemForm;
@@ -50,6 +53,8 @@ import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 
 @Controller
 public class EditController {
+    private static final Logger LOG = LoggerFactory.getLogger(EditController.class);
+
     private final EditAPI editAPI;
     private final Path pathForDataDisplay;
 
@@ -274,12 +279,12 @@ public class EditController {
         String proseCreditHTML = prepareHTMLForSaving(collectionForm.getProseCreditHTML(), creditHTMLPath);
 
         // Save collection file
-        boolean success = editAPI.updateCollection(collection, fullDescriptionHTML,
-            proseCreditHTML);
-
-        if (success) {
+        try {
+            editAPI.updateCollection(collection, fullDescriptionHTML, proseCreditHTML);
             attributes.addFlashAttribute("message", "Collection Updated.");
-        } else {
+        }
+        catch (EditApiException e) {
+            LOG.error("Failed to update collection", e);
             attributes.addFlashAttribute("error", "Failed to update collection.");
         }
 
@@ -312,7 +317,11 @@ public class EditController {
             return new RedirectView("/edit/collection/");
         }
 
-        if (!editAPI.addItemToCollection(itemName, fileExtension, file.getInputStream(), collectionId)) {
+        try {
+            editAPI.addItemToCollection(itemName, fileExtension, file.getInputStream(), collectionId);
+        }
+        catch (EditApiException e) {
+            LOG.error("Failed to add item to collection", e);
             attributes.addFlashAttribute("error", "Problem adding item to collection");
             return new RedirectView("/edit/collection/");
         }
@@ -337,10 +346,12 @@ public class EditController {
 
         attributes.addAttribute("collectionId", collectionId);
 
-        boolean success = editAPI.deleteItemFromCollection(_itemId, _collectionId);
-        if (success) {
+        try {
+            editAPI.deleteItemFromCollection(_itemId, _collectionId);
             attributes.addFlashAttribute("message", "Item deleted from collection.");
-        } else {
+        }
+        catch (EditApiException e) {
+            LOG.error("Failed to delete item from collection", e);
             attributes.addFlashAttribute("error", "Problem deleting item");
         }
 
