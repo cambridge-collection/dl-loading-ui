@@ -106,8 +106,8 @@ class EditAPITest {
     @Test
     void getCollections() {
         var collections = editAPI.getCollections();
-        assertThat(collections).hasSize(1);
-        assertThat(collections).hasSize(1);
+        assertThat(collections).hasSize(3);
+        assertThat(collections).hasSize(3);
         assertThat(collections.get(0).getName().getUrlSlug()).isEqualTo("test");
         assertThat(collections.get(0).getItemIds()).hasSize(5);
 
