@@ -22,8 +22,15 @@ import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.ImmutableItem;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.model.editor.UI;
+import uk.cam.lib.cdl.loading.model.editor.modelops.DefaultModelStateHandlerResolver;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateEnforcementResult;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateHandlerResolver;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStates;
 import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
+import uk.cam.lib.cdl.loading.utils.ThrowingSupplier;
+import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
 import javax.validation.constraints.NotNull;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -40,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -59,6 +67,8 @@ public class EditAPI {
     private final Path datasetFile;
     private final Path uiFile;
     private final GitHelper gitHelper;
+    private final ModelStateHandlerResolver stateHandlers;
+    private final ObjectMapper objectMapper;
 
     private Map<String, Collection> collectionMap = Collections.synchronizedMap(new HashMap<>());
     private Map<String, Path> collectionFilepaths = Collections.synchronizedMap(new HashMap<>());
@@ -84,8 +94,28 @@ public class EditAPI {
         this.uiFile = this.dataPath.resolve(dlUIFilename).normalize();
         this.dataItemPath = Path.of(dataItemPath).normalize();
         Preconditions.checkArgument(this.dataItemPath.startsWith(this.dataPath), "dataItemPath is not under dataPath");
+        this.objectMapper = createObjectMapper();
+        this.stateHandlers = createStateHandlers();
 
         updateModel();
+    }
+
+    private ModelStateHandlerResolver createStateHandlers() {
+        return DefaultModelStateHandlerResolver.builder()
+            .addHandlers(
+                ModelStates.itemWriter(ModelOps(), this.dataPath),
+                ModelStates.itemRemover(ModelOps(), this.dataPath),
+                ModelStates.collectionWriter(ModelOps(), this.objectMapper, this.dataPath),
+                ModelStates.collectionRemover(ModelOps(), this.dataPath)
+            )
+            .build();
+    }
+
+    private ObjectMapper createObjectMapper() {
+        var mapper = new ObjectMapper();
+        mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+        mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
+        return mapper;
     }
 
     /**
@@ -236,6 +266,15 @@ public class EditAPI {
         return getCollection(Path.of(collectionId));
     }
 
+    public boolean itemExists(Path id) {
+        try {
+            getItem(id);
+            return true;
+        }
+        catch (NotFoundException ignored) {}
+        return false;
+    }
+
     public Item getItem(Path id) {
         ModelOps().validatePathForId(id);
         var item = itemMap.get(id.toString());
@@ -247,13 +286,19 @@ public class EditAPI {
     public Item getItem(String id) {
         return getItem(Path.of(id));
     }
-
-    public boolean validate(MultipartFile file) {
-
-        // Validate content
-        boolean valid = false;
+    public Item getItemWithData(Item item) throws EditApiException {
+        return getItemWithData(item.id());
+    }
+    public Item getItemWithData(Path id) throws EditApiException {
+        var item = getItem(id); // validate the item exists
         try {
-            String content = IOUtils.toString(file.getInputStream(), StandardCharsets.UTF_8);
+            return ImmutableItem.copyOf(item)
+                .withFileData(ModelOps().readItemMetadataAsString(this.dataPath, item));
+        }
+        catch (IOException e) {
+            throw new EditApiException("Failed to read item file: " + e.getMessage(), e);
+        }
+    }
 
     public boolean validate(MultipartFile file) throws IOException {
         String content = IOUtils.toString(file.getInputStream(), StandardCharsets.UTF_8);
@@ -302,6 +347,52 @@ public class EditAPI {
 
     private Path getDataItemPath() {
         return dataItemPath;
+    }
+
+    /**
+     * Modify an Item's data and or the Collections that it's referenced from.
+     *
+     * @param item The state of the Item to enforce.
+     * @param collectionMembership A transform modifying the Collections referencing the item.
+     * @return The state of the Item which was enforced. Will be empty if only collections were changed.
+     * @throws EditApiException
+     * @see uk.cam.lib.cdl.loading.utils.sets.SetMembership
+     */
+    public Optional<ModelState<Item>> enforceItemState(
+        Item item,
+        SetMembershipTransformation<Path> collectionMembership
+    ) throws EditApiException {
+        Preconditions.checkArgument(itemExists(item.id()) || item.fileData().isPresent(),
+            "item must have fileData if it's being created");
+
+        return updateData(() -> {
+            var requiredStateChanges = ModelOps().transformItem(
+                item, this.collectionMap.values(), collectionMembership);
+
+            var results = ModelOps().enforceModelState(requiredStateChanges, this.stateHandlers);
+
+            // There won't be any item change enforced if it existed and had no attached file data
+            return results.stream()
+                .map(ModelStateEnforcementResult::state)
+                .flatMap(state -> state.match(Item.class).stream())
+                .findFirst();
+        });
+    }
+
+    protected <T, Err extends EditApiException> T updateData(ThrowingSupplier<T, Err> operation) throws EditApiException {
+        Preconditions.checkNotNull(operation);
+        try {
+            return gitHelper.writeFilesAndPushOrRollBack(() -> {
+                var result = operation.get();
+                updateModel();
+                return result;
+            });
+        } catch (GitHelperException e) {
+            if(e.getCause() instanceof EditApiException) {
+                throw (EditApiException)e.getCause();
+            }
+            throw new EditApiException("Failed to update git repository: " + e.getMessage(), e);
+        }
     }
 
     private Path getNewItemPath(String itemName, String fileExtension) {

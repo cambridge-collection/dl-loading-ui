@@ -20,9 +20,12 @@ import uk.cam.lib.cdl.loading.model.editor.CollectionCredit;
 import uk.cam.lib.cdl.loading.model.editor.CollectionDescription;
 import uk.cam.lib.cdl.loading.model.editor.CollectionName;
 import uk.cam.lib.cdl.loading.model.editor.Id;
+import uk.cam.lib.cdl.loading.model.editor.ImmutableItem;
 import uk.cam.lib.cdl.loading.model.editor.Item;
-import uk.cam.lib.cdl.loading.model.editor.ModelOps;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ImmutableModelState;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
+import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,9 +33,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 
 /**
  * Uses a Bare Repository for testing jgit commands.
@@ -41,6 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class EditAPITest {
 
     private static final Logger LOG = LoggerFactory.getLogger(EditAPITest.class);
+
+    private static final Path ITEM_ID_MS_LATIN = Path.of("items/data/tei/MS-LATIN-00509/MS-LATIN-00509.xml");
 
     private EditAPI editAPI;
     private GitLocalVariables gitSourceVariables;
@@ -183,6 +190,33 @@ class EditAPITest {
     }
 
     @Test
+    public void itemExists() {
+        Truth.assertThat(editAPI.itemExists(ITEM_ID_MS_LATIN)).isTrue();
+        Truth.assertThat(editAPI.itemExists(Path.of("items/missing"))).isFalse();
+    }
+
+    @Test
+    public void itemWithData() throws EditApiException, IOException {
+        var item = editAPI.getItemWithData(ITEM_ID_MS_LATIN);
+        Truth.assertThat(item.fileData().orElseThrow())
+            .isEqualTo(ModelOps().readMetadataAsString(editAPI.getDataLocalPath(), item.id()));
+    }
+
+    @Test
+    public void enforceItemState_modifyExistingItem() throws EditApiException, IOException {
+        var item = editAPI.getItemWithData(ITEM_ID_MS_LATIN);
+        var modifiedItem = ImmutableItem.copyOf(item).withFileData("foo");
+
+        var enforced = editAPI.enforceItemState(modifiedItem, SetMembership.unchanged());
+
+        Truth.assertThat(enforced).isEqualTo(Optional.of(ImmutableModelState.ensure(ModelState.Ensure.PRESENT, modifiedItem)));
+        Truth.assertThat(editAPI.getItemWithData(ITEM_ID_MS_LATIN)).isEqualTo(modifiedItem);
+        // The change is really on disk...
+        Truth.assertThat(ModelOps().readMetadataAsString(editAPI.getDataLocalPath(), ITEM_ID_MS_LATIN))
+            .isEqualTo("foo");
+    }
+
+    @Test
     void addItemToCollection() throws IOException, EditApiException {
         var itemId = Path.of("items/data/tei/MS-MYITEMTEST-00001/MS-MYITEMTEST-00001.xml");
         assertThrows(NotFoundException.class, () -> editAPI.getItem(itemId));
@@ -201,7 +235,7 @@ class EditAPITest {
     @Test
     void deleteItemFromCollection() throws EditApiException {
         var itemId = Path.of("items/data/tei/MS-TEST-00001/MS-TEST-00001.xml");
-        var itemFile = ModelOps.ModelOps().resolveIdToIOPath(editAPI.getDataLocalPath(), itemId);
+        var itemFile = ModelOps().resolveIdToIOPath(editAPI.getDataLocalPath(), itemId);
         var collectionId = Path.of("collections/test.collection.json");
         var itemReference = new Id("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml");
 
