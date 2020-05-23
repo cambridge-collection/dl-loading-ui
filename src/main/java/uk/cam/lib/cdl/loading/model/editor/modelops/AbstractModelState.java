@@ -22,4 +22,12 @@ public abstract class AbstractModelState<T> implements ModelState<T> {
         var type = (Class<T>)model.getClass();
         return ImmutableModelState.ensure(ensure, type, model);
     }
+
+    public static <T> ImmutableModelState<T> ensurePresent(T model) {
+        return ImmutableModelState.ensure(Ensure.PRESENT, model);
+    }
+
+    public static <T> ImmutableModelState<T> ensureAbsent(T model) {
+        return ImmutableModelState.ensure(Ensure.ABSENT, model);
+    }
 }
