@@ -2,6 +2,8 @@ package uk.cam.lib.cdl.loading.testutils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.CollectionCredit;
 import uk.cam.lib.cdl.loading.model.editor.CollectionDescription;
@@ -11,8 +13,11 @@ import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 
 public class Models {
     public static Collection exampleCollection(Path id) {
@@ -24,6 +29,10 @@ public class Models {
 
     public static Collection exampleCollection(Path id, Stream<Id> itemIds) {
         return exampleCollection(id, "example", itemIds);
+    }
+
+    public static Collection exampleCollection(Path id, String shortName, Path...itemIds) {
+        return exampleCollection(id, shortName, Stream.of(itemIds).map(idToReferenceFrom(id)));
     }
 
     public static Collection exampleCollection(Path id, String shortName, Stream<Id> itemIds) {
@@ -43,9 +52,18 @@ public class Models {
         return idToReferenceFrom(contextId).compose(Item::id);
     }
     public static Function<Path, Id> idToReferenceFrom(Path contextId) {
-        return id -> new Id(ModelOps.ModelOps().relativizeIdAsReference(contextId, id));
+        return id -> new Id(ModelOps().relativizeIdAsReference(contextId, id));
     }
     public static Function<String, Id> idToReferenceFrom(String contextId) {
-        return idToReferenceFrom(ModelOps.ModelOps().validatePathForId(Path.of(contextId))).compose(Path::of);
+        return idToReferenceFrom(ModelOps().validatePathForId(Path.of(contextId))).compose(Path::of);
+    }
+
+    public static Stream<Collection> streamCollectionsContainingItem(Item item, Iterable<Collection> collections) {
+        return Streams.stream(collections)
+            .filter(col -> ModelOps().isItemInCollection(item, col));
+    }
+    public static Set<Collection> collectionsContainingItem(Item item, Iterable<Collection> collections) {
+        return streamCollectionsContainingItem(item, collections)
+            .collect(ImmutableSet.toImmutableSet());
     }
 }

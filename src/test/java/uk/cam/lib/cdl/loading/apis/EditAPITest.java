@@ -1,5 +1,7 @@
 package uk.cam.lib.cdl.loading.apis;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Truth;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
@@ -23,21 +25,25 @@ import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.ImmutableItem;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ImmutableModelState;
-import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
+import uk.cam.lib.cdl.loading.testutils.Models;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
+import static uk.cam.lib.cdl.loading.model.editor.modelops.ModelState.Ensure.PRESENT;
 
 /**
  * Uses a Bare Repository for testing jgit commands.
@@ -48,6 +54,11 @@ class EditAPITest {
     private static final Logger LOG = LoggerFactory.getLogger(EditAPITest.class);
 
     private static final Path ITEM_ID_MS_LATIN = Path.of("items/data/tei/MS-LATIN-00509/MS-LATIN-00509.xml");
+
+    private static final Path COLLECTION_DIR = Path.of("collections");
+    private static final Path COLLECTION_ID_TEST = COLLECTION_DIR.resolve("test.collection.json");
+    private static final Path COLLECTION_ID_EMPTY1 = COLLECTION_DIR.resolve("empty1.collection.json");
+    private static final Path COLLECTION_ID_EMPTY2 = COLLECTION_DIR.resolve("empty2.collection.json");
 
     private EditAPI editAPI;
     private GitLocalVariables gitSourceVariables;
@@ -203,17 +214,94 @@ class EditAPITest {
     }
 
     @Test
+    public void getItemWithData_overloads() throws EditApiException {
+        var itemWithoutData = editAPI.getItem(ITEM_ID_MS_LATIN);
+        Truth.assertThat(editAPI.getItemWithData(itemWithoutData))
+            .isEqualTo(editAPI.getItemWithData(ITEM_ID_MS_LATIN));
+    }
+
+    private void assertItemExistsWithContent(Item item) throws EditApiException, IOException {
+        assertItemExistsOnDiskWithContent(item);
+        assertItemExistsInEditApiWithContent(item);
+    }
+
+    private void assertItemExistsOnDiskWithContent(Item item) throws IOException {
+        Preconditions.checkArgument(item.fileData().isPresent());
+        assertThat(ModelOps().readMetadataAsString(editAPI.getDataLocalPath(), item.id())).isEqualTo(item.fileData().orElseThrow());
+    }
+    private void assertItemExistsInEditApiWithContent(Item item) throws EditApiException {
+        Preconditions.checkArgument(item.fileData().isPresent());
+        assertThat(editAPI.getItemWithData(item.id())).isEqualTo(item);
+    }
+
+    private void assertItemIsInCollections(Item item, Path...collectionIds)  {
+        var expectedCollections = Stream.of(collectionIds).map(editAPI::getCollection).collect(toImmutableSet());
+        var actualCollections = Models.collectionsContainingItem(item, editAPI.getCollections());
+        assertThat(actualCollections).isEqualTo(expectedCollections);
+    }
+
+    private void assertItemDoesNotExist(Item item) {
+        Preconditions.checkArgument(item.fileData().isEmpty());
+        assertThrows(NoSuchFileException.class, () -> ModelOps().readMetadataAsString(editAPI.getDataLocalPath(), item.id()));
+        assertThat(Models.collectionsContainingItem(item, editAPI.getCollections())).isEmpty();
+    }
+
+    @Test
     public void enforceItemState_modifyExistingItem() throws EditApiException, IOException {
         var item = editAPI.getItemWithData(ITEM_ID_MS_LATIN);
         var modifiedItem = ImmutableItem.copyOf(item).withFileData("foo");
 
         var enforced = editAPI.enforceItemState(modifiedItem, SetMembership.unchanged());
 
-        Truth.assertThat(enforced).isEqualTo(Optional.of(ImmutableModelState.ensure(ModelState.Ensure.PRESENT, modifiedItem)));
-        Truth.assertThat(editAPI.getItemWithData(ITEM_ID_MS_LATIN)).isEqualTo(modifiedItem);
-        // The change is really on disk...
-        Truth.assertThat(ModelOps().readMetadataAsString(editAPI.getDataLocalPath(), ITEM_ID_MS_LATIN))
-            .isEqualTo("foo");
+        Truth.assertThat(enforced).isEqualTo(Optional.of(ImmutableModelState.ensure(PRESENT, modifiedItem)));
+        assertItemExistsWithContent(modifiedItem);
+        assertItemIsInCollections(modifiedItem, COLLECTION_ID_TEST);
+    }
+
+    @Test
+    public void enforceItemState_createItem() throws EditApiException, IOException {
+        var content = "Example content";
+        var id = Path.of("items/data/tei/MS-FOO-00001/MS-FOO-00001.xml");
+        var newItem = ImmutableItem.of(id, content);
+
+        assertItemDoesNotExist(newItem.withFileData(Optional.empty()));
+
+        var enforced = editAPI.enforceItemState(newItem, SetMembership.onlyMemberOf(ImmutableSet.of(COLLECTION_ID_TEST)));
+
+        assertThat(enforced).isEqualTo(Optional.of(ImmutableModelState.ensure(PRESENT, newItem)));
+        assertItemExistsWithContent(newItem);
+        assertItemIsInCollections(newItem, COLLECTION_ID_TEST);
+    }
+
+    @Test
+    public void enforceItemState_changeCollections() throws EditApiException, IOException {
+        var item = ImmutableItem.copyOf(editAPI.getItemWithData(ITEM_ID_MS_LATIN));
+        assertItemExistsWithContent(item);
+        assertItemIsInCollections(item, COLLECTION_ID_TEST);
+
+        // Change the item from col1 to col2 and col3
+        var enforced = editAPI.enforceItemState(
+            // Don't change item
+            item.withFileData(Optional.empty()),
+            // Move item into empty1 and empty2
+            SetMembership.onlyMemberOf(ImmutableSet.of(COLLECTION_ID_EMPTY1, COLLECTION_ID_EMPTY2)));
+
+        assertThat(enforced).isEqualTo(Optional.empty());
+        assertItemExistsWithContent(item);
+        assertItemIsInCollections(item, COLLECTION_ID_EMPTY1, COLLECTION_ID_EMPTY2);
+    }
+
+    @Test
+    public void enforceItemState_deleteItem() throws EditApiException, IOException {
+        var itemWithContent = ImmutableItem.copyOf(editAPI.getItemWithData(ITEM_ID_MS_LATIN));
+        var item = itemWithContent.withFileData(Optional.empty());
+        assertItemExistsWithContent(itemWithContent);
+        assertItemIsInCollections(itemWithContent, COLLECTION_ID_TEST);
+
+        var enforced = editAPI.enforceItemState(item, SetMembership.onlyMemberOf(ImmutableSet.of()));
+
+        assertThat(enforced).isEqualTo(Optional.of(ImmutableModelState.ensureAbsent(item)));
+        assertItemDoesNotExist(item);
     }
 
     @Test
