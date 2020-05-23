@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading.utils;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Streams;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.ResetCommand;
@@ -16,21 +17,25 @@ import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 
-import javax.annotation.concurrent.ThreadSafe;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Class for help with git requests
  */
 public class GitHelper {
+    private static final Logger LOG = LoggerFactory.getLogger(GitHelper.class);
+
     // Shared per-repo objects to synchronise against. Both keys and values are
     // weak so no memory is leaked - references are kept alive by active
     // GitHelper instances.
@@ -74,15 +79,15 @@ public class GitHelper {
     private final Git git;
     private final GitLocalVariables gitSourceVariables;
 
-    public GitHelper(GitLocalVariables gitSourceVariables) {
+    public GitHelper(GitLocalVariables gitSourceVariables) throws GitHelperException {
         this(findOrCreateRepoLock(gitSourceVariables.getGitSourcePath()), gitSourceVariables, null);
     }
 
-    public GitHelper(Git git, GitLocalVariables gitSourceVariables) {
+    public GitHelper(Git git, GitLocalVariables gitSourceVariables) throws GitHelperException {
         this(findOrCreateRepoLock(gitSourceVariables.getGitSourcePath()), gitSourceVariables, Preconditions.checkNotNull(git));
     }
 
-    private GitHelper(Map.Entry<String, Object> lock, GitLocalVariables gitSourceVariables, Git git) {
+    private GitHelper(Map.Entry<String, Object> lock, GitLocalVariables gitSourceVariables, Git git) throws GitHelperException {
         this.lockKey = lock.getKey();
         this.lock = lock.getValue();
         this.gitSourceVariables = gitSourceVariables;
@@ -98,30 +103,32 @@ public class GitHelper {
         return git;
     }
 
-    private Git setupRepo(String gitSourcePath, String gitSourceURL, String gitSourceURLUsername,
-                                       String gitSourceURLPassword) { synchronized (lock) {
-        try {
-            File dir = new File(gitSourcePath);
-            if (dir.exists()) {
-
+    private Git setupRepo(
+        String gitSourcePath, String gitSourceURL, String gitSourceURLUsername,
+        String gitSourceURLPassword
+    ) throws GitHelperException { synchronized (lock) {
+        File dir = new File(gitSourcePath);
+        if (dir.exists()) {
+            try {
                 return Git.init().setDirectory(dir).call();
-
-            } else {
-
+            } catch (GitAPIException e) {
+                throw new GitHelperException(String.format(
+                    "Failed to initialise git repo in dir '%s': %s", dir, e.getMessage()), e);
+            }
+        } else {
+            try {
                 return Git.cloneRepository()
                     .setURI(gitSourceURL)
                     .setBranch(gitSourceVariables.getGitBranch())
-                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitSourceURLUsername,
-                        gitSourceURLPassword))
-                    .setDirectory(new File(gitSourcePath))
+                    .setCredentialsProvider(new UsernamePasswordCredentialsProvider(
+                        gitSourceURLUsername, gitSourceURLPassword))
+                    .setDirectory(dir)
                     .call();
-
+            } catch (GitAPIException e) {
+                throw new GitHelperException(String.format(
+                    "Failed to clone '%s' into dir '%s': %s", gitSourceURL, dir, e.getMessage()), e);
             }
-
-        } catch (GitAPIException e) {
-            e.printStackTrace();
         }
-        return null;
     }}
 
     /**
@@ -135,24 +142,31 @@ public class GitHelper {
      * @param operation An arbitrary function to execute.
      * @return The value returned from the operation.
      */
-    public <T> T writeFilesAndPushOrRollBack(Supplier<T> operation) { synchronized (lock) {
+    public <T, Err extends Exception> T writeFilesAndPushOrRollBack(ThrowingSupplier<T, Err> operation) throws GitHelperException { synchronized (lock) {
         T result;
         ObjectId initialRevision = null;
         try {
-            initialRevision = git.getRepository().resolve(Constants.HEAD);
-            result = operation.get();
-            if (!pushGitChanges()) {
-                throw new RuntimeException("pushGitChanges() failed");
+            try {
+                initialRevision = git.getRepository().resolve(Constants.HEAD);
+            } catch (IOException e) {
+                throw new GitHelperException("Failed to resolve HEAD revision: " + e.getMessage(), e);
             }
+            try {
+                result = operation.get();
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new GitHelperException("The supplied operation failed: " + e.getMessage(), e);
+            }
+            pushGitChanges();
             return result;
-        } catch (RuntimeException | IOException e) {
+        } catch (RuntimeException | GitHelperException e) {
             rollbackUncommittedChanges(initialRevision == null ? Constants.HEAD : initialRevision.getName());
 
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            } else {
-                throw new RuntimeException("git operation failed: " + e.getMessage());
+            if(e instanceof GitHelperException) {
+                throw (GitHelperException)e;
             }
+            throw (RuntimeException)e;
         }
     }}
 
@@ -160,12 +174,11 @@ public class GitHelper {
      * Wipe uncommitted changes in the git repository, returning it to the
      * committed state of the current branch HEAD.
      */
-    public void rollbackUncommittedChanges(String ref) { synchronized (lock) {
+    public void rollbackUncommittedChanges(String ref) throws GitHelperException { synchronized (lock) {
         try {
             git.reset().setMode(ResetCommand.ResetType.HARD).setRef(ref).call();
-        }
-        catch (GitAPIException e) {
-            throw new RuntimeException(
+        } catch (GitAPIException e) {
+            throw new GitHelperException(
                 String.format(
                     "Failed to roll back uncommitted changes to git repository: " +
                         "git hard reset to %s failed: %s",
@@ -182,36 +195,39 @@ public class GitHelper {
      * @throws GitAPIException
      * @throws IOException
      */
-    public boolean pullGitChanges() throws GitAPIException { synchronized (lock) {
-
-        FetchResult fetchResult = git.fetch().setCredentialsProvider(
-            new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUsername(),
-                gitSourceVariables.getGitSourceURLPassword())).call();
-
-        // Check for changes, and pull if there have been.
-        if (!fetchResult.getTrackingRefUpdates().isEmpty()) {
-            PullResult pullResult = git.pull().setCredentialsProvider(
+    public void pullGitChanges() throws GitHelperException { synchronized (lock) {
+        try {
+            FetchResult fetchResult = git.fetch().setCredentialsProvider(
                 new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUsername(),
                     gitSourceVariables.getGitSourceURLPassword())).call();
-            if (!pullResult.isSuccessful()) {
-                // TODO Handle conflict problems
-                System.err.println("Pull Request Failed: " + pullResult.toString());
-                return false;
-            }
-        }
-        return true;
 
+            // Check for changes, and pull if there have been.
+            if (!fetchResult.getTrackingRefUpdates().isEmpty()) {
+                PullResult pullResult = git.pull().setCredentialsProvider(
+                    new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUsername(),
+                        gitSourceVariables.getGitSourceURLPassword())).call();
+                if (!pullResult.isSuccessful()) {
+                    // TODO Handle conflict problems
+                    LOG.error("Merging remote and local changes during `git pull` failed - human intervention is " +
+                        "currently required to resolve this situation. pull result: {}", pullResult);
+                    throw new GitHelperException(
+                        "Failed to update repository from remote: Updating local copy after fetch failed: " + pullResult);
+                }
+            }
+        } catch (GitAPIException e) {
+            throw new GitHelperException("Failed to update repository from remote: " + e.getMessage(), e);
+        }
     }}
 
     /**
      * @return
      */
-    public boolean pushGitChanges() { synchronized (lock) {
+    public void pushGitChanges() throws GitHelperException { synchronized (lock) {
         try {
-            boolean pullSuccess = pullGitChanges();
-            if (!pullSuccess) {
-                System.err.println("Problem pulling changes");
-                return false;
+            try {
+                pullGitChanges();
+            } catch (GitHelperException e) {
+                throw new GitHelperException("Failed to pull changes before pushing: " + e.getMessage(), e);
             }
             git.add().addFilepattern(".").call();
             git.commit().setMessage("Changed from Loading UI").call();
@@ -219,24 +235,26 @@ public class GitHelper {
                 new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUsername(),
                     gitSourceVariables.getGitSourceURLPassword())).call();
 
-            for (PushResult pushResult : results) {
-                java.util.Collection<RemoteRefUpdate> remoteUpdates = pushResult.getRemoteUpdates();
-                for (RemoteRefUpdate ref : remoteUpdates) {
-                    if (ref.getStatus() != RemoteRefUpdate.Status.OK) {
-                        // TODO Handle conflict problems
-                        System.err.println("Problem pushing changes");
-                        return false;
-                    }
-                }
+            var nonUpdatableRefsDesc = Streams.stream(results).flatMap(pushResult -> pushResult.getRemoteUpdates().stream())
+                .filter(remoteRefUpdate -> remoteRefUpdate.getStatus() != RemoteRefUpdate.Status.OK)
+                .map(RemoteRefUpdate::toString)
+                .collect(Collectors.joining(", "));
+
+            if(!nonUpdatableRefsDesc.isEmpty()) {
+                // TODO Handle conflict problems
+                LOG.error("Updating remote to match local refs during `git push` failed - human intervention is " +
+                    "currently required to resolve this situation. Non-updatable refs: {}", nonUpdatableRefsDesc);
+                throw new GitHelperException("Not all refs could be updated: " + nonUpdatableRefsDesc);
             }
-            return true;
         } catch (GitAPIException e) {
-            e.printStackTrace();
-            return false;
+            throw new GitHelperException("Pushing changes failed: " + e.getMessage(), e);
+        } catch (GitHelperException e) {
+            // Flatten exceptions thrown from this function
+            throw new GitHelperException("Pushing changes failed: " + e.getMessage(), e.getCause());
         }
     }}
 
-    public List<RevObject> getTags() { synchronized (lock) {
+    public List<RevObject> getTags() throws GitHelperException { synchronized (lock) {
         try {
             List<Ref> refs = git.tagList().call();
             List<RevObject> output = new ArrayList<>();
@@ -248,9 +266,9 @@ public class GitHelper {
 
             return output;
         } catch (GitAPIException | IOException e) {
-            e.printStackTrace();
+            throw new GitHelperException("Listing repository tags failed: " + e.getMessage(), e);
         }
-        return null;
     }}
+
 }
 

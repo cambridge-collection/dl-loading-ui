@@ -17,13 +17,13 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 import uk.cam.lib.cdl.loading.config.GitAPIVariables;
-import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.model.Tag;
 import uk.cam.lib.cdl.loading.model.WebResponse;
 import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
 import uk.cam.lib.cdl.loading.model.packaging.Pipeline;
 import uk.cam.lib.cdl.loading.model.packaging.Update;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 
 import java.io.IOException;
 import java.util.*;
@@ -56,7 +56,7 @@ public class PackagingAPI {
         return sourceBitBucketAPI.getPipelines();
     }
 
-    public List<Tag> getTags() {
+    public List<Tag> getTags() throws GitHelperException {
 
         List<RevObject> revs = gitHelper.getTags();
         List<Tag> tags = new ArrayList<>();

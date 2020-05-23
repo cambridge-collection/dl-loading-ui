@@ -5,11 +5,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriUtils;
 import uk.cam.lib.cdl.loading.apis.PackagingAPI;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.model.Tag;
 import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
 import uk.cam.lib.cdl.loading.model.packaging.Pipeline;
@@ -31,7 +30,7 @@ public class PackageController {
     }
 
     @GetMapping ("/package/package.html")
-    public String pack(Model model) {
+    public String pack(Model model) throws GitHelperException {
 
         List<Update> updates = packagingAPI.updatesSinceLastPackage();
         Collections.sort(updates);

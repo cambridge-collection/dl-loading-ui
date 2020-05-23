@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.exceptions.EditApiException;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.CollectionCredit;
@@ -46,7 +47,7 @@ class EditAPITest {
 
     // Bare repo represents a mock version of the remote repo and it is cloned locally for testing.
     // content is added from the resources source-data dir.
-    public EditAPITest() throws IOException, GitAPIException, EditApiException {
+    public EditAPITest() throws IOException, GitAPIException, GitHelperException, EditApiException {
 
         MockGitRepo gitRepo = new MockGitRepo();
         Git git = gitRepo.getGit();
@@ -148,7 +149,7 @@ class EditAPITest {
     }
 
     @Test
-    void validate() {
+    void validate() throws IOException {
         MockMultipartFile jsonFile = new MockMultipartFile("json", "filename.json", "application/json", ("{\"json" +
             "\":\"someValue\"}").getBytes());
         MockMultipartFile xmlFile = new MockMultipartFile("xml", "filename.xml", "application/xml", ("<?xml " +

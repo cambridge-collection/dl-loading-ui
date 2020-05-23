@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.net.URL;
@@ -39,7 +40,7 @@ public class GitConfig implements WebMvcConfigurer {
 
     @Bean
     @Profile("!test")
-    public GitHelper gitHelper(GitLocalVariables repoInfo) {
+    public GitHelper gitHelper(GitLocalVariables repoInfo) throws GitHelperException {
         return new GitHelper(repoInfo);
     }
 }

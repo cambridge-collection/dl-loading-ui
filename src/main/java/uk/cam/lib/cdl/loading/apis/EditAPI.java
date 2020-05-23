@@ -8,11 +8,13 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.NotImplementedException;
-import org.eclipse.jgit.api.errors.GitAPIException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import uk.cam.lib.cdl.loading.exceptions.EditApiException;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Dataset;
@@ -24,7 +26,6 @@ import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import javax.validation.constraints.NotNull;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileNotFoundException;
@@ -51,6 +52,8 @@ TODO This should be refactored out to talk to a external API.
 Access info from the git data directly for now.
 */
 public class EditAPI {
+    private static final Logger LOG = LoggerFactory.getLogger(EditAPI.class);
+
     private final Path dataPath;
     private final Path dataItemPath;
     private final Path datasetFile;
@@ -102,7 +105,7 @@ public class EditAPI {
     private synchronized void _updateModel() throws EditApiException, IOException {
         try {
             gitHelper.pullGitChanges();
-        } catch (GitAPIException e) {
+        } catch (GitHelperException e) {
             throw new EditApiException(
                 "Updating model failed: Update git repo failed: " + e.getMessage(), e);
         }
@@ -180,30 +183,34 @@ public class EditAPI {
         return this.thumbnailImageURLs.get(collectionId);
     }
 
-    private void setCollectionThumbnailURL(String thumbnailURL, String collectionId) {
+    private void setCollectionThumbnailURL(String thumbnailURL, String collectionId) throws EditApiException {
+        ObjectMapper mapper = new ObjectMapper();
 
+        mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+        mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
+        UI ui = null;
         try {
-            ObjectMapper mapper = new ObjectMapper();
-
-            mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
-            mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
-            UI ui = mapper.readValue(uiFile.toFile(), UI.class);
-            for (UICollection collection : ui.getThemeData().getCollections()) {
-                String thisCollectionPath = collection.getCollection().getId();
-
-                if (thisCollectionPath.equals(collectionId)) {
-
-                    collection.setThumbnail(new Id(thumbnailURL));
-                    ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-                    writer.writeValue(uiFile.toFile(), ui);
-                    break;
-                }
-            }
-
+            ui = mapper.readValue(uiFile.toFile(), UI.class);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new EditApiException(String.format(
+                "Failed to load UI file '%s': %s", uiFile, e.getMessage()), e);
         }
+        for (UICollection collection : ui.getThemeData().getCollections()) {
+            String thisCollectionPath = collection.getCollection().getId();
 
+            if (thisCollectionPath.equals(collectionId)) {
+
+                collection.setThumbnail(new Id(thumbnailURL));
+                ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
+                try {
+                    writer.writeValue(uiFile.toFile(), ui);
+                } catch (IOException e) {
+                    throw new EditApiException(String.format(
+                        "Failed to save UI file '%s': %s", uiFile, e.getMessage()), e);
+                }
+                break;
+            }
+        }
     }
 
     public Stream<Collection> streamCollections() {
@@ -248,16 +255,14 @@ public class EditAPI {
         try {
             String content = IOUtils.toString(file.getInputStream(), StandardCharsets.UTF_8);
 
-            if (Objects.requireNonNull(file.getContentType()).equals("text/xml") ||
-                Objects.requireNonNull(file.getContentType()).equals("application/xml")) {
-                valid = validateXML(file.getOriginalFilename(), content);
-            }
+    public boolean validate(MultipartFile file) throws IOException {
+        String content = IOUtils.toString(file.getInputStream(), StandardCharsets.UTF_8);
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (Objects.requireNonNull(file.getContentType()).equals("text/xml") ||
+            Objects.requireNonNull(file.getContentType()).equals("application/xml")) {
+            return validateXML(file.getOriginalFilename(), content);
         }
-
-        return valid;
+        return false;
     }
 
     private boolean isValidFileExtension(String extension) {
@@ -277,18 +282,22 @@ public class EditAPI {
         // could convert to JSON using cudl-pack and then validate against item json?
 
         // For now, just make sure it's valid XML.
-        DocumentBuilder parser = null;
         try {
-            parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            var parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = parser.parse(IOUtils.toInputStream(content, "UTF-8"));
-            if (document != null) {
-                return true;
-            }
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            e.printStackTrace();
+            Preconditions.checkNotNull(document);
+            return true;
         }
-
-        return false;
+        catch (ParserConfigurationException e) {
+            throw new RuntimeException(
+                "Unable to instantiate a DocumentBuilder instance: " + e.getMessage(), e);
+        }
+        catch (IOException e) {
+            throw new AssertionError("Caught IOException while parsing in-memory XML - should not occur", e);
+        }
+        catch (SAXException ignored) {
+            return false;
+        }
     }
 
     private Path getDataItemPath() {
@@ -328,7 +337,7 @@ public class EditAPI {
             gitHelper.pushGitChanges();
 
             updateModel();
-        } catch (IOException | GitAPIException e) {
+        } catch (IOException | GitHelperException e) {
             throw new EditApiException(String.format(
                 "Failed to add item '%s' to collection '%s': %s",
                 itemId, collectionId, e.getMessage()), e);
@@ -364,15 +373,15 @@ public class EditAPI {
                     try {
                         Files.deleteIfExists(itemDir);
                     }
-                    catch (DirectoryNotEmptyException e) { /* ignore */ }
+                    catch (DirectoryNotEmptyException ignored) { }
                 }
             }
 
             gitHelper.pushGitChanges();
 
             updateModel();
-        } catch (IOException | GitAPIException e) {
-            throw new EditApiException(e);
+        } catch (IOException | GitHelperException e) {
+            throw new EditApiException("Failed to remove item from collection: " + e.getMessage(), e);
         }
     }
 
@@ -437,13 +446,10 @@ public class EditAPI {
             setCollectionThumbnailURL(collection.getThumbnailURL(), collectionId);
 
             // Git Commit and push to remote repo.
-            boolean success = gitHelper.pushGitChanges();
+            gitHelper.pushGitChanges();
             updateModel();
-            if(!success) {
-                throw new EditApiException("pushGitChanges() failed");
-            }
-        } catch (IOException e) {
-            throw new EditApiException(e);
+        } catch (IOException | GitHelperException e) {
+            throw new EditApiException("Failed to update Collection: " + e.getMessage(), e);
         }
     }
 

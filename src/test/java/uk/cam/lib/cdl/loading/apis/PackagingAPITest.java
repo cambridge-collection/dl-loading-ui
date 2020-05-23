@@ -11,6 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import uk.cam.lib.cdl.loading.LoadingUIApplication;
 import uk.cam.lib.cdl.loading.config.GitAPIVariables;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
 import uk.cam.lib.cdl.loading.model.packaging.Pipeline;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
@@ -31,7 +32,7 @@ class PackagingAPITest {
     private GitAPIVariables gitAPIVariables;
 
     @BeforeEach
-    public void setup() throws IOException, GitAPIException {
+    public void setup() throws IOException, GitAPIException, GitHelperException {
 
         MockGitRepo gitRepo = new MockGitRepo();
 

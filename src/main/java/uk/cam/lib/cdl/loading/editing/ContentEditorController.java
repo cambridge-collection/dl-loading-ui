@@ -2,6 +2,8 @@ package uk.cam.lib.cdl.loading.editing;
 
 import com.google.common.base.Preconditions;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -12,7 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
-import uk.cam.lib.cdl.loading.config.GitLocalVariables;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import javax.validation.Valid;
@@ -34,6 +36,7 @@ import java.util.Objects;
 @Controller
 @RequestMapping("/editor")
 public class ContentEditorController {
+    private static final Logger LOG = LoggerFactory.getLogger(ContentEditorController.class);
 
     protected final String contentHTMLPath;
     protected final String contentImagesPath;
@@ -68,6 +71,7 @@ public class ContentEditorController {
     @PostMapping("/add/image")
     public ResponseEntity<String> handleAddImageRequest(@Valid @ModelAttribute() AddImagesParameters addParams,
                                                         BindingResult bindResult) throws IOException {
+        // FIXME: This function modifies the git repo without any locking
 
         // Check file extension and content type are image.
         uploadFileValidation(addParams, bindResult);
@@ -87,7 +91,12 @@ public class ContentEditorController {
 
         if (saveSuccessful) {
             // Git Commit and push to remote repo.
-            saveSuccessful = gitHelper.pushGitChanges();
+            try {
+                gitHelper.pushGitChanges();
+            } catch (GitHelperException e) {
+                LOG.error("handleAddImageRequest(): Failed to push git changes: " + e.getMessage(), e);
+                saveSuccessful = false;
+            }
         }
 
         String output = "<html><head><script> window.opener.CKEDITOR.tools.callFunction( "
@@ -167,6 +176,8 @@ public class ContentEditorController {
         @Valid @ModelAttribute() DeleteImagesParameters deleteParams,
         BindingResult bindResult) throws IOException {
 
+        // FIXME: This function modifies the git repo without any locking
+
         if (bindResult.hasErrors()) {
             throw new IOException(
                 "Your image or directory delete failed. Please ensure the filePath exists "
@@ -187,7 +198,12 @@ public class ContentEditorController {
 
         if (successful) {
             // Git Commit and push to remote repo.
-            successful = gitHelper.pushGitChanges();
+            try {
+                gitHelper.pushGitChanges();
+            } catch (GitHelperException e) {
+                LOG.error("handleDeleteImageRequest(): Failed to push git changes: " + e.getMessage(), e);
+                successful = false;
+            }
         }
 
         JSONObject json = new JSONObject();
