@@ -38,4 +38,11 @@ public class SetMembership {
                 .build();
         };
     }
+
+    /**
+     * Get a transform which makes no changes.
+     */
+    public static <T> SetMembershipTransformation<T> unchanged() {
+        return addingAndRemoving(ImmutableSet.of(), ImmutableSet.of());
+    }
 }

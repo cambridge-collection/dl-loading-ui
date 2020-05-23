@@ -57,6 +57,22 @@ public class SetMembershipTest {
                 new IllegalArgumentException("members contains elements not present in universe: [3, 4]")
             ),
             Arguments.of(
+                SetMembership.addingAndRemoving(ImmutableSet.of(), ImmutableSet.of()),
+                ImmutableSet.of(1, 2),
+                ImmutableSet.of(1, 2, 3, 4),
+                ImmutableSetMembershipTransformationResult.builder()
+                    .members(ImmutableSet.of(1, 2))
+                    .build()
+            ),
+            Arguments.of(
+                SetMembership.unchanged(),
+                ImmutableSet.of(1, 2),
+                ImmutableSet.of(1, 2, 3, 4),
+                ImmutableSetMembershipTransformationResult.builder()
+                    .members(ImmutableSet.of(1, 2))
+                    .build()
+            ),
+            Arguments.of(
                 SetMembership.addingAndRemoving(ImmutableSet.of(3), ImmutableSet.of()),
                 ImmutableSet.of(1, 2),
                 ImmutableSet.of(1, 2, 3, 4, 5, 6, 7),
