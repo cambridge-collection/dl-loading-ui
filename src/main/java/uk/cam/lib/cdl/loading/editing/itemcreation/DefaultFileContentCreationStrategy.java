@@ -11,31 +11,26 @@ import java.util.Set;
 public abstract class DefaultFileContentCreationStrategy<T> implements
     DefaultItemFactory.FileContentCreationStrategy<T> {
 
-    protected abstract FileContentInitialiser initialiser();
+    @Value.Default
+    protected FileContentInitialiser initialiser() {
+        return attributes -> ImmutableCreationResult.successful(ImmutableInitialFileContent.of(attributes));
+    }
     protected abstract FileContentProcessor<Optional<Void>, T> processor();
 
     @Override
-    public CreationResult<FileContent<T>> createFileContent(Set<ItemAttribute<?>> itemAttributes) {
-        return null;
+    public CreationResult<? extends FileContent<? extends T>> createFileContent(Set<ItemAttribute<?>> itemAttributes) {
+        return initialiser().initialiseFileContent(itemAttributes).flatMap(processor()::processFileContent);
     }
 
     interface FileContentInitialiser {
-        FileContent<Optional<Void>> initialiseFileContent(Set<ItemAttribute<?>> attributes);
+        CreationResult<FileContent<Optional<Void>>> initialiseFileContent(Set<ItemAttribute<?>> attributes);
     }
 
     interface FileContentProcessor<T, U> {
-        FileContent<? extends U> processFileContent(FileContent<? extends T> content);
+        CreationResult<? extends FileContent<? extends U>> processFileContent(FileContent<? extends T> content);
+
         default <V> FileContentProcessor<T, V> pipedThrough(FileContentProcessor<? super U, ? extends V> after) {
-            return input -> after.processFileContent(processFileContent(input));
+            return input -> processFileContent(input).flatMap(after::processFileContent);
         }
     }
-
-//    interface Builder<T> {
-//
-//        default <U> Builder<U>
-//
-//        default T fooBar() {
-//            return null;
-//        }
-//    }
 }

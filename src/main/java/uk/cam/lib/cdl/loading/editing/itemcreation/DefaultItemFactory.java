@@ -6,30 +6,41 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
 import org.immutables.value.Value;
 import uk.cam.lib.cdl.loading.editing.itemcreation.ItemAttributes.StandardItemAttributes;
+import uk.cam.lib.cdl.loading.model.editor.ImmutableItem;
 import uk.cam.lib.cdl.loading.model.editor.Item;
+import uk.cam.lib.cdl.loading.utils.ThrowingFunction;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 
 @Value.Immutable
-public abstract class DefaultItemFactory<I extends Item, R> implements ItemFactory {
+public abstract class DefaultItemFactory<R> implements ItemFactory {
     protected abstract IdCreationStrategy idCreator();
     protected abstract FileContentCreationStrategy<R> fileContentCreator();
-    protected abstract ResultAssembler<I, R> resultAssembler();
+
+    @Value.Default
+    protected ResultAssembler<Item, R> resultAssembler() {
+        return (idResult, contentResult) -> idResult.biMap(contentResult, (id, content) ->
+            ImmutableItem.of(id, content.text().map(ThrowingFunction.dangerouslyMakeUnchecked(CharSource::read))
+                .orElseThrow(() -> new IllegalStateException(String.format(
+                    "Cannot assemble Item: created FileContent instance does not contain accessible text: %s",
+                    content)))));
+    }
 
     @Override
-    public CreationResult<I> createItem(Set<ItemAttribute<?>> itemAttributes) {
+    public CreationResult<Item> createItem(Set<ItemAttribute<?>> itemAttributes) throws IOException {
         return resultAssembler().assembleResult(
             idCreator().createId(itemAttributes),
             fileContentCreator().createFileContent(itemAttributes));
     }
 
     public interface FileContentCreationStrategy<T> {
-        CreationResult<FileContent<T>> createFileContent(Set<ItemAttribute<?>> itemAttributes);
-        default CreationResult<FileContent<T>> createFileContent(ItemAttribute<?>... itemAttributes) {
-            return createFileContent(ImmutableSet.copyOf(itemAttributes));
+        CreationResult<? extends FileContent<? extends T>> createFileContent(Set<ItemAttribute<?>> itemAttributes);
+        default CreationResult<? extends FileContent<? extends T>> createFileContent(ItemAttribute<?> attribute, ItemAttribute<?>... attributes) {
+            return createFileContent(ImmutableSet.<ItemAttribute<?>>builder().add(attribute).add(attributes).build());
         }
     }
 
@@ -41,12 +52,13 @@ public abstract class DefaultItemFactory<I extends Item, R> implements ItemFacto
     }
 
     public interface ResultAssembler<I , R> {
-        CreationResult<I> assembleResult(CreationResult<Path> path, CreationResult<FileContent<R>> fileContent);
+        CreationResult<I> assembleResult(
+            CreationResult<Path> path,
+            CreationResult<? extends FileContent<? extends R>> fileContent) throws IOException;
     }
 
     public interface FileContent<T> {
         Set<ItemAttribute<?>> attributes();
-        Optional<String> mimeType();
         Optional<ByteSource> bytes();
         Optional<CharSource> text();
         T representation();
