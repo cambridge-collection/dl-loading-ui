@@ -4,7 +4,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import uk.cam.lib.cdl.loading.editing.itemcreation.ItemAttributes.StandardItemAttributes;
+import uk.cam.lib.cdl.loading.editing.itemcreation.ModelAttributes.StandardItemAttributes;
 
 import java.io.IOException;
 
@@ -16,7 +16,7 @@ public class DefaultItemFactoryTest {
 
 
     public static class ImmutableInitialFileContentTest {
-        private static ImmutableInitialFileContent newIIFC(ItemAttribute<?>...attributes) {
+        private static ImmutableInitialFileContent newIIFC(ModelAttribute<?>...attributes) {
             return ImmutableInitialFileContent.builder().addAttributes(attributes).build();
         }
 

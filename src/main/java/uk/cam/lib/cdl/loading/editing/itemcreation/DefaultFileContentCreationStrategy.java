@@ -1,7 +1,7 @@
 package uk.cam.lib.cdl.loading.editing.itemcreation;
 
 import org.immutables.value.Value;
-import uk.cam.lib.cdl.loading.editing.itemcreation.DefaultItemFactory.FileContent;
+import uk.cam.lib.cdl.loading.editing.itemcreation.DefaultModelFactory.FileContent;
 
 import java.util.Optional;
 import java.util.Set;
@@ -9,7 +9,7 @@ import java.util.Set;
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
 public abstract class DefaultFileContentCreationStrategy<T> implements
-    DefaultItemFactory.FileContentCreationStrategy<T> {
+    DefaultModelFactory.FileContentCreationStrategy<T> {
 
     @Value.Default
     protected FileContentInitialiser initialiser() {
@@ -18,12 +18,12 @@ public abstract class DefaultFileContentCreationStrategy<T> implements
     protected abstract FileContentProcessor<Optional<Void>, T> processor();
 
     @Override
-    public CreationResult<? extends FileContent<? extends T>> createFileContent(Set<ItemAttribute<?>> itemAttributes) {
-        return initialiser().initialiseFileContent(itemAttributes).flatMap(processor()::processFileContent);
+    public CreationResult<? extends FileContent<? extends T>> createFileContent(Set<ModelAttribute<?>> modelAttributes) {
+        return initialiser().initialiseFileContent(modelAttributes).flatMap(processor()::processFileContent);
     }
 
     interface FileContentInitialiser {
-        CreationResult<FileContent<Optional<Void>>> initialiseFileContent(Set<ItemAttribute<?>> attributes);
+        CreationResult<FileContent<Optional<Void>>> initialiseFileContent(Set<ModelAttribute<?>> attributes);
     }
 
     interface FileContentProcessor<T, U> {

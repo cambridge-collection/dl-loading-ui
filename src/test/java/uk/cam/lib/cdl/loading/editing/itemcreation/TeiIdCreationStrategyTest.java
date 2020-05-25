@@ -1,9 +1,5 @@
 package uk.cam.lib.cdl.loading.editing.itemcreation;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.Truth;
-import com.google.common.truth.Truth8;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -26,7 +22,7 @@ public class TeiIdCreationStrategyTest {
     })
     public void createId_returnsPathGivenValidFilename(String filename, Path expected) {
         var result = strategy.createId(
-            ItemAttributes.filename(filename)
+            ModelAttributes.filename(filename)
         );
         assertThat(result.isSuccessful()).isTrue();
         assertThat(result.value()).hasValue(expected);
@@ -43,7 +39,7 @@ public class TeiIdCreationStrategyTest {
     })
     public void createId_returnsUnsuccessfulResultForInvalidPaths(String invalidFilename) {
         var result = strategy.createId(
-            ItemAttributes.filename(invalidFilename)
+            ModelAttributes.filename(invalidFilename)
         );
         assertThat(result.isSuccessful()).isFalse();
         assertThat(result.issues()).hasSize(1);

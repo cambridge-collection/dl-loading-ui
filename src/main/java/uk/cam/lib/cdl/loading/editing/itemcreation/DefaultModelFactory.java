@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
 import org.immutables.value.Value;
-import uk.cam.lib.cdl.loading.editing.itemcreation.ItemAttributes.StandardItemAttributes;
+import uk.cam.lib.cdl.loading.editing.itemcreation.ModelAttributes.StandardItemAttributes;
 import uk.cam.lib.cdl.loading.model.editor.ImmutableItem;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.utils.ThrowingFunction;
@@ -15,50 +15,58 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 @Value.Immutable
-public abstract class DefaultItemFactory<R> implements ItemFactory {
+public abstract class DefaultModelFactory<T, R> implements ModelFactory<T> {
     protected abstract IdCreationStrategy idCreator();
     protected abstract FileContentCreationStrategy<R> fileContentCreator();
+    protected abstract ResultAssembler<R, T> resultAssembler();
 
-    @Value.Default
-    protected ResultAssembler<Item, R> resultAssembler() {
-        return (idResult, contentResult) -> idResult.biMap(contentResult, (id, content) ->
-            ImmutableItem.of(id, content.text().map(ThrowingFunction.dangerouslyMakeUnchecked(CharSource::read))
-                .orElseThrow(() -> new IllegalStateException(String.format(
-                    "Cannot assemble Item: created FileContent instance does not contain accessible text: %s",
-                    content)))));
+    public static <A, B> ResultAssembler<A, B> assembleResultFromFileContent(BiFunction<Path, ? super FileContent<? extends A>, ? extends B> idContentHandler) {
+        return (idResult, contentResult) -> idResult.biMap(contentResult, idContentHandler);
     }
 
+    public static <Result> ResultAssembler<FileContent<?>, Result> assembleResultFromFileContentString(String modelName, BiFunction<Path, String, ? extends Result> constructor) {
+        return assembleResultFromFileContent((id, fileContent) ->
+            constructor.apply(id, fileContent.text().map(ThrowingFunction.dangerouslyMakeUnchecked(CharSource::read))
+                .orElseThrow(() -> new IllegalStateException(String.format(
+                    "Cannot assemble %s: created FileContent instance does not contain accessible text: %s",
+                    modelName, fileContent)))));
+    }
+
+    public static final ResultAssembler<FileContent<?>, Item> ITEM_ASSEMBLER =
+        assembleResultFromFileContentString("Item", ImmutableItem::of);
+
     @Override
-    public CreationResult<Item> createItem(Set<ItemAttribute<?>> itemAttributes) throws IOException {
+    public CreationResult<T> createFromAttributes(Set<ModelAttribute<?>> modelAttributes) throws IOException {
         return resultAssembler().assembleResult(
-            idCreator().createId(itemAttributes),
-            fileContentCreator().createFileContent(itemAttributes));
+            idCreator().createId(modelAttributes),
+            fileContentCreator().createFileContent(modelAttributes));
     }
 
     public interface FileContentCreationStrategy<T> {
-        CreationResult<? extends FileContent<? extends T>> createFileContent(Set<ItemAttribute<?>> itemAttributes);
-        default CreationResult<? extends FileContent<? extends T>> createFileContent(ItemAttribute<?> attribute, ItemAttribute<?>... attributes) {
-            return createFileContent(ImmutableSet.<ItemAttribute<?>>builder().add(attribute).add(attributes).build());
+        CreationResult<? extends FileContent<? extends T>> createFileContent(Set<ModelAttribute<?>> modelAttributes);
+        default CreationResult<? extends FileContent<? extends T>> createFileContent(ModelAttribute<?> attribute, ModelAttribute<?>... attributes) {
+            return createFileContent(ImmutableSet.<ModelAttribute<?>>builder().add(attribute).add(attributes).build());
         }
     }
 
     public interface IdCreationStrategy {
-        CreationResult<Path> createId(Set<ItemAttribute<?>> itemAttributes);
-        default CreationResult<Path> createId(ItemAttribute<?>... itemAttributes) {
-            return createId(ImmutableSet.copyOf(itemAttributes));
+        CreationResult<Path> createId(Set<ModelAttribute<?>> modelAttributes);
+        default CreationResult<Path> createId(ModelAttribute<?>... modelAttributes) {
+            return createId(ImmutableSet.copyOf(modelAttributes));
         }
     }
 
     public interface ResultAssembler<I , R> {
-        CreationResult<I> assembleResult(
+        CreationResult<R> assembleResult(
             CreationResult<Path> path,
-            CreationResult<? extends FileContent<? extends R>> fileContent) throws IOException;
+            CreationResult<? extends FileContent<? extends I>> fileContent) throws IOException;
     }
 
     public interface FileContent<T> {
-        Set<ItemAttribute<?>> attributes();
+        Set<ModelAttribute<?>> attributes();
         Optional<ByteSource> bytes();
         Optional<CharSource> text();
         T representation();
@@ -68,12 +76,12 @@ public abstract class DefaultItemFactory<R> implements ItemFactory {
     abstract static class AbstractInitialFileContent implements FileContent<Optional<Void>> {
         @Override
         @Value.Parameter(order = 0)
-        public abstract Set<ItemAttribute<?>> attributes();
+        public abstract Set<ModelAttribute<?>> attributes();
 
         @Value.Derived
         public Optional<String> mimeType() {
-            return ItemAttributes.findAttribute(StandardItemAttributes.MIME_TYPE, String.class, attributes())
-                .map(ItemAttribute::value);
+            return ModelAttributes.findAttribute(StandardItemAttributes.MIME_TYPE, String.class, attributes())
+                .map(ModelAttribute::value);
         }
 
         @Value.Check
@@ -100,17 +108,17 @@ public abstract class DefaultItemFactory<R> implements ItemFactory {
 
         @Value.Derived
         protected Optional<Charset> providedCharset() {
-            return ItemAttributes.findAttribute(StandardItemAttributes.CHARSET, String.class, attributes())
-                .map(ItemAttribute::value)
+            return ModelAttributes.findAttribute(StandardItemAttributes.CHARSET, String.class, attributes())
+                .map(ModelAttribute::value)
                 .map(Charset::forName)
-                .or(() -> ItemAttributes.findAttribute(StandardItemAttributes.CHARSET, Charset.class, attributes())
-                    .map(ItemAttribute::value));
+                .or(() -> ModelAttributes.findAttribute(StandardItemAttributes.CHARSET, Charset.class, attributes())
+                    .map(ModelAttribute::value));
         }
 
         @Value.Derived
         protected Optional<ByteSource> providedBytes() {
-            return ItemAttributes.findAttribute(StandardItemAttributes.BYTES, ByteSource.class, attributes())
-                .map(ItemAttribute::value);
+            return ModelAttributes.findAttribute(StandardItemAttributes.BYTES, ByteSource.class, attributes())
+                .map(ModelAttribute::value);
         }
 
         protected Optional<ByteSource> bytesFromProvidedTextAndCharset() {
@@ -125,10 +133,10 @@ public abstract class DefaultItemFactory<R> implements ItemFactory {
 
         @Value.Derived
         protected Optional<CharSource> providedText() {
-            return ItemAttributes.findAttribute(StandardItemAttributes.TEXT, CharSource.class, attributes())
-                .map(ItemAttribute::value)
-                .or(() -> ItemAttributes.findAttribute(StandardItemAttributes.TEXT, String.class, attributes())
-                    .map(ItemAttribute::value)
+            return ModelAttributes.findAttribute(StandardItemAttributes.TEXT, CharSource.class, attributes())
+                .map(ModelAttribute::value)
+                .or(() -> ModelAttributes.findAttribute(StandardItemAttributes.TEXT, String.class, attributes())
+                    .map(ModelAttribute::value)
                     .map(CharSource::wrap));
         }
 

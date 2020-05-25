@@ -1,6 +1,6 @@
 package uk.cam.lib.cdl.loading.editing.itemcreation;
 
-public class AttributeNotFoundException extends ItemCreationException {
+public class AttributeNotFoundException extends ModelCreationException {
     public AttributeNotFoundException() {
         super();
     }
