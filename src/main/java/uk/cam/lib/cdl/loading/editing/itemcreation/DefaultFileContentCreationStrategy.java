@@ -1,7 +1,6 @@
 package uk.cam.lib.cdl.loading.editing.itemcreation;
 
 import org.immutables.value.Value;
-import uk.cam.lib.cdl.loading.editing.itemcreation.DefaultModelFactory.FileContent;
 
 import java.util.Optional;
 import java.util.Set;
@@ -13,7 +12,7 @@ public abstract class DefaultFileContentCreationStrategy<T> implements
 
     @Value.Default
     protected FileContentInitialiser initialiser() {
-        return attributes -> ImmutableCreationResult.successful(ImmutableInitialFileContent.of(attributes));
+        return DefaultFileContentInitialiser.getInstance();
     }
     protected abstract FileContentProcessor<Optional<Void>, T> processor();
 
@@ -23,7 +22,7 @@ public abstract class DefaultFileContentCreationStrategy<T> implements
     }
 
     interface FileContentInitialiser {
-        CreationResult<FileContent<Optional<Void>>> initialiseFileContent(Set<ModelAttribute<?>> attributes);
+        CreationResult<FileContent<Optional<Void>>> initialiseFileContent(Set<? extends ModelAttribute<?>> attributes);
     }
 
     interface FileContentProcessor<T, U> {

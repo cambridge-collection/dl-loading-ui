@@ -43,7 +43,7 @@ public abstract class AbstractCreationResult<T> implements CreationResult<T> {
         }
     }
 
-    private static <T> CreationResult<T> safelyCastWildcard(CreationResult<? extends T> result) {
+    private static <T> CreationResult<T> withoutCovariance(CreationResult<? extends T> result) {
         @SuppressWarnings("unchecked")
         var cast = (CreationResult<T>) result;
 
@@ -57,12 +57,12 @@ public abstract class AbstractCreationResult<T> implements CreationResult<T> {
             var result = (CreationResult<U>)this;
             return result;
         }
-        return safelyCastWildcard(mapper.apply(this.value().orElseThrow()));
+        return withoutCovariance(mapper.apply(this.value().orElseThrow()));
     }
 
     @Override
     public <U> CreationResult<U> map(Function<? super T, ? extends U> mapper) {
-        return safelyCastWildcard(flatMap(mapper.andThen(ImmutableCreationResult::successful)));
+        return withoutCovariance(flatMap(mapper.andThen(ImmutableCreationResult::successful)));
     }
 
     @Override
@@ -79,17 +79,7 @@ public abstract class AbstractCreationResult<T> implements CreationResult<T> {
         CreationResult<T> left, CreationResult<U> right,
         BiFunction<? super T, ? super U, CreationResult<? extends V>> mapper
     ) {
-        return safelyCastWildcard(left.value().flatMap(leftValue -> right.value().map(rightValue -> mapper.apply(leftValue, rightValue)))
+        return withoutCovariance(left.value().flatMap(leftValue -> right.value().map(rightValue -> mapper.apply(leftValue, rightValue)))
             .orElseGet(() -> ImmutableCreationResult.unsuccessful(Sets.union(left.issues(), right.issues()))));
     }
-
-//    @Override
-//    public <U> CreationResult<U> flatmap(Function<T, CreationResult<U>> mapper) {
-//        if(!this.isSuccessful()) {
-//            @SuppressWarnings("unchecked")
-//            var result = (CreationResult<U>)this;
-//            return result;
-//        }
-//        return null;
-//    }
 }

@@ -11,10 +11,10 @@ public class ModelAttributes {
     private ModelAttributes() {}
 
     public static ModelAttribute<String> filename(String filename) {
-        return ImmutableModelAttribute.of(StandardItemAttributes.FILENAME, filename);
+        return ImmutableModelAttribute.of(StandardFileAttributes.FILENAME, filename);
     }
 
-    public enum StandardItemAttributes implements ModelAttribute.Type {
+    public enum StandardFileAttributes implements ModelAttribute.Type {
         FILENAME,
         MIME_TYPE,
         CHARSET,
@@ -23,7 +23,7 @@ public class ModelAttributes {
     }
 
     public static <T> Stream<ModelAttribute<T>> streamAttributes(
-            ModelAttribute.Type attributeType, Class<T> valueType, Stream<ModelAttribute<?>> attributes) {
+            ModelAttribute.Type attributeType, Class<T> valueType, Stream<? extends ModelAttribute<?>> attributes) {
         Preconditions.checkNotNull(attributeType, "attributeType must not be null");
         Preconditions.checkNotNull(valueType, "valueType must not be null");
         Preconditions.checkNotNull(attributes, "attributes must not be null");
@@ -35,22 +35,22 @@ public class ModelAttributes {
             });
     }
     public static <T> Stream<ModelAttribute<T>> streamAttributes(
-            ModelAttribute.Type attributeType, Class<T> valueType, Iterable<ModelAttribute<?>> attributes) {
+            ModelAttribute.Type attributeType, Class<T> valueType, Iterable<? extends ModelAttribute<?>> attributes) {
         return streamAttributes(attributeType, valueType, Streams.stream(attributes));
     }
 
-    public static <T> Optional<ModelAttribute<T>> findAttribute(ModelAttribute.Type attributeType, Class<T> valueType, Iterable<ModelAttribute<?>> attributes) {
+    public static <T> Optional<ModelAttribute<T>> findAttribute(ModelAttribute.Type attributeType, Class<T> valueType, Iterable<? extends ModelAttribute<?>> attributes) {
         return streamAttributes(attributeType, valueType, attributes)
             .findFirst();
     }
 
     public static <T> ModelAttribute<T> requireAttribute(
-            ModelAttribute.Type attributeType, Class<T> valueType, Iterable<ModelAttribute<?>> attributes) {
+            ModelAttribute.Type attributeType, Class<T> valueType, Iterable<? extends ModelAttribute<?>> attributes) {
         return findAttribute(attributeType, valueType, attributes)
             .orElseThrow(() -> attributeNotFoundException(attributeType, valueType, attributes));
     }
 
-    public static AttributeNotFoundException attributeNotFoundException(ModelAttribute.Type attributeType, Class<?> valueType, Iterable<ModelAttribute<?>> attributes) {
+    public static AttributeNotFoundException attributeNotFoundException(ModelAttribute.Type attributeType, Class<?> valueType, Iterable<? extends ModelAttribute<?>> attributes) {
         return new AttributeNotFoundException(String.format(
             "No ItemAttribute with type() %s assignable to %s found amongst %s",
             attributeType, valueType, attributes));

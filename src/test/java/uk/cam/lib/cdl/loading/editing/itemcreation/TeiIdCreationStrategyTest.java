@@ -33,9 +33,11 @@ public class TeiIdCreationStrategyTest {
         "",
         "name.xml",
         "AB-00000.xml",
-        "AB-000-00000.xml",
         "AB-ABC--00000.xml",
         "AB--ABC-00000.xml",
+        "MS-FOO-00001.xml ",
+        " MS-FOO-00001.xml",
+        "MS-FOO 00001.xml",
     })
     public void createId_returnsUnsuccessfulResultForInvalidPaths(String invalidFilename) {
         var result = strategy.createId(

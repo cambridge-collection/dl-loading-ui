@@ -47,6 +47,87 @@ public class ImmutableCreationResultTest {
         assertThat(result.issues()).isEqualTo(issues);
     }
 
+    private static final <T> CreationResult<T> unsuccessfulResult() {
+        return ImmutableCreationResult.unsuccessful(
+            ImmutableIssue.of(ExampleIssueType.EXAMPLE, "Foo1."),
+            ImmutableIssue.of(ExampleIssueType.EXAMPLE, "Foo2."),
+            ImmutableIssue.of(ExampleIssueType.EXAMPLE, "Foo3."));
+    }
+
+    @Test
+    public void map_successful() {
+        assertThat(ImmutableCreationResult.successful(42).map(value -> value + 1))
+            .isEqualTo(ImmutableCreationResult.successful(43));
+    }
+
+    @Test
+    public void map_unsuccessful() {
+        CreationResult<String> a = unsuccessfulResult();
+        CreationResult<Integer> b = a.map(Integer::parseInt);
+
+        assertThat(b.isSuccessful()).isFalse();
+        assertThat(b).isSameInstanceAs(a);
+    }
+
+    @Test
+    public void flatmap() {
+        CreationResult<String> unsuccessful = unsuccessfulResult();
+        CreationResult<String> successful = ImmutableCreationResult.successful("42");
+
+        assertThat(unsuccessful.flatMap(value -> ImmutableCreationResult.successful(Integer.parseInt(value))))
+            .isSameInstanceAs(unsuccessful);
+        assertThat(successful.flatMap(value -> ImmutableCreationResult.successful(Integer.parseInt(value))))
+            .isEqualTo(ImmutableCreationResult.successful(42));
+        assertThat(successful.flatMap(value -> ImmutableCreationResult.unsuccessful(ISSUE1, ISSUE2)))
+            .isEqualTo(ImmutableCreationResult.unsuccessful(ISSUE1, ISSUE2));
+    }
+
+    private static final Issue ISSUE1 = ImmutableIssue.of(ExampleIssueType.EXAMPLE, "Foo1.");
+    private static final Issue ISSUE2 = ImmutableIssue.of(ExampleIssueType.EXAMPLE, "Foo2.");
+    private static final Issue ISSUE3 = ImmutableIssue.of(ExampleIssueType.EXAMPLE, "Foo3.");
+
+    @Test
+    public void biMap() {
+        CreationResult<String> unsuccessfulA = ImmutableCreationResult.unsuccessful(ISSUE1);
+        CreationResult<Integer> unsuccessfulB = ImmutableCreationResult.unsuccessful(ISSUE2, ISSUE3);
+        CreationResult<String> successfulA = ImmutableCreationResult.successful("1");
+        CreationResult<Integer> successfulB = ImmutableCreationResult.successful(2);
+
+        assertThat(unsuccessfulA.biMap(unsuccessfulB, (String a, Integer b) -> a + ":" + b))
+            .isEqualTo(ImmutableCreationResult.unsuccessful(ISSUE1, ISSUE2, ISSUE3));
+        assertThat(unsuccessfulA.biMap(successfulB, (String a, Integer b) -> a + ":" + b))
+            .isEqualTo(ImmutableCreationResult.unsuccessful(ISSUE1));
+        assertThat(successfulA.biMap(unsuccessfulB, (String a, Integer b) -> a + ":" + b))
+            .isEqualTo(ImmutableCreationResult.unsuccessful(ISSUE2, ISSUE3));
+        assertThat(successfulA.biMap(successfulB, (String a, Integer b) -> a + ":" + b))
+            .isEqualTo(ImmutableCreationResult.successful("1:2"));
+    }
+
+    @Test
+    public void flatBiMap() {
+        CreationResult<String> unsuccessfulA = ImmutableCreationResult.unsuccessful(ISSUE1);
+        CreationResult<Integer> unsuccessfulB = ImmutableCreationResult.unsuccessful(ISSUE2, ISSUE3);
+        CreationResult<String> successfulA = ImmutableCreationResult.successful("1");
+        CreationResult<Integer> successfulB = ImmutableCreationResult.successful(2);
+
+        assertThat(unsuccessfulA.flatBiMap(unsuccessfulB, (String a, Integer b) ->
+            ImmutableCreationResult.successful(a + ":" + b)))
+            .isEqualTo(ImmutableCreationResult.unsuccessful(ISSUE1, ISSUE2, ISSUE3));
+        assertThat(unsuccessfulA.flatBiMap(successfulB, (String a, Integer b) ->
+            ImmutableCreationResult.successful(a + ":" + b)))
+            .isEqualTo(ImmutableCreationResult.unsuccessful(ISSUE1));
+        assertThat(successfulA.flatBiMap(unsuccessfulB, (String a, Integer b) ->
+            ImmutableCreationResult.successful(a + ":" + b)))
+            .isEqualTo(ImmutableCreationResult.unsuccessful(ISSUE2, ISSUE3));
+        assertThat(successfulA.flatBiMap(successfulB, (String a, Integer b) ->
+            ImmutableCreationResult.successful(a + ":" + b)))
+            .isEqualTo(ImmutableCreationResult.successful("1:2"));
+        assertThat(successfulA.flatBiMap(successfulB, (String a, Integer b) ->
+            ImmutableCreationResult.unsuccessful(ISSUE1, ISSUE2)))
+            .isEqualTo(ImmutableCreationResult.unsuccessful(ISSUE1, ISSUE2));
+    }
+
+
     public enum ExampleIssueType implements Issue.Type {
         EXAMPLE
     }

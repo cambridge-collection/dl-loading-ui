@@ -8,13 +8,13 @@ import java.util.regex.Pattern;
 
 public class TeiIdCreationStrategy implements DefaultModelFactory.IdCreationStrategy {
     public static final Pattern FILENAME_PATTERN = Pattern.compile(
-        "^([a-z0-9]+-(?:[a-z0-9]+[a-z0-9]*-)+[0-9]{5})\\.xml$", Pattern.CASE_INSENSITIVE);
+        "^([a-z0-9]+-(?:[a-z0-9]+-)+[0-9]{5})\\.xml$", Pattern.CASE_INSENSITIVE);
 
     public static final Path BASE_TEI_ITEM_PATH = Path.of("data/items/data/tei");
 
     @Override
     public CreationResult<Path> createId(Set<ModelAttribute<?>> modelAttributes) {
-        var filename = ModelAttributes.requireAttribute(ModelAttributes.StandardItemAttributes.FILENAME, String.class, modelAttributes)
+        var filename = ModelAttributes.requireAttribute(ModelAttributes.StandardFileAttributes.FILENAME, String.class, modelAttributes)
             .value();
 
         var matcher = FILENAME_PATTERN.matcher(filename);
