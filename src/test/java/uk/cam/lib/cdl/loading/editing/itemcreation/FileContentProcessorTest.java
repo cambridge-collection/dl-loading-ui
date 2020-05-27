@@ -4,12 +4,14 @@ import com.google.common.truth.Truth;
 import org.junit.jupiter.api.Test;
 import uk.cam.lib.cdl.loading.editing.itemcreation.DefaultFileContentCreationStrategy.FileContentProcessor;
 
+import java.io.IOException;
+
 import static uk.cam.lib.cdl.loading.editing.itemcreation.ImmutableCreationResultTest.ExampleIssueType.EXAMPLE;
 
 public class FileContentProcessorTest {
 
     @Test
-    public void pipedThrough() {
+    public void pipedThrough() throws IOException {
         FileContentProcessor<String, Integer> a = s ->
             ImmutableCreationResult.successful(s.mapRepresentation(Integer::parseInt));
 

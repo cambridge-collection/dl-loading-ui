@@ -41,8 +41,8 @@ public abstract class DefaultModelFactory<T, R> implements ModelFactory<T> {
     }
 
     public interface FileContentCreationStrategy<T> {
-        CreationResult<? extends FileContent<? extends T>> createFileContent(Set<ModelAttribute<?>> modelAttributes);
-        default CreationResult<? extends FileContent<? extends T>> createFileContent(ModelAttribute<?> attribute, ModelAttribute<?>... attributes) {
+        CreationResult<FileContent<T>> createFileContent(Set<? extends ModelAttribute<?>> modelAttributes) throws IOException;
+        default CreationResult<FileContent<T>> createFileContent(ModelAttribute<?> attribute, ModelAttribute<?>... attributes) throws IOException {
             return createFileContent(ImmutableSet.<ModelAttribute<?>>builder().add(attribute).add(attributes).build());
         }
     }

@@ -1,7 +1,9 @@
 package uk.cam.lib.cdl.loading.editing.itemcreation;
 
 import org.immutables.value.Value;
+import uk.cam.lib.cdl.loading.utils.ThrowingFunction;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -17,8 +19,10 @@ public abstract class DefaultFileContentCreationStrategy<T> implements
     protected abstract FileContentProcessor<Optional<Void>, T> processor();
 
     @Override
-    public CreationResult<? extends FileContent<? extends T>> createFileContent(Set<ModelAttribute<?>> modelAttributes) {
-        return initialiser().initialiseFileContent(modelAttributes).flatMap(processor()::processFileContent);
+    public CreationResult<FileContent<T>> createFileContent(Set<? extends ModelAttribute<?>> modelAttributes) throws IOException {
+        return initialiser()
+            .initialiseFileContent(modelAttributes)
+            .flatMap(ThrowingFunction.dangerouslyMakeUnchecked(processor()::processFileContent));
     }
 
     interface FileContentInitialiser {
@@ -26,10 +30,13 @@ public abstract class DefaultFileContentCreationStrategy<T> implements
     }
 
     interface FileContentProcessor<T, U> {
-        CreationResult<? extends FileContent<? extends U>> processFileContent(FileContent<? extends T> content);
+        CreationResult<FileContent<U>> processFileContent(FileContent<? extends T> content) throws IOException;
 
         default <V> FileContentProcessor<T, V> pipedThrough(FileContentProcessor<? super U, ? extends V> after) {
-            return input -> processFileContent(input).flatMap(after::processFileContent);
+            return input -> processFileContent(input)
+                    .flatMap(ThrowingFunction.dangerouslyMakeUnchecked(after::processFileContent))
+                    // Safely remove ? extends V wildcard
+                    .map(fcExtendsV -> fcExtendsV.withAlternateRepresentation((V)fcExtendsV.representation()));
         }
     }
 }

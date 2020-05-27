@@ -44,6 +44,8 @@ public interface FileContent<T> {
         return withAlternateRepresentation(representation, fileData, charset());
     }
 
+    <U> FileContent<U> withAlternateRepresentation(U representation);
+
     <U> FileContent<U> flatMap(Function<? super FileContent<? extends T>, ? extends FileContent<? extends U>> mapper);
     <U> FileContent<U> flatMapRepresentation(Function<? super T, ? extends FileContent<? extends U>> mapper);
     <U> FileContent<U> map(Function<? super FileContent<? extends T>, ? extends U> mapper);
