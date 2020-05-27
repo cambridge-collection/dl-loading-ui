@@ -24,8 +24,6 @@ public class CSVPageLoaderTest {
         var loader = ImmutableCSVPageLoader.builder()
             // No column mappings defined in CSVFormat
             .csvFormat(CSVFormat.DEFAULT)
-            .labelAccessor(CSVRowAccessor.of("label"))
-            .imageAccessor(CSVRowAccessor.of("image"))
             .build();
 
         Exception e = assertThrows(PaginationException.class, () ->
@@ -41,11 +39,7 @@ public class CSVPageLoaderTest {
         "foo,bar\n"
     })
     public void loadPages_throwsUserInputError_whenNoPagesAreFound(String csv) throws IOException {
-        var loader = ImmutableCSVPageLoader.builder()
-            .csvFormat(CSVFormat.DEFAULT.withFirstRecordAsHeader())
-            .labelAccessor(CSVRowAccessor.of("label"))
-            .imageAccessor(CSVRowAccessor.of("image"))
-            .build();
+        var loader = ImmutableCSVPageLoader.builder().build();
 
         Exception e = assertThrows(UserInputPaginationException.class, () ->
             loader.loadPages(new StringReader(csv)));

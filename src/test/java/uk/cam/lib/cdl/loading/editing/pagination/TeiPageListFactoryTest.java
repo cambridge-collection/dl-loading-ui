@@ -14,7 +14,6 @@ public class TeiPageListFactoryTest {
     public static TeiPageListFactory newTestInstance() {
         return TeiPageListFactory.builder()
             .pageLoader(ImmutableCSVPageLoader.builder()
-                .csvFormat(CSVFormat.DEFAULT.withFirstRecordAsHeader())
                 .imageAccessor(CSVPageLoader.CSVRowAccessor.of("Image"))
                 .labelAccessor(CSVPageLoader.CSVRowAccessor.of("Label"))
                 .build())

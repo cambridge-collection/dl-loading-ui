@@ -31,9 +31,18 @@ public abstract class CSVPageLoader implements PageLoader<Reader> {
         }
     }
 
-    abstract CSVRowAccessor labelAccessor();
-    abstract CSVRowAccessor imageAccessor();
-    abstract CSVFormat csvFormat();
+    @Value.Default
+    CSVRowAccessor labelAccessor() {
+        return CSVRowAccessor.of("label");
+    }
+    @Value.Default
+    CSVRowAccessor imageAccessor() {
+        return CSVRowAccessor.of("image");
+    }
+    @Value.Default
+    CSVFormat csvFormat() {
+        return CSVFormat.DEFAULT.withFirstRecordAsHeader();
+    }
 
     @Override
     public List<Page> loadPages(Reader source) throws IOException {
