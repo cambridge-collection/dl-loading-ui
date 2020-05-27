@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 @Value.Immutable
 public abstract class CSVPageLoader implements PageLoader<Reader> {
-    interface CSVRowAccessor {
+    public interface CSVRowAccessor {
         String get(CSVRecord row);
 
         static CSVRowAccessor of(String column) {
