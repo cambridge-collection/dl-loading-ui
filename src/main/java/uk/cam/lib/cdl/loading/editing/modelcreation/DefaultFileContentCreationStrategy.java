@@ -8,9 +8,13 @@ import java.util.Optional;
 import java.util.Set;
 
 @Value.Immutable
-@Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PRIVATE)
 public abstract class DefaultFileContentCreationStrategy<T> implements
     DefaultModelFactory.FileContentCreationStrategy<T> {
+
+    public static <T> DefaultFileContentCreationStrategyBuilder<T> builder() {
+        return new DefaultFileContentCreationStrategyBuilder<>();
+    }
 
     @Value.Default
     protected FileContentInitialiser initialiser() {

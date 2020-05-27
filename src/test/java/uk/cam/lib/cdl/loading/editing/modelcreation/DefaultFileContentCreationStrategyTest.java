@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 public class DefaultFileContentCreationStrategyTest {
-    public static final DefaultFileContentCreationStrategy<Integer> CREATOR = ImmutableDefaultFileContentCreationStrategy.<Integer>builder()
+    public static final DefaultFileContentCreationStrategy<Integer> CREATOR = DefaultFileContentCreationStrategy.<Integer>builder()
         .initialiser(DefaultFileContentInitialiser.getInstance())
         .processor(fc -> {
             var text = fc.text()
