@@ -14,6 +14,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -23,11 +24,14 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public final class XML {
     public static DocumentBuilderFactory getDocumentBuilderFactory() {
@@ -57,9 +61,13 @@ public final class XML {
         }
     }
 
+    /**
+     * Serialise a Document as a String, specifying UTF-8 encoding.
+     */
     public static String serialise(Document doc) {
         try {
             var transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.ENCODING, UTF_8.name());
             var sw = new StringWriter();
             transformer.transform(new DOMSource(doc), new StreamResult(sw));
             return sw.toString();
