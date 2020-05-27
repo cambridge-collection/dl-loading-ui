@@ -24,7 +24,7 @@ public abstract class CSVPageLoader implements PageLoader<Reader> {
             Preconditions.checkNotNull(column, "column cannot be null");
             return row -> {
                 if(!row.isMapped(column)) {
-                    throw new PaginationException(String.format("CSV row has no column named '%s'", column));
+                    throw new UserInputPaginationException(String.format("CSV row has no column named '%s'", column));
                 }
                 return row.get(column);
             };
@@ -38,7 +38,11 @@ public abstract class CSVPageLoader implements PageLoader<Reader> {
     @Override
     public List<Page> loadPages(Reader source) throws IOException {
         Preconditions.checkNotNull(source, "source cannot be null");
-        return loadPages(Streams.stream(csvFormat().parse(source)));
+        var pages = loadPages(Streams.stream(csvFormat().parse(source)));
+        if(pages.isEmpty()) {
+            throw new UserInputPaginationException("CSV contains no page data");
+        }
+        return pages;
     }
 
     private List<Page> loadPages(Stream<CSVRecord> rows) {
@@ -53,7 +57,7 @@ public abstract class CSVPageLoader implements PageLoader<Reader> {
             imageURI = new URI(UriComponentsBuilder.fromUriString(image).toUriString());
         }
         catch (RuntimeException | URISyntaxException e) {
-            throw new PaginationException(String.format("Image location is not a valid URL: '%s'", image));
+            throw new UserInputPaginationException(String.format("Image location is not a valid URL: '%s'", image));
         }
         return ImmutablePage.builder().label(label).image(imageURI).build();
     }
