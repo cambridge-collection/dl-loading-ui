@@ -25,11 +25,11 @@ public abstract class DefaultFileContentCreationStrategy<T> implements
             .flatMapValue(ThrowingFunction.dangerouslyMakeUnchecked(processor()::processFileContent));
     }
 
-    interface FileContentInitialiser {
+    public interface FileContentInitialiser {
         CreationResult<FileContent<Optional<Void>>> initialiseFileContent(Set<? extends ModelAttribute<?>> attributes);
     }
 
-    interface FileContentProcessor<T, U> {
+    public interface FileContentProcessor<T, U> {
         CreationResult<FileContent<U>> processFileContent(FileContent<? extends T> content) throws IOException;
 
         default <V> FileContentProcessor<T, V> pipedThrough(FileContentProcessor<? super U, ? extends V> after) {
