@@ -51,7 +51,7 @@ public abstract class TeiPageListFactory implements ModelFactory<List<TEIPage>> 
             try {
                 pages = pageLoader().loadPages(textSource.openBufferedStream());
             }
-            catch (PaginationException e) {
+            catch (UserInputPaginationException e) {
                 return ImmutableCreationResult.unsuccessful(
                     ImmutableIssue.of(PaginationIssue.INVALID_INPUT_FILE, e.getMessage()));
             }

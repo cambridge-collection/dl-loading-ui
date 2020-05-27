@@ -183,7 +183,7 @@ public class TEIPageInserter {
         var root = tei.getDocumentElement();
 
         if(!elementIsNamed(XMLNS_TEI, "TEI", root))
-            throw new PaginationException(String.format(
+            throw new UserInputPaginationException(String.format(
                 "Unable to insert pages into XML: Root element must be {%s}TEI but was %s",
                 XMLNS_TEI, XML.getClarkName(root)));
     }
