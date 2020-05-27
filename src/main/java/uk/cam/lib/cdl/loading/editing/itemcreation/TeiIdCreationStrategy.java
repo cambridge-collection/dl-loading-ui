@@ -13,7 +13,7 @@ public class TeiIdCreationStrategy implements DefaultModelFactory.IdCreationStra
     public static final Path BASE_TEI_ITEM_PATH = Path.of("data/items/data/tei");
 
     @Override
-    public CreationResult<Path> createId(Set<ModelAttribute<?>> modelAttributes) {
+    public CreationResult<Path> createId(Set<? extends ModelAttribute<?>> modelAttributes) {
         var filename = ModelAttributes.requireAttribute(ModelAttributes.StandardFileAttributes.FILENAME, String.class, modelAttributes)
             .value();
 

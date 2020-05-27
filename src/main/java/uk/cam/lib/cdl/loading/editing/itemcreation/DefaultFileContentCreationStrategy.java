@@ -22,7 +22,7 @@ public abstract class DefaultFileContentCreationStrategy<T> implements
     public CreationResult<FileContent<T>> createFileContent(Set<? extends ModelAttribute<?>> modelAttributes) throws IOException {
         return initialiser()
             .initialiseFileContent(modelAttributes)
-            .flatMap(ThrowingFunction.dangerouslyMakeUnchecked(processor()::processFileContent));
+            .flatMapValue(ThrowingFunction.dangerouslyMakeUnchecked(processor()::processFileContent));
     }
 
     interface FileContentInitialiser {
@@ -34,9 +34,9 @@ public abstract class DefaultFileContentCreationStrategy<T> implements
 
         default <V> FileContentProcessor<T, V> pipedThrough(FileContentProcessor<? super U, ? extends V> after) {
             return input -> processFileContent(input)
-                    .flatMap(ThrowingFunction.dangerouslyMakeUnchecked(after::processFileContent))
+                    .flatMapValue(ThrowingFunction.dangerouslyMakeUnchecked(after::processFileContent))
                     // Safely remove ? extends V wildcard
-                    .map(fcExtendsV -> fcExtendsV.withAlternateRepresentation((V)fcExtendsV.representation()));
+                    .mapValue(fcExtendsV -> fcExtendsV.withAlternateRepresentation((V)fcExtendsV.representation()));
         }
     }
 }

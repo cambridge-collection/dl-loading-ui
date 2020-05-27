@@ -18,11 +18,14 @@ public abstract class DefaultModelFactory<T, R> implements ModelFactory<T> {
     protected abstract FileContentCreationStrategy<R> fileContentCreator();
     protected abstract ResultAssembler<R, T> resultAssembler();
 
-    public static <A, B> ResultAssembler<A, B> assembleResultFromFileContent(BiFunction<Path, ? super FileContent<? extends A>, ? extends B> idContentHandler) {
-        return (idResult, contentResult) -> idResult.biMap(contentResult, idContentHandler);
+    public static <A, B> ResultAssembler<A, B> assembleResultFromFileContent(
+        BiFunction<Path, ? super FileContent<? extends A>, ? extends B> idContentHandler
+    ) {
+        return (idResult, contentResult) -> idResult.biMapValue(contentResult, idContentHandler);
     }
 
-    public static <Result> ResultAssembler<FileContent<?>, Result> assembleResultFromFileContentString(String modelName, BiFunction<Path, String, ? extends Result> constructor) {
+    public static <Result> ResultAssembler<FileContent<?>, Result> assembleResultFromFileContentString(
+        String modelName, BiFunction<Path, String, ? extends Result> constructor) {
         return assembleResultFromFileContent((id, fileContent) ->
             constructor.apply(id, fileContent.text().map(ThrowingFunction.dangerouslyMakeUnchecked(CharSource::read))
                 .orElseThrow(() -> new IllegalStateException(String.format(
@@ -34,7 +37,7 @@ public abstract class DefaultModelFactory<T, R> implements ModelFactory<T> {
         assembleResultFromFileContentString("Item", ImmutableItem::of);
 
     @Override
-    public CreationResult<T> createFromAttributes(Set<ModelAttribute<?>> modelAttributes) throws IOException {
+    public CreationResult<T> createFromAttributes(Set<? extends ModelAttribute<?>> modelAttributes) throws IOException {
         return resultAssembler().assembleResult(
             idCreator().createId(modelAttributes),
             fileContentCreator().createFileContent(modelAttributes));
@@ -48,13 +51,13 @@ public abstract class DefaultModelFactory<T, R> implements ModelFactory<T> {
     }
 
     public interface IdCreationStrategy {
-        CreationResult<Path> createId(Set<ModelAttribute<?>> modelAttributes);
+        CreationResult<Path> createId(Set<? extends ModelAttribute<?>> modelAttributes);
         default CreationResult<Path> createId(ModelAttribute<?>... modelAttributes) {
             return createId(ImmutableSet.copyOf(modelAttributes));
         }
     }
 
-    public interface ResultAssembler<I , R> {
+    public interface ResultAssembler<I, R> {
         CreationResult<R> assembleResult(
             CreationResult<Path> path,
             CreationResult<? extends FileContent<? extends I>> fileContent) throws IOException;

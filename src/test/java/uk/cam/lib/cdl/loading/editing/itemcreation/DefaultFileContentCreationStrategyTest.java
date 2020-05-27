@@ -7,13 +7,12 @@ import uk.cam.lib.cdl.loading.editing.itemcreation.ModelAttributes.StandardFileA
 import java.io.IOException;
 
 public class DefaultFileContentCreationStrategyTest {
-    DefaultFileContentCreationStrategy<Integer> creator = ImmutableDefaultFileContentCreationStrategy.<Integer>builder()
+    public static final DefaultFileContentCreationStrategy<Integer> CREATOR = ImmutableDefaultFileContentCreationStrategy.<Integer>builder()
         .initialiser(DefaultFileContentInitialiser.getInstance())
         .processor(fc -> {
             var text = fc.text()
                 .orElseThrow(() -> new IllegalStateException("FileContent contains no text"))
                 .read();
-            CreationResult<FileContent<Number>> result;
             try {
                 var number = Integer.parseInt(text);
                 return ImmutableCreationResult.successful(fc.withAlternateRepresentation(number));
@@ -26,7 +25,7 @@ public class DefaultFileContentCreationStrategyTest {
 
     @Test
     public void createFileContent() throws IOException {
-        var result = creator.createFileContent(
+        var result = CREATOR.createFileContent(
             StandardFileAttributes.TEXT.containing("42"));
 
         Truth.assertThat(result.isSuccessful()).isTrue();
@@ -35,7 +34,7 @@ public class DefaultFileContentCreationStrategyTest {
 
     @Test
     public void createFileContent_returnsUnsuccessfulResult() throws IOException {
-        var result = creator.createFileContent(
+        var result = CREATOR.createFileContent(
             StandardFileAttributes.TEXT.containing("forty two"));
 
         Truth.assertThat(result.isSuccessful()).isFalse();

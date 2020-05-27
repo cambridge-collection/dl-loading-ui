@@ -51,7 +51,7 @@ public abstract class AbstractCreationResult<T> implements CreationResult<T> {
     }
 
     @Override
-    public <U> CreationResult<U> flatMap(Function<? super T, CreationResult<? extends U>> mapper) {
+    public <U> CreationResult<U> flatMapValue(Function<? super T, CreationResult<? extends U>> mapper) {
         if(!this.isSuccessful()) {
             @SuppressWarnings("unchecked")
             var result = (CreationResult<U>)this;
@@ -61,18 +61,18 @@ public abstract class AbstractCreationResult<T> implements CreationResult<T> {
     }
 
     @Override
-    public <U> CreationResult<U> map(Function<? super T, ? extends U> mapper) {
-        return withoutCovariance(flatMap(mapper.andThen(ImmutableCreationResult::successful)));
+    public <U> CreationResult<U> mapValue(Function<? super T, ? extends U> mapper) {
+        return withoutCovariance(flatMapValue(mapper.andThen(ImmutableCreationResult::successful)));
     }
 
     @Override
-    public <U, V> CreationResult<V> flatBiMap(CreationResult<U> other, BiFunction<? super T, ? super U, CreationResult<? extends V>> mapper) {
+    public <U, V> CreationResult<V> flatBiMapValue(CreationResult<U> other, BiFunction<? super T, ? super U, CreationResult<? extends V>> mapper) {
         return flatBiMap(this, other, mapper);
     }
 
     @Override
-    public <U, V> CreationResult<V> biMap(CreationResult<U> other, BiFunction<? super T, ? super U, ? extends V> mapper) {
-        return flatBiMap(other, mapper.andThen(ImmutableCreationResult::successful));
+    public <U, V> CreationResult<V> biMapValue(CreationResult<U> other, BiFunction<? super T, ? super U, ? extends V> mapper) {
+        return flatBiMapValue(other, mapper.andThen(ImmutableCreationResult::successful));
     }
 
     private static <T, U, V> CreationResult<V> flatBiMap(

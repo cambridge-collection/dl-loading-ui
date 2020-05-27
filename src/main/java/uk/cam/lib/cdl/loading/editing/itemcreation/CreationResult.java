@@ -10,8 +10,8 @@ public interface CreationResult<T> {
     Optional<T> value();
     Set<Issue> issues();
 
-    <U> CreationResult<U> flatMap(Function<? super T, CreationResult<? extends U>> mapper);
-    <U> CreationResult<U> map(Function<? super T, ? extends U> mapper);
-    <U, V> CreationResult<V> flatBiMap(CreationResult<U> other, BiFunction<? super T, ? super U, CreationResult<? extends V>> mapper);
-    <U, V> CreationResult<V> biMap(CreationResult<U> other, BiFunction<? super T, ? super U, ? extends V> mapper);
+    <U> CreationResult<U> flatMapValue(Function<? super T, CreationResult<? extends U>> mapper);
+    <U> CreationResult<U> mapValue(Function<? super T, ? extends U> mapper);
+    <U, V> CreationResult<V> flatBiMapValue(CreationResult<U> other, BiFunction<? super T, ? super U, CreationResult<? extends V>> mapper);
+    <U, V> CreationResult<V> biMapValue(CreationResult<U> other, BiFunction<? super T, ? super U, ? extends V> mapper);
 }
