@@ -139,6 +139,7 @@ abstract class AbstractFileContent<T, FileData> implements FileContent<T> {
 }
 
 @Value.Immutable
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
 abstract class AbstractTextFileContent<T> extends AbstractFileContent<T, CharSource> {
     @Override
     @Value.Derived
@@ -164,6 +165,7 @@ abstract class AbstractTextFileContent<T> extends AbstractFileContent<T, CharSou
 }
 
 @Value.Immutable
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PUBLIC)
 abstract class AbstractBinaryFileContent<T> extends AbstractFileContent<T, ByteSource> {
     @Override
     @Value.Derived
