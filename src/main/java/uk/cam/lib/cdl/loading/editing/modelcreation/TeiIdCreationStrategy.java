@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.editing.itemcreation;
+package uk.cam.lib.cdl.loading.editing.modelcreation;
 
 import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 
@@ -33,7 +33,7 @@ public class TeiIdCreationStrategy implements DefaultModelFactory.IdCreationStra
         return ImmutableCreationResult.successful(ModelOps.ModelOps().validatePathForId(id));
     }
 
-    public enum Issue implements uk.cam.lib.cdl.loading.editing.itemcreation.Issue.Type {
+    public enum Issue implements uk.cam.lib.cdl.loading.editing.modelcreation.Issue.Type {
         INVALID_FILENAME
     }
 }

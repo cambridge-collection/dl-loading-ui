@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.editing.itemcreation;
+package uk.cam.lib.cdl.loading.editing.modelcreation;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -80,6 +80,6 @@ public abstract class AbstractCreationResult<T> implements CreationResult<T> {
         BiFunction<? super T, ? super U, CreationResult<? extends V>> mapper
     ) {
         return withoutCovariance(left.value().flatMap(leftValue -> right.value().map(rightValue -> mapper.apply(leftValue, rightValue)))
-            .orElseGet(() -> ImmutableCreationResult.unsuccessful(Sets.union(left.issues(), right.issues()))));
+            .orElseGet(() -> unsuccessful(Sets.union(left.issues(), right.issues()))));
     }
 }

@@ -1,8 +1,7 @@
-package uk.cam.lib.cdl.loading.editing.itemcreation;
+package uk.cam.lib.cdl.loading.editing.modelcreation;
 
 import com.google.common.truth.Truth;
 import org.junit.jupiter.api.Test;
-import uk.cam.lib.cdl.loading.editing.itemcreation.ModelAttributes.StandardFileAttributes;
 
 import java.io.IOException;
 
@@ -26,7 +25,7 @@ public class DefaultFileContentCreationStrategyTest {
     @Test
     public void createFileContent() throws IOException {
         var result = CREATOR.createFileContent(
-            StandardFileAttributes.TEXT.containing("42"));
+            ModelAttributes.StandardFileAttributes.TEXT.containing("42"));
 
         Truth.assertThat(result.isSuccessful()).isTrue();
         Truth.assertThat(result.value().get().representation()).isEqualTo(42);
@@ -35,7 +34,7 @@ public class DefaultFileContentCreationStrategyTest {
     @Test
     public void createFileContent_returnsUnsuccessfulResult() throws IOException {
         var result = CREATOR.createFileContent(
-            StandardFileAttributes.TEXT.containing("forty two"));
+            ModelAttributes.StandardFileAttributes.TEXT.containing("forty two"));
 
         Truth.assertThat(result.isSuccessful()).isFalse();
         Truth.assertThat(result.issues()).containsExactly(

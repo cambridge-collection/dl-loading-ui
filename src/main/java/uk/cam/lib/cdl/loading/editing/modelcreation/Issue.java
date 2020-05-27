@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.editing.itemcreation;
+package uk.cam.lib.cdl.loading.editing.modelcreation;
 
 import org.immutables.value.Value;
 

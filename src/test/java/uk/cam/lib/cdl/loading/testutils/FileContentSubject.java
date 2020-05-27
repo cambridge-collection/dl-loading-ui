@@ -4,7 +4,7 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.Truth;
 import org.springframework.lang.Nullable;
-import uk.cam.lib.cdl.loading.editing.itemcreation.FileContent;
+import uk.cam.lib.cdl.loading.editing.modelcreation.FileContent;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

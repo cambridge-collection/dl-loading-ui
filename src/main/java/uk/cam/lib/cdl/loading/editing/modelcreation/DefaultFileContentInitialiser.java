@@ -1,10 +1,10 @@
-package uk.cam.lib.cdl.loading.editing.itemcreation;
+package uk.cam.lib.cdl.loading.editing.modelcreation;
 
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
 import org.immutables.value.Value;
-import uk.cam.lib.cdl.loading.editing.itemcreation.DefaultFileContentCreationStrategy.FileContentInitialiser;
+import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultFileContentCreationStrategy.FileContentInitialiser;
 
 import java.nio.charset.Charset;
 import java.util.Optional;

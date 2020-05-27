@@ -1,4 +1,4 @@
-package uk.cam.lib.cdl.loading.editing.itemcreation;
+package uk.cam.lib.cdl.loading.editing.modelcreation;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -10,7 +10,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import uk.cam.lib.cdl.loading.editing.itemcreation.ModelAttributes.StandardFileAttributes;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +32,7 @@ public class FileContentTests {
 
         @Test
         public void attributes() {
-            assertThat(content.attributes()).containsExactly(StandardFileAttributes.FILENAME.containing("foo.txt"));
+            assertThat(content.attributes()).containsExactly(ModelAttributes.StandardFileAttributes.FILENAME.containing("foo.txt"));
         }
 
         @Test
@@ -74,7 +73,7 @@ public class FileContentTests {
 
         public static ImmutableTextFileContent<List<String>> txtFc() {
             return ImmutableTextFileContent.<List<String>>builder()
-                .addAttributes(StandardFileAttributes.FILENAME.containing("foo.txt"))
+                .addAttributes(ModelAttributes.StandardFileAttributes.FILENAME.containing("foo.txt"))
                 .fileData("abc")
                 .representation(ImmutableList.of("a", "b", "c"))
                 .build();
@@ -82,7 +81,7 @@ public class FileContentTests {
 
         public static ImmutableBinaryFileContent<List<String>> binFc() {
             return ImmutableBinaryFileContent.<List<String>>builder()
-                .addAttributes(StandardFileAttributes.FILENAME.containing("foo.txt"))
+                .addAttributes(ModelAttributes.StandardFileAttributes.FILENAME.containing("foo.txt"))
                 .fileData("abc".getBytes(UTF_8))
                 .representation(ImmutableList.of("a", "b", "c"))
                 .build();
@@ -140,7 +139,7 @@ public class FileContentTests {
                 .fileData("42".getBytes())
                 .charset(UTF_8)
                 .addAttributes(
-                    StandardFileAttributes.FILENAME.containing("foo.txt"))
+                    ModelAttributes.StandardFileAttributes.FILENAME.containing("foo.txt"))
                 .build();
         }
 
@@ -192,7 +191,7 @@ public class FileContentTests {
                 .fileData("42")
                 .charset(UTF_8)
                 .addAttributes(
-                    StandardFileAttributes.FILENAME.containing("foo.txt"))
+                    ModelAttributes.StandardFileAttributes.FILENAME.containing("foo.txt"))
                 .build();
         }
 
