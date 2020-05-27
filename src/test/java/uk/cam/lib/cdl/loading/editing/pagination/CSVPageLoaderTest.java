@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.cam.lib.cdl.loading.editing.pagination.CSVPageLoader.CSVRowAccessor;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.util.List;
@@ -36,7 +37,7 @@ public class CSVPageLoaderTest {
     @MethodSource("loadPagesParameters")
     public void loadPages(
         CSVFormat fmt, CSVRowAccessor label,
-        CSVRowAccessor image, List<Page> expected, String csv) {
+        CSVRowAccessor image, List<Page> expected, String csv) throws IOException {
 
         var loader = ImmutableCSVPageLoader.builder()
             .csvFormat(fmt).imageAccessor(image).labelAccessor(label).build();

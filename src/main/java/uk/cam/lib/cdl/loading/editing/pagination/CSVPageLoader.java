@@ -36,14 +36,9 @@ public abstract class CSVPageLoader implements PageLoader<Reader> {
     abstract CSVFormat csvFormat();
 
     @Override
-    public List<Page> loadPages(Reader source) {
+    public List<Page> loadPages(Reader source) throws IOException {
         Preconditions.checkNotNull(source, "source cannot be null");
-        try {
-            return loadPages(Streams.stream(csvFormat().parse(source)));
-        }
-        catch (IOException e) {
-            throw new PaginationException(e);
-        }
+        return loadPages(Streams.stream(csvFormat().parse(source)));
     }
 
     private List<Page> loadPages(Stream<CSVRecord> rows) {
