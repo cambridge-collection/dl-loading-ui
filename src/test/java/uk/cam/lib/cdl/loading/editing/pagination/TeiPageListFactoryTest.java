@@ -11,15 +11,19 @@ import java.io.IOException;
 import java.net.URI;
 
 public class TeiPageListFactoryTest {
-    public static final TeiPageListFactory FACTORY = TeiPageListFactory.builder()
-        .pageLoader(ImmutableCSVPageLoader.builder()
-            .csvFormat(CSVFormat.DEFAULT.withFirstRecordAsHeader())
-            .imageAccessor(CSVPageLoader.CSVRowAccessor.of("Image"))
-            .labelAccessor(CSVPageLoader.CSVRowAccessor.of("Label"))
-            .build())
-        .teiPageConverter(new DefaultTEIPageConverter(ImmutableList.of(
-            "#example")))
-        .build();
+    public static TeiPageListFactory newTestInstance() {
+        return TeiPageListFactory.builder()
+            .pageLoader(ImmutableCSVPageLoader.builder()
+                .csvFormat(CSVFormat.DEFAULT.withFirstRecordAsHeader())
+                .imageAccessor(CSVPageLoader.CSVRowAccessor.of("Image"))
+                .labelAccessor(CSVPageLoader.CSVRowAccessor.of("Label"))
+                .build())
+            .teiPageConverter(new DefaultTEIPageConverter(ImmutableList.of(
+                "#example")))
+            .build();
+    }
+
+    private TeiPageListFactory factory = newTestInstance();
 
     @Test
     public void createFromAttributes_returnsPageListGivenValidInput() throws IOException {
@@ -39,7 +43,7 @@ public class TeiPageListFactoryTest {
                 .page(ImmutablePage.of("1v", URI.create("MS-FOO-000-00002")))
                 .build());
 
-        var creationResult = FACTORY.createFromAttributes(
+        var creationResult = factory.createFromAttributes(
             ModelAttributes.StandardFileAttributes.TEXT.containing(inputFileData));
 
         Truth.assertThat(creationResult.isSuccessful()).isTrue();
@@ -52,12 +56,12 @@ public class TeiPageListFactoryTest {
             "1r,MS-FOO-000-00001\n" +
             "1v,MS-FOO-000-00002\n";
 
-        var creationResult = FACTORY.createFromAttributes(
+        var creationResult = factory.createFromAttributes(
             ModelAttributes.StandardFileAttributes.TEXT.containing(inputFileData));
 
         Truth.assertThat(creationResult.isSuccessful()).isFalse();
         Truth.assertThat(creationResult.issues()).containsExactly(
-            ImmutableIssue.of(TeiPageListFactory.PaginationIssue.INVALID_INPUT_FILE,
+            ImmutableIssue.of(PaginationIssue.INVALID_PAGE_DEFINITIONS,
                 "CSV row has no column named 'Label'")
         );
     }

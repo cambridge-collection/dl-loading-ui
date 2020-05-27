@@ -10,7 +10,6 @@ import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultFileContentCreationSt
 import uk.cam.lib.cdl.loading.editing.modelcreation.FileContent;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableCreationResult;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableIssue;
-import uk.cam.lib.cdl.loading.editing.modelcreation.Issue;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttribute;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelFactory;
 import uk.cam.lib.cdl.loading.editing.pagination.CSVPageLoader.CSVRowAccessor;
@@ -53,14 +52,10 @@ public abstract class TeiPageListFactory implements ModelFactory<List<TEIPage>> 
             }
             catch (UserInputPaginationException e) {
                 return ImmutableCreationResult.unsuccessful(
-                    ImmutableIssue.of(PaginationIssue.INVALID_INPUT_FILE, e.getMessage()));
+                    ImmutableIssue.of(PaginationIssue.INVALID_PAGE_DEFINITIONS, e.getMessage()));
             }
             return ImmutableCreationResult.successful(fc.withAlternateRepresentation(pages));
         };
-    }
-
-    public enum PaginationIssue implements Issue.Type {
-        INVALID_INPUT_FILE
     }
 
     protected FileContentProcessor<List<Page>, List<TEIPage>> teiPageConverterProcessor() {
