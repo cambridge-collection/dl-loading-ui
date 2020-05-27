@@ -29,7 +29,7 @@ public abstract class DefaultModelFactory<T, R> implements ModelFactory<T> {
         return (idResult, contentResult) -> idResult.biMapValue(contentResult, idContentHandler);
     }
 
-    public static <Result> ResultAssembler<FileContent<?>, Result> assembleResultFromFileContentString(
+    public static <Any, Result> ResultAssembler<Any, Result> assembleResultFromFileContentString(
         String modelName, BiFunction<Path, String, ? extends Result> constructor) {
         return assembleResultFromFileContent((id, fileContent) ->
             constructor.apply(id, fileContent.text().map(ThrowingFunction.dangerouslyMakeUnchecked(CharSource::read))
@@ -37,9 +37,6 @@ public abstract class DefaultModelFactory<T, R> implements ModelFactory<T> {
                     "Cannot assemble %s: created FileContent instance does not contain accessible text: %s",
                     modelName, fileContent)))));
     }
-
-    public static final ResultAssembler<FileContent<?>, Item> ITEM_ASSEMBLER =
-        assembleResultFromFileContentString("Item", ImmutableItem::of);
 
     @Override
     public CreationResult<T> createFromAttributes(Set<? extends ModelAttribute<?>> modelAttributes) throws IOException {
