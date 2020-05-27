@@ -13,7 +13,12 @@ import java.util.Set;
 import java.util.function.BiFunction;
 
 @Value.Immutable
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PRIVATE)
 public abstract class DefaultModelFactory<T, R> implements ModelFactory<T> {
+    public static <T, R> DefaultModelFactoryBuilder<T, R> builder() {
+        return new DefaultModelFactoryBuilder<>();
+    }
+
     protected abstract IdCreationStrategy idCreator();
     protected abstract FileContentCreationStrategy<R> fileContentCreator();
     protected abstract ResultAssembler<R, T> resultAssembler();

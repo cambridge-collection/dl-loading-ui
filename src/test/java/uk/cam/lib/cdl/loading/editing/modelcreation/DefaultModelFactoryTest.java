@@ -30,7 +30,7 @@ public class DefaultModelFactoryTest {
         INVALID_FILENAME
     }
 
-    public static final DefaultModelFactory<Map<String, Object>, Integer> CREATOR = ImmutableDefaultModelFactory.<Map<String, Object>, Integer>builder()
+    public static final DefaultModelFactory<Map<String, Object>, Integer> CREATOR = DefaultModelFactory.<Map<String, Object>, Integer>builder()
         .idCreator(ID_STRATEGY)
         .fileContentCreator(DefaultFileContentCreationStrategyTest.CREATOR)
         .resultAssembler((pathResult, numberResult) -> pathResult.biMapValue(numberResult, (path, number) -> ImmutableMap.of(
