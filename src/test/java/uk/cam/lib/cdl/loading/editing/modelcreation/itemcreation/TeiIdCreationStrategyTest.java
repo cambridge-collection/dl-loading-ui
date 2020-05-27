@@ -1,8 +1,10 @@
-package uk.cam.lib.cdl.loading.editing.modelcreation;
+package uk.cam.lib.cdl.loading.editing.modelcreation.itemcreation;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes;
+import uk.cam.lib.cdl.loading.editing.modelcreation.itemcreation.TeiIdCreationStrategy;
 
 import java.nio.file.Path;
 
@@ -11,7 +13,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.common.truth.Truth8.assertThat;
 
 public class TeiIdCreationStrategyTest {
-    TeiIdCreationStrategy strategy = new TeiIdCreationStrategy();
+    TeiIdCreationStrategy strategy = TeiIdCreationStrategy.of();
 
     @ParameterizedTest
     @CsvSource({
