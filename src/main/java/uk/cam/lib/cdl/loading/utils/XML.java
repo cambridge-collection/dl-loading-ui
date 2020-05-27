@@ -13,10 +13,15 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,12 +29,16 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class XML {
+    public static DocumentBuilderFactory getDocumentBuilderFactory() {
+        var dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        return dbf;
+    }
+
     public static Document parseString(String xml) {
         try {
-            var dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
             var xmlStream = new ReaderInputStream(CharSource.wrap(xml).openStream(), Charsets.UTF_8);
-            return dbf.newDocumentBuilder().parse(xmlStream);
+            return getDocumentBuilderFactory().newDocumentBuilder().parse(xmlStream);
         }
         catch (IOException e) {
             throw new AssertionError(e);
@@ -39,6 +48,18 @@ public final class XML {
         }
         catch (SAXException e) {
             throw new IllegalArgumentException("Failed to parse xml string", e);
+        }
+    }
+
+    public static String serialise(Document doc) {
+        try {
+            var transformer = TransformerFactory.newInstance().newTransformer();
+            var sw = new StringWriter();
+            transformer.transform(new DOMSource(doc), new StreamResult(sw));
+            return sw.toString();
+        } catch (TransformerException e) {
+            throw new IllegalArgumentException(
+                "Document could not be serialised as a String: " + e.getMessageAndLocation(), e);
         }
     }
 
@@ -109,5 +130,22 @@ public final class XML {
         catch (XPathExpressionException e) {
             throw new IllegalArgumentException(String.format("invalid xpath expression: '%s'", expression), e);
         }
+    }
+
+    public static Document deepCopyDocument(Document doc) {
+        Document clone;
+        try {
+            clone = getDocumentBuilderFactory().newDocumentBuilder().newDocument();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException("Failed to create DocumentBuilder: " + e.getMessage(), e);
+        }
+
+        clone.setDocumentURI(doc.getDocumentURI());
+        clone.setStrictErrorChecking(doc.getStrictErrorChecking());
+        clone.setXmlStandalone(doc.getXmlStandalone());
+        clone.setXmlVersion(doc.getXmlVersion());
+
+        streamChildNodes(doc).forEach(node -> clone.appendChild(clone.importNode(node, true)));
+        return clone;
     }
 }

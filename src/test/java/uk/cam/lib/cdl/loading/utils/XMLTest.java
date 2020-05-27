@@ -1,9 +1,11 @@
 package uk.cam.lib.cdl.loading.utils;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.truth.Truth;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.w3c.dom.Element;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.Diff;
 
@@ -93,5 +95,27 @@ public class XMLTest {
         var expr = XML.compileXPath("//*/@info:msg", ImmutableMap.of("info", "example"));
         var el = XML.parseString("<foo xmlns:i=\"example\"><bar i:msg=\"hi\"/></foo>").getDocumentElement();
         assertThat(expr.evaluate(el, XPathConstants.STRING)).isEqualTo("hi");
+    }
+
+    @Test
+    public void deepCopyDocument() {
+        var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+            "<?foo a=\"123\"?>" +
+            "<el> <hi a=\"1\"/> </el>";
+        var doc = XML.parseString(xml);
+        var clone = XML.deepCopyDocument(doc);
+
+        Truth.assertThat(XML.serialise(doc)).isEqualTo(xml);
+        Truth.assertThat(XML.serialise(clone)).isEqualTo(xml);
+
+        var el = (Element)doc.getDocumentElement();
+        el.setAttribute("foo", "bar");
+
+        var modifiedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+            "<?foo a=\"123\"?>" +
+            "<el foo=\"bar\"> <hi a=\"1\"/> </el>";
+
+        Truth.assertThat(XML.serialise(doc)).isEqualTo(modifiedXml);
+        Truth.assertThat(XML.serialise(clone)).isEqualTo(xml);
     }
 }
