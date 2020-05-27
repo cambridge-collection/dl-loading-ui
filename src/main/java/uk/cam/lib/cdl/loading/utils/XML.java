@@ -2,6 +2,7 @@ package uk.cam.lib.cdl.loading.utils;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.springframework.lang.Nullable;
@@ -37,17 +38,22 @@ public final class XML {
 
     public static Document parseString(String xml) {
         try {
-            var xmlStream = new ReaderInputStream(CharSource.wrap(xml).openStream(), Charsets.UTF_8);
-            return getDocumentBuilderFactory().newDocumentBuilder().parse(xmlStream);
-        }
-        catch (IOException e) {
+            return parse(CharSource.wrap(xml).asByteSource(Charsets.UTF_8));
+        } catch (IOException e) {
             throw new AssertionError(e);
-        }
-        catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
-        catch (SAXException e) {
+        } catch (SAXException e) {
             throw new IllegalArgumentException("Failed to parse xml string", e);
+        }
+    }
+
+    public static Document parse(ByteSource byteSource) throws IOException, SAXException {
+        try {
+            var doc = getDocumentBuilderFactory().newDocumentBuilder()
+                .parse(byteSource.openBufferedStream());
+            doc.getDocumentElement().normalize();
+            return doc;
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
         }
     }
 
