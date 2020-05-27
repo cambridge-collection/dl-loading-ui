@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading.editing.pagination;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteSource;
 import com.google.common.truth.Truth;
+import com.google.common.truth.Truth8;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xmlunit.builder.DiffBuilder;
@@ -91,14 +92,30 @@ public class TeiPaginationGenerationProcessorTest {
         var result = process(inputDoc, PAGINATION_CSV);
 
         Truth.assertThat(result.isSuccessful()).isTrue();
-        var outputDoc = result.value().orElseThrow().representation();
+        var fc = result.value().orElseThrow();
+        var outputDoc = fc.representation();
         Truth.assertThat(outputDoc).isNotSameInstanceAs(inputDoc);
 
-        var diff = DiffBuilder.compare(TEI_EMPTY_WITH_PAGES)
+        // Output Document is as expected
+        var loadedDiff = DiffBuilder.compare(TEI_EMPTY_WITH_PAGES)
             .withTest(outputDoc)
             .ignoreWhitespace()
             .build();
-        assertWithMessage("%s", diff).that(diff.hasDifferences()).isFalse();
+        assertWithMessage("%s", loadedDiff).that(loadedDiff.hasDifferences()).isFalse();
+
+        // The FileContent should contain both text and bytes
+        Truth8.assertThat(fc.text()).isPresent();
+        Truth8.assertThat(fc.bytes()).isPresent();
+        Truth8.assertThat(fc.charset()).isPresent();
+        Truth.assertThat(fc.text().get().read())
+            .isEqualTo(fc.bytes().get().asCharSource(fc.charset().get()).read());
+
+        // And file content matches loaded Document
+        var serialisedDiff = DiffBuilder.compare(TEI_EMPTY_WITH_PAGES)
+            .withTest(fc.text().get().read())
+            .ignoreWhitespace()
+            .build();
+        assertWithMessage("%s", serialisedDiff).that(serialisedDiff.hasDifferences()).isFalse();
     }
 
     private static final String NON_TEI_XML = "<foo/>";

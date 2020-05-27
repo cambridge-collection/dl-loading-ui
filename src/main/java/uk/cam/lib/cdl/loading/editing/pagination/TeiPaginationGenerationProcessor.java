@@ -1,16 +1,15 @@
 package uk.cam.lib.cdl.loading.editing.pagination;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.immutables.value.Value;
 import org.w3c.dom.Document;
 import uk.cam.lib.cdl.loading.editing.modelcreation.CreationResult;
-import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultFileContentCreationStrategy;
 import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultFileContentCreationStrategy.FileContentProcessor;
 import uk.cam.lib.cdl.loading.editing.modelcreation.FileContent;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableCreationResult;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableIssue;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttribute;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes;
+import uk.cam.lib.cdl.loading.editing.modelcreation.itemcreation.XmlFileContentProcessor;
 import uk.cam.lib.cdl.loading.utils.XML;
 
 import java.io.IOException;
@@ -42,7 +41,7 @@ public abstract class TeiPaginationGenerationProcessor implements FileContentPro
         return teiPageResult.flatMapValue(teiPages -> {
             try {
                 teiPageInserter().insertPages(doc, teiPages);
-                return ImmutableCreationResult.successful(content.withAlternateRepresentation(doc));
+                return ImmutableCreationResult.successful(XmlFileContentProcessor.fileContentForXml(content, doc));
             } catch (UserInputPaginationException e) {
                 return ImmutableCreationResult.unsuccessful(
                     ImmutableIssue.of(PaginationIssue.INAVLID_TEI, e.getMessage()));
