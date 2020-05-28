@@ -229,6 +229,15 @@ public class GitHelper {
             } catch (GitHelperException e) {
                 throw new GitHelperException("Failed to pull changes before pushing: " + e.getMessage(), e);
             }
+
+            // Remove files that have been deleted from the working copy
+            var status = git.status().call();
+            if(!status.getMissing().isEmpty()) {
+                var rmCmd = git.rm();
+                status.getMissing().forEach(rmCmd::addFilepattern);
+                rmCmd.call();
+            }
+
             git.add().addFilepattern(".").call();
             git.commit().setMessage("Changed from Loading UI").call();
             Iterable<PushResult> results = git.push().setCredentialsProvider(
