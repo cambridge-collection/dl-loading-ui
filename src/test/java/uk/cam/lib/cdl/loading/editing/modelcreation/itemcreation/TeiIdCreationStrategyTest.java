@@ -17,10 +17,10 @@ public class TeiIdCreationStrategyTest {
 
     @ParameterizedTest
     @CsvSource({
-        "MS-FOO-00001.xml,data/items/data/tei/MS-FOO-00001/MS-FOO-00001.xml",
-        "MS-FOO-BAR-00001.xml,data/items/data/tei/MS-FOO-BAR-00001/MS-FOO-BAR-00001.xml",
-        "MS-FOO-00001.XML,data/items/data/tei/MS-FOO-00001/MS-FOO-00001.xml",
-        "MS-FOO-00001.XmL,data/items/data/tei/MS-FOO-00001/MS-FOO-00001.xml"
+        "MS-FOO-00001.xml,items/data/tei/MS-FOO-00001/MS-FOO-00001.xml",
+        "MS-FOO-BAR-00001.xml,items/data/tei/MS-FOO-BAR-00001/MS-FOO-BAR-00001.xml",
+        "MS-FOO-00001.XML,items/data/tei/MS-FOO-00001/MS-FOO-00001.xml",
+        "MS-FOO-00001.XmL,items/data/tei/MS-FOO-00001/MS-FOO-00001.xml"
     })
     public void createId_returnsPathGivenValidFilename(String filename, Path expected) {
         var result = strategy.createId(

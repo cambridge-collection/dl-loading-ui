@@ -29,7 +29,7 @@ public abstract class TeiIdCreationStrategy implements DefaultModelFactory.IdCre
     public static final Pattern FILENAME_PATTERN = Pattern.compile(
         "^([a-z0-9]+-(?:[a-z0-9]+-)+[0-9]{5})\\.xml$", Pattern.CASE_INSENSITIVE);
 
-    public static final Path DEFAULT_BASE_TEI_ITEM_PATH = Path.of("data/items/data/tei");
+    public static final Path DEFAULT_BASE_TEI_ITEM_PATH = Path.of("items/data/tei");
 
     @Value.Default
     public Path baseTeiItemPath() {

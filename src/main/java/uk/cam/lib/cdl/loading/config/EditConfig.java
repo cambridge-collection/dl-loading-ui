@@ -1,5 +1,7 @@
 package uk.cam.lib.cdl.loading.config;
 
+import com.google.common.base.Preconditions;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -34,12 +36,32 @@ public class EditConfig {
         return dataItemPath;
     }
 
+    @Bean Path absoluteDataItemPath(@Qualifier("dataRoot") Path dataRoot, @Qualifier("dataItemPath") Path dataItemPath) {
+        Preconditions.checkArgument(dataRoot.isAbsolute());
+        Preconditions.checkArgument(!dataItemPath.isAbsolute());
+        var absoluteDataItemPath = dataRoot.resolve(dataItemPath).normalize();
+        Preconditions.checkArgument(absoluteDataItemPath.startsWith(dataRoot));
+        return absoluteDataItemPath;
+    }
+
+    @Bean Path dataRoot(@Value("${git.sourcedata.checkout.path}") Path gitRepoRoot,
+                        @Value("${git.sourcedata.checkout.subpath.data}") Path gitRepoDataSubpath) {
+        Preconditions.checkArgument(gitRepoRoot.isAbsolute());
+        Preconditions.checkArgument(!gitRepoDataSubpath.isAbsolute());
+        var dataRoot = gitRepoRoot.resolve(gitRepoDataSubpath).normalize();
+        Preconditions.checkArgument(dataRoot.startsWith(gitRepoRoot));
+        return dataRoot;
+    }
+
     @Bean
     @Profile("!test")
-    public EditAPI editAPI(GitHelper gitHelper, GitLocalVariables gitSourceVariables, Path dlDatasetFilename, Path dlUIFilename, Path dataItemPath) throws EditApiException {
-        return new EditAPI(Path.of(gitSourceVariables.getGitSourcePath(), gitSourceVariables.getGitSourceDataSubpath()).toString(),
-            dlDatasetFilename.toString(), dlUIFilename.toString(),
-            Path.of(gitSourceVariables.getGitSourcePath()).resolve(dataItemPath).toString(),
+    public EditAPI editAPI(Path dataRoot, GitHelper gitHelper, Path dlDatasetFilename,
+                           Path dlUIFilename, Path absoluteDataItemPath) throws EditApiException {
+        return new EditAPI(
+            dataRoot.toString(),
+            dlDatasetFilename.toString(),
+            dlUIFilename.toString(),
+            absoluteDataItemPath.toString(),
             gitHelper);
     }
 
