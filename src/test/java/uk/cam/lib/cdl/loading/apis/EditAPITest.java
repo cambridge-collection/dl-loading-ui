@@ -320,20 +320,10 @@ class EditAPITest {
         assert (editAPI.getCollection("collections/test.collection.json").getItemIds().contains(id));
     }
 
-    @Test
-    void deleteItemFromCollection() throws EditApiException {
-        var itemId = Path.of("items/data/tei/MS-TEST-00001/MS-TEST-00001.xml");
-        var itemFile = ModelOps().resolveIdToIOPath(editAPI.getDataLocalPath(), itemId);
-        var collectionId = Path.of("collections/test.collection.json");
-        var itemReference = new Id("../items/data/tei/MS-TEST-00001/MS-TEST-00001.xml");
-
-        assertThat(editAPI.getCollection(collectionId).getItemIds()).contains(itemReference);
-        assertThat(Files.isRegularFile(itemFile));
-
-        editAPI.deleteItemFromCollection(itemId, Path.of("collections/test.collection.json"));
-
-        assertThat(editAPI.getCollection(collectionId).getItemIds()).doesNotContain(itemReference);
-        assertThat(Files.notExists(itemFile)).isTrue();
+    public void enforceItemState_pathIdOverload() throws EditApiException {
+        var item = editAPI.getItem(ITEM_ID_MS_LATIN);
+        var enforced = editAPI.enforceItemState(item.id(), SetMembership.removing(COLLECTION_ID_TEST));
+        Truth.assertThat(enforced).isEqualTo(Optional.of(ImmutableModelState.ensureAbsent(item)));
     }
 
     @Test

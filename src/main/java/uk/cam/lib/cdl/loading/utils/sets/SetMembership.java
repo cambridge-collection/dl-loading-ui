@@ -1,6 +1,7 @@
 package uk.cam.lib.cdl.loading.utils.sets;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -44,5 +45,16 @@ public class SetMembership {
      */
     public static <T> SetMembershipTransformation<T> unchanged() {
         return addingAndRemoving(ImmutableSet.of(), ImmutableSet.of());
+    }
+
+    /**
+     * Get a transform which makes no changes.
+     */
+    public static <T> SetMembershipTransformation<T> adding(T...members) {
+        return addingAndRemoving(ImmutableSet.copyOf(members), ImmutableSet.of());
+    }
+
+    public static <T> SetMembershipTransformation<T> removing(T...members) {
+        return addingAndRemoving(ImmutableSet.of(), ImmutableSet.copyOf(members));
     }
 }

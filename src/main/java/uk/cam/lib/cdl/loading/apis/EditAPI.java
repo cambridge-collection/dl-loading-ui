@@ -379,6 +379,13 @@ public class EditAPI {
         });
     }
 
+    public Optional<ModelState<Item>> enforceItemState(
+        Path itemId,
+        SetMembershipTransformation<Path> collectionMembership
+    ) throws EditApiException {
+        return enforceItemState(getItem(itemId), collectionMembership);
+    }
+
     protected <T, Err extends EditApiException> T updateData(ThrowingSupplier<T, Err> operation) throws EditApiException {
         Preconditions.checkNotNull(operation);
         try {
@@ -434,58 +441,6 @@ public class EditAPI {
                 itemId, collectionId, e.getMessage()), e);
         }
     }
-
-    public void deleteItemFromCollection(Path itemId, Path collectionId) throws EditApiException {
-        // FIXME: this fails to delete the item when it's no longer in any collections because getFirstCollectionForItem()
-        //      accesses the unmodified version of the collection now that we return copies from getCollection()
-        if(true)
-            throw new NotImplementedException("FIXME");
-        try {
-            gitHelper.pullGitChanges();
-
-            Collection collection = getCollection(collectionId);
-            Item item = getItem(itemId);
-            var itemReference = ModelOps().relativizeIdAsReference(collectionId, itemId);
-            collection.getItemIds().remove(new Id(itemReference.toString()));
-
-            // Write out collection file
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-            Path collectionFilePath = ModelOps().resolveIdToIOPath(dataPath, collectionId);
-            writer.writeValue(collectionFilePath.toFile(), collection);
-
-            // Delete file for item if it exists in no other collection
-            if (getFirstCollectionForItem(item) == null) {
-                Path itemFile = ModelOps().resolveIdToIOPath(dataPath, itemId);
-                Files.deleteIfExists(itemFile);
-                // remove parent dir if empty
-                var itemDir = itemFile.getParent();
-                if (Files.isDirectory(itemDir)) {
-                    try {
-                        Files.deleteIfExists(itemDir);
-                    }
-                    catch (DirectoryNotEmptyException ignored) { }
-                }
-            }
-
-            gitHelper.pushGitChanges();
-
-            updateModel();
-        } catch (IOException | GitHelperException e) {
-            throw new EditApiException("Failed to remove item from collection: " + e.getMessage(), e);
-        }
-    }
-
-    private Collection getFirstCollectionForItem(Item i) {
-
-        for (Collection c : getCollections()) {
-            if(ModelOps().isItemInCollection(i, c))  {
-                return c;
-            }
-        }
-        return null;
-    }
-
     public void updateCollection(Collection collection, String descriptionHTML, String creditHTML) throws EditApiException {
         try {
 

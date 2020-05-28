@@ -376,7 +376,7 @@ public class EditController {
         attributes.addAttribute("collectionId", collectionId);
 
         try {
-            editAPI.deleteItemFromCollection(_itemId, _collectionId);
+            editAPI.enforceItemState(_itemId, SetMembership.removing(_collectionId));
             attributes.addFlashAttribute("message", "Item deleted from collection.");
         }
         catch (EditApiException e) {
