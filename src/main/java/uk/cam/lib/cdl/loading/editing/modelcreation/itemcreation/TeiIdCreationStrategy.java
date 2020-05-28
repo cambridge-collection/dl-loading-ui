@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.editing.modelcreation.itemcreation;
 
+import com.google.common.base.Preconditions;
 import org.immutables.value.Value;
 import uk.cam.lib.cdl.loading.editing.modelcreation.CreationResult;
 import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultModelFactory;
@@ -7,9 +8,11 @@ import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableCreationResult;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableIssue;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttribute;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes;
+import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes.StandardModelAttributes;
 import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -41,8 +44,27 @@ public abstract class TeiIdCreationStrategy implements DefaultModelFactory.IdCre
         ModelOps.ModelOps().validatePathForId(baseTeiItemPath());
     }
 
+    private Optional<Path> findExistingId(Set<? extends ModelAttribute<?>> modelAttributes) {
+         return ModelAttributes.findAttribute(StandardModelAttributes.MODEL_ID, Path.class, modelAttributes)
+             .map(ModelAttribute::value)
+             .or(() -> ModelAttributes.findAttribute(StandardModelAttributes.MODEL_ID, String.class, modelAttributes)
+                 .map(ModelAttribute::value).map(Path::of));
+    }
+
     @Override
     public CreationResult<Path> createId(Set<? extends ModelAttribute<?>> modelAttributes) {
+        var existingId = findExistingId(modelAttributes);
+        if(existingId.isPresent()) {
+            var id = existingId.get();
+            try { ModelOps.ModelOps().validatePathForId(id); }
+            catch (IllegalStateException e) {
+                // The existing ID value is not expected to be user-specified, so we don't report an error via
+                // the CreationResult
+                throw new IllegalStateException(String.format("MODEL_ID attribute contains invalid id: '%s'", id), e);
+            }
+            return ImmutableCreationResult.successful(id);
+        }
+
         var filename = ModelAttributes.requireAttribute(ModelAttributes.StandardFileAttributes.FILENAME, String.class, modelAttributes)
             .value();
 

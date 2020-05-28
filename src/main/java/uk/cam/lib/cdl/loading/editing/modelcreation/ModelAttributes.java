@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading.editing.modelcreation;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
+import uk.cam.lib.cdl.loading.model.editor.Item;
 
 import java.util.Optional;
 import java.util.Set;
@@ -22,6 +23,11 @@ public class ModelAttributes {
         CHARSET,
         BYTES,
         TEXT
+    }
+
+    public enum StandardModelAttributes implements ModelAttribute.Type {
+        /** The existing identifier for a modeled entity, such as an {@link Item}. */
+        MODEL_ID
     }
 
     public static <T> Stream<ModelAttribute<T>> streamAttributes(
