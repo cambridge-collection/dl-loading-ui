@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
 import org.apache.commons.io.FileUtils;
@@ -68,6 +69,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -579,8 +581,20 @@ public class EditController {
     }
 
     @GetMapping("/edit/item")
-    public ModelAndView editItem(@RequestParam(required = false, name = "id") Optional<String> itemId) {
-        return getEditItemMavForItemId(itemId.map(Path::of), Optional.empty());
+    public ModelAndView createOrEditItem(
+        @RequestParam(required = false, name = "id") Optional<String> itemId,
+        @RequestParam(required = false, name = "col") Set<String> preSelectedCollectionIds) {
+        var mav = getEditItemMavForItemId(itemId.map(Path::of), Optional.empty());
+
+        // Allow pre-selecting collections when creating new items.
+        if(itemId.isEmpty() && !preSelectedCollectionIds.isEmpty()) {
+            var itemForm = (ItemForm)mav.getModel().get("form");
+            var selectedCollections = Sets.intersection(preSelectedCollectionIds,
+                editAPI.getCollections().stream().map(Collection::getCollectionId).collect(Collectors.toSet())).toArray(String[]::new);
+            itemForm.setCollections(selectedCollections);
+        }
+
+        return mav;
     }
 
     ModelAndView getEditItemMavForItemId(Optional<Path> itemId, Optional<ItemForm> populatedItemForm) {
@@ -616,6 +630,7 @@ public class EditController {
         model.put("form", form);
         model.put("collections", editAPI.getCollections());
         model.put("errors", errors);
+        model.put("itemDownloadPath", pathForDataDisplay);
         return mav;
     }
 }

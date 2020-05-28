@@ -64,6 +64,10 @@
                                       rows="8" cols="80"
                                       th:text="${form.metadata()}"></textarea>
                             <small id="item-edit-form.metadata.help" class="form-text text-muted"><span th:text="${modeLabel}">Create/Edit</span> the item metadata directly.</small>
+
+                            <a class="btn btn-primary mt-3 mb-3" role="button"
+                               th:href="${@ModelOps.resolveIdToIOPath(itemDownloadPath, item.orElseThrow().id())}"
+                               >Download current version <i class="fas fa-file-download ml-2"></i></a>
                         </div>
                         <div class="form-group">
                             <label for="item-edit-form.metadata-file">Upload descriptive metadata file</label>

@@ -224,7 +224,7 @@
                                 <div class="col-2 m-2 text-right">
 
                                 </div>
-                                <div class="col-6 m-2">
+                                <div class="m-2">
 
                                     <table class="table table-hover table-bordered" id="dataTable"
                                            width="100%"
@@ -238,7 +238,7 @@
                                         <tbody>
                                         <tr th:each="item : ${items}">
                                             <td>
-                                                <a th:href="${@ModelOps.resolveIdToIOPath(pathForDataDisplay, item.id())}"
+                                                <a th:href="@{/edit/item(id=${item.id().toString()})}"
                                                    th:text="${item.name()}">
                                                 </a>
                                             </td>
@@ -254,8 +254,6 @@
                                                         <i class="fas fa-trash-alt text-gray-500"></i>
                                                     </button>
                                                 </form>
-
-
                                             </td>
                                         </tr>
                                         </tbody>
@@ -275,15 +273,8 @@
                                 </div>
                             </div>
                             <div th:if="${!newCollection}" class="row mt-6">
-                                <div class="col-2 m-2 text-right">
-                                    <label for="additemFile">Add / Replace Item</label>
-                                </div>
-                                <div class="col-6 m-2">
-                                    <form action="/edit/collection/addItem"
-                                          method="post" id="addItemFileForm" enctype="multipart/form-data">
-                                        <input type="file" name="file" class="form-control-file" id="addItemFile">
-                                        <input type="hidden" name="collectionId" th:value="${form.collectionId}">
-                                    </form>
+                                <div class="col-6 offset-2 mt-2 mb-2">
+                                    <a class="btn btn-primary" th:href="@{/edit/item(col=${form.collectionId})}" href="#" role="button">Add new item</a>
                                 </div>
                             </div>
                             <div class="row mt-6">
