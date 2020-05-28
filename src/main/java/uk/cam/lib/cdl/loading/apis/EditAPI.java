@@ -6,13 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.multipart.MultipartFile;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
@@ -33,22 +28,15 @@ import uk.cam.lib.cdl.loading.utils.ThrowingSupplier;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
 import javax.validation.constraints.NotNull;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -300,51 +288,6 @@ public class EditAPI {
         }
     }
 
-    public boolean validate(MultipartFile file) throws IOException {
-        String content = IOUtils.toString(file.getInputStream(), StandardCharsets.UTF_8);
-
-        if (Objects.requireNonNull(file.getContentType()).equals("text/xml") ||
-            Objects.requireNonNull(file.getContentType()).equals("application/xml")) {
-            return validateXML(file.getOriginalFilename(), content);
-        }
-        return false;
-    }
-
-    private boolean isValidFileExtension(String extension) {
-        return !extension.isEmpty() && !extension.startsWith(".") && !extension.contains("/");
-    }
-
-    public boolean validateFilename(String filename) {
-
-        Matcher matcher = filenamePattern.matcher(filename);
-        return matcher.find();
-
-    }
-
-    private boolean validateXML(String filename, String content) {
-
-        // TODO There currently does not exists a XML schema to validate against.
-        // could convert to JSON using cudl-pack and then validate against item json?
-
-        // For now, just make sure it's valid XML.
-        try {
-            var parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document = parser.parse(IOUtils.toInputStream(content, "UTF-8"));
-            Preconditions.checkNotNull(document);
-            return true;
-        }
-        catch (ParserConfigurationException e) {
-            throw new RuntimeException(
-                "Unable to instantiate a DocumentBuilder instance: " + e.getMessage(), e);
-        }
-        catch (IOException e) {
-            throw new AssertionError("Caught IOException while parsing in-memory XML - should not occur", e);
-        }
-        catch (SAXException ignored) {
-            return false;
-        }
-    }
-
     private Path getDataItemPath() {
         return dataItemPath;
     }
@@ -402,45 +345,6 @@ public class EditAPI {
         }
     }
 
-    private Path getNewItemPath(String itemName, String fileExtension) {
-        Preconditions.checkArgument(validateFilename(itemName), "invalid item name: %s", itemName);
-        Preconditions.checkArgument(isValidFileExtension(fileExtension), "invalid file extension: %s", fileExtension);
-        return dataItemPath.resolve(Path.of(itemName, itemName + "." + fileExtension));
-    }
-
-    private Path getItemId(Path absoluteItemPath) {
-        Preconditions.checkArgument(absoluteItemPath.isAbsolute());
-        Preconditions.checkArgument(absoluteItemPath.startsWith(dataItemPath));
-        return dataPath.relativize(absoluteItemPath);
-    }
-
-    public void addItemToCollection(String itemName, String fileExtension, InputStream contents, String collectionId) throws EditApiException {
-
-        var itemFile = getNewItemPath(itemName, fileExtension);
-        var itemId = getItemId(itemFile);
-        try {
-            gitHelper.pullGitChanges();
-
-            Collection collection = getCollection(collectionId);
-            Path output = ModelOps().resolveIdToIOPath(dataPath, itemId);
-            Files.createDirectories(output.getParent());
-
-            ModelOps().writeMetadata(dataPath, itemId, contents);
-            if (!ModelOps().isItemInCollection(itemId, collection)) {
-                if(ModelOps().addItemToCollection(collection, itemId)) {
-                    ModelOps().writeCollectionJson(new ObjectMapper(), dataPath, collection);
-                }
-            }
-
-            gitHelper.pushGitChanges();
-
-            updateModel();
-        } catch (IOException | GitHelperException e) {
-            throw new EditApiException(String.format(
-                "Failed to add item '%s' to collection '%s': %s",
-                itemId, collectionId, e.getMessage()), e);
-        }
-    }
     public void updateCollection(Collection collection, String descriptionHTML, String creditHTML) throws EditApiException {
         try {
 

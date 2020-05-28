@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockMultipartFile;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
@@ -31,7 +30,6 @@ import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -167,40 +165,6 @@ class EditAPITest {
     }
 
     @Test
-    void validate() throws IOException {
-        MockMultipartFile jsonFile = new MockMultipartFile("json", "filename.json", "application/json", ("{\"json" +
-            "\":\"someValue\"}").getBytes());
-        MockMultipartFile xmlFile = new MockMultipartFile("xml", "filename.xml", "application/xml", ("<?xml " +
-            "version=\"1.0\" encoding=\"UTF-8\"?><test></test>").getBytes());
-        MockMultipartFile xmlFile2 = new MockMultipartFile("xml", "filename.xml", "text/xml", ("<?xml " +
-            "version=\"1.0\" encoding=\"UTF-8\"?><test></test>").getBytes());
-
-        boolean jsonValid = editAPI.validate(jsonFile);
-        assert (!jsonValid);
-
-        boolean xml1Valid = editAPI.validate(xmlFile);
-        assert (xml1Valid);
-
-        boolean xml2Valid = editAPI.validate(xmlFile2);
-        assert (xml2Valid);
-
-    }
-
-    @Test
-    void validateFilename() {
-        boolean notValid1 = editAPI.validateFilename("THISITEMNAME");
-        assert (!notValid1);
-        boolean notValid2 = editAPI.validateFilename("THIS-ITEM-NAME");
-        assert (!notValid2);
-        boolean notValid3 = editAPI.validateFilename("THIS-ITEM-NAME-000000");
-        assert (!notValid3);
-        boolean notValid4 = editAPI.validateFilename("/THIS-ITEM-NAME-00000");
-        assert (!notValid4);
-        boolean valid = editAPI.validateFilename("THIS-ITEM-NAME-00000");
-        assert (valid);
-    }
-
-    @Test
     public void itemExists() {
         Truth.assertThat(editAPI.itemExists(ITEM_ID_MS_LATIN)).isTrue();
         Truth.assertThat(editAPI.itemExists(Path.of("items/missing"))).isFalse();
@@ -305,21 +269,6 @@ class EditAPITest {
     }
 
     @Test
-    void addItemToCollection() throws IOException, EditApiException {
-        var itemId = Path.of("items/data/tei/MS-MYITEMTEST-00001/MS-MYITEMTEST-00001.xml");
-        assertThrows(NotFoundException.class, () -> editAPI.getItem(itemId));
-
-        MockMultipartFile xmlFile2 = new MockMultipartFile("xml", "filename.xml", "text/xml", ("<?xml " +
-            "version=\"1.0\" encoding=\"UTF-8\"?><test></test>").getBytes());
-
-        editAPI.addItemToCollection("MS-MYITEMTEST-00001", "xml", xmlFile2.getInputStream(), "collections/test.collection.json");
-
-        Item item = editAPI.getItem(itemId);
-        assertThat((Object)item.id()).isEqualTo(itemId);
-        Id id = new Id("../items/data/tei/MS-MYITEMTEST-00001/MS-MYITEMTEST-00001.xml");
-        assert (editAPI.getCollection("collections/test.collection.json").getItemIds().contains(id));
-    }
-
     public void enforceItemState_pathIdOverload() throws EditApiException {
         var item = editAPI.getItem(ITEM_ID_MS_LATIN);
         var enforced = editAPI.enforceItemState(item.id(), SetMembership.removing(COLLECTION_ID_TEST));

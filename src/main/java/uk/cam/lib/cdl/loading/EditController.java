@@ -321,45 +321,6 @@ public class EditController {
         return new RedirectView("/edit/collection/");
     }
 
-    @PostMapping("/edit/collection/addItem")
-    public RedirectView addCollectionItem(RedirectAttributes attributes, @RequestParam String collectionId,
-                                          @RequestParam("file") MultipartFile file) throws IOException {
-
-        attributes.addAttribute("collectionId", collectionId);
-
-        if (file.getContentType() == null || !(file.getContentType().equals("text/xml"))) {
-            attributes.addFlashAttribute("error", "Item needs to be in TEI XML format.");
-            return new RedirectView("/edit/collection/");
-        }
-
-        String itemName = FilenameUtils.getBaseName(file.getOriginalFilename());
-        String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if (!editAPI.validateFilename(itemName)) {
-            attributes.addFlashAttribute("error", "Item name not valid. Should be for example: MS-TEST-00001. Using " +
-                " characters A-Z or numbers 0-9 and the - character delimiting sections.  Should have at least 3 " +
-                " sections, group (MS = Manuscripts, PR = printed etc) then the collection, then a five digit number.");
-            return new RedirectView("/edit/collection/");
-        }
-
-        if (!editAPI.validate(file)) {
-            attributes.addFlashAttribute("error", "Item is not valid XML/JSON or does not validate against the required schema.");
-            return new RedirectView("/edit/collection/");
-        }
-
-        try {
-            editAPI.addItemToCollection(itemName, fileExtension, file.getInputStream(), collectionId);
-        }
-        catch (EditApiException e) {
-            LOG.error("Failed to add item to collection", e);
-            attributes.addFlashAttribute("error", "Problem adding item to collection");
-            return new RedirectView("/edit/collection/");
-        }
-
-        attributes.addFlashAttribute("message", "Item updated/added to collection.");
-
-        return new RedirectView("/edit/collection/");
-    }
-
     @PostMapping("/edit/collection/deleteItem")
     public RedirectView deleteCollectionItem(RedirectAttributes attributes, @RequestParam String collectionId,
                                              @RequestParam String itemId) {
