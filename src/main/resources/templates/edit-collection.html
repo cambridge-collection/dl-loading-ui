@@ -238,18 +238,18 @@
                                         <tbody>
                                         <tr th:each="item : ${items}">
                                             <td>
-                                                <a th:href="${@ModelOps.resolveIdToIOPath(pathForDataDisplay, item.idAsPath)}"
-                                                   th:text="${item.name}">
+                                                <a th:href="${@ModelOps.resolveIdToIOPath(pathForDataDisplay, item.id())}"
+                                                   th:text="${item.name()}">
                                                 </a>
                                             </td>
                                             <td>
                                                 <form
                                                     action="/edit/collection/deleteItem"
-                                                    method="post" th:id="'deleteItemForm_'+${item.idAsPath}">
-                                                    <input type="hidden" name="itemId" th:value="${item.idAsPath}">
+                                                    method="post" th:id="'deleteItemForm_'+${item.id()}">
+                                                    <input type="hidden" name="itemId" th:value="${item.id()}">
                                                     <input type="hidden" name="collectionId" th:value="${form.collectionId}">
                                                     <button class="btn btn-link"
-                                                            th:id="'deleteItemButton_'+${item.idAsPath}"
+                                                            th:id="'deleteItemButton_'+${item.id()}"
                                                             onclick="return loading_ui_edit_collection.showDeleteModal(this);">
                                                         <i class="fas fa-trash-alt text-gray-500"></i>
                                                     </button>
