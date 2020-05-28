@@ -3,6 +3,9 @@ package uk.cam.lib.cdl.loading;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.io.ByteSource;
+import com.google.common.io.CharSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jsoup.Jsoup;
@@ -13,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.InputStreamSource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +24,25 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.UriComponentsBuilder;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
+import uk.cam.lib.cdl.loading.editing.modelcreation.CreationResult;
+import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableCreationResult;
+import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableIssue;
+import uk.cam.lib.cdl.loading.editing.modelcreation.Issue;
+import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttribute;
+import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes;
+import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes.StandardModelAttributes;
+import uk.cam.lib.cdl.loading.editing.modelcreation.ModelFactory;
+import uk.cam.lib.cdl.loading.editing.modelcreation.itemcreation.ItemIssue;
+import uk.cam.lib.cdl.loading.editing.pagination.PaginationIssue;
+import uk.cam.lib.cdl.loading.editing.pagination.TeiPaginationGenerationProcessor;
 import uk.cam.lib.cdl.loading.exceptions.BadRequestException;
 import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
@@ -37,17 +52,27 @@ import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.Id;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.model.editor.ModelOps;
+import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
+import uk.cam.lib.cdl.loading.utils.ThrowingFunction;
+import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.function.Predicate.not;
+import static uk.cam.lib.cdl.loading.EditController.EditIssue.INVALID_FORM_DATA;
 import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 
 
@@ -57,15 +82,17 @@ public class EditController {
 
     private final EditAPI editAPI;
     private final Path pathForDataDisplay;
+    private final ModelFactory<Item> teiItemFactory;
 
     @Autowired
-    public EditController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay) {
+    public EditController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay, ModelFactory<Item> teiItemFactory) {
         this.editAPI = editAPI;
         this.pathForDataDisplay = Path.of(pathForDataDisplay);
         Preconditions.checkArgument(
             this.pathForDataDisplay.isAbsolute() &&
                 this.pathForDataDisplay.normalize().equals(this.pathForDataDisplay),
             "pathForDataDisplay must start with / and not contain relative segments");
+        this.teiItemFactory = Preconditions.checkNotNull(teiItemFactory);
     }
 
     @GetMapping("/edit/edit.html")
@@ -234,7 +261,7 @@ public class EditController {
     // TODO make sure we have permission to edit the collection being edited.
     @PostMapping("/edit/collection/update")
     public RedirectView updateCollection(RedirectAttributes attributes,
-                                         @Valid @ModelAttribute CollectionForm collectionForm,
+                                         @Valid @org.springframework.web.bind.annotation.ModelAttribute CollectionForm collectionForm,
                                          final BindingResult bindingResult) throws IOException {
 
         if (bindingResult.hasErrors()) {
@@ -362,49 +389,220 @@ public class EditController {
         return !(mpf.isEmpty() && Strings.isNullOrEmpty(mpf.getOriginalFilename()));
     }
 
+    static CreationResult<Optional<Set<ModelAttribute<?>>>> getItemFileContentAttribute(
+        Optional<Item> existingItem, ItemForm itemForm
+    ) {
+        Preconditions.checkNotNull(itemForm.metadataFile());
+        Preconditions.checkNotNull(itemForm.paginationFile());
+        var directMetadata = Optional.ofNullable(itemForm.metadata());
+
+        Preconditions.checkState(directMetadata.isPresent() == existingItem.isPresent(),
+            "directMetadata is expected to co-occur with an item");
+
+        var directMetadataChanged = existingItem
+            .map(item -> !(item.fileData().equals(directMetadata))).orElse(false);
+        var metadataFileSpecified = isMultipartFileProvided(itemForm.metadataFile());
+
+        // Reject the request if metadata is edited and a metadata file is specified
+        if(directMetadataChanged && metadataFileSpecified) {
+            return ImmutableCreationResult.unsuccessful(
+                ImmutableIssue.of(INVALID_FORM_DATA, "Metadata cannot be edited directly if a metadata file is also uploaded."));
+        }
+
+        Set<ModelAttribute<?>> inputAttrs = null;
+        if(metadataFileSpecified) {
+            var filename = Optional.ofNullable(itemForm.metadataFile().getOriginalFilename())
+                .filter(not(String::isEmpty)).orElseThrow(() -> new BadRequestException(
+                    new IllegalStateException("No filename available from metadata file upload")));
+
+             inputAttrs = ImmutableSet.of(
+                 ModelAttributes.StandardFileAttributes.FILENAME.containing(filename),
+                 ModelAttributes.StandardFileAttributes.BYTES.containing(
+                 asByteSource(itemForm.metadataFile())));
+        }
+        else if(directMetadataChanged) {
+            inputAttrs = ImmutableSet.of(
+                ModelAttributes.StandardFileAttributes.TEXT.containing(CharSource.wrap(directMetadata.orElseThrow())),
+                ModelAttributes.StandardFileAttributes.CHARSET.containing(UTF_8));
+        }
+        else if(isMultipartFileProvided(itemForm.paginationFile())) {
+            Preconditions.checkState(existingItem.isPresent(),
+                "Pagination provided with no existing item, metadata text or metadata file");
+            // If pagination is being updated and no metadata input has been
+            // specified then the existing item is re-processed.
+            inputAttrs = ImmutableSet.of(
+                ModelAttributes.StandardFileAttributes.TEXT.containing(
+                    CharSource.wrap(existingItem.orElseThrow().fileData().orElseThrow())),
+                ModelAttributes.StandardFileAttributes.CHARSET.containing(UTF_8));
+        }
+        return ImmutableCreationResult.successful(Optional.ofNullable(inputAttrs));
+    }
+
+    /**
+     * Get a ByteSource backed by an InputStreamSource (such as a MultiPartFile).
+     */
+    public static ByteSource asByteSource(InputStreamSource inputStreamSource) {
+        return new ByteSource() {
+            @Override
+            public InputStream openStream() throws IOException {
+                return inputStreamSource.getInputStream();
+            }
+        };
+    }
+
+    enum EditIssue implements Issue.Type {
+        INVALID_FORM_DATA
+    }
+
+    static CreationResult<Set<ModelAttribute<?>>> assembleTeiItemAttributes(Optional<Item> existingItem, ItemForm itemForm) {
+        Preconditions.checkArgument(existingItem.map(item -> item.fileData().isPresent()).orElse(true),
+            "existingItem must have file data when present");
+        Preconditions.checkNotNull(itemForm.paginationFile());
+
+        var attrs = ImmutableSet.<ModelAttribute<?>>builder();
+        existingItem.ifPresent(item -> attrs.add(StandardModelAttributes.MODEL_ID.containing(item.id())));
+
+        return getItemFileContentAttribute(existingItem, itemForm).flatMapValue(itemFileAttrs -> {
+            itemFileAttrs.ifPresent(attrs::addAll);
+
+            if(isMultipartFileProvided(itemForm.paginationFile())) {
+                attrs.add(TeiPaginationGenerationProcessor.Attribute.PAGINATION_ATTRIBUTES.containing(ImmutableSet.of(
+                    ModelAttributes.StandardFileAttributes.BYTES.containing(asByteSource(itemForm.paginationFile())),
+                    ModelAttributes.StandardFileAttributes.CHARSET.containing(UTF_8)
+                )));
+            }
+
+            return ImmutableCreationResult.successful(attrs.build());
+        });
+    }
+
+    static <A, B, E extends Exception> Function<A, B> reThrowing(Class<E> type, ThrowingFunction<A, B, E> f) {
+        return a -> {
+            try {
+                return f.apply(a);
+            } catch (Exception e) {
+                if(type.isInstance(e)) {
+                    throw new RuntimeException(e);
+                } else if(e instanceof RuntimeException) {
+                    throw (RuntimeException)e;
+                }
+                throw new AssertionError(
+                    "Caught unexpected checked exception: " + e.getClass(), e);
+            }
+        };
+    }
+
     @PostMapping("/edit/item")
     public Object saveItem(
-        RedirectAttributes attributes,
         @RequestParam(required = false, name = "id") Optional<String> itemId,
-        @Valid @ModelAttribute ItemForm itemForm
-    ) throws IOException {
+        @Valid @org.springframework.web.bind.annotation.ModelAttribute ItemForm itemForm
+    ) {
         Preconditions.checkNotNull(itemForm.metadataFile());
         Preconditions.checkNotNull(itemForm.paginationFile());
 
-        try {
-            if(itemId.isEmpty()) {
-                if(!isMultipartFileProvided(itemForm.metadataFile())) {
-                    throw new ValidationException("Please select an item metadata file to upload.");
+        var newItemCollections = Arrays.stream(itemForm.collections())
+            .map(Path::of)
+            .filter(colId -> {
+                // Reject the request if any collection IDs are invalid
+                try { editAPI.getCollection(colId); }
+                catch(NotFoundException | IllegalStateException e) {
+                    throw new BadRequestException(e);
                 }
+                return true;
+            })
+            .collect(toImmutableSet());
 
-                // TODO: Create item and add to selected collections
-            }
+        // Only allow specifying an ID that corresponds to an existing item.
+        // FIXME: We currently have no access control to limit who can edit what
+        var currentItem = itemId.map(Path::of).map(editAPI::getItemWithData);
+
+        CreationResult<Optional<Void>> validationResult = ImmutableCreationResult.successful(Optional.empty())
+            .flatMapValue(ignored -> {
+                // New items must have metadata specified
+                if(itemId.isEmpty() && !isMultipartFileProvided(itemForm.metadataFile())) {
+                    return ImmutableCreationResult.unsuccessful(
+                        ImmutableIssue.of(INVALID_FORM_DATA, "Please select an item metadata file to upload."));
+                }
+                return ImmutableCreationResult.successful(Optional.empty());
+            })
+            .flatMapValue(ignored -> {
+                if(itemId.isEmpty() && newItemCollections.isEmpty()) {
+                    return ImmutableCreationResult.unsuccessful(
+                        ImmutableIssue.of(INVALID_FORM_DATA, "Please select one or more collections for your item."));
+                }
+                return ImmutableCreationResult.successful(Optional.empty());
+            });
+
+        var itemResult = validationResult
+            .flatMapValue(ignored -> assembleTeiItemAttributes(currentItem, itemForm))
+            .flatMapValue(reThrowing(IOException.class, teiItemFactory::createFromAttributes))
+            .flatMapValue(item -> {
+                // Don't allow overwriting existing items when creating new items
+                if(itemId.isEmpty() && editAPI.itemExists(item.id())) {
+                    return ImmutableCreationResult.unsuccessful(
+                        ImmutableIssue.of(INVALID_FORM_DATA,
+                            String.format("An item already exists with the name \"%s\"", item.name())));
+                }
+                return ImmutableCreationResult.successful(item);
+            });
+
+        if(itemResult.isSuccessful()) {
+            var item = itemResult.value().orElseThrow();
+            var outcome = editAPI.enforceItemState(item, SetMembership.onlyMemberOf(newItemCollections));
+
+            return new RedirectView(outcome
+                .map(state -> state.ensure() == ModelState.Ensure.ABSENT ? "/edit/edit.html" : getItemEditUrl(state.model()))
+                .orElseGet(() -> getItemEditUrl(item)));
         }
-        catch(ValidationException e) {
-            var mav = getEditItemMav(itemId, Optional.of(itemForm));
-            mav.getModel().put("error", e.getMessage());
-            return mav;
+        else {
+            var errorMessages = itemResult.issues().stream()
+                .map(EditController::constructUserErrorMessage)
+                .collect(ImmutableList.toImmutableList());
+            return getEditItemMavForItem(currentItem, Optional.of(itemForm), Optional.of(errorMessages));
         }
-//        return new RedirectView("/edit/item");
-        throw new AssertionError();
+    }
+
+    static String constructUserErrorMessage(Issue issue) {
+        if(issue.type() instanceof PaginationIssue) {
+            return "TEI pagination could not be generated: " + issue.description();
+        }
+        else if(issue.type() == ItemIssue.INVALID_INPUT_FILE) {
+            return "Your metadata could not be processed: " + issue.description();
+        }
+        return issue.description();
+    }
+
+    protected static String getItemEditUrl(Item item) {
+        return UriComponentsBuilder.fromUriString("/edit/item")
+            .queryParam("id", item.id().toString())
+            .toUriString();
     }
 
     @GetMapping("/edit/item")
     public ModelAndView editItem(@RequestParam(required = false, name = "id") Optional<String> itemId) {
-        return getEditItemMav(itemId, Optional.empty());
+        return getEditItemMavForItemId(itemId.map(Path::of), Optional.empty());
     }
 
-    ModelAndView getEditItemMav(Optional<String> itemId, Optional<ItemForm> populatedItemForm) {
-        Preconditions.checkNotNull(itemId);
-        Preconditions.checkNotNull(populatedItemForm);
-
+    ModelAndView getEditItemMavForItemId(Optional<Path> itemId, Optional<ItemForm> populatedItemForm) {
+        return getEditItemMavForItemId(itemId, populatedItemForm, Optional.empty());
+    }
+    ModelAndView getEditItemMavForItemId(Optional<Path> itemId, Optional<ItemForm> populatedItemForm, Optional<List<String>> errors) {
         var item = itemId.map(id -> {
-            var _item = editAPI.getItem(id);
+            var _item = editAPI.getItemWithData(id);
             if(_item == null) {
                 throw new NotFoundException(String.format("Item does not exist: '%s'", id));
             }
             return _item;
         });
+        return getEditItemMavForItem(item, populatedItemForm, errors);
+    }
+    ModelAndView getEditItemMavForItem(Optional<Item> item, Optional<ItemForm> populatedItemForm, Optional<List<String>> errors) {
+        Preconditions.checkNotNull(item);
+        Preconditions.checkNotNull(populatedItemForm);
+        Preconditions.checkNotNull(errors);
+        Preconditions.checkArgument(item.map(i -> i.fileData().isPresent()).orElse(true),
+            "Item must have filedata when present");
+
         var form = populatedItemForm
             .or(() -> item.map(i -> ItemForm.forItem(editAPI, i)))
             .orElseGet(ItemForm::new);
@@ -413,10 +611,11 @@ public class EditController {
         var model = mav.getModel();
         model.put("mode", item.isEmpty() ? "create" : "update");
         model.put("modeLabel", item.isEmpty() ? "Create" : "Edit");
-        model.put("itemId", itemId.orElse(null));
+        model.put("itemId", item.map(Item::id).orElse(null));
         model.put("item", item);
         model.put("form", form);
         model.put("collections", editAPI.getCollections());
+        model.put("errors", errors);
         return mav;
     }
 }

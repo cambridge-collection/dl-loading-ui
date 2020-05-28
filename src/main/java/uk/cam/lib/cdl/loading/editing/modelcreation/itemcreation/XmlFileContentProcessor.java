@@ -3,13 +3,10 @@ package uk.cam.lib.cdl.loading.editing.modelcreation.itemcreation;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import uk.cam.lib.cdl.loading.editing.modelcreation.CreationResult;
-import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultFileContentCreationStrategy;
 import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultFileContentCreationStrategy.FileContentProcessor;
 import uk.cam.lib.cdl.loading.editing.modelcreation.FileContent;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableCreationResult;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableIssue;
-import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttribute;
-import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes;
 import uk.cam.lib.cdl.loading.utils.XML;
 
 import java.io.IOException;
@@ -29,7 +26,7 @@ public class XmlFileContentProcessor implements FileContentProcessor<Optional<Vo
             return ImmutableCreationResult.successful(fileContentForXml(fc, doc));
         } catch (SAXException e) {
             return ImmutableCreationResult.unsuccessful(
-                ImmutableIssue.of(ItemIssue.INVALID_INPUT_FILE, "File does not contain valid XML")
+                ImmutableIssue.of(ItemIssue.INVALID_INPUT_FILE, "XML is not valid.")
             );
         } catch (IllegalStateException e) {
             throw new RuntimeException(

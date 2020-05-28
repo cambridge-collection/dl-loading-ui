@@ -1,6 +1,6 @@
 package uk.cam.lib.cdl.loading.exceptions;
 
-public class EditApiException extends Exception {
+public class EditApiException extends RuntimeException {
     public EditApiException() {
         super();
     }
