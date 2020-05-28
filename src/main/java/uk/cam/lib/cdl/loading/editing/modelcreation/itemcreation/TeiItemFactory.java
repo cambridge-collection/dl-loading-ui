@@ -7,6 +7,7 @@ import uk.cam.lib.cdl.loading.editing.modelcreation.CreationResult;
 import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultFileContentCreationStrategy;
 import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultFileContentCreationStrategy.FileContentProcessor;
 import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultModelFactory;
+import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultModelFactory.IdCreationStrategy;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttribute;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelCreation;
@@ -31,7 +32,7 @@ public abstract class TeiItemFactory implements ModelFactory<Item> {
     }
 
     @Value.Default
-    protected TeiIdCreationStrategy teiIdCreationStrategy() {
+    protected IdCreationStrategy teiIdCreationStrategy() {
         return TeiIdCreationStrategy.of();
     }
 
