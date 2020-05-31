@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:12.3-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: dl-loading-ui
+      POSTGRES_DB: dl-loading-ui
+      POSTGRES_PASSWORD: ${DL_LOADING_UI_DB_PASSWORD:-changeme}
+    ports:
+      - ${DL_LOADING_UI_DB_HOST_PORT:-8422}:5432
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "${DL_LOADING_UI_ADMINER_HOST_PORT:-8423}:8080"
+    depends_on:
+      - db
+    environment:
+      ADMINER_DESIGN: pepa-linha
