@@ -30,6 +30,7 @@ import javax.validation.constraints.Pattern;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +61,15 @@ public class ContentEditorController {
         this.contentImagesPath = editAPI.getDataLocalPath().resolve(imagePath).toString();
         this.contentHTMLPath = editAPI.getDataLocalPath().resolve(htmlPath).toString();
         this.gitHelper = Preconditions.checkNotNull(gitHelper);
+
+        Preconditions.checkArgument(Path.of(this.pathForDataDisplay)
+            .equals(Path.of("/edit", pathForDataDisplay).normalize()));
+        Preconditions.checkArgument(Path.of(this.contentImagesURL)
+            .equals(Path.of("/edit", pathForDataDisplay, imagePath).normalize()));
+        Preconditions.checkArgument(Path.of(this.contentImagesPath)
+            .equals(editAPI.getDataLocalPath().resolve(imagePath).normalize()));
+        Preconditions.checkArgument(Path.of(this.contentHTMLPath)
+            .equals(editAPI.getDataLocalPath().resolve(htmlPath).normalize()));
     }
 
     /**
