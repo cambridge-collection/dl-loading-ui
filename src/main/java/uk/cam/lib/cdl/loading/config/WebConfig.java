@@ -35,6 +35,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     }
 
+    // FIXME: Is this actually called? This doesn't implement ApplicationContextAware
     public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
