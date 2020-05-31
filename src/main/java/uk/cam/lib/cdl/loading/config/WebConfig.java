@@ -70,6 +70,4 @@ public class WebConfig implements WebMvcConfigurer {
         viewResolver.setTemplateEngine(templateEngine());
         return viewResolver;
     }
-
-
 }

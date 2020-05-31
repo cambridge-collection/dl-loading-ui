@@ -29,6 +29,7 @@ import uk.cam.lib.cdl.loading.config.GitAPIVariables;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.io.File;
@@ -62,11 +63,11 @@ class PackageControllerAuthenticationTest {
     private MockMvc mvc;
 
     @BeforeEach
-    void setup() throws IOException, GitAPIException {
+    void setup() throws IOException, GitAPIException, GitHelperException {
 
         MockGitRepo gitRepo = new MockGitRepo();
 
-        GitLocalVariables gitSourceVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "/data",
+        GitLocalVariables gitSourceVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "data",
             "gitSourceURL", "gitSourceURLUserame",
             "gitSourceURLPassword", "gitBranch");
 
@@ -81,7 +82,7 @@ class PackageControllerAuthenticationTest {
             "gitUsername",
             "gitPassword");
 
-        packagingAPI = new PackagingAPI(gitSourceVariables, gitAPIVariables);
+        packagingAPI = new PackagingAPI(new GitHelper(gitRepo.getGit(), gitSourceVariables), gitAPIVariables);
 
         mvc = MockMvcBuilders
             .webAppContextSetup(context)
@@ -162,7 +163,7 @@ class PackageControllerAuthenticationTest {
         private String dataPath;
         private GitHelper gitHelper;
 
-        public Config() throws IOException, GitAPIException {
+        public Config() throws IOException, GitAPIException, GitHelperException {
             MockGitRepo gitRepo = new MockGitRepo();
             Git git = gitRepo.getGit();
 
@@ -175,7 +176,7 @@ class PackageControllerAuthenticationTest {
             git.commit().setMessage("Adding Test Data").setAuthor("testuser", "test@example.com ").call();
 
             dataPath = gitRepo.getCloneDir().getCanonicalPath() + "/data/";
-            gitLocalVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "/data/",
+            gitLocalVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "data",
                     "gitSourceURL", "gitSourceURLUserame",
                     "gitSourceURLPassword", "gitBranch");
 

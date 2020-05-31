@@ -1,29 +1,23 @@
 package uk.cam.lib.cdl.loading.model.editor;
 
+import org.apache.commons.io.FilenameUtils;
+
+import java.nio.file.Path;
+import java.util.Optional;
+
 /**
  * Not used for Jackson serialisation
  */
-public class Item {
+public interface Item {
+    Path id();
+    Optional<String> fileData();
 
-    private final String name;
-    private final String filepath;
-    private final Id id;
-
-    public Item(String name, String filepath, Id id) {
-        this.filepath = filepath;
-        this.name = name;
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getFilepath() {
-        return filepath;
-    }
-
-    public Id getId() {
-        return id;
+    /**
+     * Get the Item's name.
+     *
+     * <p>The default implementation is to use the final portion of the {@link #id()}, without any file extension.</p>
+     */
+    default String name() {
+        return FilenameUtils.removeExtension(id().getFileName().toString());
     }
 }

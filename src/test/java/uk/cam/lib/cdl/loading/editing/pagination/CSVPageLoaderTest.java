@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import uk.cam.lib.cdl.loading.editing.pagination.CSVPageLoader.CSVRowAccessor;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.util.List;
@@ -20,10 +22,8 @@ public class CSVPageLoaderTest {
     @Test
     public void columnMappingIsRequired() {
         var loader = ImmutableCSVPageLoader.builder()
-            // No column mappings defined
+            // No column mappings defined in CSVFormat
             .csvFormat(CSVFormat.DEFAULT)
-            .labelAccessor(CSVRowAccessor.of("label"))
-            .imageAccessor(CSVRowAccessor.of("image"))
             .build();
 
         Exception e = assertThrows(PaginationException.class, () ->
@@ -33,10 +33,25 @@ public class CSVPageLoaderTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {
+        "",
+        "\n",
+        "foo,bar\n"
+    })
+    public void loadPages_throwsUserInputError_whenNoPagesAreFound(String csv) throws IOException {
+        var loader = ImmutableCSVPageLoader.builder().build();
+
+        Exception e = assertThrows(UserInputPaginationException.class, () ->
+            loader.loadPages(new StringReader(csv)));
+
+        Truth.assertThat(e).hasMessageThat().isEqualTo("CSV contains no page data");
+    }
+
+    @ParameterizedTest
     @MethodSource("loadPagesParameters")
     public void loadPages(
         CSVFormat fmt, CSVRowAccessor label,
-        CSVRowAccessor image, List<Page> expected, String csv) {
+        CSVRowAccessor image, List<Page> expected, String csv) throws IOException {
 
         var loader = ImmutableCSVPageLoader.builder()
             .csvFormat(fmt).imageAccessor(image).labelAccessor(label).build();

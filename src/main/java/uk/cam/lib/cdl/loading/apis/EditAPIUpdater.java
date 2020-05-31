@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading.apis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
@@ -17,8 +18,13 @@ public class EditAPIUpdater {
     }
 
     @Scheduled(fixedDelay = 5 * 60 * 1000, initialDelay = 500) // Every 5 mins
-    public void checkForUpdates() throws IOException {
+    public void checkForUpdates() {
         LOG.info("Updating model...");
-        editAPI.updateModel();
+        try {
+            editAPI.updateModel();
+        }
+        catch (EditApiException e) {
+            LOG.error("EditAPI failed to update its model: " + e.getMessage(), e);
+        }
     }
 }

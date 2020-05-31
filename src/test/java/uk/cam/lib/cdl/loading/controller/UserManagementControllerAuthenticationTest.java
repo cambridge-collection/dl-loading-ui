@@ -26,6 +26,7 @@ import uk.cam.lib.cdl.loading.apis.MockGitRepo;
 import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.model.editor.Workspace;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
@@ -292,7 +293,7 @@ class UserManagementControllerAuthenticationTest {
         private String dataPath;
         private GitHelper gitHelper;
 
-        public Config() throws IOException, GitAPIException {
+        public Config() throws IOException, GitAPIException, GitHelperException {
             MockGitRepo gitRepo = new MockGitRepo();
             Git git = gitRepo.getGit();
 
@@ -305,7 +306,7 @@ class UserManagementControllerAuthenticationTest {
             git.commit().setMessage("Adding Test Data").setAuthor("testuser", "test@example.com ").call();
 
             dataPath = gitRepo.getCloneDir().getCanonicalPath() + "/data/";
-            gitLocalVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "/data/",
+            gitLocalVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "data",
                     "gitSourceURL", "gitSourceURLUserame",
                     "gitSourceURLPassword", "gitBranch");
 

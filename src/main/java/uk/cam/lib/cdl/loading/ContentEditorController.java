@@ -1,6 +1,9 @@
 package uk.cam.lib.cdl.loading;
 
+import com.google.common.base.Preconditions;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -9,12 +12,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
-import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.editing.BrowseFile;
 import uk.cam.lib.cdl.loading.editing.FileSave;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import javax.validation.Valid;
@@ -34,6 +41,7 @@ import java.util.Objects;
 @Controller
 @RequestMapping("/editor")
 public class ContentEditorController {
+    private static final Logger LOG = LoggerFactory.getLogger(ContentEditorController.class);
 
     protected final String contentHTMLPath;
     protected final String contentImagesPath;
@@ -45,13 +53,13 @@ public class ContentEditorController {
     public ContentEditorController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay,
                                    @Value("${data.path.images}") String imagePath,
                                    @Value("${data.path.html}") String htmlPath,
-                                   GitLocalVariables gitSourceVariables) {
+                                   GitHelper gitHelper) {
 
         this.pathForDataDisplay = "/edit"+pathForDataDisplay;
         this.contentImagesURL = "/edit"+pathForDataDisplay + imagePath;
-        this.contentImagesPath = editAPI.getDataLocalPath() + imagePath;
-        this.contentHTMLPath = editAPI.getDataLocalPath() + htmlPath;
-        this.gitHelper = new GitHelper(gitSourceVariables);
+        this.contentImagesPath = editAPI.getDataLocalPath().resolve(imagePath).toString();
+        this.contentHTMLPath = editAPI.getDataLocalPath().resolve(htmlPath).toString();
+        this.gitHelper = Preconditions.checkNotNull(gitHelper);
     }
 
     /**
@@ -68,6 +76,7 @@ public class ContentEditorController {
     @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
     public ResponseEntity<String> handleAddImageRequest(@Valid @ModelAttribute() AddImagesParameters addParams,
                                                         BindingResult bindResult) throws IOException {
+        // FIXME: This function modifies the git repo without any locking
 
         // Check file extension and content type are image.
         uploadFileValidation(addParams, bindResult);
@@ -87,7 +96,12 @@ public class ContentEditorController {
 
         if (saveSuccessful) {
             // Git Commit and push to remote repo.
-            saveSuccessful = gitHelper.pushGitChanges();
+            try {
+                gitHelper.pushGitChanges();
+            } catch (GitHelperException e) {
+                LOG.error("handleAddImageRequest(): Failed to push git changes: " + e.getMessage(), e);
+                saveSuccessful = false;
+            }
         }
 
         String output = "<html><head><script> window.opener.CKEDITOR.tools.callFunction( "
@@ -167,6 +181,8 @@ public class ContentEditorController {
         @Valid @ModelAttribute() DeleteImagesParameters deleteParams,
         BindingResult bindResult) throws IOException {
 
+        // FIXME: This function modifies the git repo without any locking
+
         if (bindResult.hasErrors()) {
             throw new IOException(
                 "Your image or directory delete failed. Please ensure the filePath exists "
@@ -187,7 +203,12 @@ public class ContentEditorController {
 
         if (successful) {
             // Git Commit and push to remote repo.
-            successful = gitHelper.pushGitChanges();
+            try {
+                gitHelper.pushGitChanges();
+            } catch (GitHelperException e) {
+                LOG.error("handleDeleteImageRequest(): Failed to push git changes: " + e.getMessage(), e);
+                successful = false;
+            }
         }
 
         JSONObject json = new JSONObject();

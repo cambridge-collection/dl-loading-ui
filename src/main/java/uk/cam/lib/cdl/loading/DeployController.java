@@ -10,6 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
 import uk.cam.lib.cdl.loading.apis.PackagingAPI;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.model.Tag;
 import uk.cam.lib.cdl.loading.model.deployment.Deployment;
 import uk.cam.lib.cdl.loading.model.deployment.Instance;
@@ -40,7 +41,7 @@ public class DeployController {
     @PreAuthorize("@roleService.canDeploySites(authentication)")
     @GetMapping ("/deploy.html")
     public String deploy(Model model, @ModelAttribute("message") String message,
-                         @ModelAttribute("error") String error) {
+                         @ModelAttribute("error") String error) throws GitHelperException {
 
         List<Instance> instances = deploymentAPI.getInstances();
         // NOTE this gets the tags from the source repo instead of from the release repo, but they should be
@@ -63,7 +64,7 @@ public class DeployController {
     @PreAuthorize("@roleService.canDeploySites(authentication)")
     @GetMapping("/cache/refresh")
     public String deployRefreshCache(Model model, @ModelAttribute("message") String message,
-                                     @ModelAttribute("error") String error) {
+                                     @ModelAttribute("error") String error) throws GitHelperException {
 
         deploymentAPI.cacheEvict();
         return deploy(model, message, error);
