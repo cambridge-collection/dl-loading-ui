@@ -1,6 +1,6 @@
-DROP table authorities;
-DROP table users;
-DROP table persistent_logins;
+DROP table IF EXISTS authorities;
+DROP table IF EXISTS users;
+DROP table IF EXISTS persistent_logins;
 
 create table users(
     id bigserial not null,
@@ -46,6 +46,9 @@ values ('test-deployment-manager', 'Deployment', 'Manager', 'password', 'dm@test
 insert into users (username, firstname, lastname, password, email, enabled)
 values ('test-site-manager', 'Site', 'Manager', 'password', 'dm@test.com', true);
 
+insert into users (username, firstname, lastname, password, email, enabled)
+values ('test-all', 'Test', 'All', 'password', 'all@test.com', true);
+
 insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-workspace-member1'),
                                                 'ROLE_WORKSPACE_MEMBER1');
 
@@ -62,3 +65,13 @@ insert into authorities (id, authority) values ((SELECT id FROM users WHERE user
                                                 'ROLE_DEPLOYMENT_MANAGER');
 insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-site-manager'),
                                                 'ROLE_SITE_MANAGER');
+
+-- test all user has access to everything
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-all'),
+                                                'ROLE_SITE_MANAGER');
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-all'),
+                                                'ROLE_WORKSPACE_MANAGER1');
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-all'),
+                                                'ROLE_WORKSPACE_MANAGER2');
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-all'),
+                                                'ROLE_DEPLOYMENT_MANAGER');

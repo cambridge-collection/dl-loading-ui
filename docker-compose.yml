@@ -1,0 +1,77 @@
+version: "3.7"
+
+services:
+  dl-loading-ui:
+    image: openjdk:11.0.7
+    volumes:
+      - ./target/ui-0.1.0-SNAPSHOT.war:/usr/local/dl-loading-ui.war
+      - ${DL_LOADING_UI_APPCONFIG:-./conf/docker-application.properties}:/etc/dl-loading-ui/application.properties
+      - ${DL_LOADING_UI_USERCONFIG:-./conf/users.properties}:/etc/dl-loading-ui/users.properties
+    command: java -jar -debug /usr/local/dl-loading-ui.war  -spring.config.additional-location=/etc/dl-loading-ui/
+    ports:
+      - "8081:8081"
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - dl-loading-db
+      - dl-deployment-api
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  # don't want to expose any external ports
+  dl-deployment-api:
+    image: openjdk:11.0.7
+    volumes:
+      - ${DL_DEPLOYMENT_API_WAR:-../dl-deployment-api/target/api-0.1.0-SNAPSHOT.war}:/usr/local/dl-deployment-api.war
+    command: java -jar -debug /usr/local/dl-deployment-api.war
+    depends_on:
+      - dl-loading-db
+    networks:
+      - backend
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  dl-loading-db:
+    image: postgres:12.1-alpine
+    restart: always
+    networks:
+      - backend
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./src/main/docs/workspaces_database_setup.sql:/docker-entrypoint-initdb.d/ui_workspace_database_setup.sql
+      - ./src/main/docs/users_database_setup.sql:/docker-entrypoint-initdb.d/ui_users_database_setup.sql
+      - ${DL_DEPLOYMENT_API_DBSETUP:-../dl-deployment-api/src/main/docs/setup_database.sql}:/docker-entrypoint-initdb.d/deployment_setup_database.sql
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+networks:
+  frontend:
+    driver: overlay
+  backend:
+    driver: overlay
+
+
+# TODO Setup SAML auth
+# Setup secure password
+# Do deploy part
+# Setup database users/ etc
+# networks?
+# could even create a git installation with the repos initialised?
+# CReate build info and Dockerfile
