@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.apis;
 
+import com.google.common.base.Preconditions;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -17,7 +18,7 @@ import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.springframework.security.access.prepost.PreAuthorize;
 import uk.cam.lib.cdl.loading.config.GitAPIVariables;
-import uk.cam.lib.cdl.loading.config.GitLocalVariables;
+import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.model.Tag;
 import uk.cam.lib.cdl.loading.model.WebResponse;
 import uk.cam.lib.cdl.loading.model.packaging.PackagingStatus;
@@ -26,7 +27,11 @@ import uk.cam.lib.cdl.loading.model.packaging.Update;
 import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 /**
  * TODO Implementation should be moved to a separate packaging API.
@@ -43,8 +48,9 @@ public class PackagingAPI {
     private final GitHelper gitHelper;
     private final BitBucketAPI sourceBitBucketAPI;
 
-    public PackagingAPI(GitLocalVariables gitSourceVariables, GitAPIVariables gitAPIVariables) {
-        this.gitHelper = new GitHelper(gitSourceVariables);
+    public PackagingAPI(GitHelper gitHelper, GitAPIVariables gitAPIVariables) {
+        Preconditions.checkNotNull(gitHelper);
+        this.gitHelper = gitHelper;
 
         this.sourceBitBucketAPI = new BitBucketAPI(gitAPIVariables.getGitAPIURL(), gitAPIVariables.getGitBranch(),
             gitAPIVariables.getRepoURL(), gitAPIVariables.getTagsURL(), gitAPIVariables.getPipelinesURL(),
@@ -57,7 +63,7 @@ public class PackagingAPI {
     }
 
     @PreAuthorize("@roleService.canBuildPackages(authentication)")
-    public List<Tag> getTags() {
+    public List<Tag> getTags() throws GitHelperException {
 
         List<RevObject> revs = gitHelper.getTags();
         List<Tag> tags = new ArrayList<>();

@@ -2,6 +2,7 @@ package uk.cam.lib.cdl.loading.model.editor;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 
 import java.beans.ConstructorProperties;
 
@@ -22,7 +23,6 @@ public class CollectionName {
         this.sort = sort;
         this.shortName = shortName;
         this.full = full;
-
     }
 
     @JsonProperty("url-slug")

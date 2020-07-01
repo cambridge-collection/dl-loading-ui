@@ -1,0 +1,125 @@
+On branch integrate-item-edit/integrate
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+	modified:   pom.xml
+	modified:   src/main/java/uk/cam/lib/cdl/loading/DeployController.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/apis/EditAPIUpdater.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/config/APIConfig.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/config/EditConfig.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/config/GitConfig.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/config/GitLocalVariables.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/AbstractCreationResult.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/AttributeNotFoundException.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/CreationResult.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/DefaultFileContentCreationStrategy.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/DefaultFileContentInitialiser.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/DefaultModelFactory.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/FileContent.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/Issue.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/ModelAttribute.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/ModelAttributes.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/ModelCreation.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/ModelCreationException.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/ModelFactory.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/itemcreation/ItemIssue.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/itemcreation/TeiIdCreationStrategy.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/itemcreation/TeiItemFactory.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/modelcreation/itemcreation/XmlFileContentProcessor.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/editing/pagination/CSVPageLoader.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/editing/pagination/PageLoader.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/pagination/PaginationIssue.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/editing/pagination/TEIPageInserter.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/pagination/TeiPageListFactory.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/pagination/TeiPaginationGenerationProcessor.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/editing/pagination/UserInputPaginationException.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/exceptions/BadRequestException.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/exceptions/EditApiException.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/exceptions/GitHelperException.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/forms/AbstractItemForm.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/forms/CollectionForm.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/AbstractItem.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/model/editor/Collection.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/model/editor/CollectionCredit.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/model/editor/CollectionDescription.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/model/editor/CollectionName.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/model/editor/Id.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/model/editor/Item.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/ModelOps.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/AbstractModelState.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/AbstractModelStateEnforcementResult.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/ModelOpsException.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/ModelState.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/ModelStateEnforcementFailureException.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/ModelStateEnforcementResult.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/ModelStateHandler.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/ModelStateHandlerResolver.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/ModelStates.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/ResolvedModelStateHandler.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/_DefaultModelStateHandler.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/model/editor/modelops/_DefaultModelStateHandlerResolver.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/utils/ThrowingConsumer.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/utils/ThrowingFunction.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/utils/ThrowingSupplier.java
+	modified:   src/main/java/uk/cam/lib/cdl/loading/utils/XML.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/utils/sets/SetMembership.java
+	new file:   src/main/java/uk/cam/lib/cdl/loading/utils/sets/SetMembershipTransformation.java
+	modified:   src/main/resources/templates/edit-collection.html
+	modified:   src/main/resources/templates/edit-image-browse.html
+	new file:   src/main/resources/templates/edit-item.html
+	modified:   src/test/java/uk/cam/lib/cdl/loading/apis/PackagingAPITest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/config/TestEditConfig.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/config/TestGitConfig.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/editing/modelcreation/DefaultFileContentCreationStrategyTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/editing/modelcreation/DefaultFileContentInitialiserTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/editing/modelcreation/DefaultModelFactoryTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/editing/modelcreation/FileContentProcessorTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/editing/modelcreation/FileContentTests.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/editing/modelcreation/ImmutableCreationResultTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/editing/modelcreation/itemcreation/TeiIdCreationStrategyTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/editing/modelcreation/itemcreation/TeiItemFactoryTest.java
+	modified:   src/test/java/uk/cam/lib/cdl/loading/editing/pagination/CSVPageLoaderTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/editing/pagination/TeiPageListFactoryTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/editing/pagination/TeiPaginationGenerationProcessorTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/CollectionTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/ImmutableItemTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/ModelOpsTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/modelops/CalculateCollectionMembershipTransformationDeltaTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/modelops/DefaultModelStateHandlerResolverTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/modelops/DefaultModelStateHandlerTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/modelops/ImmutableModelStateEnforcementResultTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/modelops/ImmutableModelStateTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/modelops/ImmutableResolvedModelStateHandlerTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/modelops/ModelOps_EnforceModelStateTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/modelops/ModelStatesTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/model/editor/modelops/TransformItemCollectionMembershipTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/testutils/FileContentSubject.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/testutils/Models.java
+	modified:   src/test/java/uk/cam/lib/cdl/loading/utils/XMLTest.java
+	new file:   src/test/java/uk/cam/lib/cdl/loading/utils/sets/SetMembershipTest.java
+	modified:   src/test/resources/application.properties
+	new file:   src/test/resources/source-data/data/collections/empty1.collection.json
+	new file:   src/test/resources/source-data/data/collections/empty2.collection.json
+	modified:   src/test/resources/source-data/data/test.dl-dataset.json
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+	both modified:   src/main/java/uk/cam/lib/cdl/loading/ContentEditorController.java
+	both modified:   src/main/java/uk/cam/lib/cdl/loading/EditController.java
+	both modified:   src/main/java/uk/cam/lib/cdl/loading/PackageController.java
+	both modified:   src/main/java/uk/cam/lib/cdl/loading/apis/EditAPI.java
+	both modified:   src/main/java/uk/cam/lib/cdl/loading/apis/PackagingAPI.java
+	both modified:   src/main/java/uk/cam/lib/cdl/loading/config/WebConfig.java
+	both modified:   src/test/java/uk/cam/lib/cdl/loading/apis/EditAPITest.java
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   src/main/java/uk/cam/lib/cdl/loading/utils/GitHelper.java
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	unmerged-files.txt
+

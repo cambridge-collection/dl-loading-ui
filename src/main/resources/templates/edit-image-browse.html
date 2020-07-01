@@ -40,7 +40,7 @@
 
             <h3 th:text="${currentDir}"></h3>
 
-            <div th:each="child,iter : ${imageFiles.children}"
+            <div th:each="child,iter : ${imageFiles?.children}"
                  th:if="${iter.index % filesPerRow == 0}" class="row">
 
                 <div class="col-xs-6 col-md-3" th:each="colindex:${#numbers.sequence(0,filesPerRow-1)}"

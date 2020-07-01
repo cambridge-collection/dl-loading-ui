@@ -2,6 +2,7 @@ package uk.cam.lib.cdl.loading.utils;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.springframework.lang.Nullable;
@@ -13,32 +14,66 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public final class XML {
+    public static DocumentBuilderFactory getDocumentBuilderFactory() {
+        var dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        return dbf;
+    }
+
     public static Document parseString(String xml) {
         try {
-            var dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            var xmlStream = new ReaderInputStream(CharSource.wrap(xml).openStream(), Charsets.UTF_8);
-            return dbf.newDocumentBuilder().parse(xmlStream);
-        }
-        catch (IOException e) {
+            return parse(CharSource.wrap(xml).asByteSource(Charsets.UTF_8));
+        } catch (IOException e) {
             throw new AssertionError(e);
+        } catch (SAXException e) {
+            throw new IllegalArgumentException("Failed to parse xml string", e);
         }
-        catch (ParserConfigurationException e) {
+    }
+
+    public static Document parse(ByteSource byteSource) throws IOException, SAXException {
+        try {
+            var doc = getDocumentBuilderFactory().newDocumentBuilder()
+                .parse(byteSource.openBufferedStream());
+            doc.getDocumentElement().normalize();
+            return doc;
+        } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        catch (SAXException e) {
-            throw new IllegalArgumentException("Failed to parse xml string", e);
+    }
+
+    /**
+     * Serialise a Document as a String, specifying UTF-8 encoding.
+     */
+    public static String serialise(Document doc) {
+        try {
+            var transformer = TransformerFactory.newInstance().newTransformer();
+            transformer.setOutputProperty(OutputKeys.ENCODING, UTF_8.name());
+            var sw = new StringWriter();
+            transformer.transform(new DOMSource(doc), new StreamResult(sw));
+            return sw.toString();
+        } catch (TransformerException e) {
+            throw new IllegalArgumentException(
+                "Document could not be serialised as a String: " + e.getMessageAndLocation(), e);
         }
     }
 
@@ -109,5 +144,22 @@ public final class XML {
         catch (XPathExpressionException e) {
             throw new IllegalArgumentException(String.format("invalid xpath expression: '%s'", expression), e);
         }
+    }
+
+    public static Document deepCopyDocument(Document doc) {
+        Document clone;
+        try {
+            clone = getDocumentBuilderFactory().newDocumentBuilder().newDocument();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException("Failed to create DocumentBuilder: " + e.getMessage(), e);
+        }
+
+        clone.setDocumentURI(doc.getDocumentURI());
+        clone.setStrictErrorChecking(doc.getStrictErrorChecking());
+        clone.setXmlStandalone(doc.getXmlStandalone());
+        clone.setXmlVersion(doc.getXmlVersion());
+
+        streamChildNodes(doc).forEach(node -> clone.appendChild(clone.importNode(node, true)));
+        return clone;
     }
 }

@@ -2,6 +2,7 @@ package uk.cam.lib.cdl.loading.model.editor;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 
 import java.beans.ConstructorProperties;
 
@@ -13,6 +14,11 @@ public class CollectionCredit {
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public CollectionCredit(@JsonProperty("prose") Id prose) {
         this.prose = prose;
+    }
+
+    public static CollectionCredit copyOf(CollectionCredit other) {
+        Preconditions.checkNotNull(other);
+        return new CollectionCredit(other.prose);
     }
 
     public Id getProse() {

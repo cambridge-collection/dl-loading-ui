@@ -17,33 +17,41 @@ import java.util.stream.Stream;
 
 @Value.Immutable
 public abstract class CSVPageLoader implements PageLoader<Reader> {
-    interface CSVRowAccessor {
+    public interface CSVRowAccessor {
         String get(CSVRecord row);
 
         static CSVRowAccessor of(String column) {
             Preconditions.checkNotNull(column, "column cannot be null");
             return row -> {
                 if(!row.isMapped(column)) {
-                    throw new PaginationException(String.format("CSV row has no column named '%s'", column));
+                    throw new UserInputPaginationException(String.format("CSV row has no column named '%s'", column));
                 }
                 return row.get(column);
             };
         }
     }
 
-    abstract CSVRowAccessor labelAccessor();
-    abstract CSVRowAccessor imageAccessor();
-    abstract CSVFormat csvFormat();
+    @Value.Default
+    CSVRowAccessor labelAccessor() {
+        return CSVRowAccessor.of("label");
+    }
+    @Value.Default
+    CSVRowAccessor imageAccessor() {
+        return CSVRowAccessor.of("image");
+    }
+    @Value.Default
+    CSVFormat csvFormat() {
+        return CSVFormat.DEFAULT.withFirstRecordAsHeader();
+    }
 
     @Override
-    public List<Page> loadPages(Reader source) {
+    public List<Page> loadPages(Reader source) throws IOException {
         Preconditions.checkNotNull(source, "source cannot be null");
-        try {
-            return loadPages(Streams.stream(csvFormat().parse(source)));
+        var pages = loadPages(Streams.stream(csvFormat().parse(source)));
+        if(pages.isEmpty()) {
+            throw new UserInputPaginationException("CSV contains no page data");
         }
-        catch (IOException e) {
-            throw new PaginationException(e);
-        }
+        return pages;
     }
 
     private List<Page> loadPages(Stream<CSVRecord> rows) {
@@ -58,7 +66,7 @@ public abstract class CSVPageLoader implements PageLoader<Reader> {
             imageURI = new URI(UriComponentsBuilder.fromUriString(image).toUriString());
         }
         catch (RuntimeException | URISyntaxException e) {
-            throw new PaginationException(String.format("Image location is not a valid URL: '%s'", image));
+            throw new UserInputPaginationException(String.format("Image location is not a valid URL: '%s'", image));
         }
         return ImmutablePage.builder().label(label).image(imageURI).build();
     }

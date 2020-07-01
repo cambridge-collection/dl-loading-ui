@@ -15,10 +15,6 @@ import java.util.List;
  */
 
 public class CollectionForm {
-
-    @NotBlank(message = "Must specify collection type.")
-    private String collectionType;
-
     @NotBlank(message = "Must specify a url-slug for this collection.")
     @Pattern(regexp = "^[a-z\\-]+$", message = "Must be all lower case letters or hyphen '-' with no spaces.")
     private String urlSlugName;
@@ -62,7 +58,6 @@ public class CollectionForm {
         if (collectionId == null || collection == null) {
             return;
         }
-        this.collectionType = collection.getType();
         this.urlSlugName = collection.getName().getUrlSlug();
         this.collectionId = collectionId;
         this.sortName = collection.getName().getSort();
@@ -85,12 +80,7 @@ public class CollectionForm {
         this.itemIds = itemIds;
     }
 
-    public CollectionForm() {
-
-        // TODO read from properties
-        this.setCollectionType("https://schemas.cudl.lib.cam.ac.uk/package/v1/collection.json");
-
-    }
+    public CollectionForm() { }
 
     public String getShortDescription() {
         return shortDescription;
@@ -136,10 +126,6 @@ public class CollectionForm {
         return collectionId;
     }
 
-    public String getCollectionType() {
-        return collectionType;
-    }
-
     public List<String> getItemIds() {
         return itemIds;
     }
@@ -156,14 +142,10 @@ public class CollectionForm {
                 itemIds.add(new Id(id));
             }
         }
-        Collection c = new Collection(collectionType, name, description, credit, itemIds);
+        Collection c = new Collection(name, description, credit, itemIds);
         c.setThumbnailURL(thumbnailURL);
         c.setCollectionId(collectionId);
         return c;
-    }
-
-    public void setCollectionType(String collectionType) {
-        this.collectionType = collectionType;
     }
 
     public void setUrlSlugName(String urlSlugName) {
