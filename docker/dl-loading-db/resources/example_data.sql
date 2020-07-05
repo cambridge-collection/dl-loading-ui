@@ -1,4 +1,31 @@
-BEGIN;
+DROP table IF EXISTS authorities;
+DROP table IF EXISTS users;
+DROP table IF EXISTS persistent_logins;
+
+create table users(
+    id bigserial not null,
+	username varchar unique not null,
+	password varchar,
+	firstName varchar not null,
+	lastName varchar not null,
+	email varchar not null,
+	enabled boolean not null,
+	primary key (id)
+);
+
+create table authorities (
+    id bigint not null,
+	authority varchar not null,
+	constraint fk_authorities_users foreign key(id) references users(id)
+);
+create unique index ix_auth_username on authorities (id,authority);
+
+create table persistent_logins (
+	id bigint not null,
+	series varchar primary key,
+	token varchar not null,
+	last_used timestamp not null
+);
 
 -- Insert test users(please change / remove before putting into production!!)
 insert into users (username, firstname, lastname, password, email, enabled)
@@ -19,6 +46,9 @@ values ('test-deployment-manager', 'Deployment', 'Manager', 'password', 'dm@test
 insert into users (username, firstname, lastname, password, email, enabled)
 values ('test-site-manager', 'Site', 'Manager', 'password', 'dm@test.com', true);
 
+insert into users (username, firstname, lastname, password, email, enabled)
+values ('test-all', 'Test', 'All', 'password', 'all@test.com', true);
+
 insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-workspace-member1'),
                                                 'ROLE_WORKSPACE_MEMBER1');
 
@@ -36,16 +66,12 @@ insert into authorities (id, authority) values ((SELECT id FROM users WHERE user
 insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-site-manager'),
                                                 'ROLE_SITE_MANAGER');
 
--- Insert default workspaces for testing.
-insert into workspaces(name) VALUES ('Test Workspace1');
-insert into workspaces(name) VALUES ('Test Workspace2');
-insert into items_in_workspaces (item_id, workspace_id) VALUES ('MS-TEST-00001-00001',
-                                                                (SELECT workspace_id FROM workspaces WHERE name='Test Workspace1'));
-insert into items_in_workspaces (item_id, workspace_id) VALUES ('MS-TEST-00001-00002',
-                                                                (SELECT workspace_id FROM workspaces WHERE name='Test Workspace1'));
-insert into items_in_workspaces (item_id, workspace_id) VALUES ('MS-TEST-00001-00003',
-                                                                (SELECT workspace_id FROM workspaces WHERE name='Test Workspace2'));
-insert into collections_in_workspaces (collection_id, workspace_id)VALUES ('collections/test.collection.json',
-                                                                           (SELECT workspace_id FROM workspaces WHERE name='Test Workspace1'));
-
-COMMIT;
+-- test all user has access to everything
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-all'),
+                                                'ROLE_SITE_MANAGER');
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-all'),
+                                                'ROLE_WORKSPACE_MANAGER1');
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-all'),
+                                                'ROLE_WORKSPACE_MANAGER2');
+insert into authorities (id, authority) values ((SELECT id FROM users WHERE username='test-all'),
+                                                'ROLE_DEPLOYMENT_MANAGER');

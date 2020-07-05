@@ -1,21 +1,59 @@
-version: "3"
+version: "3.7"
 
 services:
-  db:
-    image: postgres:12.3-alpine
+  dl-loading-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - dl-loading-db
+      - dl-deployment-api
+
+  # Persists data in /usr/local/dl-loading-db/data
+  dl-loading-db:
+    build:
+      context: docker/dl-loading-db
+      dockerfile: Dockerfile
     restart: always
+    volumes:
+      - /usr/local/dl-loading-db/data:/var/lib/postgresql/data
+    ports:
+      - ${LOADING_DB_HOST_PORT:-0}:5432
     environment:
       POSTGRES_USER: dl-loading-ui
       POSTGRES_DB: dl-loading-ui
-      POSTGRES_PASSWORD: ${DL_LOADING_UI_DB_PASSWORD:-changeme}
-    ports:
-      - ${DL_LOADING_UI_DB_HOST_PORT:-8422}:5432
-  adminer:
-    image: adminer
+      POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD:-password}
+
+
+  # NOTE: Download dl-deployment-api from git and run
+  # docker build -t jennief/dl-deployment-db docker/dl-deployment-db/
+  # docker build -t jennief/dl-deployment-api .
+  # TODO: replace with image in dockerhub etc.
+
+  dl-deployment-api:
+    image: jennief/dl-deployment-api
+
+  # Persists data in /usr/local/dl-deployment-db/data
+  dl-deployment-db:
+    image: jennief/dl-deployment-db:latest
     restart: always
+    volumes:
+      - /usr/local/dl-deployment-db/data:/var/lib/postgresql/data
     ports:
-      - "${DL_LOADING_UI_ADMINER_HOST_PORT:-8423}:8080"
-    depends_on:
-      - db
+      - ${DEPLOY_DB_HOST_PORT:-0}:5432
     environment:
-      ADMINER_DESIGN: pepa-linha
+      POSTGRES_USER: dl-deployment-db
+      POSTGRES_DB: dl-deployment-db
+      POSTGRES_PASSWORD: ${DEPLOY_DB_PASSWORD:-password}
+
+#  adminer:
+#    image: adminer
+#    restart: always
+#    ports:
+#      - "${DL_LOADING_UI_ADMINER_HOST_PORT:-8423}:8090"
+#    depends_on:
+#      - dl-loading-db
+#    environment:
+#      ADMINER_DESIGN: pepa-linha
