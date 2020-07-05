@@ -28,16 +28,16 @@ services:
 
 
   # NOTE: Download dl-deployment-api from git and run
-  # docker build -t jennief/dl-deployment-db docker/dl-deployment-db/
-  # docker build -t jennief/dl-deployment-api .
+  # docker build -t cudl/dl-deployment-db docker/dl-deployment-db/
+  # docker build -t cudl/dl-deployment-api .
   # TODO: replace with image in dockerhub etc.
 
   dl-deployment-api:
-    image: jennief/dl-deployment-api
+    image: cudl/dl-deployment-api
 
   # Persists data in /usr/local/dl-deployment-db/data
   dl-deployment-db:
-    image: jennief/dl-deployment-db:latest
+    image: cudl/dl-deployment-db:latest
     restart: always
     volumes:
       - /usr/local/dl-deployment-db/data:/var/lib/postgresql/data
