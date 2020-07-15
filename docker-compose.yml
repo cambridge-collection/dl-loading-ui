@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8081:8081"
+    image: cudl/dl-loading-ui:latest
     depends_on:
       - dl-loading-db
       - dl-deployment-api
@@ -17,8 +18,9 @@ services:
       context: docker/dl-loading-db
       dockerfile: Dockerfile
     restart: always
+    image: cudl/dl-loading-db:latest
     volumes:
-      - /usr/local/dl-loading-db/data:/var/lib/postgresql/data
+      - dl-loading-db:/var/lib/postgresql/data
     ports:
       - ${LOADING_DB_HOST_PORT:-0}:5432
     environment:
@@ -28,19 +30,18 @@ services:
 
 
   # NOTE: Download dl-deployment-api from git and run
-  # docker build -t cudl/dl-deployment-db docker/dl-deployment-db/
-  # docker build -t cudl/dl-deployment-api .
+  # docker build
   # TODO: replace with image in dockerhub etc.
 
   dl-deployment-api:
     image: cudl/dl-deployment-api
 
-  # Persists data in /usr/local/dl-deployment-db/data
+  # uses image made from dl-deployment-api
   dl-deployment-db:
     image: cudl/dl-deployment-db:latest
     restart: always
     volumes:
-      - /usr/local/dl-deployment-db/data:/var/lib/postgresql/data
+      - dl-deployment-db:/var/lib/postgresql/data
     ports:
       - ${DEPLOY_DB_HOST_PORT:-0}:5432
     environment:
@@ -57,3 +58,7 @@ services:
 #      - dl-loading-db
 #    environment:
 #      ADMINER_DESIGN: pepa-linha
+
+volumes:
+  dl-loading-db:
+  dl-deployment-db:
