@@ -12,7 +12,6 @@ services:
       - dl-loading-db
       - dl-deployment-api
 
-  # Persists data in /usr/local/dl-loading-db/data
   dl-loading-db:
     build:
       context: docker/dl-loading-db
@@ -22,12 +21,13 @@ services:
     volumes:
       - dl-loading-db:/var/lib/postgresql/data
     ports:
-      - ${LOADING_DB_HOST_PORT:-0}:5432
+      - ${LOADING_DB_HOST_PORT:-0}:5431
+    command: -p 5431
     environment:
       POSTGRES_USER: dl-loading-ui
       POSTGRES_DB: dl-loading-ui
       POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD:-password}
-
+`
 
   # NOTE: Download dl-deployment-api from git and run
   # docker build
