@@ -27,7 +27,7 @@ services:
       POSTGRES_USER: dl-loading-ui
       POSTGRES_DB: dl-loading-ui
       POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD:-password}
-`
+
 
   # NOTE: Download dl-deployment-api from git and run
   # docker build

@@ -94,11 +94,17 @@ class BitBucketAPI {
                 String id = pipeline.getString("uuid");
                 int buildNumber = pipeline.getInt("build_number");
 
-                DateTimeFormatter parser = ISODateTimeFormat.dateTime();
-                Date created = parser.parseDateTime(pipeline.getString("created_on")).toDate();
                 Date completed = null;
-                if (pipeline.has("completed_on")) {
-                    completed = parser.parseDateTime(pipeline.getString("completed_on")).toDate();
+                Date created = null;
+                try {
+                    DateTimeFormatter parser = ISODateTimeFormat.dateTime();
+                    created = parser.parseDateTime(pipeline.getString("created_on")).toDate();
+
+                    if (pipeline.has("completed_on")) {
+                        completed = parser.parseDateTime(pipeline.getString("completed_on")).toDate();
+                    }
+                } catch (Exception ignored) {
+                    // ignored
                 }
 
                 JSONObject stateJSON = pipeline.getJSONObject("state");
