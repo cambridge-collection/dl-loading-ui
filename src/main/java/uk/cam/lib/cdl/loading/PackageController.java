@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriUtils;
+import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.apis.PackagingAPI;
 import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.model.Tag;
@@ -26,15 +27,21 @@ import java.util.List;
 public class PackageController {
 
     private final PackagingAPI packagingAPI;
+    private final EditAPI editAPI;
 
     @Autowired
-    public PackageController(PackagingAPI packagingAPI) {
+    public PackageController(PackagingAPI packagingAPI, EditAPI editAPI) {
+
         this.packagingAPI = packagingAPI;
+        this.editAPI = editAPI;
     }
 
     @GetMapping ("/package.html")
     @PreAuthorize("@roleService.canBuildPackages(authentication)")
     public String pack(Model model) throws GitHelperException {
+
+        // Refresh model on each package view.
+        editAPI.updateModel();
 
         List<Update> updates = packagingAPI.updatesSinceLastPackage();
         Collections.sort(updates);
