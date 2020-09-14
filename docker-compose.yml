@@ -5,8 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - ${ENV_FILE}
     ports:
-      - "8081:8081"
+      - ${LOADING_UI_PORT_EXT}:${LOADING_UI_PORT_INT}
     image: cudl/dl-loading-ui:latest
     depends_on:
       - dl-loading-db
@@ -20,13 +22,11 @@ services:
     image: cudl/dl-loading-db:latest
     volumes:
       - dl-loading-db:/var/lib/postgresql/data
-    ports:
-      - ${LOADING_DB_HOST_PORT:-0}:5431
-    command: -p 5431
+    command: -p ${LOADING_DB_PORT_INT}
     environment:
-      POSTGRES_USER: dl-loading-ui
-      POSTGRES_DB: dl-loading-ui
-      POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD:-password}
+      POSTGRES_USER: ${LOADING_DB_USER}
+      POSTGRES_DB: ${LOADING_DB_DATABASE}
+      POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
 
 
   # NOTE: Download dl-deployment-api from git and run
@@ -35,6 +35,10 @@ services:
 
   dl-deployment-api:
     image: cudl/dl-deployment-api
+    ports:
+      - 0:${DEPLOY_DB_PORT_INT}
+    env_file:
+      - ${ENV_FILE}
 
   # uses image made from dl-deployment-api
   dl-deployment-db:
@@ -43,11 +47,12 @@ services:
     volumes:
       - dl-deployment-db:/var/lib/postgresql/data
     ports:
-      - ${DEPLOY_DB_HOST_PORT:-0}:5432
+      - ${DEPLOY_DB_PORT_EXT}:${DEPLOY_DB_PORT_INT}
+    command: -p ${DEPLOY_DB_PORT_INT}
     environment:
-      POSTGRES_USER: dl-deployment-db
-      POSTGRES_DB: dl-deployment-db
-      POSTGRES_PASSWORD: ${DEPLOY_DB_PASSWORD:-password}
+      POSTGRES_USER: ${DEPLOY_DB_USER}
+      POSTGRES_DB: ${DEPLOY_DB_DATABASE}
+      POSTGRES_PASSWORD: ${DEPLOY_DB_PASSWORD}
 
 #  adminer:
 #    image: adminer
