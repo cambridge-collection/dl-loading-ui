@@ -27,9 +27,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -37,14 +34,9 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
-import uk.cam.lib.cdl.loading.editing.modelcreation.CreationResult;
-import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableCreationResult;
-import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableIssue;
-import uk.cam.lib.cdl.loading.editing.modelcreation.Issue;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttribute;
-import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes;
+import uk.cam.lib.cdl.loading.editing.modelcreation.*;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes.StandardModelAttributes;
-import uk.cam.lib.cdl.loading.editing.modelcreation.ModelFactory;
 import uk.cam.lib.cdl.loading.editing.modelcreation.itemcreation.ItemIssue;
 import uk.cam.lib.cdl.loading.editing.pagination.PaginationIssue;
 import uk.cam.lib.cdl.loading.editing.pagination.TeiPaginationGenerationProcessor;
@@ -54,12 +46,9 @@ import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.forms.CollectionForm;
 import uk.cam.lib.cdl.loading.forms.ItemForm;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
-import uk.cam.lib.cdl.loading.model.editor.Id;
-import uk.cam.lib.cdl.loading.model.editor.Item;
-import uk.cam.lib.cdl.loading.model.editor.Workspace;
-import uk.cam.lib.cdl.loading.utils.RoleHelper;
-import uk.cam.lib.cdl.loading.model.editor.ModelOps;
+import uk.cam.lib.cdl.loading.model.editor.*;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
+import uk.cam.lib.cdl.loading.utils.RoleHelper;
 import uk.cam.lib.cdl.loading.utils.ThrowingFunction;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
 
@@ -68,18 +57,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -167,6 +148,7 @@ public class EditController {
         CollectionForm form;
         boolean newCollection = true;
         List<Item> items = ImmutableList.of();
+        Map<Path,String> itemNames = new HashMap();
 
         if (collectionId == null || collectionId.trim().equals("")) {
             form = new CollectionForm();
@@ -196,6 +178,11 @@ public class EditController {
                 items = ModelOps().streamResolvedItemIds(collection)
                     .map(editAPI::getItem)
                     .collect(ImmutableList.toImmutableList());
+
+                // Bit of a hack to workaround an thymeleaf error getting name from item
+                for (Item i: items) {
+                    itemNames.put(i.id(),i.name());
+                }
             }
         }
 
@@ -216,6 +203,7 @@ public class EditController {
         model.addAttribute("thumbnailURL", thumbnailURL);
         model.addAttribute("form", form);
         model.addAttribute("items", items);
+        model.addAttribute("itemNames", itemNames);
         model.addAttribute("dataLocalPath", editAPI.getDataLocalPath());
         model.addAttribute("pathForDataDisplay", pathForDataDisplay);
         model.addAttribute("workspaceIds", workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
@@ -359,7 +347,6 @@ public class EditController {
         String fullDescriptionHTML = prepareHTMLForSaving(collectionForm.getFullDescriptionHTML(), collectionHTMLPath);
         String proseCreditHTML = prepareHTMLForSaving(collectionForm.getProseCreditHTML(), creditHTMLPath);
 
-        // Save collection file
 
         // Add to workspaces
         for (long workspaceId: workspaceIds) {
