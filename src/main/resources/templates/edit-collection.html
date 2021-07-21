@@ -238,9 +238,13 @@
                                         <tbody>
                                         <tr th:each="item : ${items}">
                                             <td>
-                                                <a th:href="@{/edit/item(id=${item.id().toString()})}"
-                                                   th:text="${item.name()}">
+                                                <a th:if="${#strings.containsIgnoreCase(item.id(),'tei')}"
+                                                   th:href="@{/edit/item(id=${item.id().toString()})}"
+                                                   th:text="${itemNames.get(item.id())}">
                                                 </a>
+                                                <div th:if="${!#strings.containsIgnoreCase(item.id(),'tei')}"
+                                                     th:text="${itemNames.get(item.id())}">
+                                                </div>
                                             </td>
                                             <td>
                                                 <form
