@@ -11,7 +11,6 @@ import java.beans.ConstructorProperties;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 
@@ -31,13 +30,15 @@ public class Collection implements Comparable<Collection> {
     private String thumbnailURL;
     @Nullable
     private String collectionId;
+    private final List<Id> subcollections;
 
-    @ConstructorProperties({"name", "description", "credit", "items"})
+    @ConstructorProperties({"name", "description", "credit", "items", "collections"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public Collection(@JsonProperty("name") CollectionName name,
                       @JsonProperty("description") CollectionDescription description,
                       @JsonProperty("credit") CollectionCredit credit,
-                      @JsonProperty("items") List<Id> ids) {
+                      @JsonProperty("items") List<Id> ids,
+                      @JsonProperty("collections") List<Id> subcollections) {
         Preconditions.checkNotNull(name, "name cannot be null");
         Preconditions.checkNotNull(ids, "ids cannot be null");
         this.name = name;
@@ -45,6 +46,7 @@ public class Collection implements Comparable<Collection> {
         this.credit = credit;
         // Ensure ids is a mutable list
         this.ids = new ArrayList<>(ids);
+        this.subcollections = new ArrayList<>(subcollections);
     }
 
     /**
@@ -58,7 +60,8 @@ public class Collection implements Comparable<Collection> {
             other.name, // immutable
             other.description == null ? null : CollectionDescription.copyOf(other.description),
             other.credit == null ? null : CollectionCredit.copyOf(other.credit),
-            other.ids // ids is cloned in the constructor
+            other.ids, // ids  and sub-collections are cloned in the constructor
+            other.subcollections
         );
         copy.setThumbnailURL(other.getThumbnailURL());
         copy.setCollectionId(other.getCollectionId());
@@ -89,6 +92,11 @@ public class Collection implements Comparable<Collection> {
         return ids;
     }
 
+    @JsonProperty("collections")
+    public List<Id> getSubCollectionIds() {
+        return subcollections;
+    }
+
     @JsonIgnore
     @Nullable
     public String getThumbnailURL() {
@@ -116,6 +124,7 @@ public class Collection implements Comparable<Collection> {
         sb.append("    description: ").append(toIndentedString(description)).append("\n");
         sb.append("    credit: ").append(toIndentedString(credit)).append("\n");
         sb.append("    items: ").append(toIndentedString(ids)).append("\n");
+        sb.append("    collections: ").append(toIndentedString(subcollections)).append("\n");
         sb.append("}");
         return sb.toString();
     }

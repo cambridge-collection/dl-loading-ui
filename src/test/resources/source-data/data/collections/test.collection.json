@@ -28,5 +28,6 @@
     "@id" : "../items/data/tei/MS-LATIN-00509/MS-LATIN-00509.xml"
   }, {
     "@id" : "../items/data/tei/MS-PERSIAN-00003/MS-PERSIAN-00003.xml"
-  } ]
+  } ],
+  "collections" : []
 }

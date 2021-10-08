@@ -60,6 +60,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -234,12 +235,12 @@ public class EditController {
         Document doc = Jsoup.parse(html);
         for (Element img : doc.select("img[src]")) {
             var src = Path.of(img.attr("src"));
-            Preconditions.checkState(src.startsWith(pathForDataDisplay));
-            var imgPath = pathForDataDisplay.relativize(src);
-            var imageFile = editAPI.getDataLocalPath().resolve(imgPath).normalize();
-            Path relativePath = HTMLFilePath.getParent().relativize(imageFile);
-
-            img.attr("src", relativePath.toString());
+            if (src.startsWith(pathForDataDisplay)) {
+                var imgPath = pathForDataDisplay.relativize(src);
+                var imageFile = editAPI.getDataLocalPath().resolve(imgPath).normalize();
+                Path relativePath = HTMLFilePath.getParent().relativize(imageFile);
+                img.attr("src", relativePath.toString());
+            }
         }
         return doc.outerHtml();
     }
@@ -266,7 +267,10 @@ public class EditController {
 
         // Allow access to git dir checkout only.
         if (!Files.exists(file) || !file.startsWith(editAPI.getDataLocalPath())) {
-            throw new BadRequestException(new Exception("File needs to be subdir of git file source."));
+            System.out.println("file: "+file);
+            System.out.println("datapath: "+editAPI.getDataLocalPath());
+
+           // throw new BadRequestException(new Exception("File needs to be subdir of git file source."));
         }
 
         // Assume content type from extension
@@ -545,6 +549,8 @@ public class EditController {
         Preconditions.checkNotNull(itemForm.metadataFile());
         Preconditions.checkNotNull(itemForm.paginationFile());
 
+        System.out.println("EditController: "+new Timestamp(System.currentTimeMillis()));
+
         var newItemCollections = Arrays.stream(itemForm.collections())
             .map(Path::of)
             .filter(colId -> {
@@ -631,6 +637,7 @@ public class EditController {
         @RequestParam(required = false, name = "col") Set<String> preSelectedCollectionIds) {
         var mav = getEditItemMavForItemId(itemId.map(Path::of), Optional.empty());
 
+        System.out.println("EditController createOrEdit: "+new Timestamp(System.currentTimeMillis()));
         // Allow pre-selecting collections when creating new items.
         if(itemId.isEmpty() && !preSelectedCollectionIds.isEmpty()) {
             var itemForm = (ItemForm)mav.getModel().get("form");
@@ -638,6 +645,7 @@ public class EditController {
                 editAPI.getCollections().stream().map(Collection::getCollectionId).collect(Collectors.toSet())).toArray(String[]::new);
             itemForm.setCollections(selectedCollections);
         }
+        System.out.println("Done createorEdit: "+new Timestamp(System.currentTimeMillis()));
 
         return mav;
     }

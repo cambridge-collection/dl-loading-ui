@@ -51,6 +51,9 @@ public class CollectionForm {
     @NotNull
     private List<String> itemIds;
 
+    @NotNull
+    private List<String> subcollections;
+
     @NotBlank(message = "Must specify a thumbnail URL")
     private String thumbnailURL;
 
@@ -78,6 +81,14 @@ public class CollectionForm {
             }
         }
         this.itemIds = itemIds;
+
+        List<String> sub_collections = new ArrayList<>();
+        for (Id id : collection.getSubCollectionIds()) {
+            if (id.getId()!=null && !id.getId().trim().equals("")) {
+                sub_collections.add(id.getId());
+            }
+        }
+        this.subcollections = sub_collections;
     }
 
     public CollectionForm() { }
@@ -130,6 +141,10 @@ public class CollectionForm {
         return itemIds;
     }
 
+    public List<String> getSubCollectionIds() {
+        return subcollections;
+    }
+
     public Collection toCollection() {
         CollectionName name = new CollectionName(urlSlugName, sortName, shortName, fullName);
         CollectionDescription description = new CollectionDescription(shortDescription, new Id(fullDescriptionPath),
@@ -142,7 +157,15 @@ public class CollectionForm {
                 itemIds.add(new Id(id));
             }
         }
-        Collection c = new Collection(name, description, credit, itemIds);
+
+        List<Id> subCollectionIds = new ArrayList<>();
+        for (String id : getSubCollectionIds()) {
+            if (id!=null && !id.trim().equals("")) {
+                subCollectionIds.add(new Id(id));
+            }
+        }
+
+        Collection c = new Collection(name, description, credit, itemIds, subCollectionIds);
         c.setThumbnailURL(thumbnailURL);
         c.setCollectionId(collectionId);
         return c;
@@ -204,6 +227,18 @@ public class CollectionForm {
         }
 
         this.itemIds = ids;
+    }
+
+    public void setSubCollectionIds(List<String> collectionIds) {
+
+        // Thymeleaf appends extra [ ] to the itemIds, so remove these here.
+        List<String> ids = new ArrayList<>();
+        for (String id : collectionIds) {
+            id = id.replaceAll("([\\[\\]])", "");
+            ids.add(id);
+        }
+
+        this.subcollections = ids;
     }
 
     public String getThumbnailURL() {

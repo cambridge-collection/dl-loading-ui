@@ -4,13 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
-import uk.cam.lib.cdl.loading.model.editor.Collection;
-import uk.cam.lib.cdl.loading.model.editor.CollectionCredit;
-import uk.cam.lib.cdl.loading.model.editor.CollectionDescription;
-import uk.cam.lib.cdl.loading.model.editor.CollectionName;
-import uk.cam.lib.cdl.loading.model.editor.Id;
-import uk.cam.lib.cdl.loading.model.editor.Item;
-import uk.cam.lib.cdl.loading.model.editor.ModelOps;
+import uk.cam.lib.cdl.loading.model.editor.*;
 
 import java.nio.file.Path;
 import java.util.Set;
@@ -24,24 +18,25 @@ public class Models {
         return exampleCollection(id, Stream.of());
     }
     public static Collection exampleCollection(Path id, String shortName) {
-        return exampleCollection(id, shortName, Stream.of());
+        return exampleCollection(id, shortName, Stream.of(), Stream.of());
     }
 
     public static Collection exampleCollection(Path id, Stream<Id> itemIds) {
-        return exampleCollection(id, "example", itemIds);
+        return exampleCollection(id, "example", itemIds, Stream.of());
     }
 
     public static Collection exampleCollection(Path id, String shortName, Path...itemIds) {
-        return exampleCollection(id, shortName, Stream.of(itemIds).map(idToReferenceFrom(id)));
+        return exampleCollection(id, shortName, Stream.of(itemIds).map(idToReferenceFrom(id)), Stream.of());
     }
 
-    public static Collection exampleCollection(Path id, String shortName, Stream<Id> itemIds) {
+    public static Collection exampleCollection(Path id, String shortName, Stream<Id> itemIds, Stream<Id> subCollectionIds) {
         Preconditions.checkNotNull(shortName);
         var col = new Collection(
             new CollectionName("urlslug", "sort", shortName, "full"),
             new CollectionDescription("short", new Id("description.html"), "medium"),
             new CollectionCredit(new Id("prose.html")),
-            itemIds.collect(ImmutableList.toImmutableList()));
+            itemIds.collect(ImmutableList.toImmutableList()),
+            subCollectionIds.collect(ImmutableList.toImmutableList()));
 
         col.setThumbnailURL("http://example.com/thumbnail.jpg");
         col.setCollectionId(id.toString());

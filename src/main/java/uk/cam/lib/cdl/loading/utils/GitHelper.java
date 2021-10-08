@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Streams;
+import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.ResetCommand;
@@ -238,7 +239,15 @@ public class GitHelper {
                 rmCmd.call();
             }
 
-            git.add().addFilepattern(".").call();
+            AddCommand addCommand = git.add();
+            for (String pattern: status.getModified()) {
+                addCommand = addCommand.addFilepattern(pattern);
+            }
+            for (String pattern: status.getUntracked()) {
+                addCommand = addCommand.addFilepattern(pattern);
+            }
+            addCommand.call();
+
             git.commit().setMessage("Changed from Loading UI").call();
             Iterable<PushResult> results = git.push().setCredentialsProvider(
                 new UsernamePasswordCredentialsProvider(gitSourceVariables.getGitSourceURLUsername(),

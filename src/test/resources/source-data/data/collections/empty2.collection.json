@@ -3,5 +3,6 @@
     "name" : {
         "short" : "Empty 2"
     },
-    "items" : []
+    "items" : [],
+    "collections" : []
 }

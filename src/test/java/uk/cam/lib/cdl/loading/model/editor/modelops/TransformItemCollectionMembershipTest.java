@@ -11,11 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.lang.Nullable;
-import uk.cam.lib.cdl.loading.model.editor.Collection;
-import uk.cam.lib.cdl.loading.model.editor.ImmutableItem;
-import uk.cam.lib.cdl.loading.model.editor.ImmutableMembershipDelta;
-import uk.cam.lib.cdl.loading.model.editor.Item;
-import uk.cam.lib.cdl.loading.model.editor.ModelOps;
+import uk.cam.lib.cdl.loading.model.editor.*;
 import uk.cam.lib.cdl.loading.testutils.Models;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
 
@@ -266,6 +262,6 @@ public class TransformItemCollectionMembershipTest {
     private static Map<String, Collection> reifySymbolicCollections(Map<String, List<String>> symbolicCollections) {
         return symbolicCollections.keySet().stream().collect(toImmutableMap(k -> k,
             k -> Models.exampleCollection(Path.of(k), k,
-                symbolicCollections.get(k).stream().map(Models.idToReferenceFrom(k)))));
+                symbolicCollections.get(k).stream().map(Models.idToReferenceFrom(k)), Stream.of())));
     }
 }

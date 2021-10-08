@@ -18,7 +18,7 @@ public class CollectionTest {
             Stream.of("i1", "i2").map(Models.idToReferenceFrom("c1")));
         var nullCol = new Collection(
             new CollectionName(null, null, null, null),
-            null, null, ImmutableList.of());
+            null, null, ImmutableList.of(), ImmutableList.of());
 
         return Stream.of(
             Arguments.of(col),

@@ -58,6 +58,7 @@
                                   th:action="@{'/edit/collection/update?workspaceIds='+${workspaceIds}}"
                                   th:object="${form}">
                                 <input type="hidden" name="itemIds" th:value="*{ItemIds}">
+                                <input type="hidden" name="subCollectionIds" th:value="*{subCollectionIds}">
                                 <input type="hidden" name="collectionId" th:value="*{collectionId}">
                                 <div class="form-group w-auto">
                                     <div class="row">
@@ -216,6 +217,17 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row mt-6" th:if="*{not #arrays.isEmpty(subCollectionIds)}">
+                                    <div class="col"><h4>Sub-Collections</h4></div>
+                                </div>
+                                <div class="row" th:if="*{not #arrays.isEmpty(subCollectionIds)}">
+                                    <div class="col">
+                                        <ul>
+                                            <li class="list-unstyled" th:each="id :*{subCollectionIds}" th:text="${id}"></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
                             </form>
                             <div class="row mt-6">
                                 <div class="col"><h4>Items</h4></div>
@@ -281,6 +293,7 @@
                                     <a class="btn btn-primary" th:href="@{/edit/item(col=${form.collectionId})}" href="#" role="button">Add new item</a>
                                 </div>
                             </div>
+
                             <div class="row mt-6">
                                 <div class="col">
 
