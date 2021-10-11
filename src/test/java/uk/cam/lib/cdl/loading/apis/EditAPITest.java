@@ -5,32 +5,22 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Truth;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
-import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.exceptions.EditApiException;
-import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
-import uk.cam.lib.cdl.loading.model.editor.Collection;
-import uk.cam.lib.cdl.loading.model.editor.CollectionCredit;
-import uk.cam.lib.cdl.loading.model.editor.CollectionDescription;
-import uk.cam.lib.cdl.loading.model.editor.CollectionName;
-import uk.cam.lib.cdl.loading.model.editor.Id;
-import uk.cam.lib.cdl.loading.model.editor.ImmutableItem;
-import uk.cam.lib.cdl.loading.model.editor.Item;
+import uk.cam.lib.cdl.loading.model.editor.*;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ImmutableModelState;
 import uk.cam.lib.cdl.loading.testutils.Models;
-import uk.cam.lib.cdl.loading.utils.GitHelper;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -60,35 +50,22 @@ class EditAPITest {
     private static final Path COLLECTION_ID_EMPTY2 = COLLECTION_DIR.resolve("empty2.collection.json");
 
     private EditAPI editAPI;
-    private GitLocalVariables gitSourceVariables;
+    private File testSourceDir;
 
     // Bare repo represents a mock version of the remote repo and it is cloned locally for testing.
     // content is added from the resources source-data dir.
-    public EditAPITest() throws IOException, GitAPIException, GitHelperException, EditApiException {
-
-        MockGitRepo gitRepo = new MockGitRepo();
-        Git git = gitRepo.getGit();
-
-        // Let's do our first commit
-        // Create a new file
-        File testSourceDir = new File("./src/test/resources/source-data");
-        FileUtils.copyDirectory(testSourceDir, gitRepo.getCloneDir());
-
-        // Commit the new file
-        git.add().addFilepattern(".").call();
-        git.commit().setMessage("Adding Test Data").setAuthor("testuser", "test@example.com ").call();
+    public EditAPITest() throws IOException, EditApiException {
 
 
-        gitSourceVariables = new GitLocalVariables(gitRepo.getCloneDir().getCanonicalPath(), "data",
-            "gitSourceURL", "gitSourceURLUserame",
-            "gitSourceURLPassword", "gitBranch");
+        Path tempDir = Files.createTempDirectory("EditAPITest");
+        testSourceDir = tempDir.toFile();
 
+        File testSourceDirOriginals = new File("./src/test/resources/source-data");
+        FileUtils.copyDirectory(testSourceDirOriginals, testSourceDir);
 
-        GitHelper gitHelper = new GitHelper(git, gitSourceVariables);
-
-        editAPI = new EditAPI(gitRepo.getCloneDir().getCanonicalPath() + "/data",
+        editAPI = new EditAPI(testSourceDir.getAbsolutePath() + "/data",
             "test.dl-dataset.json", "test.ui.json5",
-            gitSourceVariables.getGitSourcePath() + "/data/items/data/tei/", gitHelper);
+            testSourceDir.getAbsolutePath() +"/data/items/data/tei/");
 
     }
 
@@ -96,7 +73,7 @@ class EditAPITest {
     void updateModel() throws IOException, JSONException, EditApiException {
 
         // update a file directly on the file system
-        String filePath = gitSourceVariables.getGitSourcePath() + "/data/collections/test.collection.json";
+        String filePath = testSourceDir.getAbsolutePath()+ "/data/collections/test.collection.json";
         String fileString = FileUtils.readFileToString(new File(filePath), "UTF-8");
         JSONObject testCollection = new JSONObject(fileString);
         String sortName = testCollection.getJSONObject("name").getString("sort");
@@ -298,13 +275,6 @@ class EditAPITest {
         assert (editAPI.getCollections().contains(collection));
     }
 
-    @Test
-    void getDataLocalPath() {
-        var dataLocalPath = editAPI.getDataLocalPath();
-        LOG.info("dataLocalPath: " + dataLocalPath);
-        assertThat((Object)dataLocalPath)
-            .isEqualTo(Path.of(gitSourceVariables.getGitSourcePath(), gitSourceVariables.getGitSourceDataSubpath()));
-    }
 
     private Collection makeCollection(String urlSlugName) {
         String collectionId = "collections/" + urlSlugName + ".collection.json";
@@ -318,7 +288,7 @@ class EditAPITest {
 
         Collection c = new Collection(name, description, credit, itemIds, ImmutableList.of());
         String filePath =
-            gitSourceVariables.getGitSourcePath() + "/data/"+collectionId;
+            editAPI.getDataLocalPath()+ "/data/"+collectionId;
         c.setThumbnailURL("thumbnailURL");
         c.setCollectionId(collectionId);
 

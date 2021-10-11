@@ -21,7 +21,7 @@ import uk.cam.lib.cdl.loading.editing.pagination.TeiPageListFactory;
 import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.model.editor.ModelOps;
-import uk.cam.lib.cdl.loading.utils.GitHelper;
+//import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -65,14 +65,13 @@ public class EditConfig {
 
     @Bean
     @Profile("!test")
-    public EditAPI editAPI(Path dataRoot, GitHelper gitHelper, Path dlDatasetFilename,
+    public EditAPI editAPI(Path dataRoot, Path dlDatasetFilename,
                            Path dlUIFilename, Path absoluteDataItemPath) throws EditApiException {
         return new EditAPI(
             dataRoot.toString(),
             dlDatasetFilename.toString(),
             dlUIFilename.toString(),
-            absoluteDataItemPath.toString(),
-            gitHelper);
+            absoluteDataItemPath.toString());
     }
 
     @Bean

@@ -13,6 +13,9 @@ services:
     depends_on:
       - dl-loading-db
       - dl-deployment-api
+      - s3fs
+    volumes:
+      - /mnt/s3data/data:/mnt/s3data/data:shared
 
   dl-loading-db:
     build:
@@ -64,6 +67,19 @@ services:
 #    environment:
 #      ADMINER_DESIGN: pepa-linha
 
+  s3fs:
+    privileged: true
+    image: efrecon/s3fs:1.86
+    restart: always
+    env_file:
+      - ${ENV_FILE}
+      # A workaround for bucket names containing '.' until the related s3fs-fuse issue is resolved
+      # Keep in mind this is a secrutiy risk (default is https)
+      # - AWS_S3_URL=http://s3.amazonaws.com
+    volumes:
+      - /mnt/s3data/data:/opt/s3fs/bucket:shared
+
 volumes:
   dl-loading-db:
   dl-deployment-db:
+

@@ -9,13 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
-import uk.cam.lib.cdl.loading.apis.PackagingAPI;
-import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.model.Tag;
 import uk.cam.lib.cdl.loading.model.deployment.Deployment;
 import uk.cam.lib.cdl.loading.model.deployment.Instance;
 import uk.cam.lib.cdl.loading.model.deployment.Status;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,12 +23,10 @@ import java.util.List;
 public class DeployController {
 
     private final DeploymentAPI deploymentAPI;
-    private final PackagingAPI packagingAPI;
 
     @Autowired
-    public DeployController(DeploymentAPI deploymentAPI, PackagingAPI packagingAPI) {
+    public DeployController(DeploymentAPI deploymentAPI) {
         this.deploymentAPI = deploymentAPI;
-        this.packagingAPI = packagingAPI;
     }
 
     /**
@@ -41,12 +38,14 @@ public class DeployController {
     @PreAuthorize("@roleService.canDeploySites(authentication)")
     @GetMapping ("/deploy.html")
     public String deploy(Model model, @ModelAttribute("message") String message,
-                         @ModelAttribute("error") String error) throws GitHelperException {
+                         @ModelAttribute("error") String error) {
 
         List<Instance> instances = deploymentAPI.getInstances();
         // NOTE this gets the tags from the source repo instead of from the release repo, but they should be
         // the same. Could checkout the release repo, or use BitBucket API for access to release repo directly.
-        List<Tag> tags = packagingAPI.getTags();
+       // List<Tag> tags = packagingAPI.getTags();
+        // TODO get tags
+        List<Tag> tags = new ArrayList<>();
         Collections.sort(tags);
         Collections.sort(instances);
 
@@ -64,7 +63,7 @@ public class DeployController {
     @PreAuthorize("@roleService.canDeploySites(authentication)")
     @GetMapping("/cache/refresh")
     public String deployRefreshCache(Model model, @ModelAttribute("message") String message,
-                                     @ModelAttribute("error") String error) throws GitHelperException {
+                                     @ModelAttribute("error") String error) {
 
         deploymentAPI.cacheEvict();
         return deploy(model, message, error);
@@ -82,7 +81,7 @@ public class DeployController {
     @PreAuthorize("@roleService.canDeploySites(authentication)")
     @PostMapping("/{instanceId}")
     public RedirectView deployVersion(RedirectAttributes attributes, @PathVariable("instanceId") String instanceId,
-                                      @RequestParam String version) throws JSONException {
+                                      @RequestParam String version) {
         /** TODO validate input **/
         Instance instance = deploymentAPI.getInstance(instanceId);
         instance.setVersion(version);

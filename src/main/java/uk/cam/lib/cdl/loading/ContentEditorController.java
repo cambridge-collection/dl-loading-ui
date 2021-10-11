@@ -12,17 +12,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.editing.BrowseFile;
 import uk.cam.lib.cdl.loading.editing.FileSave;
-import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
-import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -48,19 +42,16 @@ public class ContentEditorController {
     protected final String contentImagesPath;
     protected final String contentImagesURL;
     private final String pathForDataDisplay;
-    private final GitHelper gitHelper;
 
     @Autowired
     public ContentEditorController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay,
                                    @Value("${data.path.images}") String imagePath,
-                                   @Value("${data.path.html}") String htmlPath,
-                                   GitHelper gitHelper) {
+                                   @Value("${data.path.html}") String htmlPath) {
 
         this.pathForDataDisplay = "/edit"+pathForDataDisplay;
         this.contentImagesURL = "/edit"+pathForDataDisplay + imagePath;
         this.contentImagesPath = editAPI.getDataLocalPath().resolve(imagePath).toString();
         this.contentHTMLPath = editAPI.getDataLocalPath().resolve(htmlPath).toString();
-        this.gitHelper = Preconditions.checkNotNull(gitHelper);
 
         Preconditions.checkArgument(Path.of(this.pathForDataDisplay)
             .equals(Path.of("/edit", pathForDataDisplay).normalize()));
@@ -104,15 +95,6 @@ public class ContentEditorController {
         boolean saveSuccessful = FileSave.save(contentImagesPath
             + File.separator + addParams.getDirectory(), filename, is);
 
-        if (saveSuccessful) {
-            // Git Commit and push to remote repo.
-            try {
-                gitHelper.pushGitChanges();
-            } catch (GitHelperException e) {
-                LOG.error("handleAddImageRequest(): Failed to push git changes: " + e.getMessage(), e);
-                saveSuccessful = false;
-            }
-        }
 
         String output = "<html><head><script> window.opener.CKEDITOR.tools.callFunction( "
             + addParams.getCKEditorFuncNum()
@@ -211,15 +193,6 @@ public class ContentEditorController {
             successful = file.delete(); // delete empty directory.
         }
 
-        if (successful) {
-            // Git Commit and push to remote repo.
-            try {
-                gitHelper.pushGitChanges();
-            } catch (GitHelperException e) {
-                LOG.error("handleDeleteImageRequest(): Failed to push git changes: " + e.getMessage(), e);
-                successful = false;
-            }
-        }
 
         JSONObject json = new JSONObject();
         json.put("deletesuccess", successful);
@@ -278,8 +251,9 @@ public class ContentEditorController {
         }
 
         List<BrowseFile> children = imageFiles.getChildren();
-        if (children == null)
+        if (children == null) {
             return null;
+        }
 
         for (BrowseFile child : children) {
             BrowseFile f = buildBrowseDirectory(browseDir, child);

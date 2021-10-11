@@ -12,13 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import uk.cam.lib.cdl.loading.exceptions.EditApiException;
-import uk.cam.lib.cdl.loading.exceptions.GitHelperException;
 import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.*;
 import uk.cam.lib.cdl.loading.model.editor.modelops.*;
 import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
-import uk.cam.lib.cdl.loading.utils.GitHelper;
 import uk.cam.lib.cdl.loading.utils.ThrowingSupplier;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
@@ -45,7 +43,6 @@ public class EditAPI {
     private final Path dataItemPath;
     private final Path datasetFile;
     private final Path uiFile;
-    private final GitHelper gitHelper;
     private final ModelStateHandlerResolver stateHandlers;
     private final ObjectMapper objectMapper;
 
@@ -61,12 +58,10 @@ public class EditAPI {
      * @param dataPath          File path to source data
      * @param dlDatasetFilename Filename for the root JSON file for this dataset.
      * @param dataItemPath      File path to the item TEI directory.
-     * @param gitHelper         Object for interacting with Git
      * @throws IllegalStateException If the initial model load from the git repo fails.
      */
-    public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath,
-                   GitHelper gitHelper) throws EditApiException {
-        this.gitHelper = gitHelper;
+    public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath) throws EditApiException {
+
         this.dataPath = Path.of(dataPath).normalize();
         Preconditions.checkArgument(this.dataPath.isAbsolute(), "dataPath is not absolute: %s", dataPath);
         this.datasetFile = this.dataPath.resolve(dlDatasetFilename).normalize();
@@ -112,12 +107,6 @@ public class EditAPI {
         }
     }
     private synchronized void _updateModel() throws EditApiException, IOException {
-        try {
-            gitHelper.pullGitChanges();
-        } catch (GitHelperException e) {
-            throw new EditApiException(
-                "Updating model failed: Update git repo failed: " + e.getMessage(), e);
-        }
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
@@ -334,18 +323,11 @@ public class EditAPI {
 
     protected <T, Err extends EditApiException> T updateData(ThrowingSupplier<T, Err> operation) throws EditApiException {
         Preconditions.checkNotNull(operation);
-        try {
-            return gitHelper.writeFilesAndPushOrRollBack(() -> {
-                var result = operation.get();
-                updateModel();
-                return result;
-            });
-        } catch (GitHelperException e) {
-            if(e.getCause() instanceof EditApiException) {
-                throw (EditApiException)e.getCause();
-            }
-            throw new EditApiException("Failed to update git repository: " + e.getMessage(), e);
-        }
+
+        var result = operation.get();
+        updateModel();
+        return result;
+
     }
 
     @PreAuthorize("@roleService.canEditCollection(#collection.collectionId, authentication) ||" +
@@ -401,10 +383,8 @@ public class EditAPI {
             // Update collection thumbnail in the UI
             setCollectionThumbnailURL(collection.getThumbnailURL(), collectionId);
 
-            // Git Commit and push to remote repo.
-            gitHelper.pushGitChanges();
             updateModel();
-        } catch (IOException | GitHelperException e) {
+        } catch (IOException e) {
             throw new EditApiException("Failed to update Collection: " + e.getMessage(), e);
         }
     }
