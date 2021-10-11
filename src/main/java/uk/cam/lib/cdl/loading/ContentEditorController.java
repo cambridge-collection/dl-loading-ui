@@ -25,10 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Controller for editing content through CKEditor on path /editor
@@ -214,27 +211,30 @@ public class ContentEditorController {
      */
     private BrowseFile buildFileHierarchy(File file) {
 
-        if (!file.getPath().startsWith(contentImagesPath)) {
+        String filePath = file.getPath();
+        boolean fileIsDirectory = file.isDirectory();
+
+        if (!filePath.startsWith(contentImagesPath)) {
             return null;
         }
 
         String fileURL = contentImagesURL
-            + file.getPath().replaceFirst(contentImagesPath, "");
+            + filePath.replaceFirst(contentImagesPath, "");
 
-        if (!file.isDirectory()) {
-            return new BrowseFile(file.getName(), file.getPath(), fileURL,
-                file.isDirectory(), null);
+        if (!fileIsDirectory) {
+            return new BrowseFile(file.getName(), filePath, fileURL,
+                false, null);
         }
-
         ArrayList<BrowseFile> children = new ArrayList<BrowseFile>();
-        for (int i = 0; i < Objects.requireNonNull(file.listFiles()).length; i++) {
+        File[] files = file.listFiles();
+        for (int i = 0; i < Objects.requireNonNull(files).length; i++) {
 
-            File child = Objects.requireNonNull(file.listFiles())[i];
+            File child = Objects.requireNonNull(files)[i];
             children.add(buildFileHierarchy(child));
         }
         Collections.sort(children);
-        return new BrowseFile(file.getName(), file.getPath(), fileURL,
-            file.isDirectory(), children);
+        return new BrowseFile(file.getName(), filePath, fileURL,
+            true, children);
     }
 
     /**

@@ -1,7 +1,6 @@
 package uk.cam.lib.cdl.loading.controller;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +46,7 @@ class DeployControllerAuthenticationTest {
     private MockMvc mvc;
 
     @BeforeEach
-    void setup() throws IOException, GitAPIException {
+    void setup() throws IOException {
 
         URI apiURL = UriComponentsBuilder.fromHttpUrl(wireMockServer.baseUrl())
             .path("/api/deploy/v0.1/").build().toUri();
