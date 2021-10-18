@@ -78,6 +78,8 @@
                                                            id="name.urlSlugName"
                                                            maxlength="30"
                                                            th:value="*{urlSlugName}">
+
+                                                    <input th:if="*{urlSlugName!=null}" type="hidden" name="urlSlugName" th:value="*{urlSlugName}">
                                                 </div>
                                             </div>
 

@@ -134,4 +134,10 @@ The database can be populated with sample users and workspaces by executing [exa
 
 The repository contains a Docker Compose file which will run a suitable database, plus a web-based DB admin UI to manage it.
 
-Run `$ docker-compose up` in the repository to start the services.
+Run `$ docker-compose --env-file example.env up` in the repository to start the services with appropriate values set in the example.env
+
+to deploy to remote host
+`export DOCKER_HOST="ssh://digilib@ec2-52-31-243-155.eu-west-1.compute.amazonaws.com"`
+
+then run the docker commands as you would the local version.
+Add the -d flag to the up command for Detached mode: Run containers in the background.
