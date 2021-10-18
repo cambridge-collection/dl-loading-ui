@@ -73,7 +73,7 @@
                                                          th:if="${#fields.hasErrors('urlSlugName')}"
                                                          th:errors="*{urlSlugName}"></div>
 
-                                                    <input disabled class="form-control"
+                                                    <input th:disabled="*{urlSlugName!=null}" class="form-control"
                                                            type="text" name="urlSlugName"
                                                            id="name.urlSlugName"
                                                            maxlength="30"
