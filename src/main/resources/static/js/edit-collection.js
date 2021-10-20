@@ -55,6 +55,8 @@ $(document).ready(function () {
         height: 300,
         removeButtons: 'About'
     });
+
+    CKEDITOR.config.allowedContent=true;
 });
 
 
