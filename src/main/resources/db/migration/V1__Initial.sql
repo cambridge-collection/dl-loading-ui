@@ -44,3 +44,13 @@ create table collections_in_workspaces (
     primary key (collection_id, workspace_id)
 );
 create unique index ix_collections_workspaces on collections_in_workspaces (collection_id, workspace_id);
+
+create table data_processing_errors (
+    message_id varchar not null,
+	topic_arn varchar not null,
+	timestamp timestamp not null,
+	subject varchar not null,
+	message varchar not null,
+	unsubscribe_url varchar not null,
+	primary key (message_id)
+);

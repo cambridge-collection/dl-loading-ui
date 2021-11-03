@@ -34,6 +34,6 @@ insert into items_in_workspaces (item_id, workspace_id) VALUES ('MS-TEST-00001-0
 (SELECT workspace_id FROM workspaces WHERE name='Test Workspace1'));
 insert into items_in_workspaces (item_id, workspace_id) VALUES ('MS-TEST-00001-00003',
 (SELECT workspace_id FROM workspaces WHERE name='Test Workspace2'));
-insert into collections_in_workspaces (collection_id, workspace_id)VALUES ('collections/test.collection.json',
-(SELECT workspace_id FROM workspaces WHERE name='Test Workspace1'));
+--insert into collections_in_workspaces (collection_id, workspace_id)VALUES ('collections/test.collection.json',
+--(SELECT workspace_id FROM workspaces WHERE name='Test Workspace1'));
 

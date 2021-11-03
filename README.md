@@ -126,9 +126,9 @@ Alternatively, the [Flyway CLI] can be used stand-alone to apply the [migration 
 
 ### Example Data
 
-The database can be populated with sample users and workspaces by executing [example_data.sql].
+The database can be populated with sample users and workspaces by executing [example_user_data.sql].
 
-[example_data.sql]: src/main/docs/example_data.sql
+[example_user_data.sql]: src/main/docs/example_data.sql
 
 ## Docker Compose
 
