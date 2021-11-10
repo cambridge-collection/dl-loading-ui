@@ -70,16 +70,16 @@
                                                 <div class="col-4 m-2 text-right">Identifier / URL</div>
                                                 <div class="col m-2">
                                                     <div class="alert-danger"
-                                                         th:if="${#fields.hasErrors('urlSlugName')}"
+                                                         th:if="${#fields.hasErrors('urlSlugName') && newCollection}"
                                                          th:errors="*{urlSlugName}"></div>
 
-                                                    <input th:disabled="*{urlSlugName!=null}" class="form-control"
+                                                    <input th:disabled="${!newCollection}" class="form-control"
                                                            type="text" name="urlSlugName"
                                                            id="name.urlSlugName"
                                                            maxlength="30"
                                                            th:value="*{urlSlugName}">
 
-                                                    <input th:if="*{urlSlugName!=null}" type="hidden" name="urlSlugName" th:value="*{urlSlugName}">
+                                                    <input th:if="${!newCollection}" type="hidden" name="urlSlugName" th:value="*{urlSlugName}">
                                                 </div>
                                             </div>
 
@@ -295,10 +295,22 @@
                                     <a class="btn btn-primary" th:href="@{/edit/item(col=${form.collectionId})}" href="#" role="button">Add new item</a>
                                 </div>
                             </div>
+                            <div th:if="${!newCollection}" class="row mt-6">
+                                <div class="col-6 offset-2 mt-2 mb-2">
+                                    <form action="/edit/collection/addExistingItemsToCollection" method="post" >
+                                        <input type="hidden" name="collectionId" th:value="${form.collectionId}">
+                                        <input type="hidden" name="workspaceIds" th:value="${workspaceIds}">
+                                        <label>Item ids (comma separated):</label>
+                                        <input class="form-control" type="text" name="itemIds" size="60"
+                                               id="itemIds">
+                                        <button type="submit" class="btn btn-primary
+                                                float-right m-1">Add existing items</button>
+                                    </form>
+                                </div>
+                            </div>
 
                             <div class="row mt-6">
                                 <div class="col">
-
                                     <button type="button" id="collectioneditform-reset" class="btn btn-secondary
                                                 float-right
                                         m-1">Reset

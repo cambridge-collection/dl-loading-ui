@@ -56,6 +56,7 @@ import javax.management.InvalidAttributeValueException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -145,43 +146,33 @@ public class EditController {
                                  @RequestParam(required = false) List<Long> workspaceIds)
         throws IOException {
 
-        CollectionForm form;
+        CollectionForm form = new CollectionForm();
         boolean newCollection = true;
         List<Item> items = ImmutableList.of();
-        Map<Path,String> itemNames = new HashMap();
+        Map<Path,String> itemNames = new HashMap<>();
 
-        if (collectionId == null || collectionId.trim().equals("")) {
-            form = new CollectionForm();
-        } else {
-            Collection collection = editAPI.getCollection(collectionId);
-            if (model.asMap().get("form") == null) {
+        Collection collection = null;
 
-                var collectionFile = editAPI.getCollectionPath(collectionId);
-                // Description HTML
-                var fullDescription = collectionFile.getParent().resolve(collection.getDescription().getFull().getId()).normalize();
-                String descriptionHTML = FileUtils.readFileToString(fullDescription.toFile(), "UTF-8");
-                descriptionHTML = prepareHTMLForDisplay(descriptionHTML, fullDescription);
+        if (collectionId!=null && !collectionId.isEmpty()) {
+            collection = editAPI.getCollection(collectionId);
+        }
 
-                // Credit HTML
-                var credit = collectionFile.getParent().resolve(collection.getCredit().getProse().getId()).normalize();
-                String creditHTML = FileUtils.readFileToString(credit.toFile(), "UTF-8");
-                creditHTML = prepareHTMLForDisplay(creditHTML, credit);
+        if (model.asMap().get("form") != null) {
+            form = (CollectionForm) model.asMap().get("form");
+        } else if (collection!=null) {
+            form = getCollectionForm(collection);
+        }
 
-                form = new CollectionForm(collectionId, collection, descriptionHTML, creditHTML);
-            } else {
-                form = (CollectionForm) model.asMap().get("form");
-            }
-            // Get Item names from Ids
-            if (collection != null) {
-                newCollection = false;
-                items = ModelOps().streamResolvedItemIds(collection)
-                    .map(editAPI::getItem)
-                    .collect(ImmutableList.toImmutableList());
+        // Get Item names from Ids
+        if (collection != null) {
+            newCollection = false;
+            items = ModelOps().streamResolvedItemIds(collection)
+                .map(editAPI::getItem)
+                .collect(ImmutableList.toImmutableList());
 
-                // Bit of a hack to workaround an thymeleaf error getting name from item
-                for (Item i: items) {
-                    itemNames.put(i.id(),i.name());
-                }
+            // Bit of a hack to workaround an thymeleaf error getting name from item
+            for (Item i : items) {
+                itemNames.put(i.id(), i.name());
             }
         }
 
@@ -315,14 +306,14 @@ public class EditController {
                                          final BindingResult bindingResult)
         throws Exception {
 
-        if (bindingResult.hasErrors()) {
+        if (bindingResult!=null && bindingResult.hasErrors()) {
             attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
                 "details.");
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
             attributes.addFlashAttribute("form", collectionForm);
             attributes.addAttribute("collectionId", collectionForm.getCollectionId());
 
-            return new RedirectView("/edit/collection/");
+            return new RedirectView("/edit/collection/?workspaceIds="+workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
         }
 
         Collection collection = collectionForm.toCollection();
@@ -372,8 +363,7 @@ public class EditController {
         }
 
         attributes.addAttribute("collectionId", collection.getCollectionId());
-        attributes.addAttribute("workspaceIds", workspaceIds);
-        return new RedirectView("/edit/collection/");
+        return new RedirectView("/edit/collection/?workspaceIds="+workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
     }
 
     // Note do not call this directly as preauthorise annotation will not run.
@@ -626,12 +616,68 @@ public class EditController {
             .toUriString();
     }
 
+    @PostMapping("/collection/addExistingItemsToCollection")
+    @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication) ||" +
+        " @roleService.canEditWorkspace(#workspaceIds, authentication)")
+    public RedirectView addExistingItemsToCollection(
+        RedirectAttributes attributes,
+        @Value("${data.path.items}") String itemPath,
+        @RequestParam(name = "itemIds") String itemIds,
+        @RequestParam(name = "collectionId") String collectionId,
+        @RequestParam(name = "workspaceIds") List<Long> workspaceIds
+        ) throws Exception {
+
+        Collection collection = editAPI.getCollection(collectionId);
+        List<Id> itemIdsInCollection = collection.getItemIds();
+
+        String[] inputIds = itemIds.split(",");
+        for (String inputId: inputIds) {
+            // If id is not a path assume the default item path
+            if (!inputId.contains(File.separator)) {
+                inputId = "../"+itemPath+File.separator+inputId+File.separator+inputId+".xml";
+            }
+            Id itemId = new Id(inputId);
+            if (!itemIdsInCollection.contains(itemId)) {
+                itemIdsInCollection.add(itemId);
+            }
+        }
+
+        CollectionForm form = getCollectionForm(collection);
+        return updateCollection(attributes,workspaceIds,form,null);
+
+    }
+
+    private CollectionForm getCollectionForm(Collection collection) throws IOException {
+
+        var collectionFile = editAPI.getCollectionPath(collection.getCollectionId());
+
+        // Description HTML
+        var fullDescription = collectionFile.getParent().resolve(collection.getDescription().getFull().getId()).normalize();
+        String descriptionHTML = FileUtils.readFileToString(fullDescription.toFile(), "UTF-8");
+        descriptionHTML = prepareHTMLForDisplay(descriptionHTML, fullDescription);
+
+        // Credit HTML
+        var credit = collectionFile.getParent().resolve(collection.getCredit().getProse().getId()).normalize();
+        String creditHTML = FileUtils.readFileToString(credit.toFile(), "UTF-8");
+        creditHTML = prepareHTMLForDisplay(creditHTML, credit);
+
+        return new CollectionForm(collection.getCollectionId(), collection, descriptionHTML, creditHTML);
+
+    }
+
     @GetMapping("/item")
     @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
     // FIXME: Add RoleService method to restrict access to individual items and use here
     public ModelAndView createOrEditItem(
         @RequestParam(required = false, name = "id") Optional<String> itemId,
-        @RequestParam(required = false, name = "col") Set<String> preSelectedCollectionIds) {
+        @RequestParam(required = false, name = "col") Set<String> preSelectedCollectionIds,
+        @Value("${data.path.items}") String itemPath) {
+
+        // If id is just e.g. MS-ADD-03996 map to full id
+        if (itemId.isPresent() && !itemId.get().contains(File.separator) && !itemId.get().isEmpty()) {
+            itemId = Optional.of( itemPath + File.separator + itemId.get() + File.separator + itemId.get() + ".xml");
+        }
+
         var mav = getEditItemMavForItemId(itemId.map(Path::of), Optional.empty());
 
         // Allow pre-selecting collections when creating new items.

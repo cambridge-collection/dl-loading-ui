@@ -135,11 +135,20 @@
                     </div>
                 </div>
             </div>
+
             <div class="card shadow mb-4">
                 <div class="card-body list-unstyled">
-                    Browse and edit the content for your digital library. For advanced users, you can also get access
+                    <div>
+                      <form action="/edit/item" method="get" >
+                        <label>View Item (E.g. MS-ADD-03958):</label>
+                        <input class="form-control" type="text" name="id" size="20" id="id">
+                        <button type="submit" class="btn btn-primary float-right m-1">View Item</button>
+                      </form>
+                    </div>
+                    <br/>
+                    <p>Browse and edit the content for your digital library. For advanced users, you can also get access
                     through <a
-                    href="https://aws.amazon.com/s3/getting-started/">S3</a>.<br><br>
+                            href="https://aws.amazon.com/s3/getting-started/">S3</a>.<br><br></p>
                 </div>
             </div>
 

@@ -45,7 +45,7 @@ public class CollectionForm {
     private String fullDescriptionHTML;
 
     private String proseCreditPath;
-    @NotBlank(message = "Must specify a prose credit.")
+
     private String proseCreditHTML;
 
     @NotNull

@@ -108,6 +108,7 @@ public class Collection implements Comparable<Collection> {
         this.thumbnailURL = thumbnailURL;
     }
 
+    @Override
     public String toString() {
         return toString(true);
     }
