@@ -58,8 +58,14 @@
                                 <tr th:each="collectionId: ${workspace.getCollectionIds()}">
                                     <div th:with="collection=${collections.get(collectionId)}"
                                          class="col-xl-3 col-md-6 mb-4">
-                                        <div class="card border-left-primary shadow h-100 py-2">
-                                            <div class="card-body" style="height: 200px; position:relative">
+                                        <div class="card border-left-primary shadow h-100 py-2 ">
+                                            <div class="card-body collection-card" style="height: 200px; position:relative">
+                                                <div class="col-auto collection-card-background-image-div">
+                                                    <img id="thumbnailImage" class="img-thumbnail collection-card-background-image"
+                                                         th:src="${pathForDataDisplay} +'/'+ ${collection.getThumbnailURL()}"
+                                                         width="200px"
+                                                         height="200px">
+                                                </div>
                                                 <div class="row no-gutters align-items-top">
                                                     <div class="col mr-2">
                                                         <div
@@ -70,9 +76,6 @@
                                                         <div class="text-xs mb-0 text-gray-800 text-left"
                                                              th:text="${collection.description.shortDescription}">
                                                         </div>
-                                                    </div>
-                                                    <div class="col-auto">
-                                                        <i class="fas fa-images fa-2x text-gray-300"></i>
                                                     </div>
                                                 </div>
                                                 <div class="row align-items-end float-right" style="position:

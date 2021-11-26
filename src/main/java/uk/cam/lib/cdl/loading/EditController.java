@@ -119,12 +119,22 @@ public class EditController {
 
                 // Get the collections in those workspaces
                 for (String collectionId : workspace.getCollectionIds()) {
-                    Collection collection = editAPI.getCollection(collectionId);
-                    collections.put(collectionId, collection);
+
+                    try {
+                        Collection collection = editAPI.getCollection(collectionId);
+                        collections.put(collectionId, collection);
+                    } catch (NotFoundException e) {
+                        // If collection has been deleted remove from workspace
+                        System.err.println("Collection "+collectionId+" not found. Removing from Workspace.");
+                    }
                 }
             }
+
+            // Remove any collections not found from workspace
+            workspace.getCollectionIds().retainAll(collections.keySet());
         }
 
+        model.addAttribute("pathForDataDisplay", pathForDataDisplay);
         model.addAttribute("workspaces", workspaces);
         model.addAttribute("collections", collections);
 
@@ -317,7 +327,6 @@ public class EditController {
         }
 
         Collection collection = collectionForm.toCollection();
-
 
         String collectionId = collectionForm.getCollectionId();
         if (collectionId == null || collectionId.trim().equals("")) {
@@ -634,15 +643,29 @@ public class EditController {
         for (String inputId: inputIds) {
             // If id is not a path assume the default item path
             if (!inputId.contains(File.separator)) {
-                inputId = "../"+itemPath+File.separator+inputId+File.separator+inputId+".xml";
+                inputId = "../"+itemPath+inputId+File.separator+inputId+".xml";
             }
-            Id itemId = new Id(inputId);
-            if (!itemIdsInCollection.contains(itemId)) {
-                itemIdsInCollection.add(itemId);
+
+            if (itemIdsInCollection.contains(new Id(inputId))) {
+                attributes.addFlashAttribute("error","Item already exists in collection.");
+                attributes.addAttribute("collectionId", collectionId);
+                return new RedirectView("/edit/collection/?workspaceIds="+workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
             }
+
+            // Check if item exists
+            if (inputId.startsWith("../")) {
+                String idRelToData = inputId.replaceFirst("../", "");
+                if (!editAPI.itemExists(Path.of(idRelToData))) {
+                    attributes.addFlashAttribute("error","Item does not exist.");
+                    attributes.addAttribute("collectionId", collectionId);
+                    return new RedirectView("/edit/collection/?workspaceIds="+workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
+                }
+            }
+            itemIdsInCollection.add(new Id(inputId));
         }
 
         CollectionForm form = getCollectionForm(collection);
+
         return updateCollection(attributes,workspaceIds,form,null);
 
     }
