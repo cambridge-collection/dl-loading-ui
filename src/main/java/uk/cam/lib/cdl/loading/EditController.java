@@ -26,6 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -317,6 +318,12 @@ public class EditController {
         throws Exception {
 
         if (bindingResult!=null && bindingResult.hasErrors()) {
+
+            System.err.println("Errors: "+bindingResult.getErrorCount());
+            for (ObjectError error : bindingResult.getAllErrors()) {
+                System.err.println("binding errors: "+error.toString());
+            }
+
             attributes.addFlashAttribute("error", "There was a problem saving your changes. See form below for " +
                 "details.");
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);

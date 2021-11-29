@@ -16,7 +16,7 @@ import java.util.List;
 
 public class CollectionForm {
     @NotBlank(message = "Must specify a url-slug for this collection.")
-    @Pattern(regexp = "^[a-z\\-]+$", message = "Must be all lower case letters or hyphen '-' with no spaces.")
+    @Pattern(regexp = "^[a-z\\-0-9_]+$", message = "Must be all lower case letters, numbers, underscore '_' or hyphen '-' with no spaces.")
     private String urlSlugName;
 
     // Can be null/blank for new collections.
