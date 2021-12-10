@@ -15,6 +15,7 @@ import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.model.editor.*;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ImmutableModelState;
+import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
 import uk.cam.lib.cdl.loading.testutils.Models;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
 
@@ -260,7 +261,7 @@ class EditAPITest {
         Collection collection = makeCollection("test");
         String descriptionHTML = "<html>test description</html>";
         String creditHTML = "<html>test credit</html>";
-        editAPI.updateCollection(collection, descriptionHTML, creditHTML, ImmutableList.of((long)-1));
+        editAPI.updateCollection(collection, descriptionHTML, creditHTML, makeUICollection(collection.getCollectionId()), ImmutableList.of((long)-1));
         assert ("sortName".equals(editAPI.getCollection("collections/test.collection.json").getName().getSort()));
     }
 
@@ -271,7 +272,7 @@ class EditAPITest {
         assert (!editAPI.getCollections().contains(collection));
         String descriptionHTML = "<html>test description</html>";
         String creditHTML = "<html>test credit</html>";
-        editAPI.updateCollection(collection, descriptionHTML, creditHTML, ImmutableList.of((long)-1));
+        editAPI.updateCollection(collection, descriptionHTML, creditHTML, makeUICollection(collection.getCollectionId()), ImmutableList.of((long)-1));
         assert (editAPI.getCollections().contains(collection));
     }
 
@@ -293,5 +294,9 @@ class EditAPITest {
         c.setCollectionId(collectionId);
 
         return c;
+    }
+
+    private UICollection makeUICollection(String collectionId) {
+        return new UICollection(new Id(collectionId), "organisation", new Id("pages/images/collectionsView/collection-blank.jpg"));
     }
 }

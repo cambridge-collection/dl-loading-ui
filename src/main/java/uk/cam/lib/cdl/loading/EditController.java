@@ -49,6 +49,7 @@ import uk.cam.lib.cdl.loading.forms.ItemForm;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.*;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
+import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
 import uk.cam.lib.cdl.loading.utils.RoleHelper;
 import uk.cam.lib.cdl.loading.utils.ThrowingFunction;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
@@ -370,7 +371,7 @@ public class EditController {
         }
 
         try {
-            editAPI.updateCollection(collection, fullDescriptionHTML, proseCreditHTML, workspaceIds);
+            editAPI.updateCollection(collection, fullDescriptionHTML, proseCreditHTML, collectionForm.toUICollection(), workspaceIds);
             attributes.addFlashAttribute("message", "Collection Updated.");
         }
         catch (EditApiException e) {
@@ -691,7 +692,13 @@ public class EditController {
         String creditHTML = FileUtils.readFileToString(credit.toFile(), "UTF-8");
         creditHTML = prepareHTMLForDisplay(creditHTML, credit);
 
-        return new CollectionForm(collection.getCollectionId(), collection, descriptionHTML, creditHTML);
+        // Collection type
+        UICollection collectionUI = editAPI.getCollectionUI(collection.getCollectionId());
+        if (collectionUI==null) {
+            collectionUI = new UICollection(new Id(collection.getCollectionId()), "organisation", new Id("./pages/images/collectionsView/collection-blank.jpg"));
+        }
+
+        return new CollectionForm(collection.getCollectionId(), collection, descriptionHTML, creditHTML, collectionUI);
 
     }
 

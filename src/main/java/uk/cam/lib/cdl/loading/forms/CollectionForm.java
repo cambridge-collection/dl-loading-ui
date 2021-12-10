@@ -1,6 +1,7 @@
 package uk.cam.lib.cdl.loading.forms;
 
 import uk.cam.lib.cdl.loading.model.editor.*;
+import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -48,6 +49,9 @@ public class CollectionForm {
 
     private String proseCreditHTML;
 
+    @NotBlank(message = "Must specify a collection type")
+    private String collectionType;
+
     @NotNull
     private List<String> itemIds;
 
@@ -57,7 +61,8 @@ public class CollectionForm {
     @NotBlank(message = "Must specify a thumbnail URL")
     private String thumbnailURL;
 
-    public CollectionForm(String collectionId, Collection collection, String descriptionHTML, String creditHTML) {
+    public CollectionForm(String collectionId, Collection collection, String descriptionHTML, String creditHTML,
+                          UICollection uiCollection) {
         if (collectionId == null || collection == null) {
             return;
         }
@@ -73,6 +78,7 @@ public class CollectionForm {
         this.proseCreditPath = collection.getCredit().getProse().getId();
         this.proseCreditHTML = creditHTML;
         this.thumbnailURL = collection.getThumbnailURL();
+        this.collectionType = uiCollection.getLayout();
 
         List<String> itemIds = new ArrayList<>();
         for (Id id : collection.getItemIds()) {
@@ -133,6 +139,10 @@ public class CollectionForm {
         return urlSlugName;
     }
 
+    public String getCollectionType() {
+        return collectionType;
+    }
+
     public String getCollectionId() {
         return collectionId;
     }
@@ -171,6 +181,11 @@ public class CollectionForm {
         return c;
     }
 
+    public UICollection toUICollection() {
+
+        return new UICollection(new Id(collectionId), collectionType, new Id(thumbnailURL));
+    }
+
     public void setUrlSlugName(String urlSlugName) {
 
         this.urlSlugName = urlSlugName;
@@ -179,6 +194,10 @@ public class CollectionForm {
     public void setCollectionId(String collectionId) {
 
         this.collectionId = collectionId;
+    }
+
+    public void setCollectionType(String collectionType) {
+        this.collectionType = collectionType;
     }
 
     public void setSortName(String sortName) {

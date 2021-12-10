@@ -49,7 +49,7 @@ public class EditAPI {
     private Map<String, Collection> collectionMap = Collections.synchronizedMap(new HashMap<>());
     private Map<String, Path> collectionFilepaths = Collections.synchronizedMap(new HashMap<>());
     private Map<String, Item> itemMap = Collections.synchronizedMap(new HashMap<>());
-    private Map<String, String> thumbnailImageURLs = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, UICollection> uiCollectionMap = Collections.synchronizedMap(new HashMap<>());
     private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
 
     /**
@@ -119,24 +119,32 @@ public class EditAPI {
         // Setup collections
         for (Id id : dataset.getCollections()) {
 
-            var collectionFile = datasetFile.resolveSibling(id.getId()).normalize();
-            Preconditions.checkState(collectionFile.startsWith(dataPath), "Collection '%s' is not under dataPath", id.getId());
-            String collectionId = dataPath.relativize(collectionFile).toString();
-            if (!Files.exists(collectionFile)) {
-                throw new FileNotFoundException("Collection file cannot be found at: " + collectionFile);
-            }
+            try {
+                var collectionFile = datasetFile.resolveSibling(id.getId()).normalize();
+                Preconditions.checkState(collectionFile.startsWith(dataPath), "Collection '%s' is not under dataPath", id.getId());
+                String collectionId = dataPath.relativize(collectionFile).toString();
+                if (!Files.exists(collectionFile)) {
+                    throw new FileNotFoundException("Collection file cannot be found at: " + collectionFile);
+                }
 
-            Collection c = mapper.readValue(collectionFile.toFile(), Collection.class);
-            c.setCollectionId(collectionId);
+                Collection c = mapper.readValue(collectionFile.toFile(), Collection.class);
+                c.setCollectionId(collectionId);
 
-            // Setup collection maps
-            newCollectionMap.put(collectionId, c);
-            newCollectionFilepaths.put(collectionId, collectionFile);
+                // Setup collection maps
+                newCollectionMap.put(collectionId, c);
+                newCollectionFilepaths.put(collectionId, collectionFile);
 
-            for (Id relativeItemId : c.getItemIds()) {
-                var itemFile = collectionFile.resolveSibling(relativeItemId.getId());
-                var itemId = dataPath.relativize(itemFile);
-                newItemMap.put(itemId.toString(), ImmutableItem.of(itemId));
+                for (Id relativeItemId : c.getItemIds()) {
+                    try {
+                        var itemFile = collectionFile.resolveSibling(relativeItemId.getId());
+                        var itemId = dataPath.relativize(itemFile);
+                        newItemMap.put(itemId.toString(), ImmutableItem.of(itemId));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
 
@@ -145,23 +153,16 @@ public class EditAPI {
         this.itemMap = newItemMap;
 
         // Update UI
-        Map<String, String> newThumbnailImageURLs = Collections.synchronizedMap(new HashMap<>());
+        Map<String, UICollection> newUICollectionMap = Collections.synchronizedMap(new HashMap<>());
         UI ui = mapper.readValue(uiFile.toFile(), UI.class);
         for (UICollection collection : ui.getThemeData().getCollections()) {
 
             // Get collection Id from the filepath
             String collectionId = collection.getCollection().getId();
-
-            // TODO Properly format Ids into set pattern
-            // For now remove ./ at the start of a filepath
-            if (collectionId.startsWith("./")) {
-                collectionId = collectionId.replaceFirst("./", "");
-            }
-
-            newThumbnailImageURLs.put(collectionId, collection.getThumbnail().getId());
+            newUICollectionMap.put(collectionId, collection);
 
         }
-        this.thumbnailImageURLs = newThumbnailImageURLs;
+        this.uiCollectionMap = newUICollectionMap;
 
         for (Collection c : collectionMap.values()) {
             String thumbnailURL = getCollectionThumbnailURL(c.getCollectionId());
@@ -178,10 +179,12 @@ public class EditAPI {
      */
     private String getCollectionThumbnailURL(@NotNull String collectionId) {
 
-        return this.thumbnailImageURLs.get(collectionId);
+        UICollection uiCollection = uiCollectionMap.get(collectionId);
+        return uiCollection.getThumbnail().getId();
+
     }
 
-    private void setCollectionThumbnailURL(String thumbnailURL, String collectionId) throws EditApiException {
+    private void setUICollection(UICollection uiCollection, String collectionId) throws EditApiException {
         ObjectMapper mapper = new ObjectMapper();
 
         mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
@@ -198,7 +201,8 @@ public class EditAPI {
 
             if (thisCollectionPath.equals(collectionId)) {
 
-                collection.setThumbnail(new Id(thumbnailURL));
+                collection.setThumbnail(uiCollection.getThumbnail());
+                collection.setLayout(uiCollection.getLayout());
                 ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
                 try {
                     writer.writeValue(uiFile.toFile(), ui);
@@ -219,6 +223,13 @@ public class EditAPI {
 
     public List<Collection> getCollections() {
         return streamCollections().collect(toImmutableList());
+    }
+
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
+    public UICollection getCollectionUI(String collectionId) {
+
+        UICollection uiCollection = uiCollectionMap.get(collectionId);
+        return uiCollection;
     }
 
     @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
@@ -333,7 +344,7 @@ public class EditAPI {
     @PreAuthorize("@roleService.canEditCollection(#collection.collectionId, authentication) ||" +
             " @roleService.canEditWorkspace(#workspaceIds, authentication)")
     public void updateCollection(Collection collection, String descriptionHTML, String creditHTML,
-                                    List<Long> workspaceIds) throws EditApiException {
+                                    UICollection uiCollection, List<Long> workspaceIds) throws EditApiException {
         try {
 
             ObjectMapper mapper = new ObjectMapper();
@@ -364,7 +375,7 @@ public class EditAPI {
             List<UICollection> uiCollections = ui.getThemeData().getCollections();
             if (!UICollectionContains(collectionId, uiCollections)) {
                 uiCollections.add(new UICollection(new Id(collectionId),
-                    "organisation", new Id(collection.getThumbnailURL())));
+                    uiCollection.getLayout(), uiCollection.getThumbnail()));
                 writer.writeValue(uiFile.toFile(), ui);
             }
 
@@ -381,7 +392,7 @@ public class EditAPI {
             FileUtils.write(creditHTMLFile.toFile(), creditHTML, "UTF-8");
 
             // Update collection thumbnail in the UI
-            setCollectionThumbnailURL(collection.getThumbnailURL(), collectionId);
+            setUICollection(uiCollection, collectionId);
 
             updateModel();
         } catch (IOException e) {

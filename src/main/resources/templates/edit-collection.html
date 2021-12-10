@@ -156,6 +156,19 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-2 m-2 text-right">
+                                            <label for="collectionType">Layout</label>
+                                        </div>
+                                        <div class="col m-2">
+                                            <div class="alert-danger" th:if="${#fields.hasErrors('collectionType')}"
+                                                 th:errors="*{collectionType}"></div>
+                                            <select th:field="*{collectionType}" name="collectionType" id="collectionType">
+                                                <option th:each="collectionTypeOption : ${T(uk.cam.lib.cdl.loading.model.editor.CollectionType).values()}"
+                                                        th:value="${collectionTypeOption}" th:text="${collectionTypeOption}"></option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-2 m-2 text-right">
                                             <label for="description.shortDescription">Short</label>
                                         </div>
                                         <div class="col m-2">
@@ -300,7 +313,7 @@
                                     <form action="/edit/collection/addExistingItemsToCollection" method="post" >
                                         <input type="hidden" name="collectionId" th:value="${form.collectionId}">
                                         <input type="hidden" name="workspaceIds" th:value="${workspaceIds}">
-                                        <label>Item ids (comma separated):</label>
+                                        <label>Item ids (comma separated) e.g. MS-ADD-03958,MS-ADD-03960,MS-ADD-03996</label>
                                         <input class="form-control" type="text" name="itemIds" size="60"
                                                id="itemIds">
                                         <button type="submit" class="btn btn-primary
