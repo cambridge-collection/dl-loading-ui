@@ -214,7 +214,6 @@ public class EditAPI {
             }
         }
     }
-
     @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
     public Stream<Collection> streamCollections() {
         return collectionMap.values().stream()
@@ -352,6 +351,9 @@ public class EditAPI {
             mapper.enable(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature());
             ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
 
+            // Set metadata for error tracing
+
+
             String collectionId = collection.getCollectionId();
 
             Path collectionFilepath = collectionFilepaths.get(collectionId);
@@ -395,6 +397,7 @@ public class EditAPI {
             setUICollection(uiCollection, collectionId);
 
             updateModel();
+
         } catch (IOException e) {
             throw new EditApiException("Failed to update Collection: " + e.getMessage(), e);
         }

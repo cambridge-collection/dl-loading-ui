@@ -5,6 +5,7 @@ import com.amazonaws.services.sns.message.SnsMessageManager;
 import com.amazonaws.services.sns.message.SnsNotification;
 import com.google.common.base.Preconditions;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uk.cam.lib.cdl.loading.dao.LogMessageRepository;
 import uk.cam.lib.cdl.loading.model.logs.LogMessage;
+import uk.cam.lib.cdl.loading.model.logs.LogType;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -26,10 +28,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -61,7 +60,8 @@ public class ProcessingLogController {
     @GetMapping("/view-logs.html")
     public String viewLogs(Model model, HttpServletRequest request) {
 
-        List<LogMessage> messages = repository.findTop10ByOrderByTimestampDesc();
+        //List<LogMessage> messages = repository.findTop10ByLogTypeOrderByTimestampDesc(LogType.DATA_PROCESSING_EXCEPTION_FOR_UI_DISPLAY);
+        List<LogMessage> messages = repository.findTop20ByOrderByTimestampDesc();
         for (LogMessage message: messages) {
             logger.info(String.valueOf(message));
         }
@@ -103,21 +103,74 @@ public class ProcessingLogController {
                         + "Message = {} \n",
                     snsNotification.getSubject(), snsNotification.getMessage());
 
-                LogMessage message = new LogMessage();
-                message.setMessageId(snsNotification.getMessageId());
-                message.setMessage(snsNotification.getMessage());
-                message.setTimestamp(
-                    LocalDateTime.ofInstant(Instant.ofEpochMilli(snsNotification.getTimestamp().getTime()),
-                        ZoneId.systemDefault()));
-                message.setSubject(snsNotification.getSubject());
-                message.setTopic_arn(snsNotification.getTopicArn());
-                message.setUnsubscribe_url(snsNotification.getUnsubscribeUrl().toString());
-
-                repository.save(message);
+                try {
+                    repository.save(makeLogMessage(snsNotification));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
         return "{}";
 
     }
+
+    private LogMessage makeLogMessage(SnsNotification snsNotification) throws IOException {
+
+        logger.info("making Log Message");
+        LogMessage message = new LogMessage();
+        message.setMessageId(snsNotification.getMessageId());
+        message.setMessage(snsNotification.getMessage());
+        message.setTimestamp(
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(snsNotification.getTimestamp().getTime()),
+                ZoneId.systemDefault()));
+        message.setSubject(snsNotification.getSubject());
+        message.setTopicArn(snsNotification.getTopicArn());
+        message.setUnsubscribeUrl(snsNotification.getUnsubscribeUrl().toString());
+
+        // Notification message format is:
+        //    LOG-GROUP-NAME: /aws/lambda/AWSLambda_CUDLPackageData_HTML_to_HTML_Translate_URLS
+        //    LOG-STREAM: 2022/01/21/[$LATEST]2baa7f2e2504493dbd895d5cc1840b11
+        //    LOG-MESSAGE: ...
+        String m = snsNotification.getMessage();
+        logger.info("m: "+m);
+        message.setLogGroup(StringUtils.substringBetween(m, "LOG-GROUP-NAME: ", "\n"));
+        message.setLogStream(StringUtils.substringBetween(m, "LOG-STREAM: ", "\n"));
+        logger.info("loggroup: "+message.getLogGroup());
+        logger.info("logstream: "+message.getLogStream());
+
+        String error = StringUtils.substringAfter(m,"LOG-MESSAGE: ");
+
+        logger.info("error: "+error);
+        // test for LogType.DATA_PROCESSING_EXCEPTION_FOR_UI_DISPLAY
+        // This has the format
+        // ERROR uk.ac.cam.lib.cudl.awslambda.handlers.AbstractRequestHandler -
+        // DATA-PROCESSING-EXCEPTION-FOR-UI-DISPLAY (message,error,stacktrace) || <json_event_message> || <error> || stacktrace
+        if (error.contains("DATA-PROCESSING-EXCEPTION-FOR-UI-DISPLAY")) {
+            logger.info("found DATA-PROCESSING-EXCEPTION-FOR-UI-DISPLAY");
+            String[] parts = error.split(" \\|\\| ");
+            logger.info("parts: "+parts.length);
+            if (parts.length<3) { throw new IOException("invalid notification found: "+snsNotification.getMessage()); }
+            message.setJsonEvent(parts[1]);
+            message.setError(parts[2]);
+            message.setStacktrace(parts[3]);
+            message.setLogType(LogType.DATA_PROCESSING_EXCEPTION_FOR_UI_DISPLAY);
+            logger.info("json: "+message.getJsonEvent());
+            logger.info("error: "+message.getError());
+            logger.info("stacktrace: "+message.getStacktrace());
+
+        } else if (error.contains("ERROR")) {
+            message.setLogType(LogType.ERROR);
+        } else if (error.contains("WARN")) {
+            message.setLogType(LogType.WARNING);
+        } else if (error.contains("Task timed out")) {
+            message.setLogType(LogType.TIMEOUT);
+        } else if (error.matches(".*5\\d{2}.*")) {
+            message.setLogType(LogType.CODE5XX);
+        }
+
+        return message;
+    }
+
+
 }

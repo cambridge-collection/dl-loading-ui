@@ -141,3 +141,7 @@ to deploy to remote host
 
 then run the docker commands as you would the local version.
 Add the -d flag to the up command for Detached mode: Run containers in the background.
+
+Note that you will need to copy your key to the servers manually to deploy remotely using the command:
+e.g. for dev: `ssh-copy-id -i ~/.ssh/mykey digilib@ec2-52-31-243-155.eu-west-1.compute.amazonaws.com`
+passwords for the digilib account can be found on keepass.

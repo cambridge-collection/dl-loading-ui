@@ -9,12 +9,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
 import org.thymeleaf.extras.springsecurity5.dialect.SpringSecurityDialect;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import uk.cam.lib.cdl.loading.security.tags.RoleDialect;
+
 
 @Configuration
 @EnableWebMvc
@@ -62,6 +64,7 @@ public class WebConfig implements WebMvcConfigurer {
         templateEngine.addDialect(new RoleDialect()); // our custom role dialect
         templateEngine.addDialect(new LayoutDialect()); // from layout-dialect
         templateEngine.addDialect(new SpringSecurityDialect()); // from springsecurity extras
+        templateEngine.addDialect(new Java8TimeDialect()); // Adds #temporals object for date formatting
         return templateEngine;
     }
 
@@ -71,4 +74,18 @@ public class WebConfig implements WebMvcConfigurer {
         viewResolver.setTemplateEngine(templateEngine());
         return viewResolver;
     }
+
+/*    @Bean
+    public FilterRegistrationBean<AWSXRayServletFilter> filterRegistrationBean() {
+
+        FilterRegistrationBean < AWSXRayServletFilter > registrationBean = new FilterRegistrationBean<>();
+        AWSXRayServletFilter filter = new AWSXRayServletFilter("dl-loading-ui-segment");
+
+        registrationBean.setFilter(filter);
+        registrationBean.addUrlPatterns("/edit/collection/*");
+        //registrationBean.setOrder(2);
+        return registrationBean;
+
+   }*/
+
 }

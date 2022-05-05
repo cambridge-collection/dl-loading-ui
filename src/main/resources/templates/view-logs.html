@@ -30,7 +30,7 @@
                 <div class="card shadow mb-4 mt-4 ">
                     <div class="card-header">
                         <h6 class="m-0 font-weight-bold">Recent Processing Errors</h6>
-                        (last 10 shown)
+                        (last 20 shown)
                     </div>
                     <div class="card-body">
 
@@ -38,36 +38,46 @@
                             <div class="col-2 m-2 text-right">
 
                             </div>
-                            <div class="m-2">
+                            <div class="m-2" th:with="count=1">
 
+                                <p class="float-right"><button class="btn btn-primary" type="button" data-toggle="collapse" data-target=".systemRow">Show/Hide System Errors</button></p>
                                 <table class="table table-hover table-bordered" id="dataTable"
                                        width="100%"
                                        cellspacing="0">
                                     <thead>
                                     <tr>
-                                        <th style="width: 10%">Id</th>
-                                        <th style="width: 10%">Timestamp</th>
-                                        <th style="width: 20%">Subject</th>
-                                        <th>Message</th>
+                                        <th style="width: 10%">Time</th>
+                                        <th style="width: 20%">Files Changed</th>
+                                        <th>Error</th>
+                                        <th style="width: 20%">Log</th>
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <tr th:each="message : ${messages}">
+                                    <tr th:each="message : ${messages}" th:class="${message.getError()}? userRow : 'systemRow collapse'">
                                         <td>
-                                            <p th:text="${message.getMessageId()}">
+                                            <p th:if="${message.getTimestamp() != null}" th:text="${#temporals.format(message.getTimestamp(), 'dd-MM-yyyy HH:mm')}">
                                             </p>
                                         </td>
                                         <td>
-                                            <p th:text="${message.getTimestamp()}">
-                                            </p>
+                                            <a th:if="${message.getSourceFileS3Link() != null}"  th:href="${message.getSourceFileS3Link()}" target="_blank"><p th:text="${message.getSourceFileChanged()}">
+                                            </p></a>
                                         </td>
                                         <td>
-                                            <p th:text="${message.getSubject()}">
-                                            </p>
+                                            <div th:if="*{message.getError() != null and #strings.length(message.getError())>400}">
+                                                <p class="userError">
+                                                    <span th:text="${#strings.substring(message.getError(),0,390)}"></span>
+                                                    <a data-toggle="collapse" th:href="'#Error-'+${message.getMessageId()}" role="button" aria-expanded="false">... more</a>
+                                                    <span th:text="${#strings.substring(message.getError(),390, #strings.length(message.getError()))}" class="collapse" th:id="'Error-'+${message.getMessageId()}"></span>
+                                                </p>
+                                            </div>
+                                            <div th:unless="*{message.getError()!=null and #strings.length(message.getError())>400}">
+                                                <p class="userError" th:if="${message.getError() != null}" th:text="${message.getError()}"></p>
+                                                <p class="systemError" th:if="${message.getError() == null && message.getMessage() != null}"
+                                                   th:text="${#strings.abbreviate(message.getMessage(),390)}"></p>
+                                            </div>
                                         </td>
                                         <td>
-                                            <p th:text="${message.getMessage()}">
-                                            </p>
+                                            <a th:if="${message.getCloudwatchLink() != null}"  th:href="${message.getCloudwatchLink()}" target="_blank"><p>More info. (requires auth)</p></a>
                                         </td>
                                     </tr>
                                     </tbody>

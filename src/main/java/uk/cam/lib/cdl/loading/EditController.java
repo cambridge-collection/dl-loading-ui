@@ -372,7 +372,7 @@ public class EditController {
 
         try {
             editAPI.updateCollection(collection, fullDescriptionHTML, proseCreditHTML, collectionForm.toUICollection(), workspaceIds);
-            attributes.addFlashAttribute("message", "Collection Updated.");
+            attributes.addFlashAttribute("message", "Collection Updated. If changes are not viewable in a few minutes check the <a href='/logs/view-logs.html'>error logs</a>.");
         }
         catch (EditApiException e) {
             LOG.error("Failed to update collection", e);
