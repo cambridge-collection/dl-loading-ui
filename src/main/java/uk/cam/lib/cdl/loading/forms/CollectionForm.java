@@ -1,6 +1,7 @@
 package uk.cam.lib.cdl.loading.forms;
 
 import uk.cam.lib.cdl.loading.model.editor.*;
+import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -15,12 +16,8 @@ import java.util.List;
  */
 
 public class CollectionForm {
-
-    @NotBlank(message = "Must specify collection type.")
-    private String collectionType;
-
     @NotBlank(message = "Must specify a url-slug for this collection.")
-    @Pattern(regexp = "^[a-z\\-]+$", message = "Must be all lower case letters or hyphen '-' with no spaces.")
+    @Pattern(regexp = "^[a-z\\-0-9_]+$", message = "Must be all lower case letters, numbers, underscore '_' or hyphen '-' with no spaces.")
     private String urlSlugName;
 
     // Can be null/blank for new collections.
@@ -49,20 +46,26 @@ public class CollectionForm {
     private String fullDescriptionHTML;
 
     private String proseCreditPath;
-    @NotBlank(message = "Must specify a prose credit.")
+
     private String proseCreditHTML;
+
+    @NotBlank(message = "Must specify a collection type")
+    private String collectionType;
 
     @NotNull
     private List<String> itemIds;
 
+    @NotNull
+    private List<String> subcollections;
+
     @NotBlank(message = "Must specify a thumbnail URL")
     private String thumbnailURL;
 
-    public CollectionForm(String collectionId, Collection collection, String descriptionHTML, String creditHTML) {
+    public CollectionForm(String collectionId, Collection collection, String descriptionHTML, String creditHTML,
+                          UICollection uiCollection) {
         if (collectionId == null || collection == null) {
             return;
         }
-        this.collectionType = collection.getType();
         this.urlSlugName = collection.getName().getUrlSlug();
         this.collectionId = collectionId;
         this.sortName = collection.getName().getSort();
@@ -75,6 +78,7 @@ public class CollectionForm {
         this.proseCreditPath = collection.getCredit().getProse().getId();
         this.proseCreditHTML = creditHTML;
         this.thumbnailURL = collection.getThumbnailURL();
+        this.collectionType = uiCollection.getLayout();
 
         List<String> itemIds = new ArrayList<>();
         for (Id id : collection.getItemIds()) {
@@ -83,14 +87,17 @@ public class CollectionForm {
             }
         }
         this.itemIds = itemIds;
+
+        List<String> sub_collections = new ArrayList<>();
+        for (Id id : collection.getSubCollectionIds()) {
+            if (id.getId()!=null && !id.getId().trim().equals("")) {
+                sub_collections.add(id.getId());
+            }
+        }
+        this.subcollections = sub_collections;
     }
 
-    public CollectionForm() {
-
-        // TODO read from properties
-        this.setCollectionType("https://schemas.cudl.lib.cam.ac.uk/package/v1/collection.json");
-
-    }
+    public CollectionForm() { }
 
     public String getShortDescription() {
         return shortDescription;
@@ -132,16 +139,20 @@ public class CollectionForm {
         return urlSlugName;
     }
 
-    public String getCollectionId() {
-        return collectionId;
-    }
-
     public String getCollectionType() {
         return collectionType;
     }
 
+    public String getCollectionId() {
+        return collectionId;
+    }
+
     public List<String> getItemIds() {
         return itemIds;
+    }
+
+    public List<String> getSubCollectionIds() {
+        return subcollections;
     }
 
     public Collection toCollection() {
@@ -156,14 +167,23 @@ public class CollectionForm {
                 itemIds.add(new Id(id));
             }
         }
-        Collection c = new Collection(collectionType, name, description, credit, itemIds);
+
+        List<Id> subCollectionIds = new ArrayList<>();
+        for (String id : getSubCollectionIds()) {
+            if (id!=null && !id.trim().equals("")) {
+                subCollectionIds.add(new Id(id));
+            }
+        }
+
+        Collection c = new Collection(name, description, credit, itemIds, subCollectionIds);
         c.setThumbnailURL(thumbnailURL);
         c.setCollectionId(collectionId);
         return c;
     }
 
-    public void setCollectionType(String collectionType) {
-        this.collectionType = collectionType;
+    public UICollection toUICollection() {
+
+        return new UICollection(new Id(collectionId), collectionType, new Id(thumbnailURL));
     }
 
     public void setUrlSlugName(String urlSlugName) {
@@ -174,6 +194,10 @@ public class CollectionForm {
     public void setCollectionId(String collectionId) {
 
         this.collectionId = collectionId;
+    }
+
+    public void setCollectionType(String collectionType) {
+        this.collectionType = collectionType;
     }
 
     public void setSortName(String sortName) {
@@ -222,6 +246,18 @@ public class CollectionForm {
         }
 
         this.itemIds = ids;
+    }
+
+    public void setSubCollectionIds(List<String> collectionIds) {
+
+        // Thymeleaf appends extra [ ] to the itemIds, so remove these here.
+        List<String> ids = new ArrayList<>();
+        for (String id : collectionIds) {
+            id = id.replaceAll("([\\[\\]])", "");
+            ids.add(id);
+        }
+
+        this.subcollections = ids;
     }
 
     public String getThumbnailURL() {

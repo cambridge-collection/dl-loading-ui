@@ -4,6 +4,8 @@
   "name": "Manchester Digital Library Data",
 
   "collections": [
-    { "@id": "collections/test.collection.json" }
+    { "@id": "collections/test.collection.json" },
+    { "@id": "collections/empty1.collection.json" },
+    { "@id": "collections/empty2.collection.json" }
   ]
 }

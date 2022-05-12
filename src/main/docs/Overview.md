@@ -104,11 +104,3 @@ this.
        assigned ROLEs. This section should be available only to people with the correct ROLE.
 
       To be implemented.
-
-
-   ##Other Issues:
-
-   There is currently some caching in the results of the deployment API which can probably be removed as it seems to
-   just make it too unresponsive to releases and the deployment interface should now be used by a large number of
-   users anyway.  Just remove the @Cacheable annotations.
-

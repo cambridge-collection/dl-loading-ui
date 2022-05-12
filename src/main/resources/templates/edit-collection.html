@@ -35,12 +35,12 @@
             <div class="mb-4">
                 <div th:if="${message}">
                     <div class="alert alert-success" role="alert">
-                        <span th:text="${message}"></span>
+                        <span th:utext="${message}"></span>
                     </div>
                 </div>
                 <div th:if="${error}">
                     <div class="alert alert-danger" role="alert">
-                        <span th:text="${error}"></span>
+                        <span th:utext="${error}"></span>
                     </div>
                 </div>
             </div>
@@ -58,6 +58,7 @@
                                   th:action="@{'/edit/collection/update?workspaceIds='+${workspaceIds}}"
                                   th:object="${form}">
                                 <input type="hidden" name="itemIds" th:value="*{ItemIds}">
+                                <input type="hidden" name="subCollectionIds" th:value="*{subCollectionIds}">
                                 <input type="hidden" name="collectionId" th:value="*{collectionId}">
                                 <div class="form-group w-auto">
                                     <div class="row">
@@ -69,14 +70,16 @@
                                                 <div class="col-4 m-2 text-right">Identifier / URL</div>
                                                 <div class="col m-2">
                                                     <div class="alert-danger"
-                                                         th:if="${#fields.hasErrors('urlSlugName')}"
+                                                         th:if="${#fields.hasErrors('urlSlugName') && newCollection}"
                                                          th:errors="*{urlSlugName}"></div>
 
-                                                    <input class="form-control"
+                                                    <input th:disabled="${!newCollection}" class="form-control"
                                                            type="text" name="urlSlugName"
                                                            id="name.urlSlugName"
                                                            maxlength="30"
                                                            th:value="*{urlSlugName}">
+
+                                                    <input th:if="${!newCollection}" type="hidden" name="urlSlugName" th:value="*{urlSlugName}">
                                                 </div>
                                             </div>
 
@@ -127,7 +130,7 @@
                                                     <div class="row">
                                                         <div style="width: 150px">
                                                             <img id="thumbnailImage" class="img-thumbnail"
-                                                                 th:src="${pathForDataDisplay + thumbnailURL}"
+                                                                 th:src="${pathForDataDisplay.resolve(thumbnailURL)}"
                                                                  width="150px"
                                                                  height="150px">
                                                             <input id="thumbnailImageInput" type="hidden"
@@ -150,6 +153,19 @@
 
                                     <div class="row mt-6">
                                         <div class="col"><h4>Description</h4></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-2 m-2 text-right">
+                                            <label for="collectionType">Layout</label>
+                                        </div>
+                                        <div class="col m-2">
+                                            <div class="alert-danger" th:if="${#fields.hasErrors('collectionType')}"
+                                                 th:errors="*{collectionType}"></div>
+                                            <select th:field="*{collectionType}" name="collectionType" id="collectionType">
+                                                <option th:each="collectionTypeOption : ${T(uk.cam.lib.cdl.loading.model.editor.CollectionType).values()}"
+                                                        th:value="${collectionTypeOption}" th:text="${collectionTypeOption}"></option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-2 m-2 text-right">
@@ -216,6 +232,17 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row mt-6" th:if="*{not #arrays.isEmpty(subCollectionIds)}">
+                                    <div class="col"><h4>Sub-Collections</h4></div>
+                                </div>
+                                <div class="row" th:if="*{not #arrays.isEmpty(subCollectionIds)}">
+                                    <div class="col">
+                                        <ul>
+                                            <li class="list-unstyled" th:each="id :*{subCollectionIds}" th:text="${id}"></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
                             </form>
                             <div class="row mt-6">
                                 <div class="col"><h4>Items</h4></div>
@@ -224,7 +251,7 @@
                                 <div class="col-2 m-2 text-right">
 
                                 </div>
-                                <div class="col-6 m-2">
+                                <div class="m-2">
 
                                     <table class="table table-hover table-bordered" id="dataTable"
                                            width="100%"
@@ -237,26 +264,27 @@
                                         </thead>
                                         <tbody>
                                         <tr th:each="item : ${items}">
-                                            <td
-                                                th:with="relativeFilePath=${item.filepath.replace(dataLocalPath, '')}">
-                                                <a th:href="${pathForDataDisplay + relativeFilePath}"
-                                                   th:text="${item.name}">
+                                            <td>
+                                                <a th:if="${#strings.containsIgnoreCase(item.id(),'tei')}"
+                                                   th:href="@{/edit/item(id=${item.id().toString()})}"
+                                                   th:text="${itemNames.get(item.id())}">
                                                 </a>
+                                                <div th:if="${!#strings.containsIgnoreCase(item.id(),'tei')}"
+                                                     th:text="${itemNames.get(item.id())}">
+                                                </div>
                                             </td>
                                             <td>
                                                 <form
                                                     action="/edit/collection/deleteItem"
-                                                    method="post" th:id="'deleteItemForm_'+${item.name}">
-                                                    <input type="hidden" name="itemName" th:value="${item.name}">
+                                                    method="post" th:id="'deleteItemForm_'+${item.id()}">
+                                                    <input type="hidden" name="itemId" th:value="${item.id()}">
                                                     <input type="hidden" name="collectionId" th:value="${form.collectionId}">
                                                     <button class="btn btn-link"
-                                                            th:id="'deleteItemButton_'+${item.name}"
+                                                            th:id="'deleteItemButton_'+${item.id()}"
                                                             onclick="return loading_ui_edit_collection.showDeleteModal(this);">
                                                         <i class="fas fa-trash-alt text-gray-500"></i>
                                                     </button>
                                                 </form>
-
-
                                             </td>
                                         </tr>
                                         </tbody>
@@ -276,20 +304,26 @@
                                 </div>
                             </div>
                             <div th:if="${!newCollection}" class="row mt-6">
-                                <div class="col-2 m-2 text-right">
-                                    <label for="additemFile">Add / Replace Item</label>
+                                <div class="col-6 offset-2 mt-2 mb-2">
+                                    <a class="btn btn-primary" th:href="@{/edit/item(col=${form.collectionId})}" href="#" role="button">Add new item</a>
                                 </div>
-                                <div class="col-6 m-2">
-                                    <form action="/edit/collection/addItem"
-                                          method="post" id="addItemFileForm" enctype="multipart/form-data">
-                                        <input type="file" name="file" class="form-control-file" id="addItemFile">
+                            </div>
+                            <div th:if="${!newCollection}" class="row mt-6">
+                                <div class="col-6 offset-2 mt-2 mb-2">
+                                    <form action="/edit/collection/addExistingItemsToCollection" method="post" >
                                         <input type="hidden" name="collectionId" th:value="${form.collectionId}">
+                                        <input type="hidden" name="workspaceIds" th:value="${workspaceIds}">
+                                        <label>Item ids (comma separated) e.g. MS-ADD-03958,MS-ADD-03960,MS-ADD-03996</label>
+                                        <input class="form-control" type="text" name="itemIds" size="60"
+                                               id="itemIds">
+                                        <button type="submit" class="btn btn-primary
+                                                float-right m-1">Add existing items</button>
                                     </form>
                                 </div>
                             </div>
+
                             <div class="row mt-6">
                                 <div class="col">
-
                                     <button type="button" id="collectioneditform-reset" class="btn btn-secondary
                                                 float-right
                                         m-1">Reset

@@ -1,6 +1,6 @@
-DROP table items_in_workspaces;
-DROP table collections_in_workspaces;
-DROP table workspaces;
+DROP table IF EXISTS items_in_workspaces;
+DROP table IF EXISTS collections_in_workspaces;
+DROP table IF EXISTS workspaces;
 
 create table workspaces(
     workspace_id bigserial not null,

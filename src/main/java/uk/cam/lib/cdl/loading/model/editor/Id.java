@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.beans.ConstructorProperties;
+import java.nio.file.Path;
 
 public class Id implements Comparable<Id> {
 
@@ -13,6 +14,10 @@ public class Id implements Comparable<Id> {
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public Id(@JsonProperty("@id") String id) {
         this.id = id;
+    }
+
+    public Id(Path id) {
+        this(id.toString());
     }
 
     @JsonProperty("@id")

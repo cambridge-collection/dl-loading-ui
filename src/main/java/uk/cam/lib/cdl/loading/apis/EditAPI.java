@@ -5,90 +5,91 @@ import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.eclipse.jgit.api.errors.GitAPIException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.multipart.MultipartFile;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-import uk.cam.lib.cdl.loading.config.GitLocalVariables;
+import uk.cam.lib.cdl.loading.exceptions.EditApiException;
+import uk.cam.lib.cdl.loading.exceptions.NotFoundException;
 import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.*;
+import uk.cam.lib.cdl.loading.model.editor.modelops.*;
 import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
-import uk.cam.lib.cdl.loading.utils.GitHelper;
+import uk.cam.lib.cdl.loading.utils.ThrowingSupplier;
+import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
 import javax.validation.constraints.NotNull;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 
 /*
 TODO This should be refactored out to talk to a external API.
 Access info from the git data directly for now.
 */
 public class EditAPI {
+    private static final Logger LOG = LoggerFactory.getLogger(EditAPI.class);
 
-    private final String dataPath;
-    private final String dataItemPath;
-    private final File datasetFile;
-    private final File uiFile;
-    private final GitHelper gitHelper;
+    private final Path dataPath;
+    private final Path dataItemPath;
+    private final Path datasetFile;
+    private final Path uiFile;
+    private final ModelStateHandlerResolver stateHandlers;
+    private final ObjectMapper objectMapper;
 
     private Map<String, Collection> collectionMap = Collections.synchronizedMap(new HashMap<>());
-    private Map<String, String> collectionFilepaths = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, Path> collectionFilepaths = Collections.synchronizedMap(new HashMap<>());
     private Map<String, Item> itemMap = Collections.synchronizedMap(new HashMap<>());
-    private Map<String, String> thumbnailImageURLs = Collections.synchronizedMap(new HashMap<>());
+    private Map<String, UICollection> uiCollectionMap = Collections.synchronizedMap(new HashMap<>());
     private final Pattern filenamePattern = Pattern.compile("^[a-zA-Z0-9]+-[a-zA-Z0-9]+[a-zA-Z0-9\\-]*-[0-9]{5}$");
 
-    public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath,
-                   GitLocalVariables gitSourceVariables) {
-        this.gitHelper = new GitHelper(gitSourceVariables);
-        this.dataPath = dataPath;
-        this.datasetFile = new File(dataPath + File.separator + dlDatasetFilename);
-        this.uiFile = new File(dataPath + File.separator + dlUIFilename);
-        this.dataItemPath = dataItemPath;
-        setup();
-    }
-
     /**
-     * Used for testing Edit API
+     * Initialise an EditAPI instance by reading model data from a git repository.
      *
      * @param dataPath          File path to source data
      * @param dlDatasetFilename Filename for the root JSON file for this dataset.
      * @param dataItemPath      File path to the item TEI directory.
-     * @param gitHelper         Object for interacting with Git
+     * @throws IllegalStateException If the initial model load from the git repo fails.
      */
-    public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath,
-                   GitHelper gitHelper) {
-        this.gitHelper = gitHelper;
-        this.dataPath = dataPath;
-        this.datasetFile = new File(dataPath + File.separator + dlDatasetFilename);
-        this.uiFile = new File(dataPath + File.separator + dlUIFilename);
-        this.dataItemPath = dataItemPath;
-        setup();
+    public EditAPI(String dataPath, String dlDatasetFilename, String dlUIFilename, String dataItemPath) throws EditApiException {
+
+        this.dataPath = Path.of(dataPath).normalize();
+        Preconditions.checkArgument(this.dataPath.isAbsolute(), "dataPath is not absolute: %s", dataPath);
+        this.datasetFile = this.dataPath.resolve(dlDatasetFilename).normalize();
+        this.uiFile = this.dataPath.resolve(dlUIFilename).normalize();
+        this.dataItemPath = Path.of(dataItemPath).normalize();
+        Preconditions.checkArgument(this.dataItemPath.startsWith(this.dataPath), "dataItemPath is not under dataPath");
+        this.objectMapper = createObjectMapper();
+        this.stateHandlers = createStateHandlers();
+
+        updateModel();
     }
 
-    private void setup() {
-        try {
-            if (!datasetFile.exists()) {
-                throw new FileNotFoundException("Dataset file cannot be found at: " + datasetFile.toPath());
-            }
+    private ModelStateHandlerResolver createStateHandlers() {
+        return DefaultModelStateHandlerResolver.builder()
+            .addHandlers(
+                ModelStates.itemWriter(ModelOps(), this.dataPath),
+                ModelStates.itemRemover(ModelOps(), this.dataPath),
+                ModelStates.collectionWriter(ModelOps(), this.objectMapper, this.dataPath),
+                ModelStates.collectionRemover(ModelOps(), this.dataPath)
+            )
+            .build();
+    }
 
-            updateModel();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private ObjectMapper createObjectMapper() {
+        var mapper = new ObjectMapper();
+        mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+        mapper.enable(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature());
+        return mapper;
     }
 
     /**
@@ -97,41 +98,54 @@ public class EditAPI {
      *
      * @throws IOException On problems accessing file system data
      */
-    public synchronized void updateModel() throws IOException {
+    public synchronized void updateModel() throws EditApiException {
         try {
-            gitHelper.pullGitChanges();
-        } catch (GitAPIException e) {
-            e.printStackTrace();
+            _updateModel();
         }
+        catch (IOException e) {
+            throw new EditApiException("Updating model failed: " + e.getMessage(), e);
+        }
+    }
+    private synchronized void _updateModel() throws EditApiException, IOException {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
         mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
-        Dataset dataset = mapper.readValue(datasetFile, Dataset.class);
+        Dataset dataset = mapper.readValue(datasetFile.toFile(), Dataset.class);
         Map<String, Collection> newCollectionMap = Collections.synchronizedMap(new HashMap<>());
-        Map<String, String> newCollectionFilepaths = Collections.synchronizedMap(new HashMap<>());
+        Map<String, Path> newCollectionFilepaths = Collections.synchronizedMap(new HashMap<>());
         Map<String, Item> newItemMap = Collections.synchronizedMap(new HashMap<>());
 
         // Setup collections
         for (Id id : dataset.getCollections()) {
 
-            String collectionId = id.getId();
-            File collectionFile = new File(dataPath + File.separator + collectionId);
-            if (!collectionFile.exists()) {
-                throw new FileNotFoundException("Collection file cannot be found at: " + collectionFile.toPath());
+            try {
+                var collectionFile = datasetFile.resolveSibling(id.getId()).normalize();
+                Preconditions.checkState(collectionFile.startsWith(dataPath), "Collection '%s' is not under dataPath", id.getId());
+                String collectionId = dataPath.relativize(collectionFile).toString();
+                if (!Files.exists(collectionFile)) {
+                    throw new FileNotFoundException("Collection file cannot be found at: " + collectionFile);
+                }
+
+                Collection c = mapper.readValue(collectionFile.toFile(), Collection.class);
+                c.setCollectionId(collectionId);
+
+                // Setup collection maps
+                newCollectionMap.put(collectionId, c);
+                newCollectionFilepaths.put(collectionId, collectionFile);
+
+                for (Id relativeItemId : c.getItemIds()) {
+                    try {
+                        var itemFile = collectionFile.resolveSibling(relativeItemId.getId());
+                        var itemId = dataPath.relativize(itemFile);
+                        newItemMap.put(itemId.toString(), ImmutableItem.of(itemId));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            Collection c = mapper.readValue(collectionFile, Collection.class);
-            c.setCollectionId(collectionId);
-
-            // Setup collection maps
-            newCollectionMap.put(collectionId, c);
-            newCollectionFilepaths.put(collectionId, collectionFile.getCanonicalPath());
-
-            for (Id itemId : c.getItemIds()) {
-                newItemMap.put(FilenameUtils.getBaseName(itemId.getId()), createItem(itemId.getId(), collectionFile));
-            }
-
         }
 
         this.collectionMap = newCollectionMap;
@@ -139,23 +153,16 @@ public class EditAPI {
         this.itemMap = newItemMap;
 
         // Update UI
-        Map<String, String> newThumbnailImageURLs = Collections.synchronizedMap(new HashMap<>());
-        UI ui = mapper.readValue(uiFile, UI.class);
+        Map<String, UICollection> newUICollectionMap = Collections.synchronizedMap(new HashMap<>());
+        UI ui = mapper.readValue(uiFile.toFile(), UI.class);
         for (UICollection collection : ui.getThemeData().getCollections()) {
 
             // Get collection Id from the filepath
             String collectionId = collection.getCollection().getId();
-
-            // TODO Properly format Ids into set pattern
-            // For now remove ./ at the start of a filepath
-            if (collectionId.startsWith("./")) {
-                collectionId = collectionId.replaceFirst("./", "");
-            }
-
-            newThumbnailImageURLs.put(collectionId, collection.getThumbnail().getId());
+            newUICollectionMap.put(collectionId, collection);
 
         }
-        this.thumbnailImageURLs = newThumbnailImageURLs;
+        this.uiCollectionMap = newUICollectionMap;
 
         for (Collection c : collectionMap.values()) {
             String thumbnailURL = getCollectionThumbnailURL(c.getCollectionId());
@@ -172,237 +179,171 @@ public class EditAPI {
      */
     private String getCollectionThumbnailURL(@NotNull String collectionId) {
 
-        return this.thumbnailImageURLs.get(collectionId);
+        UICollection uiCollection = uiCollectionMap.get(collectionId);
+        return uiCollection.getThumbnail().getId();
+
     }
 
-    private void setCollectionThumbnailURL(String thumbnailURL, String collectionId) {
+    private void setUICollection(UICollection uiCollection, String collectionId) throws EditApiException {
+        ObjectMapper mapper = new ObjectMapper();
 
+        mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+        mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
+        UI ui = null;
         try {
-            ObjectMapper mapper = new ObjectMapper();
-
-            mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
-            mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
-            UI ui = mapper.readValue(uiFile, UI.class);
-            for (UICollection collection : ui.getThemeData().getCollections()) {
-                String thisCollectionPath = collection.getCollection().getId();
-
-                if (thisCollectionPath.equals(collectionId)) {
-
-                    collection.setThumbnail(new Id(thumbnailURL));
-                    ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-                    writer.writeValue(uiFile, ui);
-                    break;
-                }
-            }
-
+            ui = mapper.readValue(uiFile.toFile(), UI.class);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new EditApiException(String.format(
+                "Failed to load UI file '%s': %s", uiFile, e.getMessage()), e);
         }
+        for (UICollection collection : ui.getThemeData().getCollections()) {
+            String thisCollectionPath = collection.getCollection().getId();
 
+            if (thisCollectionPath.equals(collectionId)) {
+
+                collection.setThumbnail(uiCollection.getThumbnail());
+                collection.setLayout(uiCollection.getLayout());
+                ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
+                try {
+                    writer.writeValue(uiFile.toFile(), ui);
+                } catch (IOException e) {
+                    throw new EditApiException(String.format(
+                        "Failed to save UI file '%s': %s", uiFile, e.getMessage()), e);
+                }
+                break;
+            }
+        }
+    }
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
+    public Stream<Collection> streamCollections() {
+        return collectionMap.values().stream()
+            .map(Collection::copyOf);
     }
 
-    @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
     public List<Collection> getCollections() {
-        return new ArrayList<>(collectionMap.values());
+        return streamCollections().collect(toImmutableList());
     }
 
     @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
+    public UICollection getCollectionUI(String collectionId) {
+
+        UICollection uiCollection = uiCollectionMap.get(collectionId);
+        return uiCollection;
+    }
+
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
+    public Collection getCollection(Path id) {
+        ModelOps().validatePathForId(id);
+        var collection = collectionMap.get(id.toString());
+        if(collection == null) {
+            throw new NotFoundException(String.format("Collection not found: '%s'", id));
+        }
+        // Collections are mutable, so we need to copy collections we share to
+        // keep our data in a predictable state.
+        return Collection.copyOf(collection);
+    }
+
     public Collection getCollection(String collectionId) {
-        return collectionMap.get(collectionId);
-    }
-
-    private Item createItem(String id, File collectionFile) throws IOException {
-        File f = new File(collectionFile.getParentFile().getCanonicalPath(), id);
-        return new Item(FilenameUtils.getBaseName(f.getName()), f.getCanonicalPath(), new Id(id));
-    }
-
-    @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
-    public Item getItem(String id) {
-        return itemMap.get(FilenameUtils.getBaseName(id));
+        return getCollection(Path.of(collectionId));
     }
 
     @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
     public java.util.Collection<Item> getItems() {
-        return itemMap.values();
+        return ImmutableList.copyOf(itemMap.values());
     }
 
-    public boolean validate(MultipartFile file) {
-
-        // Validate content
-        boolean valid = false;
+    public boolean itemExists(Path id) {
         try {
-            String content = IOUtils.toString(file.getInputStream(), StandardCharsets.UTF_8);
-
-            if (Objects.requireNonNull(file.getContentType()).equals("text/xml") ||
-                Objects.requireNonNull(file.getContentType()).equals("application/xml")) {
-                valid = validateXML(file.getOriginalFilename(), content);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            getItem(id);
+            return true;
         }
-
-        return valid;
-    }
-
-    public boolean validateFilename(String filename) {
-
-        Matcher matcher = filenamePattern.matcher(filename);
-        return matcher.find();
-
-    }
-
-    private boolean validateXML(String filename, String content) {
-
-        // TODO There currently does not exists a XML schema to validate against.
-        // could convert to JSON using cudl-pack and then validate against item json?
-
-        // For now, just make sure it's valid XML.
-        DocumentBuilder parser = null;
-        try {
-            parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document = parser.parse(IOUtils.toInputStream(content, "UTF-8"));
-            if (document != null) {
-                return true;
-            }
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            e.printStackTrace();
-        }
-
+        catch (NotFoundException ignored) {}
         return false;
     }
 
-    private String getDataItemPath() {
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
+    public Item getItem(Path id) {
+        ModelOps().validatePathForId(id);
+        var item = itemMap.get(id.toString());
+        if(item == null) {
+            throw new NotFoundException(String.format("Item not found: '%s'", id));
+        }
+        return item;
+    }
+    public Item getItem(String id) {
+        return getItem(Path.of(id));
+    }
+    public Item getItemWithData(Item item) throws EditApiException {
+        return getItemWithData(item.id());
+    }
+    @PreAuthorize("@roleService.canViewWorkspaces(authentication) || @roleService.canEditWorkspaces(authentication)")
+    public Item getItemWithData(Path id) throws EditApiException {
+        var item = getItem(id); // validate the item exists
+        try {
+            return ImmutableItem.copyOf(item)
+                .withFileData(ModelOps().readItemMetadataAsString(this.dataPath, item));
+        }
+        catch (IOException e) {
+            throw new EditApiException("Failed to read item file: " + e.getMessage(), e);
+        }
+    }
+
+    private Path getDataItemPath() {
         return dataItemPath;
     }
 
-    private boolean itemInCollection(String itemName, Collection collection) {
-        Item item = itemMap.get(itemName);
-        if (item != null) {
-            return collection.getItemIds().contains(item.getId());
-        }
-        return false;
+    /**
+     * Modify an Item's data and or the Collections that it's referenced from.
+     *
+     * @param item The state of the Item to enforce.
+     * @param collectionMembership A transform modifying the Collections referencing the item.
+     * @return The state of the Item which was enforced. Will be empty if only collections were changed.
+     * @throws EditApiException
+     * @see uk.cam.lib.cdl.loading.utils.sets.SetMembership
+     */
+    // FIXME: This needs permission enforcement
+    // @PreAuthorize("@roleService.canEditCollection(#collectionId,authentication)")
+    public Optional<ModelState<Item>> enforceItemState(
+        Item item,
+        SetMembershipTransformation<Path> collectionMembership
+    ) throws EditApiException {
+        Preconditions.checkArgument(itemExists(item.id()) || item.fileData().isPresent(),
+            "item must have fileData if it's being created");
+
+        return updateData(() -> {
+            var requiredStateChanges = ModelOps().transformItem(
+                item, this.collectionMap.values(), collectionMembership);
+
+            var results = ModelOps().enforceModelState(requiredStateChanges, this.stateHandlers);
+
+            // There won't be any item change enforced if it existed and had no attached file data
+            return results.stream()
+                .map(ModelStateEnforcementResult::state)
+                .flatMap(state -> state.match(Item.class).stream())
+                .findFirst();
+        });
     }
 
-    @PreAuthorize("@roleService.canEditCollection(#collectionId,authentication)")
-    public boolean addItemToCollection(String itemName, String fileExtension, InputStream contents, String collectionId) {
-
-        try {
-            gitHelper.pullGitChanges();
-
-            Collection collection = getCollection(collectionId);
-
-            File output;
-
-            // Check to see if the file already exists
-            boolean itemAlreadyInCollection = itemInCollection(itemName, collection);
-            if (itemMap.containsKey(itemName)) {
-
-                // Overwrite existing Item
-                output = new File(itemMap.get(itemName).getFilepath());
-
-            } else {
-
-                // new Item
-                output = new File(getDataItemPath() +
-                    FilenameUtils.getBaseName(itemName) +
-                    File.separator + itemName + "." + fileExtension);
-                output.getParentFile().mkdirs();
-
-            }
-
-            // Write out file.
-            FileUtils.copyInputStreamToFile(contents, output);
-
-            if (!itemAlreadyInCollection) {
-
-                String collectionFilePath = collectionFilepaths.get(collection.getCollectionId());
-                // Add itemId to collection
-                if (itemMap.containsKey(itemName)) {
-                    collection.getItemIds().add(itemMap.get(itemName).getId());
-                } else {
-                    String collectionDir = new File(collectionFilePath).getParentFile().getPath();
-                    String itemPath = Paths.get(collectionDir).relativize(Paths.get(output.getCanonicalPath())).toString();
-                    Id id = new Id(itemPath);
-                    collection.getItemIds().add(id);
-                }
-
-                // Write out collection file
-                ObjectMapper mapper = new ObjectMapper();
-                ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-                writer.writeValue(new File(collectionFilePath), collection);
-
-            }
-
-            gitHelper.pushGitChanges();
-
-            updateModel();
-
-            return true;
-
-        } catch (IOException | GitAPIException e) {
-            e.printStackTrace();
-        }
-        return false;
+    public Optional<ModelState<Item>> enforceItemState(
+        Path itemId,
+        SetMembershipTransformation<Path> collectionMembership
+    ) throws EditApiException {
+        return enforceItemState(getItem(itemId), collectionMembership);
     }
 
-    @PreAuthorize("@roleService.canEditCollection(#collectionId,authentication)")
-    public boolean deleteItemFromCollection(String itemName, String collectionId) {
+    protected <T, Err extends EditApiException> T updateData(ThrowingSupplier<T, Err> operation) throws EditApiException {
+        Preconditions.checkNotNull(operation);
 
-        try {
-            gitHelper.pullGitChanges();
+        var result = operation.get();
+        updateModel();
+        return result;
 
-            Collection collection = getCollection(collectionId);
-            Item item = itemMap.get(itemName);
-            collection.getItemIds().remove(item.getId());
-
-            // Write out collection file
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-            String collectionFilePath = collectionFilepaths.get(collectionId);
-            writer.writeValue(new File(collectionFilePath), collection);
-
-            // Delete file for item if it exists in no other collection
-            if (getFirstCollectionForItem(item) == null) {
-                File f = new File(item.getFilepath());
-                if (!f.delete()) {
-                    return false;
-                }
-                // remove parent dir if empty
-                File parentFile = f.getParentFile();
-                if (parentFile != null && f.getParentFile().isDirectory() &&
-                    Objects.requireNonNull(parentFile.list()).length == 0) {
-                    if (!parentFile.delete()) {
-                        return false;
-                    }
-                }
-            }
-
-            gitHelper.pushGitChanges();
-
-            updateModel();
-
-            return true;
-        } catch (IOException | GitAPIException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    private Collection getFirstCollectionForItem(Item i) {
-
-        for (Collection c : getCollections()) {
-            if (c.getItemIds().contains(i.getId())) {
-                return c;
-            }
-        }
-        return null;
     }
 
     @PreAuthorize("@roleService.canEditCollection(#collection.collectionId, authentication) ||" +
             " @roleService.canEditWorkspace(#workspaceIds, authentication)")
-    public boolean updateCollection(Collection collection, String descriptionHTML, String creditHTML,
-                                    List<Long> workspaceIds) {
+    public void updateCollection(Collection collection, String descriptionHTML, String creditHTML,
+                                    UICollection uiCollection, List<Long> workspaceIds) throws EditApiException {
         try {
 
             ObjectMapper mapper = new ObjectMapper();
@@ -410,66 +351,67 @@ public class EditAPI {
             mapper.enable(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature());
             ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
 
+            // Set metadata for error tracing
+
+
             String collectionId = collection.getCollectionId();
 
-            String collectionFilepath = collectionFilepaths.get(collectionId);
+            Path collectionFilepath = collectionFilepaths.get(collectionId);
             if (collectionFilepath == null) {
                 // New item so create filepath
-                collectionFilepath = dataPath + File.separator + collectionId;
+                collectionFilepath = dataPath.resolve(collectionId).normalize();
+                Preconditions.checkState(collectionFilepath.startsWith(dataPath), "collection path is not under dataPath: '%s'", collectionFilepath);
             }
 
             // If collection is not in dataset file add it.
-            Dataset dataset = mapper.readValue(datasetFile, Dataset.class);
+            Dataset dataset = mapper.readValue(datasetFile.toFile(), Dataset.class);
             List<Id> collectionIds = dataset.getCollections();
             if (!collectionIds.contains(new Id(collectionId))) {
                 collectionIds.add(new Id(collectionId));
-                writer.writeValue(datasetFile, dataset);
+                writer.writeValue(datasetFile.toFile(), dataset);
             }
 
             // If collectionThumbnail is not in uiFile add it
             // TODO: Allow settings or collection form to define UI layout for new collections
-            UI ui = mapper.readValue(uiFile, UI.class);
+            UI ui = mapper.readValue(uiFile.toFile(), UI.class);
             List<UICollection> uiCollections = ui.getThemeData().getCollections();
             if (!UICollectionContains(collectionId, uiCollections)) {
                 uiCollections.add(new UICollection(new Id(collectionId),
-                    "organisation", new Id(collection.getThumbnailURL())));
-                writer.writeValue(uiFile, ui);
+                    uiCollection.getLayout(), uiCollection.getThumbnail()));
+                writer.writeValue(uiFile.toFile(), ui);
             }
 
             // Write out collection file
-            File collectionFile = new File(collectionFilepath);
-            writer.writeValue(collectionFile, collection);
+            writer.writeValue(collectionFilepath.toFile(), collection);
 
             // Write out HTML section files
-            File descriptionHTMLFile = new File(collectionFile.getParent(), collection.getDescription().getFull().getId());
-            FileUtils.write(descriptionHTMLFile, descriptionHTML, "UTF-8");
+            var descriptionHTMLFile = collectionFilepath.getParent().resolve(collection.getDescription().getFull().getId()).normalize();
+            Preconditions.checkState(descriptionHTMLFile.startsWith(dataPath), "descriptionHTMLFile is not under dataPath: %s", descriptionHTMLFile);
+            FileUtils.write(descriptionHTMLFile.toFile(), descriptionHTML, "UTF-8");
 
-            File creditHTMLFile = new File(collectionFile.getParent(), collection.getCredit().getProse().getId());
-            FileUtils.write(creditHTMLFile, creditHTML, "UTF-8");
+            var creditHTMLFile = collectionFilepath.getParent().resolve(collection.getCredit().getProse().getId()).normalize();
+            Preconditions.checkState(creditHTMLFile.startsWith(dataPath), "creditHTMLFile is not under dataPath: %s", creditHTMLFile);
+            FileUtils.write(creditHTMLFile.toFile(), creditHTML, "UTF-8");
 
             // Update collection thumbnail in the UI
-            setCollectionThumbnailURL(collection.getThumbnailURL(), collectionId);
+            setUICollection(uiCollection, collectionId);
 
-            // Git Commit and push to remote repo.
-            boolean success = gitHelper.pushGitChanges();
             updateModel();
 
-            return success;
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new EditApiException("Failed to update Collection: " + e.getMessage(), e);
         }
-        return false;
     }
 
-    public String getDataLocalPath() {
-        return gitHelper.getDataLocalPath();
+    public Path getDataLocalPath() {
+        return dataPath;
     }
 
-    public String getCollectionPath(String collectionId) {
+    public Path getCollectionPath(String collectionId) {
         return collectionFilepaths.get(collectionId);
     }
 
-    public File getDatasetFile() {
+    public Path getDatasetFile() {
         return datasetFile;
     }
 

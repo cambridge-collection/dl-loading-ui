@@ -144,6 +144,7 @@ public class WebSecurityConfig {
                 .antMatchers("/img/**").permitAll()
                 .antMatchers("/webjars/**").permitAll()
                 .antMatchers("/login/**").permitAll()
+                .antMatchers("/logs/handleErrorLog").permitAll()
                 .anyRequest().authenticated();
 
             // Required for allowing Iframe embedding from same origin.

@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.editing.pagination;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -7,5 +8,5 @@ import java.util.List;
  * e.g. a CSV file.
  */
 public interface PageLoader<T> {
-    List<Page> loadPages(T source);
+    List<Page> loadPages(T source) throws IOException;
 }

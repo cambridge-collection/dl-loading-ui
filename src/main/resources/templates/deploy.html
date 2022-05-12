@@ -5,7 +5,6 @@
     <!-- TODO: fix the flash of unstyled content that happens if these styles are not included here -->
     <link href="/webjars/startbootstrap-sb-admin-2/vendor/fontawesome-free/css/all.min.css" rel="stylesheet"
           type="text/css">
-    <link href="/webjars/startbootstrap-sb-admin-2/vendor/datatables/dataTables.bootstrap4.css" rel="stylesheet">
     <link href="/webjars/startbootstrap-sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
     <link href="/css/deploy.css" rel="stylesheet">
 </head>
@@ -37,81 +36,20 @@
                         <span th:text="${error}"></span>
                     </div>
                 </div>
-                <div class="card border-left-success shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <span class="text-xs font-weight-bold text-primary text-uppercase mb-1">Recently
-                                    created
-                                    packages
-                                </span>
-                                <div th:if="${tags.size()>0}">
-                                <p th:object="${tags[__${tags.size()-1}__]}">
-                                    The last package created was
-                                    <span class="h5 mb-0 font-weight-bold text-gray-800">
-                                    <span th:text="*{name}"></span>
-                                </span> on <span class="h5 mb-0 font-weight-bold text-gray-800">
-                                    <span th:text="*{date.toLocalDate()}"></span>
-                                </span> at <span class="h5 mb-0 font-weight-bold text-gray-800">
-                                    <span th:text="*{date.toLocalTime().toString('HH:mm:ss')}"></span>
-                                </span>
-                                </p>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-box-open fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Cards -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <div class="row">
-                        <h6 class="m-0 font-weight-bold text-primary col">Current Status</h6>
-                        <div class="text-sm-right col"><a class="text-gray-500" href="/deploy/cache/refresh">Refresh
-                            Table</a></div>
+                        <h6 class="m-0 font-weight-bold text-primary col">Deploy</h6>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="card mb-3">
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-borderless table-hover" id="dataTable"
-                                       data-order='[[ 1, "asc" ]]'
-                                       width="100%"
-                                       cellspacing="0">
-                                    <thead>
-                                    <tr>
-                                        <th>Instance ID</th>
-                                        <th>
-                                            Version
-                                        </th>
-                                        <th>URL</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr th:each="instance : ${instances}">
-                                        <td><a th:href="${'/deploy/status/'+instance.instanceId}"
-                                               th:text="${instance.instanceId}"></a></td>
-                                        <td>
-                                            <select th:name="${instance.instanceId}" class="custom-select"
-                                                    th:onfocus="deploy.beforeVersionChange(this)"
-                                                    th:onchange="deploy.onVersionChange(this)"
-                                            >
-                                                <option th:each="tag : ${tags}" th:value="${tag.name}"
-                                                        th:text="${tag.name}"
-                                                        th:selected="${tag.name==instance.version}"></option>
-                                            </select>
-                                        </td>
-                                        <td><a th:href="${instance.url}"
-                                               target="_blank"><span th:text="${instance.url}"></span></a></td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <button class="btn btn-primary" type="submit" data-toggle="modal"
+                                    data-target="#confirmDeployModal">Deploy this version to Production</button>
                         </div>
                     </div>
                 </div>
@@ -130,23 +68,20 @@
         </div>
     </footer>
 
-    <div class="modal fade" id="confirmChangeModal" tabindex="-1" role="dialog" aria-labelledby="confirmChangeModal"
+    <div class="modal fade" id="confirmDeployModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeployModal"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="confirmChangeLabel">Deploy a new version?</h5>
+                    <h5 class="modal-title" id="confirmDeployLabel">Deploy all changes?</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div class="modal-body">This will deploy the package <b><span
-                        id="confirmChangePackageName"></span></b> to
-                    <b><span id="confirmChangeInstanceId"></span></b>.
+                <div class="modal-body">This will deploy the current content to <b>production</b>.
                 </div>
                 <div class="modal-footer">
-                    <form method="POST" th:id="confirmDeployForm" th:object="${DeployForm}" action="#">
-                        <input type="hidden" name="version" value=""/>
+                    <form method="POST" th:id="confirmDeployForm" action="/deploy/production">
                         <button type="submit" value="value" class="btn btn-primary">Deploy</button>
                     </form>
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
@@ -158,8 +93,5 @@
 </div>
 
 <!-- /.content-wrapper -->
-<div id="page_js" layout:fragment="page_js">
-    <script type="text/javascript" src="/js/deploy.js"></script>
-</div>
 </body>
 </html>

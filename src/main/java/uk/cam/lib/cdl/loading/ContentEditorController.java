@@ -1,6 +1,9 @@
 package uk.cam.lib.cdl.loading;
 
+import com.google.common.base.Preconditions;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -12,10 +15,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
-import uk.cam.lib.cdl.loading.config.GitLocalVariables;
 import uk.cam.lib.cdl.loading.editing.BrowseFile;
 import uk.cam.lib.cdl.loading.editing.FileSave;
-import uk.cam.lib.cdl.loading.utils.GitHelper;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -23,10 +24,8 @@ import javax.validation.constraints.Pattern;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * Controller for editing content through CKEditor on path /editor
@@ -34,24 +33,31 @@ import java.util.Objects;
 @Controller
 @RequestMapping("/editor")
 public class ContentEditorController {
+    private static final Logger LOG = LoggerFactory.getLogger(ContentEditorController.class);
 
     protected final String contentHTMLPath;
     protected final String contentImagesPath;
     protected final String contentImagesURL;
     private final String pathForDataDisplay;
-    private final GitHelper gitHelper;
 
     @Autowired
     public ContentEditorController(EditAPI editAPI, @Value("${data.url.display}") String pathForDataDisplay,
                                    @Value("${data.path.images}") String imagePath,
-                                   @Value("${data.path.html}") String htmlPath,
-                                   GitLocalVariables gitSourceVariables) {
+                                   @Value("${data.path.html}") String htmlPath) {
 
         this.pathForDataDisplay = "/edit"+pathForDataDisplay;
         this.contentImagesURL = "/edit"+pathForDataDisplay + imagePath;
-        this.contentImagesPath = editAPI.getDataLocalPath() + imagePath;
-        this.contentHTMLPath = editAPI.getDataLocalPath() + htmlPath;
-        this.gitHelper = new GitHelper(gitSourceVariables);
+        this.contentImagesPath = editAPI.getDataLocalPath().resolve(imagePath).toString();
+        this.contentHTMLPath = editAPI.getDataLocalPath().resolve(htmlPath).toString();
+
+        Preconditions.checkArgument(Path.of(this.pathForDataDisplay)
+            .equals(Path.of("/edit", pathForDataDisplay).normalize()));
+        Preconditions.checkArgument(Path.of(this.contentImagesURL)
+            .equals(Path.of("/edit", pathForDataDisplay, imagePath).normalize()));
+        Preconditions.checkArgument(Path.of(this.contentImagesPath)
+            .equals(editAPI.getDataLocalPath().resolve(imagePath).normalize()));
+        Preconditions.checkArgument(Path.of(this.contentHTMLPath)
+            .equals(editAPI.getDataLocalPath().resolve(htmlPath).normalize()));
     }
 
     /**
@@ -68,6 +74,7 @@ public class ContentEditorController {
     @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
     public ResponseEntity<String> handleAddImageRequest(@Valid @ModelAttribute() AddImagesParameters addParams,
                                                         BindingResult bindResult) throws IOException {
+        // FIXME: This function modifies the git repo without any locking
 
         // Check file extension and content type are image.
         uploadFileValidation(addParams, bindResult);
@@ -85,10 +92,6 @@ public class ContentEditorController {
         boolean saveSuccessful = FileSave.save(contentImagesPath
             + File.separator + addParams.getDirectory(), filename, is);
 
-        if (saveSuccessful) {
-            // Git Commit and push to remote repo.
-            saveSuccessful = gitHelper.pushGitChanges();
-        }
 
         String output = "<html><head><script> window.opener.CKEDITOR.tools.callFunction( "
             + addParams.getCKEditorFuncNum()
@@ -167,6 +170,8 @@ public class ContentEditorController {
         @Valid @ModelAttribute() DeleteImagesParameters deleteParams,
         BindingResult bindResult) throws IOException {
 
+        // FIXME: This function modifies the git repo without any locking
+
         if (bindResult.hasErrors()) {
             throw new IOException(
                 "Your image or directory delete failed. Please ensure the filePath exists "
@@ -185,10 +190,6 @@ public class ContentEditorController {
             successful = file.delete(); // delete empty directory.
         }
 
-        if (successful) {
-            // Git Commit and push to remote repo.
-            successful = gitHelper.pushGitChanges();
-        }
 
         JSONObject json = new JSONObject();
         json.put("deletesuccess", successful);
@@ -210,27 +211,30 @@ public class ContentEditorController {
      */
     private BrowseFile buildFileHierarchy(File file) {
 
-        if (!file.getPath().startsWith(contentImagesPath)) {
+        String filePath = file.getPath();
+        boolean fileIsDirectory = file.isDirectory();
+
+        if (!filePath.startsWith(contentImagesPath)) {
             return null;
         }
 
         String fileURL = contentImagesURL
-            + file.getPath().replaceFirst(contentImagesPath, "");
+            + filePath.replaceFirst(contentImagesPath, "");
 
-        if (!file.isDirectory()) {
-            return new BrowseFile(file.getName(), file.getPath(), fileURL,
-                file.isDirectory(), null);
+        if (!fileIsDirectory) {
+            return new BrowseFile(file.getName(), filePath, fileURL,
+                false, null);
         }
-
         ArrayList<BrowseFile> children = new ArrayList<BrowseFile>();
-        for (int i = 0; i < Objects.requireNonNull(file.listFiles()).length; i++) {
+        File[] files = file.listFiles();
+        for (int i = 0; i < Objects.requireNonNull(files).length; i++) {
 
-            File child = Objects.requireNonNull(file.listFiles())[i];
+            File child = Objects.requireNonNull(files)[i];
             children.add(buildFileHierarchy(child));
         }
         Collections.sort(children);
-        return new BrowseFile(file.getName(), file.getPath(), fileURL,
-            file.isDirectory(), children);
+        return new BrowseFile(file.getName(), filePath, fileURL,
+            true, children);
     }
 
     /**
@@ -247,8 +251,9 @@ public class ContentEditorController {
         }
 
         List<BrowseFile> children = imageFiles.getChildren();
-        if (children == null)
+        if (children == null) {
             return null;
+        }
 
         for (BrowseFile child : children) {
             BrowseFile f = buildBrowseDirectory(browseDir, child);

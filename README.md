@@ -10,7 +10,9 @@ This is a web application providing a GUI for editing and loading data into the 
 
 2. See the Configuration section to create a config file
 
-3. Run the executable war, pointing it to a configuration dir (containing `application.{yml,properties}`):
+3. See the Database section
+
+4. Run the executable war, pointing it to a configuration dir (containing `application.{yml,properties}`):
 
         $ java -jar target/ui-0.1.0-SNAPSHOT.war --spring.config.additional-location=./conf/
 
@@ -111,4 +113,35 @@ auth.saml.keycloak.auth-server-url=http://your-keycloak-host/auth/realms/demo
 
 You can now start the loading ui and log in using the user account you have created.
 
-## Setting up the database
+## Database
+
+A database server is required to run the application. Postgres 12.3 is recommended. Docker Compose can be used to create one, see the Docker Compose section.
+
+The database schema is managed by [Flyway]. Flyway applies any required migrations on application startup, so the app's user needs permission to create/modify the database structure.
+Alternatively, the [Flyway CLI] can be used stand-alone to apply the [migration files].
+
+[Flyway]: https://flywaydb.org/
+[Flyway CLI]: https://flywaydb.org/documentation/commandline/
+[migration files]: src/main/resources/db/migration
+
+### Example Data
+
+The database can be populated with sample users and workspaces by executing [example_user_data.sql].
+
+[example_user_data.sql]: src/main/docs/example_data.sql
+
+## Docker Compose
+
+The repository contains a Docker Compose file which will run a suitable database, plus a web-based DB admin UI to manage it.
+
+Run `$ docker-compose --env-file example.env up` in the repository to start the services with appropriate values set in the example.env
+
+to deploy to remote host
+`export DOCKER_HOST="ssh://digilib@ec2-52-31-243-155.eu-west-1.compute.amazonaws.com"`
+
+then run the docker commands as you would the local version.
+Add the -d flag to the up command for Detached mode: Run containers in the background.
+
+Note that you will need to copy your key to the servers manually to deploy remotely using the command:
+e.g. for dev: `ssh-copy-id -i ~/.ssh/mykey digilib@ec2-52-31-243-155.eu-west-1.compute.amazonaws.com`
+passwords for the digilib account can be found on keepass.

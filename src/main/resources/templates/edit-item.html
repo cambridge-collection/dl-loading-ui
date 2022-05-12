@@ -1,0 +1,202 @@
+<!DOCTYPE HTML>
+<html xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{fragments/main-layout}">
+<head>
+    <!-- TODO: fix the flash of unstyled content that happens if these styles are not included here -->
+    <link href="/webjars/startbootstrap-sb-admin-2/vendor/fontawesome-free/css/all.min.css" rel="stylesheet"
+          type="text/css">
+    <link href="/webjars/startbootstrap-sb-admin-2/vendor/datatables/dataTables.bootstrap4.css" rel="stylesheet">
+    <link href="/webjars/startbootstrap-sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
+    <link href="/webjars/ckeditor/standard/contents.css" rel="stylesheet">
+    <link href="/css/edit-collection.css" rel="stylesheet">
+
+    <!-- page styles -->
+</head>
+<body>
+<div id="content-wrapper" layout:fragment="content">
+
+    <div class="container-fluid">
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/edit/edit.html">Edit</a>
+            </li>
+            <li class="breadcrumb-item active"><span th:text="${modeLabel}">Create/Edit</span> Item</li>
+        </ol>
+
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800 ml-3"><span th:text="${modeLabel}">Create/Edit</span> Item</h1>
+        </div>
+
+        <form method="post" id="item-edit-form"
+              th:action="${itemId}? @{/edit/item(id=${itemId.toString()})} : @{/edit/item}"
+              th:object="${form}"
+              enctype="multipart/form-data">
+            <div class="col-lg-11" style="max-width: 1200px">
+                <div class="mb-4">
+                    <div th:if="${message}">
+                        <div class="alert alert-success" role="alert">
+                            <span th:text="${message}"></span>
+                        </div>
+                    </div>
+                    <div th:if="${errors.isPresent()}">
+                        <div class="alert alert-danger" role="alert">
+                            <h5>Your changes could not be saved</h5>
+                            <ul th:each="message : ${errors.get()}" class="mt-3 mb-3">
+                                <li th:text="${message}">Description of something that's wrong</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-dark float-left">Item Metadata</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group" th:if="${mode == 'update'}">
+                            <label for="item-edit-form.metadata">Descriptive metadata</label>
+                            <textarea class="form-control text-monospace" name="metadata"
+                                      id="item-edit-form.metadata"
+                                      rows="8" cols="80"
+                                      th:text="${form.metadata()}"></textarea>
+                            <small id="item-edit-form.metadata.help" class="form-text text-muted"><span th:text="${modeLabel}">Create/Edit</span> the item metadata directly.</small>
+
+                            <a class="btn btn-primary mt-3 mb-3" role="button"
+                               th:href="${@ModelOps.resolveIdToIOPath(itemDownloadPath, item.orElseThrow().id())}"
+                               >Download current version <i class="fas fa-file-download ml-2"></i></a>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-edit-form.metadata-file">Upload descriptive metadata file</label>
+                            <input type="file" class="form-control-file" id="item-edit-form.metadata-file" name="metadataFile">
+                            <small id="item-edit-form.metadata-file.help" class="form-text text-muted">This will replace any existing metadata.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-dark float-left">TEI Pagination</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group w-auto">
+                            <label for="item-edit-form.metadata-file">Generate pagination</label>
+                            <input type="file" class="form-control-file" id="item-edit-form.pagination-file" name="paginationFile">
+                            <small id="item-edit-form.pagination-file.help" class="form-text text-muted">
+                                TEI pagination can be generated from a CSV file containing columns named <strong><code>label</code></strong> and <strong><code>image</code></strong>.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-dark float-left">Collection Membership</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <small>This item will appear in the Collections selected here.</small>
+                            <div th:each="col, iteration : ${collections}" class="d-flex _mb-3 ">
+                                <div class="align-self-center">
+                                    <div class="form-check">
+                                        <input class="form-check-input align-middle" type="checkbox" name="collections"
+                                               th:checked="${item}? ${form.isCollectionSelected(col)}"
+                                               th:value="${col.collectionId}" value="collections/hebrew.collection.json"
+                                               th:id="|item-edit-form.collections.${iteration.count}|" id="item-edit-form.collections.1">&nbsp;
+                                    </div>
+                                </div>
+                                <div class="align-self-center p-2">
+                                    <label class="form-check-label" th:for="|item-edit-form.collections.${iteration.count}|" for="item-edit-form.collections.1">
+                                        <img th:src="@{/edit/source/{imgPath}(imgPath=${col.thumbnailURL})}" src="/edit/source/pages/images/collectionsView/collection-hebrew.jpg" alt="Collection icon" class="rounded-circle" width="50" height="50">
+                                        <span th:text="${col.name.shortName}">Hebrew Manuscripts</span> <a href="/edit/collection/?collectionId=collections/hebrew.collection.json" target="_blank" class="badge badge-primary ml-1">Edit</a>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <button type="submit" id="item-edit-form.submit" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">Your changes are being saved...
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteItemModal" tabindex="-1" role="dialog" aria-labelledby="deleteItemModal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteItemModalLabel">Remove this item?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    This will remove the item from this collection and delete the item if there are no other
+                    collections it is contained in.
+                </div>
+                <div class="modal-footer">
+                    <button value="value" class="btn btn-danger" id="confirmDeleteItemButton">
+                        Remove Item
+                    </button>
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="replaceImageModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div style="--aspect-ratio: 16/9;">
+                        <iframe src="/editor/browse/images" width="1000px" height="500px" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- /.container-fluid -->
+
+    <!-- Sticky Footer -->
+    <footer class="sticky-footer">
+        <div class="container my-auto">
+            <div class="copyright text-center my-auto">
+                <span>Created by Cambridge University Library</span>
+            </div>
+        </div>
+    </footer>
+
+</div>
+<!-- /.content-wrapper -->
+
+<div id="page_js" layout:fragment="page_js">
+    <script type="text/javascript" src="/webjars/ckeditor/standard/ckeditor.js"></script>
+    <script type="text/javascript" src="/js/edit-collection.js"></script>
+</div>
+</body>
+</html>

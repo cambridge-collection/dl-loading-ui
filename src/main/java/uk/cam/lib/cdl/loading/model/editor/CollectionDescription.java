@@ -2,6 +2,7 @@ package uk.cam.lib.cdl.loading.model.editor;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 
 import java.beans.ConstructorProperties;
 
@@ -19,6 +20,11 @@ public class CollectionDescription {
         this.shortDescription = shortDescription;
         this.medium = medium;
         this.full = full;
+    }
+
+    public static CollectionDescription copyOf(CollectionDescription other) {
+        Preconditions.checkNotNull(other);
+        return new CollectionDescription(other.shortDescription, other.full, other.medium);
     }
 
     @JsonProperty("short")
