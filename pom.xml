@@ -238,12 +238,11 @@
             <artifactId>thymeleaf-extras-springsecurity5</artifactId>
             <version>3.0.4.RELEASE</version>
         </dependency>
-
-<!--        <dependency>
+        <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-xray-recorder-sdk-core</artifactId>
-            <version>1.2.1</version>
-        </dependency>-->
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>1.12.215</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -28,7 +28,10 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -44,7 +47,8 @@ public class ProcessingLogController {
     @Autowired
     public ProcessingLogController(
         LogMessageRepository repository,
-        @Value("${data.url.display}") String pathForDataDisplay
+        @Value("${data.url.display}") String pathForDataDisplay,
+        @Value("${data.aws.region}") String region
     ) {
         this.repository = repository;
         this.pathForDataDisplay = Path.of("/logs", pathForDataDisplay);
@@ -53,7 +57,7 @@ public class ProcessingLogController {
                 this.pathForDataDisplay.normalize().equals(this.pathForDataDisplay),
             "pathForDataDisplay must start with / and not contain relative segments");
 
-        snsManager = new SnsMessageManager("eu-west-1");
+        snsManager = new SnsMessageManager(region);
     }
 
     @PreAuthorize("@roleService.canViewWorkspaces(authentication)")

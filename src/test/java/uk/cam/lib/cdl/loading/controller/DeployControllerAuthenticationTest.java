@@ -12,13 +12,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.util.UriComponentsBuilder;
-import uk.cam.lib.cdl.loading.apis.DeploymentAPI;
 import uk.cam.lib.cdl.loading.dao.UserRepository;
 import uk.cam.lib.cdl.loading.dao.WorkspaceRepository;
-
-import java.io.IOException;
-import java.net.URI;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -32,9 +27,6 @@ class DeployControllerAuthenticationTest {
     private WireMockServer wireMockServer;
 
     @MockBean
-    private DeploymentAPI deploymentAPI;
-
-    @MockBean
     private UserRepository userRepository;
 
     @MockBean
@@ -46,11 +38,7 @@ class DeployControllerAuthenticationTest {
     private MockMvc mvc;
 
     @BeforeEach
-    void setup() throws IOException {
-
-        URI apiURL = UriComponentsBuilder.fromHttpUrl(wireMockServer.baseUrl())
-            .path("/api/deploy/v0.1/").build().toUri();
-        this.deploymentAPI = new DeploymentAPI(apiURL.toURL());
+    void setup()  {
 
         mvc = MockMvcBuilders
             .webAppContextSetup(context)
@@ -75,28 +63,8 @@ class DeployControllerAuthenticationTest {
     }
 
     @Test
-    void UnauthorisedRefreshCache_shouldFailWith401() throws Exception {
-        mvc.perform(get("/deploy/cache/refresh"))
-            .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(username="test-workspace-member1", roles = {"WORKSPACE_MEMBER1"})
-    void AuthorisedRefreshCache_shouldFailWith403() throws Exception {
-        mvc.perform(get("/deploy/cache/refresh"))
-            .andExpect(MockMvcResultMatchers.status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(username="test-deployment-manager", roles = {"DEPLOYMENT_MANAGER"})
-    void AuthorisedRefreshCache_shouldSucceedWith200() throws Exception {
-        mvc.perform(get("/deploy/cache/refresh"))
-            .andExpect(MockMvcResultMatchers.status().isOk());
-    }
-
-    @Test
     void UnauthorisedDeployInstance_shouldFailWith401() throws Exception {
-        mvc.perform(post("/deploy/testid"))
+        mvc.perform(post("/deploy/production"))
             .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
@@ -116,24 +84,4 @@ class DeployControllerAuthenticationTest {
         //    .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
-    @Test
-    void UnauthorisedDeployStatus_shouldFailWith401() throws Exception {
-        mvc.perform(get("/deploy/status/testid"))
-            .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(username="test-workspace-manager1", roles = {"WORKSPACE_MANAGER1"})
-    void AuthorisedDeployStatus_shouldFailWith403() throws Exception {
-        mvc.perform(get("/deploy/status/testid"))
-            .andExpect(MockMvcResultMatchers.status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(username="test-deployment-manager", roles = {"DEPLOYMENT_MANAGER"})
-    void AuthorisedDeployStatus_shouldSucceedWith200() throws Exception {
-        // TODO
-        //mvc.perform(get("/deploy/status/testid"))
-        //    .andExpect(MockMvcResultMatchers.status().isOk());
-    }
 }

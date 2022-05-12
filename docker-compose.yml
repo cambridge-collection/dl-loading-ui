@@ -11,8 +11,6 @@ services:
       - ${LOADING_UI_PORT_EXT}:${LOADING_UI_PORT_INT}
     image: cudl/dl-loading-ui:latest
     depends_on:
-      - dl-loading-db
-      - dl-deployment-api
       - s3fs
     volumes:
       - /mnt/s3data/data:/mnt/s3data/data:shared
@@ -31,42 +29,6 @@ services:
       POSTGRES_DB: ${LOADING_DB_DATABASE}
       POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
 
-
-  # NOTE: Download dl-deployment-api from git and run
-  # docker build
-  # TODO: replace with image in dockerhub etc.
-
-  dl-deployment-api:
-    image: cudl/dl-deployment-api
-    ports:
-      - 0:${DEPLOY_DB_PORT_INT}
-    env_file:
-      - ${ENV_FILE}
-
-  # uses image made from dl-deployment-api
-  dl-deployment-db:
-    image: cudl/dl-deployment-db:latest
-    restart: always
-    volumes:
-      - dl-deployment-db:/var/lib/postgresql/data
-    ports:
-      - ${DEPLOY_DB_PORT_EXT}:${DEPLOY_DB_PORT_INT}
-    command: -p ${DEPLOY_DB_PORT_INT}
-    environment:
-      POSTGRES_USER: ${DEPLOY_DB_USER}
-      POSTGRES_DB: ${DEPLOY_DB_DATABASE}
-      POSTGRES_PASSWORD: ${DEPLOY_DB_PASSWORD}
-
-#  adminer:
-#    image: adminer
-#    restart: always
-#    ports:
-#      - "${DL_LOADING_UI_ADMINER_HOST_PORT:-8423}:8090"
-#    depends_on:
-#      - dl-loading-db
-#    environment:
-#      ADMINER_DESIGN: pepa-linha
-
   s3fs:
     privileged: true
     image: efrecon/s3fs:1.86
@@ -81,5 +43,3 @@ services:
 
 volumes:
   dl-loading-db:
-  dl-deployment-db:
-
