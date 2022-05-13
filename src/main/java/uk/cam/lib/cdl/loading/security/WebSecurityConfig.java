@@ -5,6 +5,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -132,11 +133,19 @@ public class WebSecurityConfig {
     public static class DefaultsWebSecurityConfigurer extends
         AbstractHttpConfigurer<DefaultsWebSecurityConfigurer, HttpSecurity> {
 
+        @Value("${server.ssl.enabled}")
+        public boolean sslEnabled;
+
         @Override
         public void configure(HttpSecurity http) throws Exception {
             // FIXME: CSRF protection shouldn't be disabled
             http.csrf()
                 .disable();
+
+            if (sslEnabled) {
+                http.requiresChannel(channel ->
+                    channel.anyRequest().requiresSecure());
+            }
 
             http.authorizeRequests()
                 .antMatchers("/js/**").permitAll()

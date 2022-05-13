@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -33,22 +34,21 @@ import java.util.List;
 @RequestMapping("/user-management")
 public class UserManagementController {
 
-    private WorkspaceRepository workspaceRepository;
-
-    private UserRepository userRepository;
-
+    private final WorkspaceRepository workspaceRepository;
+    private final UserRepository userRepository;
     private final EditAPI editAPI;
-
-    private ApplicationContext appContext;
+    private final ApplicationContext appContext;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserManagementController(EditAPI editAPI, UserRepository userRepository,
                                     WorkspaceRepository workspaceRepository, ApplicationContext
-                                    context) {
+                                    context, PasswordEncoder passwordEncoder) {
         this.editAPI = editAPI;
         this.userRepository = userRepository;
         this.workspaceRepository = workspaceRepository;
         this.appContext = context;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/")
@@ -108,7 +108,7 @@ public class UserManagementController {
         }
 
         RoleHelper roleHelper = new RoleHelper(workspaceRepository);
-        User user = userForm.toUser();
+        User user = userForm.toUser(passwordEncoder);
         User userFromRepo = userRepository.findById(user.getId());
 
         // Ensure user has permission to set roles
@@ -126,6 +126,7 @@ public class UserManagementController {
         user.setAuthorities(allowedAuthorities);
 
         if (userFromRepo == null) {
+            // NOTE: can save a user with null password.
             userRepository.save(user);
         } else {
             userFromRepo.setUsername(user.getUsername());
@@ -134,6 +135,9 @@ public class UserManagementController {
             userFromRepo.setEmail(user.getEmail());
             userFromRepo.setEnabled(user.isEnabled());
             userFromRepo.setAuthorities(user.getAuthorities());
+            if (user.getPassword()!=null) {
+                userFromRepo.setPassword(user.getPassword());
+            }
             userRepository.save(userFromRepo);
         }
 

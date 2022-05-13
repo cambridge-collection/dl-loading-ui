@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.forms;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import uk.cam.lib.cdl.loading.model.security.User;
 
 import javax.validation.constraints.NotBlank;
@@ -26,6 +27,7 @@ public class UserForm {
     private List<String> authorities;
 
     public UserForm() {
+
     }
 
     public UserForm(User user) {
@@ -103,11 +105,15 @@ public class UserForm {
         this.authorities = authorities;
     }
 
-    public User toUser() {
+    public User toUser(PasswordEncoder passwordEncoder) {
         User user = new User();
         user.setId(id);
         user.setUsername(username);
-        user.setPassword(password);
+        if (password ==null || "".equals(password.trim())) {
+            user.setPassword(null);
+        } else {
+            user.setPassword(passwordEncoder.encode(password));
+        }
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEnabled(enabled);

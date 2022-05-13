@@ -3,6 +3,7 @@ package uk.cam.lib.cdl.loading.security;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -29,8 +30,10 @@ public class PasswordEncodingConfig {
     }
 
     @Bean
+    @Primary
     @ConditionalOnProperty(name = "auth.password-encoding.method", havingValue = "default", matchIfMissing = true)
     public PasswordEncoder defaultPasswordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        return passwordEncoder;
     }
 }

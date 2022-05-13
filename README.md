@@ -6,19 +6,22 @@ This is a web application providing a GUI for editing and loading data into the 
 
 1. Build the project:
 
-        $ mvn package
+        $ mvn clean package
 
-2. See the Configuration section to create a config file
+2. Copy the example.env file and customise.
 
-3. See the Database section
+3. Run using the command:
 
-4. Run the executable war, pointing it to a configuration dir (containing `application.{yml,properties}`):
+       docker-compose --env-file <your_.env_file> up
 
-        $ java -jar target/ui-0.1.0-SNAPSHOT.war --spring.config.additional-location=./conf/
+4. The application will start an HTTP server listening on http://localhost:8081. (or an alternative port if config was changed)
 
-    The application will start an HTTP server listening on http://localhost:8081.
+NOTE: It currently takes AGES for the servers to start.  This was since updating to SSL and updating dependencies. Needs investigating.
 
 [Externalized Configuration]: https://docs.spring.io/spring-boot/docs/2.1.8.RELEASE/reference/html/boot-features-external-config.html
+
+
+
 
 ## Developing
 
@@ -36,9 +39,12 @@ In addition, compile-time annotation processing is used by the [Immutables] libr
 
 ## Configuration
 
-A configuration file template is at [`conf/EXAMPLE-application.properties`](conf/application.properties.example). Copy it to `conf/application.properties` and edit it.
+Configuration is set through .env file which defines a number of environment variables that
+are passed to the application on building and running.
 
-In particular set `git.sourcedata.checkout.path` to a local dir containing a checkout the source data.
+Copy the `example.env` file and make your own adjustments to the variables.
+
+This is passed into docker-compose when the application is run/
 
 > #### Note
 >

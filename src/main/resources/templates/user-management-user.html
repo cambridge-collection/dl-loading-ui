@@ -55,7 +55,6 @@
                               th:action="@{'/user-management/user/update'}"
                               th:object="${form}">
                             <input type="hidden" name="id" th:value="*{id}">
-                            <input type="hidden" name="password" th:value="*{password}">
                             <div class="form-group w-auto">
                                 <div class="row">
                                     <div class="col">
@@ -101,6 +100,21 @@
                                                        id="lastName"
                                                        maxlength="30"
                                                        th:value="*{lastName}">
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-4 m-2 text-right">Password</div>
+                                            <div class="col m-2">
+                                                <div class="alert-danger"
+                                                     th:if="${#fields.hasErrors('password')}"
+                                                     th:errors="*{password}"></div>
+
+                                                <input class="form-control"
+                                                       type="password" name="password"
+                                                       id="password"
+                                                       maxlength="60"
+                                                       >
                                             </div>
                                         </div>
 

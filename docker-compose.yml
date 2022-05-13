@@ -19,6 +19,9 @@ services:
     build:
       context: docker/dl-loading-db
       dockerfile: Dockerfile
+      args:
+        LOADING_DB_USER_SETUP_SQL: ${LOADING_DB_USER_SETUP_SQL}
+        POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
     restart: always
     image: cudl/dl-loading-db:latest
     volumes:

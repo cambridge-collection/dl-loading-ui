@@ -3,13 +3,13 @@ package uk.cam.lib.cdl.loading.config;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 
 import java.nio.file.Path;
 
 @Configuration
 public class TestEditConfig {
+
     @Bean
     public EditAPI editAPI() {
         var editApi = Mockito.mock(EditAPI.class);
