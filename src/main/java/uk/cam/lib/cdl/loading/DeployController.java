@@ -10,16 +10,24 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import uk.cam.lib.cdl.loading.utils.S3Helper;
+import org.springframework.web.servlet.view.RedirectView;
+import uk.cam.lib.cdl.loading.utils.DeploymentHelper;
+
+import java.io.IOException;
 
 @Controller
 @RequestMapping ("/deploy")
 public class DeployController {
 
-    private final S3Helper s3Helper;
+    private final DeploymentHelper deploymentHelper;
 
-    public DeployController(@Value("${data.aws.region}") String region) {
-        this.s3Helper = new S3Helper(region);
+    public DeployController(@Value("${data.aws.region}") String region, @Value("${deploy.releases.staging.bucketname}") String sourceBucket,
+                            @Value("${deploy.releases.staging.transcription.bucketname}") String sourceTranscriptionBucket,
+                            @Value("${deploy.releases.production.bucketname}") String destBucket,
+                            @Value("${deploy.releases.production.transcription.bucketname}") String destTranscriptionBucket,
+                            @Value("${deploy.datasync.task.arn}") String dataSyncTaskARN) {
+
+        this.deploymentHelper = new DeploymentHelper(region,sourceBucket,sourceTranscriptionBucket,destBucket,destTranscriptionBucket, dataSyncTaskARN);
     }
     /**
      * Displays the deployment page with the table.
@@ -54,10 +62,9 @@ public class DeployController {
      */
     @PreAuthorize("@roleService.canDeploySites(authentication)")
     @PostMapping("/production")
-    public String deployToProduction(RedirectAttributes attributes, @Value("${deploy.releases.staging.bucketname}") String sourceBucket,
-                                     @Value("${deploy.releases.production.bucketname}") String destBucket) {
+    public RedirectView deployToProduction(RedirectAttributes attributes) throws IOException, InterruptedException {
 
-        boolean returnOK = s3Helper.syncBucketData(sourceBucket,destBucket, false);
+        boolean returnOK = deploymentHelper.deploy();
 
         if (returnOK) {
             String message = "Deployment process has started.  "
@@ -65,13 +72,12 @@ public class DeployController {
 
             attributes.addFlashAttribute("message", message);
 
-
         } else {
 
             attributes.addFlashAttribute("error", "There was an error deploying your version.");
 
         }
-        return "deploy";
+        return new RedirectView("/deploy/deploy.html");
     }
 
 
