@@ -16,10 +16,12 @@ This is a web application providing a GUI for editing and loading data into the 
 
 4. The application will start an HTTP server listening on http://localhost:8081. (or an alternative port if config was changed)
 
-NOTE: It currently takes AGES for the servers to start.  This was since updating to SSL and updating dependencies. Needs investigating.
+NOTE: It currently takes AGES for the servers to start.  This is when SSL is enabled. Needs investigating. Be prepared
+when deploying to staging/dev.
 
 [Externalized Configuration]: https://docs.spring.io/spring-boot/docs/2.1.8.RELEASE/reference/html/boot-features-external-config.html
 
+ALSO: If you're deploying for CUDL, the env files for staging and dev (there is no production deployment) are in the KeePass file.
 
 
 
