@@ -8,22 +8,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.io.CharSource;
+import org.apache.commons.io.FileUtils;
 import org.immutables.value.Value;
-import uk.cam.lib.cdl.loading.model.editor.modelops.ImmutableModelState;
-import uk.cam.lib.cdl.loading.model.editor.modelops.ImmutableModelStateEnforcementResult;
-import uk.cam.lib.cdl.loading.model.editor.modelops.ModelOpsException;
-import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
-import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateEnforcementFailureException;
-import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateEnforcementResult;
-import uk.cam.lib.cdl.loading.model.editor.modelops.ModelStateHandlerResolver;
+import uk.cam.lib.cdl.loading.model.editor.modelops.*;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -60,7 +52,12 @@ public interface ModelOps {
         Preconditions.checkNotNull(metadata);
         var destination = resolveIdToIOPath(dataRoot, id);
         Files.createDirectories(destination.getParent());
-        Files.copy(metadata, destination, StandardCopyOption.REPLACE_EXISTING);
+        if (destination.toFile().exists()) {
+            Files.write(destination, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
+        }
+        FileUtils.writeByteArrayToFile(destination.toFile(),metadata.readAllBytes());
+        // Files.copy deletes existing file, which causes errors for s3 processing, so instead truncating
+        // Files.copy(metadata, destination, StandardCopyOption.REPLACE_EXISTING);
     }
 
     default void writeMetadata(Path dataRoot, Path id, String metadata) throws IOException {
