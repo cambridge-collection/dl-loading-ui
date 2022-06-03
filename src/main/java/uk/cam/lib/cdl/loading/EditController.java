@@ -458,8 +458,11 @@ public class EditController {
 
         // Reject the request if metadata is edited and a metadata file is specified
         if(directMetadataChanged && metadataFileSpecified) {
-            return ImmutableCreationResult.unsuccessful(
-                ImmutableIssue.of(INVALID_FORM_DATA, "Metadata cannot be edited directly if a metadata file is also uploaded."));
+            // Prioritise the uploaded file if both have changed
+            // as it keep getting false positives that both have changed.
+            directMetadataChanged = false;
+          //  return ImmutableCreationResult.unsuccessful(
+          //      ImmutableIssue.of(INVALID_FORM_DATA, "Metadata cannot be edited directly if a metadata file is also uploaded."));
         }
 
         Set<ModelAttribute<?>> inputAttrs = null;
