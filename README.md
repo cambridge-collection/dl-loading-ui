@@ -1,6 +1,9 @@
 # Cambridge Digital Library: Content Loader
 
 This is a web application providing a GUI for editing and loading data into the Cambridge Digital Library Platform.
+It edits data in the cudl-data-source s3 buckets (prefixed with dev-, staging- and production-).
+Once this data is edited it triggers processing, see https://github.com/cambridge-collection/data-lambda-transform which has
+details on how the data is processed.
 
 ## Running
 

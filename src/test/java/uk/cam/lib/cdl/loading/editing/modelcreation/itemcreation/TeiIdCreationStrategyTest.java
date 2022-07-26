@@ -62,7 +62,8 @@ public class TeiIdCreationStrategyTest {
         "MS-FOO-00001.xml,items/data/tei/MS-FOO-00001/MS-FOO-00001.xml",
         "MS-FOO-BAR-00001.xml,items/data/tei/MS-FOO-BAR-00001/MS-FOO-BAR-00001.xml",
         "MS-FOO-00001.XML,items/data/tei/MS-FOO-00001/MS-FOO-00001.xml",
-        "MS-FOO-00001.XmL,items/data/tei/MS-FOO-00001/MS-FOO-00001.xml"
+        "MS-FOO-00001.XmL,items/data/tei/MS-FOO-00001/MS-FOO-00001.xml",
+        "MS-FOO-00001-362-AT.XmL,items/data/tei/MS-FOO-00001-362-AT/MS-FOO-00001-362-AT.xml"
     })
     public void createId_returnsPathGivenValidFilename(String filename, Path expected) {
         var result = strategy.createId(
@@ -77,7 +78,7 @@ public class TeiIdCreationStrategyTest {
         "",
         "name.xml",
         "AB-00000.xml",
-        "AB-ABC--00000.xml",
+        "AB-ABC-000$0.xml",
         "AB--ABC-00000.xml",
         "MS-FOO-00001.xml ",
         " MS-FOO-00001.xml",

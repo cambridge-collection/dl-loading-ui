@@ -1,13 +1,7 @@
 package uk.cam.lib.cdl.loading.editing.modelcreation.itemcreation;
 
-import com.google.common.base.Preconditions;
 import org.immutables.value.Value;
-import uk.cam.lib.cdl.loading.editing.modelcreation.CreationResult;
-import uk.cam.lib.cdl.loading.editing.modelcreation.DefaultModelFactory;
-import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableCreationResult;
-import uk.cam.lib.cdl.loading.editing.modelcreation.ImmutableIssue;
-import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttribute;
-import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes;
+import uk.cam.lib.cdl.loading.editing.modelcreation.*;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes.StandardModelAttributes;
 import uk.cam.lib.cdl.loading.model.editor.ModelOps;
 
@@ -29,8 +23,11 @@ public abstract class TeiIdCreationStrategy implements DefaultModelFactory.IdCre
         return builder().baseTeiItemPath(baseTeiItemPath).build();
     }
 
+    // public static final Pattern FILENAME_PATTERN = Pattern.compile(
+    //    "^([a-z0-9]+-(?:[a-z0-9]+-)+[0-9]{5})\\.xml$", Pattern.CASE_INSENSITIVE);
+
     public static final Pattern FILENAME_PATTERN = Pattern.compile(
-        "^([a-z0-9]+-(?:[a-z0-9]+-)+[0-9]{5})\\.xml$", Pattern.CASE_INSENSITIVE);
+        "^([a-z0-9]+-(?:[a-z0-9]+-)+[a-z0-9\\-]+)\\.xml$", Pattern.CASE_INSENSITIVE);
 
     public static final Path DEFAULT_BASE_TEI_ITEM_PATH = Path.of("items/data/tei");
 
