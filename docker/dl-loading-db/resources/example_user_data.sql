@@ -28,6 +28,7 @@ create table persistent_logins (
 );
 
 -- Insert test users(please change / remove before putting into production!!)
+-- NOTE: If using this set LOADING_UI_AUTH_PASSWORD_ENCODING_METHOD=insecure-plaintext-for-testing
 insert into users (username, firstname, lastname, password, email, enabled)
 values ('test-workspace-member1', 'Workspace', 'Member', 'password', 'wm@test.com', true);
 

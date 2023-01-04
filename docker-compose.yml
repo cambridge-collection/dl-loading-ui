@@ -9,7 +9,7 @@ services:
       - ${ENV_FILE}
     ports:
       - ${LOADING_UI_PORT_EXT}:${LOADING_UI_PORT_INT}
-    image: cudl/dl-loading-ui:latest
+    image: camdl/dl-loading-ui:latest
     depends_on:
       - s3fs
     volumes:
@@ -23,7 +23,7 @@ services:
         LOADING_DB_USER_SETUP_SQL: ${LOADING_DB_USER_SETUP_SQL}
         POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
     restart: always
-    image: cudl/dl-loading-db:latest
+    image: camdl/dl-loading-db:latest
     volumes:
       - dl-loading-db:/var/lib/postgresql/data
     command: -p ${LOADING_DB_PORT_INT}
