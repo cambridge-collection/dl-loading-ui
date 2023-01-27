@@ -1,5 +1,8 @@
 package uk.cam.lib.cdl.loading.config;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,8 +24,10 @@ import uk.cam.lib.cdl.loading.editing.pagination.TeiPageListFactory;
 import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 import uk.cam.lib.cdl.loading.model.editor.Item;
 import uk.cam.lib.cdl.loading.model.editor.ModelOps;
-//import uk.cam.lib.cdl.loading.utils.GitHelper;
+import uk.cam.lib.cdl.loading.model.editor.UI;
+import uk.cam.lib.cdl.loading.model.editor.ui.UIThemeData;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -132,6 +137,28 @@ public class EditConfig {
     @Bean(name = "ModelOps")
     public ModelOps modelOps() {
         return ModelOps.ModelOps();
+    }
+
+    @Bean
+    @Profile("!test")
+    public UIThemeData uiThemeData(EditAPI editAPI) throws IOException {
+
+        if (editAPI==null || editAPI.getUiFile()==null) {return null;}
+
+        // Setup for reading json5
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
+        mapper.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
+        mapper.enable(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature());
+        mapper.enable(JsonReadFeature.ALLOW_UNQUOTED_FIELD_NAMES.mappedFeature());
+        mapper.enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER.mappedFeature());
+        mapper.enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS.mappedFeature());
+        mapper.enable(JsonReadFeature.ALLOW_JAVA_COMMENTS.mappedFeature());
+        mapper.enable(JsonReadFeature.ALLOW_LEADING_DECIMAL_POINT_FOR_NUMBERS.mappedFeature());
+
+        UI ui = mapper.readValue(editAPI.getUiFile().toFile(), UI.class);
+        return ui.getThemeData();
+
     }
 }
 

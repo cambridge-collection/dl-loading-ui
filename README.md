@@ -147,12 +147,14 @@ The repository contains a Docker Compose file which will run a suitable database
 
 Run `$ docker-compose --env-file example.env up` in the repository to start the services with appropriate values set in the example.env
 
-to deploy to remote host
-`export DOCKER_HOST="ssh://digilib@ec2-52-31-243-155.eu-west-1.compute.amazonaws.com"`
+## Deployment
+
+To deploy to remote host
+`export DOCKER_HOST="ssh://digilib@dev.loader.cudl.link"`
 
 then run the docker commands as you would the local version.
 Add the -d flag to the up command for Detached mode: Run containers in the background.
 
 Note that you will need to copy your key to the servers manually to deploy remotely using the command:
-e.g. for dev: `ssh-copy-id -i ~/.ssh/mykey digilib@ec2-52-31-243-155.eu-west-1.compute.amazonaws.com`
+e.g. for dev: `ssh-copy-id -i ~/.ssh/mykey digilib@dev.loader.cudl.link`
 passwords for the digilib account can be found on keepass.

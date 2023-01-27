@@ -1,35 +1,42 @@
 package uk.cam.lib.cdl.loading.model.editor.ui;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.cam.lib.cdl.loading.model.editor.Id;
+
 import java.beans.ConstructorProperties;
 
 public class UIPage {
 
-    private UIPageGeneral general;
-    private UIPageHome home;
-    private UIPageAbout about;
-    private UIPageBrowse browse;
+    private final String name;
+    private final Id html;
+    private Id sidebarHtml;
 
-    @ConstructorProperties({"general", "home", "about", "browse"})
-    public UIPage(UIPageGeneral general, UIPageHome home, UIPageAbout about, UIPageBrowse browse) {
-        this.general = general;
-        this.home = home;
-        this.about = about;
-        this.browse = browse;
+    @ConstructorProperties({"name", "html"})
+    public UIPage(String name, Id html) {
+        this.name = name;
+        this.html = html;
+        this.sidebarHtml = null;
     }
 
-    public UIPageGeneral getGeneral() {
-        return general;
+    @JsonProperty("html")
+    public Id getHtml() {
+        return html;
     }
 
-    public UIPageHome getHome() {
-        return home;
+    // Optional.  May be null.
+    @JsonProperty("sidebar-html")
+    public Id getSidebarHtml() {
+        return sidebarHtml;
     }
 
-    public UIPageAbout getAbout() {
-        return about;
+    @JsonProperty("sidebar-html")
+    public void setSidebarHtml(Id sidebarHtml) {
+        this.sidebarHtml = sidebarHtml;
     }
 
-    public UIPageBrowse getBrowse() {
-        return browse;
+    @JsonProperty("name")
+    public String getName() {
+        return name;
     }
+
 }

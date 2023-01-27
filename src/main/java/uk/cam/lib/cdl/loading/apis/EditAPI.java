@@ -110,7 +110,8 @@ public class EditAPI {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
-        mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
+        mapper.enable(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature());
+
         Dataset dataset = mapper.readValue(datasetFile.toFile(), Dataset.class);
         Map<String, Collection> newCollectionMap = Collections.synchronizedMap(new HashMap<>());
         Map<String, Path> newCollectionFilepaths = Collections.synchronizedMap(new HashMap<>());
@@ -120,12 +121,10 @@ public class EditAPI {
         for (Id id : dataset.getCollections()) {
 
             try {
-                var collectionFile = datasetFile.resolveSibling(id.getId()).normalize();
-                Preconditions.checkState(collectionFile.startsWith(dataPath), "Collection '%s' is not under dataPath", id.getId());
+                //var collectionFile = datasetFile.resolveSibling(id.getId()).normalize();
+                //Preconditions.checkState(collectionFile.startsWith(dataPath), "Collection '%s' is not under dataPath", id.getId());
+                var collectionFile = getFullPathForId(id.getId());
                 String collectionId = dataPath.relativize(collectionFile).toString();
-                if (!Files.exists(collectionFile)) {
-                    throw new FileNotFoundException("Collection file cannot be found at: " + collectionFile);
-                }
 
                 Collection c = mapper.readValue(collectionFile.toFile(), Collection.class);
                 c.setCollectionId(collectionId);
@@ -415,6 +414,8 @@ public class EditAPI {
         return datasetFile;
     }
 
+    public Path getUiFile() { return uiFile; }
+
     private boolean UICollectionContains(String collectionId, List<UICollection> uiCollections) {
         for (UICollection c : uiCollections) {
             if (c.getCollection().equals(new Id(collectionId))) {
@@ -422,6 +423,15 @@ public class EditAPI {
             }
         }
         return false;
+    }
+
+    public Path getFullPathForId(String id) throws FileNotFoundException {
+        var path = datasetFile.resolveSibling(id).normalize();
+        Preconditions.checkState(path.startsWith(dataPath), "File '%s' is not under dataPath", id);
+        if (!Files.exists(path)) {
+            throw new FileNotFoundException("File cannot be found at: " + path);
+        }
+        return path;
     }
 }
 

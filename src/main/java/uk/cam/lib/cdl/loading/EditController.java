@@ -9,9 +9,6 @@ import com.google.common.io.ByteSource;
 import com.google.common.io.CharSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.velocity.shaded.commons.io.FilenameUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +47,7 @@ import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.*;
 import uk.cam.lib.cdl.loading.model.editor.modelops.ModelState;
 import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
+import uk.cam.lib.cdl.loading.utils.HTMLEditingHelper;
 import uk.cam.lib.cdl.loading.utils.RoleHelper;
 import uk.cam.lib.cdl.loading.utils.ThrowingFunction;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
@@ -82,6 +80,7 @@ public class EditController {
     private final EditAPI editAPI;
     private final Path pathForDataDisplay;
     private final ModelFactory<Item> teiItemFactory;
+    private final HTMLEditingHelper htmlEditingHelper;
     private WorkspaceRepository workspaceRepository;
     private ApplicationContext appContext;
 
@@ -102,6 +101,7 @@ public class EditController {
         this.workspaceRepository = workspaceRepository;
         this.appContext = appContext;
         this.teiItemFactory = Preconditions.checkNotNull(teiItemFactory);
+        this.htmlEditingHelper = new HTMLEditingHelper(editAPI.getDataLocalPath(), this.pathForDataDisplay);
     }
 
     @PreAuthorize("@roleService.canViewWorkspaces(authentication)")
@@ -213,38 +213,38 @@ public class EditController {
         return "edit-collection";
     }
 
-    // Need to parse relative links to add in 'pathForDataDisplay' for local viewing.
-    private String prepareHTMLForDisplay(String html, Path HTMLFilePath) {
-        Document doc = Jsoup.parse(html);
-        for (Element img : doc.select("img[src]")) {
-            String src = img.attr("src");
-
-            var collectionRelativePath =
-                editAPI.getDataLocalPath().relativize(HTMLFilePath.getParent());
-            var imageRelativePath = collectionRelativePath.resolve(src);
-
-            img.attr("src", pathForDataDisplay.resolve(imageRelativePath).normalize().toString());
-        }
-        return doc.outerHtml();
-    }
-
-    // Need to parse links from display to format to be saved.
-    // replace 'pathForDataDisplay' with file path to data
-    // Generate relative path from collections
-    private String prepareHTMLForSaving(String html, Path HTMLFilePath) throws IOException {
-        Preconditions.checkArgument(HTMLFilePath.isAbsolute(), "HTMLFilePath is not absolute: %s", HTMLFilePath);
-        Document doc = Jsoup.parse(html);
-        for (Element img : doc.select("img[src]")) {
-            var src = Path.of(img.attr("src"));
-            if (src.startsWith(pathForDataDisplay)) {
-                var imgPath = pathForDataDisplay.relativize(src);
-                var imageFile = editAPI.getDataLocalPath().resolve(imgPath).normalize();
-                Path relativePath = HTMLFilePath.getParent().relativize(imageFile);
-                img.attr("src", relativePath.toString());
-            }
-        }
-        return doc.outerHtml();
-    }
+//    // Need to parse relative links to add in 'pathForDataDisplay' for local viewing.
+//    private String prepareHTMLForDisplay(String html, Path HTMLFilePath) {
+//        Document doc = Jsoup.parse(html);
+//        for (Element img : doc.select("img[src]")) {
+//            String src = img.attr("src");
+//
+//            var collectionRelativePath =
+//                editAPI.getDataLocalPath().relativize(HTMLFilePath.getParent());
+//            var imageRelativePath = collectionRelativePath.resolve(src);
+//
+//            img.attr("src", pathForDataDisplay.resolve(imageRelativePath).normalize().toString());
+//        }
+//        return doc.outerHtml();
+//    }
+//
+//    // Need to parse links from display to format to be saved.
+//    // replace 'pathForDataDisplay' with file path to data
+//    // Generate relative path from collections
+//    private String prepareHTMLForSaving(String html, Path HTMLFilePath) throws IOException {
+//        Preconditions.checkArgument(HTMLFilePath.isAbsolute(), "HTMLFilePath is not absolute: %s", HTMLFilePath);
+//        Document doc = Jsoup.parse(html);
+//        for (Element img : doc.select("img[src]")) {
+//            var src = Path.of(img.attr("src"));
+//            if (src.startsWith(pathForDataDisplay)) {
+//                var imgPath = pathForDataDisplay.relativize(src);
+//                var imageFile = editAPI.getDataLocalPath().resolve(imgPath).normalize();
+//                Path relativePath = HTMLFilePath.getParent().relativize(imageFile);
+//                img.attr("src", relativePath.toString());
+//            }
+//        }
+//        return doc.outerHtml();
+//    }
 
     /**
      * Returns the requested file contents specified by filepath if it exists in the checkedout source repo.
@@ -355,8 +355,8 @@ public class EditController {
         var creditHTMLPath = collectionPath.resolve(creditId).normalize();
         Preconditions.checkState(creditHTMLPath.startsWith(editAPI.getDataLocalPath()));
 
-        String fullDescriptionHTML = prepareHTMLForSaving(collectionForm.getFullDescriptionHTML(), collectionHTMLPath);
-        String proseCreditHTML = prepareHTMLForSaving(collectionForm.getProseCreditHTML(), creditHTMLPath);
+        String fullDescriptionHTML = htmlEditingHelper.prepareHTMLForSaving(collectionForm.getFullDescriptionHTML(), collectionHTMLPath);
+        String proseCreditHTML = htmlEditingHelper.prepareHTMLForSaving(collectionForm.getProseCreditHTML(), creditHTMLPath);
 
 
         // Add to workspaces
@@ -688,12 +688,12 @@ public class EditController {
         // Description HTML
         var fullDescription = collectionFile.getParent().resolve(collection.getDescription().getFull().getId()).normalize();
         String descriptionHTML = FileUtils.readFileToString(fullDescription.toFile(), "UTF-8");
-        descriptionHTML = prepareHTMLForDisplay(descriptionHTML, fullDescription);
+        descriptionHTML = htmlEditingHelper.prepareHTMLForDisplay(descriptionHTML, fullDescription);
 
         // Credit HTML
         var credit = collectionFile.getParent().resolve(collection.getCredit().getProse().getId()).normalize();
         String creditHTML = FileUtils.readFileToString(credit.toFile(), "UTF-8");
-        creditHTML = prepareHTMLForDisplay(creditHTML, credit);
+        creditHTML = htmlEditingHelper.prepareHTMLForDisplay(creditHTML, credit);
 
         // Collection type
         UICollection collectionUI = editAPI.getCollectionUI(collection.getCollectionId());
