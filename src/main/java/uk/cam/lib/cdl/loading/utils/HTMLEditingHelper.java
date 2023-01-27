@@ -10,8 +10,8 @@ import java.nio.file.Path;
 
 public class HTMLEditingHelper {
 
-    private Path localDataPath;
-    private Path pathForDataDisplay;
+    private final Path localDataPath;
+    private final Path pathForDataDisplay;
 
     public HTMLEditingHelper(Path localDataPath, Path pathForDataDisplay) {
 
@@ -20,10 +20,10 @@ public class HTMLEditingHelper {
     }
 
     // Need to parse relative links to add in 'pathForDataDisplay' for local viewing.
-    public String prepareHTMLForDisplay(String html, Path HTMLFilePath) {
+    public String prepareHTMLForDisplay(String html, Path htmlFilePath) {
         Document doc = Jsoup.parse(html);
         var fileRelativePath =
-            localDataPath.toAbsolutePath().relativize(HTMLFilePath.getParent().toAbsolutePath());
+            localDataPath.toAbsolutePath().relativize(htmlFilePath.getParent().toAbsolutePath());
 
         // Translate images
         for (Element img : doc.select("img[src]")) {

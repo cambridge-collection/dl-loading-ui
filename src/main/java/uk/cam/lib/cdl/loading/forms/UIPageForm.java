@@ -4,16 +4,18 @@ import javax.validation.constraints.NotBlank;
 
 public class UIPageForm {
 
-    @NotBlank(message = "Must specify a websiteId.")
-    private String websiteId;
     @NotBlank(message = "Must specify html")
     private String html;
 
-    public UIPageForm(String websiteId, String html) {
+    @NotBlank(message = "Must specify a website Name.")
+    private String websiteName;
+    @NotBlank(message = "Must specify a website Path.")
+    private String websitePath;
 
-        this.websiteId = websiteId;
+    public UIPageForm(String websiteName, String websitePath, String html) {
+        this.websiteName = websiteName;
+        this.websitePath = websitePath;
         this.html = html;
-
     }
 
     public UIPageForm() { }
@@ -22,9 +24,12 @@ public class UIPageForm {
         return html;
     }
 
-    public String getWebsiteId() {
-        return websiteId;
+    public String getWebsiteName() {
+        return websiteName;
     }
 
+    public String getWebsitePath() {
+        return websitePath;
+    }
 }
 

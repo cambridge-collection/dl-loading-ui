@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.cam.lib.cdl.loading.apis.EditAPI;
 import uk.cam.lib.cdl.loading.forms.UIPageForm;
+import uk.cam.lib.cdl.loading.model.editor.ui.UIPage;
 import uk.cam.lib.cdl.loading.model.editor.ui.UIThemeData;
 import uk.cam.lib.cdl.loading.utils.HTMLEditingHelper;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -67,29 +67,37 @@ public class WebsiteEditController {
     @PreAuthorize("@roleService.canEditWebsite(authentication)")
     @GetMapping("/editpage.html")
     public String editPage(Model model, HttpServletRequest request,
-                           @RequestParam String websiteId) throws IOException {
+                           @RequestParam String websiteName) throws IOException {
 
-        // validate websiteId
-        String websitePath = Paths.get(websiteId).normalize().toString();
-
-        if (!websitePath.matches("^pages/html/.*\\.html$")) {
-            throw new IOException("Invalid path for editng HTML");
+        // NOTE: Website Names need to be unique. Should use id?
+        UIPage websitePage = null;
+        for (UIPage page: uiThemeData.getPages()) {
+            if (page.getName().equals(websiteName)) {
+                websitePage = page;
+            }
         }
+
+        if (websitePage==null) {
+            throw new IOException("Invalid name for website to edit");
+        }
+
+        // validate website html path
+        String websitePath = Paths.get(websitePage.getHtml().getId()).normalize().toString();
 
         // Read HTML
         Path htmlDataFile = editAPI.getFullPathForId(websitePath);
         String websiteHTML = FileUtils.readFileToString(htmlDataFile.toFile(), "UTF-8");
         websiteHTML = htmlEditingHelper.prepareHTMLForDisplay(websiteHTML, htmlDataFile);
 
-        UIPageForm form = new UIPageForm();
+        UIPageForm form;
         if (model.asMap().get("form") != null) {
             form = (UIPageForm) model.asMap().get("form");
         } else {
-            form = new UIPageForm(websiteId, websiteHTML);
+            form = new UIPageForm(websiteName, websitePath, websiteHTML);
         }
 
         model.addAttribute("pathForDataDisplay", pathForDataDisplay);
-        model.addAttribute("websiteId", websiteId);
+        model.addAttribute("websitePage", websitePage);
         model.addAttribute("websiteHTML", websiteHTML);
         model.addAttribute("form", form);
 

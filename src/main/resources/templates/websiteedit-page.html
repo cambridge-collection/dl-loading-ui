@@ -26,7 +26,7 @@
         </ol>
 
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800 ml-3">Website Content Editor</h1>
+            <th:h1 class="h3 mb-0 text-gray-800 ml-3" th:text="${websitePage.getName()}"/>
         </div>
 
         <div class="col-xl-11" style="max-width: 1200px">
@@ -46,9 +46,10 @@
             <!-- Cards -->
             <div>
                 <form method="post" id="uipageform"
-                      th:action="@{'/websiteedit/editpage.html?websiteId='+${websiteId}}"
+                      th:action="@{'/websiteedit/editpage.html?websiteName='+${websitePage.getName()}}"
                       th:object="${form}">
-                    <input type="hidden" name="websiteId" th:value="*{websiteId}">
+                    <input type="hidden" name="websiteName" th:value="*{getWebsiteName()}">
+                    <input type="hidden" name="websitePath" th:value="*{getWebsitePath()}">
                 <table>
                     <tr>
                         <div class="row">

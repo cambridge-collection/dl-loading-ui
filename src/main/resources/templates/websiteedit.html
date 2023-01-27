@@ -58,7 +58,7 @@
                                             <div
                                                 class="text-s text-primary font-weight-bold text-uppercase mb-1">
                                                 <a
-                                                    th:href="'/websiteedit/editpage.html?websiteId='+${page.getHtml().getId()}"
+                                                    th:href="'/websiteedit/editpage.html?websiteName='+${page.getName()}"
                                                     th:text="${page.getName()}"></a></div>
                                             </div>
                                         </div>
@@ -67,7 +67,7 @@
                                                 absolute; bottom: 0; right:7px;">
                                         <div class="col-auto">
                                             <a
-                                                th:href="'/websiteedit/editpage.html?websiteId='+${page.getHtml().getId()}">
+                                                th:href="'/websiteedit/editpage.html?websiteName='+${page.getName()}">
                                                 <i class="fas fa-arrow-alt-circle-right fa-2x"></i>
                                             </a>
                                         </div>
