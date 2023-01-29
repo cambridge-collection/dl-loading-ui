@@ -155,7 +155,7 @@ public class WebsiteEditController {
 
         try {
             editAPI.updatePage(uiPage,preparedHTML);
-            attributes.addFlashAttribute("message", "Page Updated. If changes are not viewable in a few minutes check the <a href='/logs/view-logs.html'>error logs</a>.");
+            attributes.addFlashAttribute("message", "Page Updated. Changes should be viewable in a few minutes.");
         }
         catch (EditApiException e) {
             LOG.error("Failed to update page", e);
