@@ -1,5 +1,8 @@
 package uk.cam.lib.cdl.loading.forms;
 
+import uk.cam.lib.cdl.loading.model.editor.Id;
+import uk.cam.lib.cdl.loading.model.editor.ui.UIPage;
+
 import javax.validation.constraints.NotBlank;
 
 public class UIPageForm {
@@ -30,6 +33,22 @@ public class UIPageForm {
 
     public String getWebsitePath() {
         return websitePath;
+    }
+
+    public void setHtml(String html) {
+        this.html = html;
+    }
+
+    public void setWebsiteName(String websiteName) {
+        this.websiteName = websiteName;
+    }
+
+    public void setWebsitePath(String websitePath) {
+        this.websitePath = websitePath;
+    }
+
+    public UIPage toUIPage() {
+        return new UIPage(websiteName, new Id(websitePath));
     }
 }
 

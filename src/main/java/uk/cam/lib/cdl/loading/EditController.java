@@ -213,39 +213,6 @@ public class EditController {
         return "edit-collection";
     }
 
-//    // Need to parse relative links to add in 'pathForDataDisplay' for local viewing.
-//    private String prepareHTMLForDisplay(String html, Path HTMLFilePath) {
-//        Document doc = Jsoup.parse(html);
-//        for (Element img : doc.select("img[src]")) {
-//            String src = img.attr("src");
-//
-//            var collectionRelativePath =
-//                editAPI.getDataLocalPath().relativize(HTMLFilePath.getParent());
-//            var imageRelativePath = collectionRelativePath.resolve(src);
-//
-//            img.attr("src", pathForDataDisplay.resolve(imageRelativePath).normalize().toString());
-//        }
-//        return doc.outerHtml();
-//    }
-//
-//    // Need to parse links from display to format to be saved.
-//    // replace 'pathForDataDisplay' with file path to data
-//    // Generate relative path from collections
-//    private String prepareHTMLForSaving(String html, Path HTMLFilePath) throws IOException {
-//        Preconditions.checkArgument(HTMLFilePath.isAbsolute(), "HTMLFilePath is not absolute: %s", HTMLFilePath);
-//        Document doc = Jsoup.parse(html);
-//        for (Element img : doc.select("img[src]")) {
-//            var src = Path.of(img.attr("src"));
-//            if (src.startsWith(pathForDataDisplay)) {
-//                var imgPath = pathForDataDisplay.relativize(src);
-//                var imageFile = editAPI.getDataLocalPath().resolve(imgPath).normalize();
-//                Path relativePath = HTMLFilePath.getParent().relativize(imageFile);
-//                img.attr("src", relativePath.toString());
-//            }
-//        }
-//        return doc.outerHtml();
-//    }
-
     /**
      * Returns the requested file contents specified by filepath if it exists in the checkedout source repo.
      * Currently on /edit/source/

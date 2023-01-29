@@ -46,7 +46,7 @@
             <!-- Cards -->
             <div>
                 <form method="post" id="uipageform"
-                      th:action="@{'/websiteedit/editpage.html?websiteName='+${websitePage.getName()}}"
+                      th:action="@{'/websiteedit/update'}"
                       th:object="${form}">
                     <input type="hidden" name="websiteName" th:value="*{getWebsiteName()}">
                     <input type="hidden" name="websitePath" th:value="*{getWebsitePath()}">
@@ -66,13 +66,36 @@
                                           name="html"
                                           th:text="*{html}"
                                 ></textarea>
-                                <input type="hidden" name="html"
-                                       th:value="*{html}">
+                            </div>
+                        </div>
+
+                        <div class="row mt-6">
+                            <div class="col">
+                                <button type="button" id="uipageform-reset" class="btn btn-secondary
+                                                float-right
+                                        m-1">Reset
+                                </button>
+                                <button type="button" id="uipageform-submit" class="btn btn-primary
+                                                float-right m-1">Update
+                                </button>
                             </div>
                         </div>
 
                     </tr></table>
                 </form>
+            </div>
+
+            <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModal"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body">Your changes are being saved...
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
     <!-- Sticky Footer -->

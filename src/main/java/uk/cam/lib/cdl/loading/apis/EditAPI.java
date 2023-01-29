@@ -17,6 +17,7 @@ import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.*;
 import uk.cam.lib.cdl.loading.model.editor.modelops.*;
 import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
+import uk.cam.lib.cdl.loading.model.editor.ui.UIPage;
 import uk.cam.lib.cdl.loading.utils.ThrowingSupplier;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
@@ -400,6 +401,14 @@ public class EditAPI {
         } catch (IOException e) {
             throw new EditApiException("Failed to update Collection: " + e.getMessage(), e);
         }
+    }
+
+    // This is used to update the HTML for other parts of the site.
+    @PreAuthorize("@roleService.canEditWebsite(authentication)")
+    public void updatePage(UIPage page, String html) throws IOException {
+        var pagePath = dataPath.resolve(page.getHtmlPath().getId()).normalize();
+        Preconditions.checkState(pagePath.startsWith(dataPath), "UIPage is not under dataPath: %s", pagePath);
+        FileUtils.writeStringToFile(pagePath.toFile(), html, "UTF-8", false);
     }
 
     public Path getDataLocalPath() {

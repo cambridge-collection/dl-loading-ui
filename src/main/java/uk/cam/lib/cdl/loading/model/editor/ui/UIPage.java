@@ -8,19 +8,19 @@ import java.beans.ConstructorProperties;
 public class UIPage {
 
     private final String name;
-    private final Id html;
+    private final Id htmlPath;
     private Id sidebarHtml;
 
     @ConstructorProperties({"name", "html"})
-    public UIPage(String name, Id html) {
+    public UIPage(String name, Id htmlPath) {
         this.name = name;
-        this.html = html;
+        this.htmlPath = htmlPath;
         this.sidebarHtml = null;
     }
 
     @JsonProperty("html")
-    public Id getHtml() {
-        return html;
+    public Id getHtmlPath() {
+        return htmlPath;
     }
 
     // Optional.  May be null.

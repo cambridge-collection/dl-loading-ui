@@ -5,7 +5,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class HTMLEditingHelper {
@@ -45,16 +44,16 @@ public class HTMLEditingHelper {
 
     // Need to parse links from display to format to be saved.
     // replace 'pathForDataDisplay' with file path to data
-    // Generate relative path from collections
-    public String prepareHTMLForSaving(String html, Path HTMLFilePath) throws IOException {
-        Preconditions.checkArgument(HTMLFilePath.isAbsolute(), "HTMLFilePath is not absolute: %s", HTMLFilePath);
+    // Generate relative path from thisHTMLPath
+    public String prepareHTMLForSaving(String html, Path thisHTMLPath) {
+        Preconditions.checkArgument(thisHTMLPath.isAbsolute(), "thisHTMLPath is not absolute: %s", thisHTMLPath);
         Document doc = Jsoup.parse(html);
         for (Element img : doc.select("img[src]")) {
             var src = Path.of(img.attr("src"));
             if (src.startsWith(pathForDataDisplay)) {
                 var imgPath = pathForDataDisplay.relativize(src);
                 var imageFile = localDataPath.resolve(imgPath).normalize();
-                Path relativePath = HTMLFilePath.getParent().relativize(imageFile);
+                Path relativePath = thisHTMLPath.getParent().relativize(imageFile);
                 img.attr("src", relativePath.toString());
             }
         }
