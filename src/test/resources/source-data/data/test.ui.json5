@@ -15,45 +15,30 @@
               "name": "about",
               "html": {
                   "@id": "pages/html/about-main.html"
-              },
-              "sidebar-html": {
-                  "@id": "pages/html/about-side.html"
               }
           },
           {
               "name": "about-community",
               "html": {
                   "@id": "pages/html/about-main.html"
-              },
-              "sidebar-html": {
-                  "@id": "pages/html/about-side.html"
               }
           },
           {
               "name": "about-news",
               "html": {
                   "@id": "pages/html/news.html"
-              },
-              "sidebar-html": {
-                  "@id": "pages/html/about-side.html"
               }
           },
           {
               "name": "about-contributors",
               "html": {
                   "@id": "pages/html/contributors.html"
-              },
-              "sidebar-html": {
-                  "@id": "pages/html/about-side.html"
               }
           },
           {
               "name": "about-terms-conditions",
               "html": {
                   "@id": "pages/html/terms.html"
-              },
-              "sidebar-html": {
-                  "@id": "pages/html/about-side.html"
               }
           },
           {
