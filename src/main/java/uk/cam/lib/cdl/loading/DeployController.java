@@ -25,9 +25,10 @@ public class DeployController {
                             @Value("${deploy.releases.staging.transcription.bucketname}") String sourceTranscriptionBucket,
                             @Value("${deploy.releases.production.bucketname}") String destBucket,
                             @Value("${deploy.releases.production.transcription.bucketname}") String destTranscriptionBucket,
-                            @Value("${deploy.datasync.task.arn}") String dataSyncTaskARN) {
+                            @Value("${deploy.datasync.task.arn}") String dataSyncTaskARN,
+                            @Value("${deploy.datasync.task.pages.arn}") String dataSyncTaskPagesARN) {
 
-        this.deploymentHelper = new DeploymentHelper(region,sourceBucket,sourceTranscriptionBucket,destBucket,destTranscriptionBucket, dataSyncTaskARN);
+        this.deploymentHelper = new DeploymentHelper(region,sourceBucket,sourceTranscriptionBucket,destBucket,destTranscriptionBucket, dataSyncTaskARN, dataSyncTaskPagesARN);
     }
     /**
      * Displays the deployment page with the table.

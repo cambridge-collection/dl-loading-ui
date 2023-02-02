@@ -14,6 +14,7 @@ public class DeploymentHelper {
     private final String destTranscriptionBucket;
     private final S3Helper s3Helper;
     private final String dataSyncTaskARN;
+    private final String datasyncTaskPagesARN;
 
     private static final Logger logger = LoggerFactory.getLogger(DeploymentHelper.class);
 
@@ -21,13 +22,15 @@ public class DeploymentHelper {
                             String sourceTranscriptionBucket,
                             String destBucket,
                             String destTranscriptionBucket,
-                            String datasyncTaskARN) {
+                            String datasyncTaskARN,
+                            String datasyncTaskPagesARN) {
         this.sourceBucket = sourceBucket;
         this.sourceTranscriptionBucket = sourceTranscriptionBucket;
         this.destBucket = destBucket;
         this.destTranscriptionBucket = destTranscriptionBucket;
         this.s3Helper = new S3Helper(region);
         this.dataSyncTaskARN = datasyncTaskARN;
+        this.datasyncTaskPagesARN = datasyncTaskPagesARN;
     }
     public boolean deploy() throws IOException, InterruptedException {
         Process returnOK = s3Helper.syncBucketData(sourceBucket,destBucket, true);
@@ -38,6 +41,7 @@ public class DeploymentHelper {
         returnOK.waitFor();
         logger.info("Syncing production S3 item data to production EFS");
         runDataSyncTask(dataSyncTaskARN);
+        runDataSyncTask(datasyncTaskPagesARN);
         logger.info("Deploy complete");
 
         return true;

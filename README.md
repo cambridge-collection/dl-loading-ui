@@ -15,9 +15,14 @@ details on how the data is processed.
 
 3. Run using the command:
 
-       docker-compose --env-file <your_.env_file> up
+  `docker-compose --env-file <your_.env_file> up`
 
-4. The application will start an HTTP server listening on http://localhost:8081. (or an alternative port if config was changed)
+alternatively you can enable hot reloading (for html) using the command:
+
+  `docker-compose --file docker-compose-hot.yml --env-file <your_.env_file> up`
+
+
+5. The application will start an HTTP server listening on http://localhost:8081. (or an alternative port if config was changed)
 
 NOTE: It currently takes AGES for the servers to start.  This is when SSL is enabled. Needs investigating. Be prepared
 when deploying to staging/dev.
@@ -153,8 +158,21 @@ To deploy to remote host
 `export DOCKER_HOST="ssh://digilib@dev.loader.cudl.link"`
 
 then run the docker commands as you would the local version.
+You **will need to be on the library VPN to connect.**
 Add the -d flag to the up command for Detached mode: Run containers in the background.
+
+e.g.
+
+    docker-compose --env-file cudl-dev.env down
+    docker image rm camdl/dl-loading-ui
+    docker-compose --env-file cudl-dev.env up -d
+
+NOTE: This can be *very slow* at the moment to start up.
 
 Note that you will need to copy your key to the servers manually to deploy remotely using the command:
 e.g. for dev: `ssh-copy-id -i ~/.ssh/mykey digilib@dev.loader.cudl.link`
 passwords for the digilib account can be found on keepass.
+
+You can then unset the DOCKER_HOST variable to work locally again
+
+`unset DOCKER_HOST`

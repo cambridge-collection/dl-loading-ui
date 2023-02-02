@@ -108,12 +108,12 @@ $(document).ready(function () {
 
         upload = upload.replace("C:\\fakepath\\", ""); // Chrome and Safari prepend this, so remove it.
 
-        if (!(/^.*\.(jpg|jpeg|png|gif|bmp)$/i).test(upload)) {
+        if (!(/^.*\.(svg|jpg|jpeg|png|gif|bmp)$/i).test(upload)) {
             alert("Select an image file with the file extension .jpg .jpeg .bmp .png or .gif");
             return false;
         }
 
-        if (!(/^[-_A-Za-z0-9]+\.(jpg|jpeg|png|gif|bmp)$/i).test(upload)) {
+        if (!(/^[-_A-Za-z0-9]+\.(svg|jpg|jpeg|png|gif|bmp)$/i).test(upload)) {
             alert("The image file name must only contain the characters A-Z or 0-9 or - or _ without spaces.");
             return false;
         }
