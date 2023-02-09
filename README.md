@@ -154,7 +154,12 @@ Run `$ docker-compose --env-file example.env up` in the repository to start the 
 
 ## Deployment
 
-To deploy to remote host
+First build the project if you have not already.
+`$ mvn clean package`
+
+Enable the library VPN
+
+To deploy to remote host set the DOCKER_HOST variable.
 `export DOCKER_HOST="ssh://digilib@dev.loader.cudl.link"`
 
 then run the docker commands as you would the local version.
