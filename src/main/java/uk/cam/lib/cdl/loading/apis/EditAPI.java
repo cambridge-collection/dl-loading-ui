@@ -17,6 +17,7 @@ import uk.cam.lib.cdl.loading.model.editor.Collection;
 import uk.cam.lib.cdl.loading.model.editor.*;
 import uk.cam.lib.cdl.loading.model.editor.modelops.*;
 import uk.cam.lib.cdl.loading.model.editor.ui.UICollection;
+import uk.cam.lib.cdl.loading.model.editor.ui.UIPage;
 import uk.cam.lib.cdl.loading.utils.ThrowingSupplier;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
@@ -110,7 +111,8 @@ public class EditAPI {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(JsonParser.Feature.ALLOW_COMMENTS);
-        mapper.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
+        mapper.enable(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature());
+
         Dataset dataset = mapper.readValue(datasetFile.toFile(), Dataset.class);
         Map<String, Collection> newCollectionMap = Collections.synchronizedMap(new HashMap<>());
         Map<String, Path> newCollectionFilepaths = Collections.synchronizedMap(new HashMap<>());
@@ -120,12 +122,10 @@ public class EditAPI {
         for (Id id : dataset.getCollections()) {
 
             try {
-                var collectionFile = datasetFile.resolveSibling(id.getId()).normalize();
-                Preconditions.checkState(collectionFile.startsWith(dataPath), "Collection '%s' is not under dataPath", id.getId());
+                //var collectionFile = datasetFile.resolveSibling(id.getId()).normalize();
+                //Preconditions.checkState(collectionFile.startsWith(dataPath), "Collection '%s' is not under dataPath", id.getId());
+                var collectionFile = getFullPathForId(id.getId());
                 String collectionId = dataPath.relativize(collectionFile).toString();
-                if (!Files.exists(collectionFile)) {
-                    throw new FileNotFoundException("Collection file cannot be found at: " + collectionFile);
-                }
 
                 Collection c = mapper.readValue(collectionFile.toFile(), Collection.class);
                 c.setCollectionId(collectionId);
@@ -403,6 +403,14 @@ public class EditAPI {
         }
     }
 
+    // This is used to update the HTML for other parts of the site.
+    @PreAuthorize("@roleService.canEditWebsite(authentication)")
+    public void updatePage(UIPage page, String html) throws IOException {
+        var pagePath = dataPath.resolve(page.getHtmlPath().getId()).normalize();
+        Preconditions.checkState(pagePath.startsWith(dataPath), "UIPage is not under dataPath: %s", pagePath);
+        FileUtils.writeStringToFile(pagePath.toFile(), html, "UTF-8", false);
+    }
+
     public Path getDataLocalPath() {
         return dataPath;
     }
@@ -415,6 +423,8 @@ public class EditAPI {
         return datasetFile;
     }
 
+    public Path getUiFile() { return uiFile; }
+
     private boolean UICollectionContains(String collectionId, List<UICollection> uiCollections) {
         for (UICollection c : uiCollections) {
             if (c.getCollection().equals(new Id(collectionId))) {
@@ -422,6 +432,15 @@ public class EditAPI {
             }
         }
         return false;
+    }
+
+    public Path getFullPathForId(String id) throws FileNotFoundException {
+        var path = datasetFile.resolveSibling(id).normalize();
+        Preconditions.checkState(path.startsWith(dataPath), "File '%s' is not under dataPath", id);
+        if (!Files.exists(path)) {
+            throw new FileNotFoundException("File cannot be found at: " + path);
+        }
+        return path;
     }
 }
 

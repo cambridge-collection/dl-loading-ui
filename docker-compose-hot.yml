@@ -1,0 +1,54 @@
+version: "3.7"
+
+services:
+  tomcat:
+    image: tomcat:9.0.30-jdk11-openjdk
+    env_file:
+      - ${ENV_FILE}
+    ports:
+      - 8081:8080
+    volumes:
+      # Use exploded webapp files, instead of packaged WAR, to allow hot reloading of source JSPs etc.
+      #- ./src/main/webapp/:/usr/local/tomcat/webapps/ROOT/
+      #- ./target/ui-0.1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/ROOT.war
+      - ./target/ui-0.1.0-SNAPSHOT/:/usr/local/tomcat/webapps/
+      # Classes will be reloaded only if your IDE auto re-compiles, or you run a maven build.
+      - ./target/classes/:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/
+      - ./target/ui-0.1.0-SNAPSHOT/WEB-INF/lib/:/usr/local/tomcat/webapps/ROOT/WEB-INF/lib/
+      - /mnt/s3data/data:/mnt/s3data/data
+
+    depends_on:
+      - dl-loading-db
+      - s3fs
+
+  dl-loading-db:
+    build:
+      context: docker/dl-loading-db
+      dockerfile: Dockerfile
+      args:
+        LOADING_DB_USER_SETUP_SQL: ${LOADING_DB_USER_SETUP_SQL}
+        POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
+    restart: always
+    image: camdl/dl-loading-db:latest
+    volumes:
+      - dl-loading-db:/var/lib/postgresql/data
+    command: -p ${LOADING_DB_PORT_INT}
+    environment:
+      POSTGRES_USER: ${LOADING_DB_USER}
+      POSTGRES_DB: ${LOADING_DB_DATABASE}
+      POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
+
+  s3fs:
+    privileged: true
+    image: efrecon/s3fs:1.86
+    restart: always
+    env_file:
+      - ${ENV_FILE}
+      # A workaround for bucket names containing '.' until the related s3fs-fuse issue is resolved
+      # Keep in mind this is a secrutiy risk (default is https)
+      # - AWS_S3_URL=http://s3.amazonaws.com
+    volumes:
+      - /mnt/s3data/data:/opt/s3fs/bucket:shared
+
+volumes:
+  dl-loading-db:

@@ -350,7 +350,7 @@ public class ContentEditorController {
 
         // check file extension / content type for image.
         java.util.regex.Pattern pattern = java.util.regex.Pattern
-            .compile("^[-_A-Za-z0-9]+\\.(?i)(jpg|jpeg|png|gif|bmp)$");
+            .compile("^[-_A-Za-z0-9]+\\.(?i)(svg|jpg|jpeg|png|gif|bmp)$");
         boolean isImageFile = pattern.matcher(
             Objects.requireNonNull(uploadParams.getUpload().getOriginalFilename())).matches();
         boolean isImageContent = Objects.requireNonNull(uploadParams.getUpload().getContentType())

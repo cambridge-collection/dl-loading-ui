@@ -10,27 +10,20 @@ import java.util.List;
 public class UIThemeData {
 
     private final List<UICollection> collections;
-    private final UIPage page;
-    private final UIStaticPage staticPage;
+    private final List<UIPage> pages;
 
-    @ConstructorProperties({"collections", "pages", "static-pages"})
-    public UIThemeData(List<UICollection> collections, UIPage page, UIStaticPage staticPage) {
+    @ConstructorProperties({"collections", "pages"})
+    public UIThemeData(List<UICollection> collections, List<UIPage> pages) {
         this.collections = collections;
-        this.page = page;
-        this.staticPage = staticPage;
+        this.pages = pages;
     }
 
     public List<UICollection> getCollections() {
         return collections;
     }
 
-    @JsonProperty("static-pages")
-    public UIStaticPage getStaticPage() {
-        return staticPage;
-    }
-
     @JsonProperty("pages")
-    public UIPage getPage() {
-        return page;
+    public List<UIPage> getPages() {
+        return pages;
     }
 }

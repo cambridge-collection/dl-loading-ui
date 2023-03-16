@@ -144,4 +144,8 @@ public class RoleService {
     public boolean canAssignRoleSiteManager(Authentication authentication) {
         return hasRoleRegex(RoleHelper.getRoleSiteManager(), authentication);
     }
+
+    public boolean canEditWebsite(Authentication authentication) {
+        return hasRoleRegex(RoleHelper.getRoleSiteManager(), authentication);
+    }
 }

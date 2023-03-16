@@ -47,13 +47,23 @@ $(document).ready(function () {
     CKEDITOR.replace('description.full', {
         filebrowserImageBrowseUrl: '/editor/browse/images',
         height: 500,
-        removeButtons: 'About'
+        removeButtons: 'About',
+        on: {
+            instanceReady: function() {
+                this.document.appendStyleSheet( '/css/cudl.css' );
+            }
+        }
     });
 
     CKEDITOR.replace('credit.prose', {
         filebrowserImageBrowseUrl: '/editor/browse/images',
         height: 300,
-        removeButtons: 'About'
+        removeButtons: 'About',
+        on: {
+            instanceReady: function() {
+                this.document.appendStyleSheet( '/css/cudl.css' );
+            }
+        }
     });
 
     CKEDITOR.config.allowedContent=true;
