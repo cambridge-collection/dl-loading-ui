@@ -19,6 +19,7 @@ import uk.cam.lib.cdl.loading.editing.modelcreation.ModelFactory;
 import uk.cam.lib.cdl.loading.editing.modelcreation.itemcreation.TeiIdCreationStrategy;
 import uk.cam.lib.cdl.loading.editing.modelcreation.itemcreation.TeiItemFactory;
 import uk.cam.lib.cdl.loading.editing.pagination.DefaultTEIPageConverter;
+import uk.cam.lib.cdl.loading.editing.pagination.IIIFImageQuerier;
 import uk.cam.lib.cdl.loading.editing.pagination.ImmutableCSVPageLoader;
 import uk.cam.lib.cdl.loading.editing.pagination.TeiPageListFactory;
 import uk.cam.lib.cdl.loading.exceptions.EditApiException;
@@ -66,6 +67,11 @@ public class EditConfig {
         var dataRoot = gitRepoRoot.resolve(gitRepoDataSubpath).normalize();
         Preconditions.checkArgument(dataRoot.startsWith(gitRepoRoot));
         return dataRoot;
+    }
+
+    @Bean( name = "iiifImageServer")
+    public IIIFImageQuerier iiifImageQuerier(@Value("${iiif-image-server}") String iiifImageServer) {
+        return new IIIFImageQuerier(iiifImageServer);
     }
 
     @Bean

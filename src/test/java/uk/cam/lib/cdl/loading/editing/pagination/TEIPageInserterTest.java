@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.Diff;
 import uk.cam.lib.cdl.loading.utils.XML;
@@ -19,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SpringBootTest
 public class TEIPageInserterTest {
 
     private TEIPageInserter inserter;
