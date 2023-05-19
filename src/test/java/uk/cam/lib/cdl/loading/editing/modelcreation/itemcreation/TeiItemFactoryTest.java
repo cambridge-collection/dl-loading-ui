@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteSource;
 import com.google.common.truth.Truth;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.xmlunit.builder.DiffBuilder;
 import uk.cam.lib.cdl.loading.editing.modelcreation.ModelAttributes;
 import uk.cam.lib.cdl.loading.editing.pagination.CSVPageLoader.CSVRowAccessor;
@@ -23,6 +24,7 @@ import static com.google.common.truth.Truth8.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static uk.cam.lib.cdl.loading.editing.pagination.TeiPaginationGenerationProcessorTest.TEI_EMPTY;
 
+@SpringBootTest
 public class TeiItemFactoryTest {
     public static final Path TEI_BASE_PATH = Path.of("example/items/tei");
 

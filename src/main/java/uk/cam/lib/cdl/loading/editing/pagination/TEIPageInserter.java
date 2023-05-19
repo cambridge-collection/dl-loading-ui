@@ -10,6 +10,7 @@ import javax.xml.XMLConstants;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -25,7 +26,6 @@ public class TEIPageInserter {
         Preconditions.checkNotNull(tei, "tei cannot be null");
         Preconditions.checkNotNull(teiPages, "teiPages cannot be null");
         validateTEIDoc(tei);
-
         if(teiPages.isEmpty())
             return;
 
@@ -106,11 +106,29 @@ public class TEIPageInserter {
         surfaceEl.setAttribute("n", page.page().label());
         surfaceEl.setAttributeNS(XMLConstants.XML_NS_URI, "xml:id", surfaceId(page));
         var graphicEl = XML.appendChild(surfaceEl, XMLNS_TEI, "graphic");
-        // The original code set rend, width and height, but we don't have access to the image size here,
-        // and they shouldn't be duplicated here as the image can change, and we can determine them at
-        // runtime.
+
+        String jp2_id = page.page().image().toString();
+
         graphicEl.setAttribute("decls", String.join(" ", page.tags()));
-        graphicEl.setAttribute("url", page.page().image().toString());
+        graphicEl.setAttribute("url", jp2_id);
+
+        // Here we query the image server and set rend, height and width.
+        // Note if the image changes this will be inaccurate.
+        try {
+            IIIFImageInfo info = IIIFImageQuerierFactory.get().getImageInfo(jp2_id);
+
+            graphicEl.setAttribute("height", info.getHeight()+"px");
+            graphicEl.setAttribute("width", info.getWidth()+"px");
+            if (info.getHeight()> info.getWidth()) {
+                graphicEl.setAttribute("rend", "portrait");
+            } else {
+                graphicEl.setAttribute("rend", "landscape");
+            }
+        } catch (IOException e) {
+            System.err.println("Unable to get image height and width.");
+            e.printStackTrace();
+        }
+
         return surfaceEl;
     }
 

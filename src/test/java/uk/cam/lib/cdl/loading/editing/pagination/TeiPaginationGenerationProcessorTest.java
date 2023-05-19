@@ -5,6 +5,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.truth.Truth;
 import com.google.common.truth.Truth8;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.w3c.dom.Document;
 import org.xmlunit.builder.DiffBuilder;
 import uk.cam.lib.cdl.loading.editing.modelcreation.CreationResult;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+@SpringBootTest
 public class TeiPaginationGenerationProcessorTest {
 
     public static TeiPaginationGenerationProcessor newTestInstance() {
