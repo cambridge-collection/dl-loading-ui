@@ -213,3 +213,11 @@ passwords for the digilib account can be found on keepass.
 You can then unset the DOCKER_HOST variable to work locally again
 
 `unset DOCKER_HOST`
+
+## Publish Docker Image
+
+The following publishes the docker image to dockerhub
+
+    docker login
+    docker image push camdl/dl-loading-ui:latest
+    docker image push camdl/dl-loading-db:latest
