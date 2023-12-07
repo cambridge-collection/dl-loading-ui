@@ -1,10 +1,12 @@
 package uk.cam.lib.cdl.loading.model.editor.ui;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.cam.lib.cdl.loading.model.editor.Id;
 
 import java.beans.ConstructorProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UIPage {
 
     private final String name;
