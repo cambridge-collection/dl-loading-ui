@@ -5,24 +5,52 @@ It edits data in the cudl-data-source s3 buckets (prefixed with dev-, staging- a
 Once this data is edited it triggers processing, see https://github.com/cambridge-collection/data-lambda-transform which has
 details on how the data is processed.
 
-## Running
+## Want to just start the content loader on a folder of data?
+If you are new to the content loader, start by using the sample
+data set instead of using data ina s3 bucket. You can run the following commands to
+bring in the sample data, and run the client:
+
+    git submodule init
+
+You should see some sample data in the directory `docker/dl-data-samples/source-data`
+
+Then you can build the client and run it using the commands:
+
+    mvn clean package
+
+This should produce a target directory with a war file in.
+
+Then you can run the command:
+
+    docker-compose  --env-file example.env --file docker-compose-sample-data.yml up
+
+and the content loader should start on http://localhost:8081 and you will need to log in using the following:
+
+    username: test-all
+    password: password
+
+This is set in the file `docker/dl-loading-db/resources/example_user_data.sql` and can be changed through the user management section.
+
+## Running with S3 buckets
 
 1. Build the project:
 
         $ mvn clean package
 
-2. Copy the example.env file and customise.
+2. Copy the `example.env` file and customise by adding specific s3 bucket details and access keys.
 
 3. Run using the command:
 
-  `docker-compose --env-file <your_.env_file> up`
+       docker-compose --env-file <your_.env_file> up
+
 
 alternatively you can enable hot reloading (for html) using the command:
 
   `docker-compose --file docker-compose-hot.yml --env-file <your_.env_file> up`
 
 
-5. The application will start an HTTP server listening on http://localhost:8081. (or an alternative port if config was changed)
+4. The application will start an HTTP server listening on http://localhost:8081. (or an alternative port if config was changed)
+
 
 NOTE: It currently takes AGES for the servers to start.  This is when SSL is enabled. Needs investigating. Be prepared
 when deploying to staging/dev.

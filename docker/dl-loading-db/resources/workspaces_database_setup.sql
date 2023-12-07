@@ -28,12 +28,10 @@ create unique index ix_collections_workspaces on collections_in_workspaces (coll
 -- Insert default workspaces for testing.
 insert into workspaces(name) VALUES ('Test Workspace1');
 insert into workspaces(name) VALUES ('Test Workspace2');
-insert into items_in_workspaces (item_id, workspace_id) VALUES ('MS-TEST-00001-00001',
+insert into collections_in_workspaces (collection_id, workspace_id) VALUES ('collections/test.collection.json',
 (SELECT workspace_id FROM workspaces WHERE name='Test Workspace1'));
-insert into items_in_workspaces (item_id, workspace_id) VALUES ('MS-TEST-00001-00002',
+insert into collections_in_workspaces (collection_id, workspace_id) VALUES ('collections/another.collection.json',
 (SELECT workspace_id FROM workspaces WHERE name='Test Workspace1'));
-insert into items_in_workspaces (item_id, workspace_id) VALUES ('MS-TEST-00001-00003',
+insert into collections_in_workspaces (collection_id, workspace_id) VALUES ('collections/test.collection.json',
 (SELECT workspace_id FROM workspaces WHERE name='Test Workspace2'));
---insert into collections_in_workspaces (collection_id, workspace_id)VALUES ('collections/test.collection.json',
---(SELECT workspace_id FROM workspaces WHERE name='Test Workspace1'));
 
