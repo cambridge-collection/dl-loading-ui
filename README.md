@@ -33,6 +33,10 @@ This is set in the file `docker/dl-loading-db/resources/example_user_data.sql` a
 
 ## Running with S3 buckets
 
+For this you will need to make sure the env file you are using points to a valid s3 bucket which you have access to
+and have created an access key, with permission to write to that bucket.
+The bucket should contain the data in the same format as shown in the `docker/dl-data-samples/source-data`.
+
 1. Build the project:
 
         $ mvn clean package
