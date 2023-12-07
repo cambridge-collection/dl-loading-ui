@@ -18,6 +18,8 @@ services:
       - /dev/fuse
     entrypoint: ["bash", "-c", "-l", "mkdir -p /mnt/s3data && mount-s3 $AWS_S3_BUCKET /mnt/s3data && java -jar -debug /usr/local/dl-loading-ui.war --spring.config.additional-location=/etc/dl-loading-ui/"]
     image: camdl/dl-loading-ui:latest
+    depends_on:
+      - dl-loading-db
 
   dl-loading-db:
     build:
