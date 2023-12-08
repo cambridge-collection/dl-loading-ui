@@ -31,6 +31,15 @@ and the content loader should start on http://localhost:8081 and you will need t
 
 This is set in the file `docker/dl-loading-db/resources/example_user_data.sql` and can be changed through the user management section.
 
+### Ready for getting the edited data into the viewer?
+
+The content loader works on the "source data"
+(see `docker/dl-data-samples/source-data` for an example) and it needs to be transformed into the processed data
+(see `docker/dl-data-samples/processed-data` for an example).  In order to do this we have a Terraform script to create a
+pipeline in AWS to transform the data in real-time here: https://github.com/cambridge-collection/cudl-terraform.  If you prefer to
+do this transformation yourself we have XSLT here: https://github.com/cambridge-collection/cudl-data-processing-xslt which
+transforms the TEI into the JSON format we use for the viewer.
+
 ## Running with S3 buckets
 
 For this you will need to make sure the env file you are using points to a valid s3 bucket which you have access to
@@ -214,9 +223,9 @@ You can then unset the DOCKER_HOST variable to work locally again
 
 `unset DOCKER_HOST`
 
-## Publish Docker Image
+## Publish Docker Images
 
-The following publishes the docker image to dockerhub
+The following publishes the docker images to dockerhub.  Note: Make sure these do not contain any credentials.
 
     docker login
     docker image push camdl/dl-loading-ui:latest
