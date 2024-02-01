@@ -2,7 +2,6 @@ version: "3.7"
 
 services:
   dl-loading-ui:
-    privileged: true
     image: camdl/dl-loading-ui:latest
     build:
       context: .
@@ -13,17 +12,10 @@ services:
       - ${ENV_FILE}
     ports:
       - ${LOADING_UI_PORT_EXT}:${LOADING_UI_PORT_INT}
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - "apparmor:unconfined"
-    devices:
-      - /dev/fuse
     volumes:
        - ./docker/dl-data-samples/source-data:/mnt/s3data
     depends_on:
       - dl-loading-db
-  #  entrypoint: ["bash", "-c", "-l", "mkdir -p /mnt/s3data && mount-s3 $AWS_S3_BUCKET /mnt/s3data && java -jar -debug /usr/local/dl-loading-ui.war --spring.config.additional-location=/etc/dl-loading-ui/"]
 
   dl-loading-db:
     build:
@@ -41,35 +33,6 @@ services:
       POSTGRES_USER: ${LOADING_DB_USER}
       POSTGRES_DB: ${LOADING_DB_DATABASE}
       POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
-
-#  s3fs:
-#    privileged: true
-#    build:
-#      context: docker/mountpoint-s3
-#      dockerfile: Dockerfile
-#    #image: efrecon/s3fs:1.92
-#    image: mountpoint-s3
-#    restart: always
-#    env_file:
-#      - ${ENV_FILE}
-#      # A workaround for bucket names containing '.' until the related s3fs-fuse issue is resolved
-#      # Keep in mind this is a secrutiy risk (default is https)
-#      #- AWS_S3_URL=https://s3.amazonaws.com
-#    cap_add:
-#      - SYS_ADMIN
-#    security_opt:
-#      - "apparmor:unconfined"
-#    devices:
-#      - /dev/fuse
-#    volumes:
-##      - s3data:/opt/s3fs/bucket
-#      - type: bind
-#        source: /mnt/s3data
-#        target: /opt/s3fs
-#        bind:
-#          propagation: rshared
-#
-#    entrypoint: ["bash", "-c", "-l", "mkdir -p /opt/s3fs/bucket && mount-s3 -f sandbox-cudl-data-source /opt/s3fs/bucket"]
 
 volumes:
   dl-loading-db:

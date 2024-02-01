@@ -40,6 +40,11 @@ pipeline in AWS to transform the data in real-time here: https://github.com/camb
 do this transformation yourself we have XSLT here: https://github.com/cambridge-collection/cudl-data-processing-xslt which
 transforms the TEI into the JSON format we use for the viewer.
 
+### Cambridge developer?
+
+Use:
+        `docker-compose --env-file <your env file> --file docker-compose-cudl-data.yml`
+
 ## Running with S3 buckets
 
 For this you will need to make sure the env file you are using points to a valid s3 bucket which you have access to
@@ -223,6 +228,23 @@ You can then unset the DOCKER_HOST variable to work locally again
 
 `unset DOCKER_HOST`
 
+
+## Restart running container on dev
+
+    export DOCKER_HOST="ssh://digilib@dev.loader.cudl.link"
+
+Get container id using:
+
+    docker container ls
+
+the restart using:
+
+    docker container restart [CONTAINERID]
+
+Alternatively, after setting the DOCKER_HOST you can run:
+
+    docker container restart
+
 ## Publish Docker Images
 
 The following publishes the docker images to dockerhub.  Note: Make sure these do not contain any credentials.
@@ -230,3 +252,16 @@ The following publishes the docker images to dockerhub.  Note: Make sure these d
     docker login
     docker image push camdl/dl-loading-ui:latest
     docker image push camdl/dl-loading-db:latest
+
+# Publish to Docker Images AWS ECR Repository
+
+    source <env file>
+    cd docker/dl-loading-db
+
+follow push commands at: https://eu-west-1.console.aws.amazon.com/ecr/repositories/private/563181399728/dl-loader-db?region=eu-west-1
+substituting build command for: `docker image build --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-ui .`
+
+    cd ../..
+
+follow push commands at: https://eu-west-1.console.aws.amazon.com/ecr/repositories/private/563181399728/dl-loader-ui?region=eu-west-1
+substituting build command for: `docker image build --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui . `

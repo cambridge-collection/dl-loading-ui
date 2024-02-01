@@ -1,8 +1,10 @@
 version: "3.7"
 
 services:
+
+  # Note: mountpoint not currently used as updating files not currently supported. Using s3fs until then.
   dl-loading-ui:
-    privileged: true
+#    privileged: true
     image: camdl/dl-loading-ui:latest
     build:
       context: .
@@ -13,15 +15,18 @@ services:
       - ${ENV_FILE}
     ports:
       - ${LOADING_UI_PORT_EXT}:${LOADING_UI_PORT_INT}
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - "apparmor:unconfined"
-    devices:
-      - /dev/fuse
+#    cap_add:
+#      - SYS_ADMIN
+#    security_opt:
+#      - "apparmor:unconfined"
+#    devices:
+#      - /dev/fuse
     depends_on:
+      - s3fs
       - dl-loading-db
-    entrypoint: ["bash", "-c", "-l", "mkdir -p /mnt/s3data && mount-s3 $AWS_S3_BUCKET /mnt/s3data && java -jar -debug /usr/local/dl-loading-ui.war --spring.config.additional-location=/etc/dl-loading-ui/"]
+    volumes:
+      - /mnt/s3data/data:/mnt/s3data/data:shared
+#    entrypoint: ["bash", "-c", "-l", "mkdir -p /mnt/s3data && mount-s3 $AWS_S3_BUCKET /mnt/s3data && java -jar -debug /usr/local/dl-loading-ui.war --spring.config.additional-location=/etc/dl-loading-ui/"]
 
   dl-loading-db:
     build:
@@ -40,7 +45,19 @@ services:
       POSTGRES_DB: ${LOADING_DB_DATABASE}
       POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
 
-#  s3fs:
+  s3fs:
+    privileged: true
+    image: efrecon/s3fs:1.86
+    restart: always
+    env_file:
+      - ${ENV_FILE}
+      # A workaround for bucket names containing '.' until the related s3fs-fuse issue is resolved
+      # Keep in mind this is a secrutiy risk (default is https)
+      # - AWS_S3_URL=http://s3.amazonaws.com
+    volumes:
+      - /mnt/s3data/data:/opt/s3fs/bucket:shared
+
+#  mountpoint:
 #    privileged: true
 #    build:
 #      context: docker/mountpoint-s3

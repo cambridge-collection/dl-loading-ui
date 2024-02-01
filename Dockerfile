@@ -1,4 +1,5 @@
-FROM adoptopenjdk/openjdk11:jdk-11.0.11_9
+#FROM adoptopenjdk/openjdk11:jdk-11.0.11_9
+FROM openjdk:11.0.14
 
 ARG LOADING_UI_HARDCODED_USERS_FILE
 
@@ -9,11 +10,11 @@ COPY ./${LOADING_UI_HARDCODED_USERS_FILE} /etc/dl-loading-ui/users.properties
 
 # Install req
 RUN apt update -y && apt upgrade -y
-RUN apt install apt-utils -y
+#RUN apt install apt-utils -y
 RUN apt install curl -y
-RUN apt-get install zip -y
+#RUN apt-get install zip -y
 RUN apt-get install unzip -y
-RUN apt-get install python -y
+#RUN apt-get install python -y
 
 # install aws cli
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -22,7 +23,7 @@ RUN ./aws/install
 
 # install the s3 mountpoint.
 # See https://docs.aws.amazon.com/AmazonS3/latest/userguide/mountpoint-installation.html
-COPY ./docker/mountpoint-s3/mount-s3.deb mount-s3.deb
-RUN apt-get install ./mount-s3.deb -y
+#COPY ./docker/mountpoint-s3/mount-s3.deb mount-s3.deb
+#RUN apt-get install ./mount-s3.deb -y
 
 CMD java -jar -debug /usr/local/dl-loading-ui.war --spring.config.additional-location=/etc/dl-loading-ui/
