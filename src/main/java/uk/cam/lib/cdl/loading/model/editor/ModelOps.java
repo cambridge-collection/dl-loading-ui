@@ -8,14 +8,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.io.CharSource;
-import org.apache.commons.io.FileUtils;
 import org.immutables.value.Value;
 import uk.cam.lib.cdl.loading.model.editor.modelops.*;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.*;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -52,10 +53,16 @@ public interface ModelOps {
         Preconditions.checkNotNull(metadata);
         var destination = resolveIdToIOPath(dataRoot, id);
         Files.createDirectories(destination.getParent());
-        if (destination.toFile().exists()) {
-            Files.write(destination, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
-        }
-        FileUtils.writeByteArrayToFile(destination.toFile(),metadata.readAllBytes());
+//        if (destination.toFile().exists()) {
+//            Files.write(destination, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
+//        }
+//        FileUtils.writeByteArrayToFile(destination.toFile(),metadata.readAllBytes());
+
+        // This write has options that default to:
+        // StandardOpenOption.TRUNCATE_EXISTING, WRITE and CREATE.
+        Files.write(destination, metadata.readAllBytes());
+
+
         // Files.copy deletes existing file, which causes errors for s3 processing, so instead truncating
         // Files.copy(metadata, destination, StandardCopyOption.REPLACE_EXISTING);
     }

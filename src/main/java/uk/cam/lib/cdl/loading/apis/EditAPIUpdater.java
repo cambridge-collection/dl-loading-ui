@@ -6,7 +6,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import uk.cam.lib.cdl.loading.exceptions.EditApiException;
 
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 
 public class EditAPIUpdater {
     private static final Logger LOG = LoggerFactory.getLogger(EditAPIUpdater.class);
@@ -17,7 +16,7 @@ public class EditAPIUpdater {
         this.editAPI = editAPI;
     }
 
-    @Scheduled(fixedDelay = 5 * 60 * 1000, initialDelay = 500) // Every 5 mins
+    @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 10 * 60 * 1000) // Every 5 mins
     public void checkForUpdates() {
         LOG.info("Updating model...");
         try {

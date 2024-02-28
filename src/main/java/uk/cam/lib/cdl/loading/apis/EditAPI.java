@@ -152,7 +152,13 @@ public class EditAPI {
         this.collectionFilepaths = newCollectionFilepaths;
         this.itemMap = newItemMap;
 
+        _updateModelFromUIFile(mapper);
+        System.out.println("done update model.");
+    }
+
+    private synchronized void _updateModelFromUIFile(ObjectMapper mapper) throws IOException{
         // Update UI
+        System.out.println("update UI");
         Map<String, UICollection> newUICollectionMap = Collections.synchronizedMap(new HashMap<>());
         UI ui = mapper.readValue(uiFile.toFile(), UI.class);
         for (UICollection collection : ui.getThemeData().getCollections()) {
@@ -168,9 +174,43 @@ public class EditAPI {
             String thumbnailURL = getCollectionThumbnailURL(c.getCollectionId());
             c.setThumbnailURL(thumbnailURL);
         }
-
     }
 
+    private synchronized void _updateModelCollection(Id id, ObjectMapper mapper) throws EditApiException {
+
+        System.out.println("update collection: "+id.getId().toString());
+        try {
+            var collectionFile = getFullPathForId(id.getId());
+            String collectionId = dataPath.relativize(collectionFile).toString();
+
+            Collection c = mapper.readValue(collectionFile.toFile(), Collection.class);
+            c.setCollectionId(collectionId);
+
+            // Setup collection maps
+            collectionMap.put(collectionId, c);
+            collectionFilepaths.put(collectionId, collectionFile);
+
+            for (Id relativeItemId : c.getItemIds()) {
+
+                try {
+                    var itemFile = collectionFile.resolveSibling(relativeItemId.getId());
+                    var itemId = dataPath.relativize(itemFile);
+                    _updateModelItem(itemId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private synchronized void _updateModelItem(Path itemId) {
+
+        System.out.println("update model item: "+itemId);
+        itemMap.put(itemId.toString(), ImmutableItem.of(itemId));
+
+    }
     /**
      * Get the ThumbnailURL for a collection.
      *
@@ -310,7 +350,7 @@ public class EditAPI {
         Preconditions.checkArgument(itemExists(item.id()) || item.fileData().isPresent(),
             "item must have fileData if it's being created");
 
-        return updateData(() -> {
+        return updateItemData(() -> {
             var requiredStateChanges = ModelOps().transformItem(
                 item, this.collectionMap.values(), collectionMembership);
 
@@ -331,12 +371,19 @@ public class EditAPI {
         return enforceItemState(getItem(itemId), collectionMembership);
     }
 
-    protected <T, Err extends EditApiException> T updateData(ThrowingSupplier<T, Err> operation) throws EditApiException {
+    protected <T, Err extends EditApiException> T updateItemData(ThrowingSupplier<T, Err> operation) throws EditApiException {
         Preconditions.checkNotNull(operation);
 
-        var result = operation.get();
+        var result = (Optional<T>) operation.get();
+
+        if (result.isPresent()) {
+            ModelState modelState = (ModelState) result.get();
+            ImmutableItem item = (ImmutableItem) modelState.model();
+            _updateModelItem(item.id());
+        }
+
         updateModel();
-        return result;
+        return operation.get();
 
     }
 
@@ -387,15 +434,17 @@ public class EditAPI {
             // Write out HTML section files
             var descriptionHTMLFile = collectionFilepath.getParent().resolve(collection.getDescription().getFull().getId()).normalize();
             Preconditions.checkState(descriptionHTMLFile.startsWith(dataPath), "descriptionHTMLFile is not under dataPath: %s", descriptionHTMLFile);
-            FileUtils.write(descriptionHTMLFile.toFile(), descriptionHTML, "UTF-8");
+            FileUtils.write(descriptionHTMLFile.toFile(), descriptionHTML, "UTF-8", false);
 
             var creditHTMLFile = collectionFilepath.getParent().resolve(collection.getCredit().getProse().getId()).normalize();
             Preconditions.checkState(creditHTMLFile.startsWith(dataPath), "creditHTMLFile is not under dataPath: %s", creditHTMLFile);
-            FileUtils.write(creditHTMLFile.toFile(), creditHTML, "UTF-8");
+            FileUtils.write(creditHTMLFile.toFile(), creditHTML, "UTF-8", false);
 
             // Update collection thumbnail in the UI
             setUICollection(uiCollection, collectionId);
 
+            //_updateModelCollection(new Id(collectionId), mapper);
+            //_updateModelFromUIFile(mapper);
             updateModel();
 
         } catch (IOException e) {

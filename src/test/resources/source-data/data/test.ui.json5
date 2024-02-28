@@ -77,5 +77,29 @@
               }
           }
       ],
+  },
+  "theme-ui" : {
+    "title" : "Cambridge Digital Library",
+    "description" : "A home for the discovery of digitised material and research outputs from the University of Cambridge and beyond",
+    "attribution" : "Provided by Cambridge University Library.",
+    "css" : [ "ui/theme/css/default.css", "ui/theme/css/override.css" ],
+    "js" : [ ],
+    "images" : {
+        "logo_document_page_right" : {
+            "src" : "ui/theme/images/ULLogowhite.gif",
+            "alt" : "Cambridge University Library",
+            "href" : "https://www.lib.cam.ac.uk"
+        },
+        "logo" : {
+            "src" : "ui/theme/images/logo.svg",
+            "alt" : "University of Cambridge",
+            "href" : "https://www.cam.ac.uk/"
+        },
+        "logo_document_page" : {
+            "src" : "ui/theme/images/cudl-logo-1x.png",
+            "alt" : "University of Cambridge Digital Library",
+            "href" : "/"
+        }
+    }
   }
 }

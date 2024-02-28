@@ -196,7 +196,7 @@ The database can be populated with sample users and workspaces by executing [exa
 
 The repository contains a Docker Compose file which will run a suitable database, plus a web-based DB admin UI to manage it.
 
-Run `$ docker-compose --env-file example.env up` in the repository to start the services with appropriate values set in the example.env
+Run `$ docker-compose --env-file example.env up --build` in the repository to start the services with appropriate values set in the example.env
 
 ## Deployment
 
@@ -216,7 +216,7 @@ e.g.
 
     docker-compose --env-file cudl-dev.env down
     docker image rm camdl/dl-loading-ui
-    docker-compose --env-file cudl-dev.env up -d
+    docker-compose --env-file cudl-dev.env up --build -d
 
 NOTE: This can be *very slow* at the moment to start up.
 
