@@ -258,12 +258,20 @@
                                            cellspacing="0">
                                         <thead>
                                         <tr>
+                                            <th>Position</th>
                                             <th>Filename</th>
                                             <th>Options</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <tr th:each="item : ${items}">
+
+                                        <tr th:each="i : ${#numbers.sequence( 0, items.size()-1)}">
+                                            <span th:with="item=${items.get(i)}">
+                                            <td>
+                                                <div>
+                                                    <span th:text="${i+1}"></span>
+                                                </div>
+                                            </td>
                                             <td>
                                                 <a th:if="${#strings.containsIgnoreCase(item.id(),'tei')}"
                                                    th:href="@{/edit/item(id=${item.id().toString()})}"
@@ -286,6 +294,7 @@
                                                     </button>
                                                 </form>
                                             </td>
+                                            </span>
                                         </tr>
                                         </tbody>
                                     </table>

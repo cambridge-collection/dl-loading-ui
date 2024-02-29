@@ -1,9 +1,8 @@
 version: "3.7"
 
-# Note: mountpoint not currently used as updating files not currently supported. Using s3fs until then.
 services:
   dl-loading-ui:
-    #privileged: true
+    privileged: true
     build:
       context: .
       dockerfile: Dockerfile
@@ -13,13 +12,13 @@ services:
       - ${ENV_FILE}
     ports:
       - ${LOADING_UI_PORT_EXT}:${LOADING_UI_PORT_INT}
-    #cap_add:
-    #  - SYS_ADMIN
-    #security_opt:
-    #  - "apparmor:unconfined"
-    #devices:
-    #  - /dev/fuse
-    #entrypoint: ["bash", "-c", "-l", "mkdir -p /mnt/s3data && mount-s3 $AWS_S3_BUCKET /mnt/s3data && java -jar -debug /usr/local/dl-loading-ui.war --spring.config.additional-location=/etc/dl-loading-ui/"]
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - "apparmor:unconfined"
+    devices:
+      - /dev/fuse
+    entrypoint: ["bash", "-c",  "mkdir -p /mnt/s3data/data && mount-s3 $AWS_S3_BUCKET /mnt/s3data/data && java -jar -debug /usr/local/dl-loading-ui.war --spring.config.additional-location=/etc/dl-loading-ui/"]
     image: camdl/dl-loading-ui:latest
     volumes:
       # Use exploded webapp files, instead of packaged WAR, to allow hot reloading of source JSPs etc.
@@ -29,23 +28,23 @@ services:
       # Classes will be reloaded only if your IDE auto re-compiles, or you run a maven build.
       - ./target/classes/:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/
       - ./target/ui-0.1.0-SNAPSHOT/WEB-INF/lib/:/usr/local/tomcat/webapps/ROOT/WEB-INF/lib/
-      - /mnt/s3data/data:/mnt/s3data/data:shared
+      #- /mnt/s3data/data:/mnt/s3data/data:shared
 
     depends_on:
       - dl-loading-db
-      - s3fs
+#      - s3fs
 
-  s3fs:
-    privileged: true
-    image: efrecon/s3fs:1.86
-    restart: always
-    env_file:
-      - ${ENV_FILE}
-      # A workaround for bucket names containing '.' until the related s3fs-fuse issue is resolved
-      # Keep in mind this is a secrutiy risk (default is https)
-      # - AWS_S3_URL=http://s3.amazonaws.com
-    volumes:
-      - /mnt/s3data/data:/opt/s3fs/bucket:shared
+#  s3fs:
+#    privileged: true
+#    image: efrecon/s3fs:1.86
+#    restart: always
+#    env_file:
+#      - ${ENV_FILE}
+#      # A workaround for bucket names containing '.' until the related s3fs-fuse issue is resolved
+#      # Keep in mind this is a secrutiy risk (default is https)
+#      # - AWS_S3_URL=http://s3.amazonaws.com
+#    volumes:
+#      - /mnt/s3data/data:/opt/s3fs/bucket:shared
 
   dl-loading-db:
     build:

@@ -1,5 +1,5 @@
 #FROM adoptopenjdk/openjdk11:jdk-11.0.11_9
-FROM openjdk:11.0.14
+FROM ibmjava:11-jdk
 
 ARG LOADING_UI_HARDCODED_USERS_FILE
 
@@ -15,6 +15,7 @@ RUN apt install curl -y
 #RUN apt-get install zip -y
 RUN apt-get install unzip -y
 #RUN apt-get install python -y
+RUN apt-get install fuse libfuse2
 
 # install aws cli
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
