@@ -9,13 +9,7 @@ COPY ./target/ui-0.1.0-SNAPSHOT.war /usr/local/dl-loading-ui.war
 COPY ./${LOADING_UI_HARDCODED_USERS_FILE} /etc/dl-loading-ui/users.properties
 
 # Install req
-RUN apt update -y && apt upgrade -y
-#RUN apt install apt-utils -y
-RUN apt install curl -y
-#RUN apt-get install zip -y
-RUN apt-get install unzip -y
-#RUN apt-get install python -y
-RUN apt-get install fuse libfuse2
+RUN apt-get update -y && apt-get upgrade -y && apt-get install curl unzip fuse libfuse2 -y
 
 # install aws cli
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
