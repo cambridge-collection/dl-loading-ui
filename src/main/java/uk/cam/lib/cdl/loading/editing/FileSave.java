@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
-import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class FileSave {
@@ -53,9 +52,9 @@ public class FileSave {
             rollback.addFirst(() -> Files.deleteIfExists(oldFile.toPath()));
 
             // Task 4 - rename file (overwriting if exists already).
-            Files.move(newFile.toPath(), file.toPath(), REPLACE_EXISTING, ATOMIC_MOVE);
-
+            Files.copy(newFile.toPath(), file.toPath(), REPLACE_EXISTING);
             // Clean up.
+            Files.deleteIfExists(newFile.toPath());
             Files.deleteIfExists(oldFile.toPath());
 
             // Write response out in JSON.

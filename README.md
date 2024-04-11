@@ -245,21 +245,13 @@ Alternatively, after setting the DOCKER_HOST you can run:
 
     docker container restart
 
-## Publish Docker Images
-
-The following publishes the docker images to dockerhub.  Note: Make sure these do not contain any credentials.
-
-    docker login
-    docker image push camdl/dl-loading-ui:latest
-    docker image push camdl/dl-loading-db:latest
-
 # Publish to Docker Images AWS ECR Repository
 
     source <env file>
     cd docker/dl-loading-db
 
 follow push commands at: https://eu-west-1.console.aws.amazon.com/ecr/repositories/private/563181399728/dl-loader-db?region=eu-west-1
-substituting build command for: `docker image build --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-ui .`
+substituting build command for: `docker image build --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-db .`
 
     cd ../..
 

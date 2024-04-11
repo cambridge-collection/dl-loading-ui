@@ -1,8 +1,11 @@
 package uk.cam.lib.cdl.loading.model.editor.ui;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * This class represents an theme image as defined in the cudl.ui.json5 file.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UIThemeUIImage {
 
     protected String src;
