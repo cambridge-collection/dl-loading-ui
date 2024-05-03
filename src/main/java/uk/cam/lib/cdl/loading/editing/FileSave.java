@@ -7,10 +7,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -43,19 +45,19 @@ public class FileSave {
 
             // Task 2 - Write file to file system.
             Files.copy(is, newFile.toPath());
-            rollback.addFirst(() -> Files.deleteIfExists(newFile.toPath()));
+            rollback.addFirst(() -> deleteFileIfExists(newFile.toPath()));
 
             // Task 3 - Copy existing file (if available) for rollback.
             if (file.exists()) {
                 Files.copy(file.toPath(), oldFile.toPath());
             }
-            rollback.addFirst(() -> Files.deleteIfExists(oldFile.toPath()));
+            rollback.addFirst(() -> deleteFileIfExists(oldFile.toPath()));
 
             // Task 4 - rename file (overwriting if exists already).
             Files.copy(newFile.toPath(), file.toPath(), REPLACE_EXISTING);
             // Clean up.
-            Files.deleteIfExists(newFile.toPath());
-            Files.deleteIfExists(oldFile.toPath());
+            deleteFileIfExists(newFile.toPath());
+            deleteFileIfExists(oldFile.toPath());
 
             // Write response out in JSON.
             return true;
@@ -73,6 +75,23 @@ public class FileSave {
             return false;
         }
 
+    }
+
+    public static synchronized boolean deleteFileIfExists(Path path) throws IOException{
+        try {
+            if (Files.exists(path)) {
+                if (Files.isDirectory(path)){
+                    try (Stream<Path> entries = Files.list(path)) {
+                        if (entries.findFirst().isPresent()) return false;
+                    }
+                }
+                Files.delete(path);
+                return true;
+            }
+        } catch (java.nio.file.NoSuchFileException e) {
+            /* ignore */
+        }
+        return false;
     }
 
     /**
@@ -108,7 +127,7 @@ public class FileSave {
 
             // delete dir if empty.
             if (childDir.isDirectory() && Objects.requireNonNull(childDir.list()).length == 0) {
-                Files.delete(childDir.toPath());
+                deleteFileIfExists(childDir.toPath());
                 childDir = childDir.getParentFile();
             } else {
                 return false;

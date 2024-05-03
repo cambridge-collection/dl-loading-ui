@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import com.google.common.io.CharSource;
 import org.immutables.value.Value;
+import uk.cam.lib.cdl.loading.editing.FileSave;
 import uk.cam.lib.cdl.loading.model.editor.modelops.*;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 
@@ -89,7 +90,7 @@ public interface ModelOps {
     default boolean removeMetadata(Path dataRoot, Path id) throws IOException {
         Preconditions.checkNotNull(dataRoot);
         Preconditions.checkNotNull(id);
-        var wasRemoved = Files.deleteIfExists(resolveIdToIOPath(dataRoot, id));
+        var wasRemoved = FileSave.deleteFileIfExists(resolveIdToIOPath(dataRoot, id));
         if(wasRemoved) {
             cleanEmptyDirectories(dataRoot, id);
         }
@@ -101,7 +102,7 @@ public interface ModelOps {
         assert dir.startsWith(dataRoot);
         while(!dir.equals(dataRoot)) {
             try {
-                Files.delete(dir);
+                FileSave.deleteFileIfExists(dir);
             }
             catch(DirectoryNotEmptyException e) {
                 break;
