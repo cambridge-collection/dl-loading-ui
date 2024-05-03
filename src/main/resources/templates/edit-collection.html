@@ -263,7 +263,7 @@
                                             <th>Options</th>
                                         </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody th:if="${items.size()>0}">
 
                                         <tr th:each="i : ${#numbers.sequence( 0, items.size()-1)}">
                                             <span th:with="item=${items.get(i)}">
