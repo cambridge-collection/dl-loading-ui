@@ -22,13 +22,9 @@ public class DeployController {
     private final DeploymentHelper deploymentHelper;
 
     public DeployController(@Value("${data.aws.region}") String region, @Value("${deploy.releases.staging.bucketname}") String sourceBucket,
-                            @Value("${deploy.releases.staging.transcription.bucketname}") String sourceTranscriptionBucket,
-                            @Value("${deploy.releases.production.bucketname}") String destBucket,
-                            @Value("${deploy.releases.production.transcription.bucketname}") String destTranscriptionBucket,
-                            @Value("${deploy.datasync.task.arn}") String dataSyncTaskARN,
-                            @Value("${deploy.datasync.task.pages.arn}") String dataSyncTaskPagesARN) {
+                            @Value("${deploy.releases.production.bucketname}") String destBucket) {
 
-        this.deploymentHelper = new DeploymentHelper(region,sourceBucket,sourceTranscriptionBucket,destBucket,destTranscriptionBucket, dataSyncTaskARN, dataSyncTaskPagesARN);
+        this.deploymentHelper = new DeploymentHelper(region,sourceBucket,destBucket);
     }
     /**
      * Displays the deployment page with the table.
