@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.resource.EncodedResourceResolver;
 import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
 import org.thymeleaf.extras.springsecurity5.dialect.SpringSecurityDialect;
 import org.thymeleaf.spring5.SpringTemplateEngine;
@@ -35,6 +36,7 @@ public class WebConfig implements WebMvcConfigurer {
             .resourceChain(false);
         registry.addResourceHandler("/**").addResourceLocations(staticPath);
 
+        addViewerUiAssets(registry);
     }
 
     // FIXME: Is this actually called? This doesn't implement ApplicationContextAware
@@ -73,6 +75,15 @@ public class WebConfig implements WebMvcConfigurer {
         ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
         viewResolver.setTemplateEngine(templateEngine());
         return viewResolver;
+    }
+
+    private void addViewerUiAssets(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/ui/**")
+            .addResourceLocations(
+                "classpath:ulcambridge/foundations/viewer/viewer-ui/assets/")
+            .setCachePeriod(60 * 60 * 24 * 365)  // 1 year
+            .resourceChain(true)
+            .addResolver(new EncodedResourceResolver());
     }
 
 /*    @Bean

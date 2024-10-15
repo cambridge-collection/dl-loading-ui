@@ -51,6 +51,8 @@ import uk.cam.lib.cdl.loading.utils.HTMLEditingHelper;
 import uk.cam.lib.cdl.loading.utils.RoleHelper;
 import uk.cam.lib.cdl.loading.utils.ThrowingFunction;
 import uk.cam.lib.cdl.loading.utils.sets.SetMembership;
+import uk.cam.lib.cdl.loading.viewerui.frontend.BuildFactory;
+import uk.cam.lib.cdl.loading.viewerui.frontend.PageType;
 
 import javax.management.InvalidAttributeValueException;
 import javax.servlet.http.HttpServletRequest;
@@ -83,6 +85,8 @@ public class EditController {
     private final HTMLEditingHelper htmlEditingHelper;
     private WorkspaceRepository workspaceRepository;
     private ApplicationContext appContext;
+
+    @Autowired private BuildFactory buildFactory;
 
     @Autowired
     public EditController(
@@ -655,12 +659,12 @@ public class EditController {
         // Description HTML
         var fullDescription = collectionFile.getParent().resolve(collection.getDescription().getFull().getId()).normalize();
         String descriptionHTML = FileUtils.readFileToString(fullDescription.toFile(), "UTF-8");
-        descriptionHTML = htmlEditingHelper.prepareHTMLForDisplay(descriptionHTML, fullDescription);
+        descriptionHTML = htmlEditingHelper.prepareHTMLForDisplay(descriptionHTML, fullDescription, buildFactory, PageType.COLLECTION_ORGANISATION);
 
         // Credit HTML
         var credit = collectionFile.getParent().resolve(collection.getCredit().getProse().getId()).normalize();
         String creditHTML = FileUtils.readFileToString(credit.toFile(), "UTF-8");
-        creditHTML = htmlEditingHelper.prepareHTMLForDisplay(creditHTML, credit);
+        creditHTML = htmlEditingHelper.prepareHTMLForDisplay(creditHTML, credit, buildFactory, PageType.COLLECTION_ORGANISATION);
 
         // Collection type
         UICollection collectionUI = editAPI.getCollectionUI(collection.getCollectionId());

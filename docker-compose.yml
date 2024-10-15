@@ -6,6 +6,7 @@ services:
     image: camdl/dl-loading-ui:latest
     build:
       context: .
+      network: host
       dockerfile: Dockerfile
       args:
         LOADING_UI_HARDCODED_USERS_FILE: ${LOADING_UI_HARDCODED_USERS_FILE}

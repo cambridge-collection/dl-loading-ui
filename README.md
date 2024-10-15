@@ -54,6 +54,7 @@ The bucket should contain the data in the same format as shown in the `docker/dl
 1. Build the project:
 
         $ mvn clean package
+        $ docker build --network=host .
 
 2. Copy the `example.env` file and customise by adding specific s3 bucket details and access keys.
 
