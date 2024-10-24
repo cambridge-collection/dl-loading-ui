@@ -54,6 +54,7 @@ The bucket should contain the data in the same format as shown in the `docker/dl
 1. Build the project:
 
         $ mvn clean package
+        $ docker build --network=host .
 
 2. Copy the `example.env` file and customise by adding specific s3 bucket details and access keys.
 
@@ -256,4 +257,4 @@ substituting build command for: `docker image build --build-arg LOADING_DB_PASSW
     cd ../..
 
 follow push commands at: https://eu-west-1.console.aws.amazon.com/ecr/repositories/private/563181399728/dl-loader-ui?region=eu-west-1
-substituting build command for: `docker image build --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui . `
+substituting build command for: `docker image build --network=host --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui . `

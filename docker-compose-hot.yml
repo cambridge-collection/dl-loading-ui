@@ -5,6 +5,7 @@ services:
     privileged: true
     build:
       context: .
+      network: host
       dockerfile: Dockerfile
       args:
         LOADING_UI_HARDCODED_USERS_FILE: ${LOADING_UI_HARDCODED_USERS_FILE}

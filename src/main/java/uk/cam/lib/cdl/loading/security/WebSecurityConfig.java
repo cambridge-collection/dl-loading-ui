@@ -149,6 +149,7 @@ public class WebSecurityConfig {
 
             http.authorizeRequests()
                 .antMatchers("/js/**").permitAll()
+                .antMatchers("/ui/**").permitAll()
                 .antMatchers("/css/**").permitAll()
                 .antMatchers("/css/Lato/**").permitAll()
                 .antMatchers("/img/**").permitAll()

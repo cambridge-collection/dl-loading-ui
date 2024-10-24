@@ -21,6 +21,8 @@ import uk.cam.lib.cdl.loading.forms.UIPageForm;
 import uk.cam.lib.cdl.loading.model.editor.ui.UIPage;
 import uk.cam.lib.cdl.loading.model.editor.ui.UIThemeData;
 import uk.cam.lib.cdl.loading.utils.HTMLEditingHelper;
+import uk.cam.lib.cdl.loading.viewerui.frontend.BuildFactory;
+import uk.cam.lib.cdl.loading.viewerui.frontend.PageType;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -41,6 +43,7 @@ public class WebsiteEditController {
     private final UIThemeData uiThemeData;
     private HTMLEditingHelper htmlEditingHelper;
 
+    @Autowired private BuildFactory buildFactory;
 
     @Autowired
     public WebsiteEditController(
@@ -97,7 +100,7 @@ public class WebsiteEditController {
         // Read HTML
         Path htmlDataFile = editAPI.getFullPathForId(websitePath);
         String websiteHTML = FileUtils.readFileToString(htmlDataFile.toFile(), "UTF-8");
-        websiteHTML = htmlEditingHelper.prepareHTMLForDisplay(websiteHTML, htmlDataFile);
+        websiteHTML = htmlEditingHelper.prepareHTMLForDisplay(websiteHTML, htmlDataFile, buildFactory, PageType.STANDARD);
 
         UIPageForm form;
         if (model.asMap().get("form") != null) {

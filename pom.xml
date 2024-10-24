@@ -126,6 +126,27 @@
             <version>2.7.14</version>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+
+        <!-- Include the viewer UI's built assets. The resources jar contains
+        the built files under META-INF/resources which gets served as if
+        they were in the war's root. -->
+        <dependency>
+            <groupId>ulcambridge.foundations.viewer</groupId>
+            <artifactId>viewer-ui</artifactId>
+            <version>4.1.1</version>
+            <classifier>resources</classifier>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Include the viewer UI's build metadata JSON files -->
+        <dependency>
+            <groupId>ulcambridge.foundations.viewer</groupId>
+            <artifactId>viewer-ui</artifactId>
+            <version>4.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>

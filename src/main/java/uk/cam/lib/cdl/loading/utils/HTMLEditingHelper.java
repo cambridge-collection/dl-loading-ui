@@ -4,13 +4,19 @@ import com.google.common.base.Preconditions;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import uk.cam.lib.cdl.loading.viewerui.frontend.BuildFactory;
+import uk.cam.lib.cdl.loading.viewerui.frontend.PageType;
+import uk.cam.lib.cdl.loading.viewerui.frontend.frontend.FrontEndBuild;
 
 import java.nio.file.Path;
+
 
 public class HTMLEditingHelper {
 
     private final Path localDataPath;
     private final Path pathForDataDisplay;
+
+
 
     public HTMLEditingHelper(Path localDataPath, Path pathForDataDisplay) {
 
@@ -19,7 +25,7 @@ public class HTMLEditingHelper {
     }
 
     // Need to parse relative links to add in 'pathForDataDisplay' for local viewing.
-    public String prepareHTMLForDisplay(String html, Path htmlFilePath) {
+    public String prepareHTMLForDisplay(String html, Path htmlFilePath, BuildFactory buildFactory, PageType pageType) {
         Document doc = Jsoup.parse(html);
         var fileRelativePath =
             localDataPath.toAbsolutePath().relativize(htmlFilePath.getParent().toAbsolutePath());
@@ -39,6 +45,12 @@ public class HTMLEditingHelper {
             var linkRelativePath = fileRelativePath.resolve(src);
             link.attr("src", pathForDataDisplay.resolve(linkRelativePath).normalize().toString());
         }
+
+        // Add extra css / js  from the viewer ui war, this would be in the cudl page when displayed.
+        for(FrontEndBuild.Resource resource: buildFactory.getBuild(pageType).resources()) {
+            doc.head().append(resource.render());
+        }
+
         return doc.outerHtml();
     }
 
@@ -57,6 +69,17 @@ public class HTMLEditingHelper {
                 img.attr("src", relativePath.toString());
             }
         }
+
+        // Remove extra css / js  from the viewer ui war, this would be in the cudl page when displayed.
+        // Remove CSS
+        for (Element element : doc.head().getElementsByAttributeValueStarting("href", "/ui/")) {
+            element.remove();
+        }
+        // Remove JS
+        for (Element element : doc.head().getElementsByAttributeValueStarting("src", "/ui/")) {
+            element.remove();
+        }
+
         return doc.outerHtml();
     }
 
