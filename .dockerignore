@@ -1,4 +1,7 @@
 **
+!pom.xml
+!settings.xml
+!src/**
 !target/*.war
 !conf/**
 !docker/**

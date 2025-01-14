@@ -1,11 +1,13 @@
 FROM maven:3.9.9-amazoncorretto-11 AS maven
 
+ARG GITHUB_USER GITHUB_TOKEN
+
 WORKDIR /opt/build
 
-COPY pom.xml .
+COPY pom.xml settings.xml .
 COPY src ./src
 
-RUN mvn clean package;
+RUN mvn -s settings.xml clean package;
 
 FROM ibmjava:11-jdk AS main
 
