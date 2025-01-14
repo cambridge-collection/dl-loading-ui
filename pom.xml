@@ -23,6 +23,7 @@
         <java.version>11</java.version>
         <tomcat.version>9.0.44</tomcat.version>
         <start-class>uk.cam.lib.cdl.loading.LoadingUIApplication</start-class>
+        <cudl-viewer-ui.version>4.2.0</cudl-viewer-ui.version>
     </properties>
 
     <dependencyManagement>
@@ -133,7 +134,7 @@
         <dependency>
             <groupId>ulcambridge.foundations.viewer</groupId>
             <artifactId>viewer-ui</artifactId>
-            <version>4.1.1</version>
+            <version>${cudl-viewer-ui.version}</version>
             <classifier>resources</classifier>
             <type>jar</type>
             <scope>compile</scope>
@@ -143,7 +144,7 @@
         <dependency>
             <groupId>ulcambridge.foundations.viewer</groupId>
             <artifactId>viewer-ui</artifactId>
-            <version>4.1.1</version>
+            <version>${cudl-viewer-ui.version}</version>
             <scope>compile</scope>
         </dependency>
 
