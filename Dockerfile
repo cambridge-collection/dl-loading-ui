@@ -1,10 +1,18 @@
-#FROM adoptopenjdk/openjdk11:jdk-11.0.11_9
-FROM ibmjava:11-jdk
+FROM maven:3.9.9-amazoncorretto-11 AS maven
+
+WORKDIR /opt/build
+
+COPY pom.xml .
+COPY src ./src
+
+RUN mvn clean package;
+
+FROM ibmjava:11-jdk AS main
 
 ARG LOADING_UI_HARDCODED_USERS_FILE
 
 # TODO hardcoded version
-COPY ./target/ui-0.1.0-SNAPSHOT.war /usr/local/dl-loading-ui.war
+COPY --from=maven /opt/build/target/ui-0.1.0-SNAPSHOT.war /usr/local/dl-loading-ui.war
 #COPY ./conf/application.properties /etc/dl-loading-ui/application.properties
 COPY ./${LOADING_UI_HARDCODED_USERS_FILE} /etc/dl-loading-ui/users.properties
 
