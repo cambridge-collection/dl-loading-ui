@@ -4,10 +4,10 @@ ARG GITHUB_USER GITHUB_TOKEN
 
 WORKDIR /opt/build
 
-COPY pom.xml settings.xml .
+COPY pom.xml settings.xml toolchains.xml .
 COPY src ./src
 
-RUN mvn -s settings.xml clean package;
+RUN mvn -s settings.xml -t toolchains.xml clean package;
 
 FROM ibmjava:11-jdk AS main
 

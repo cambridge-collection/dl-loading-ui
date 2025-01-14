@@ -1,6 +1,7 @@
 **
 !pom.xml
 !settings.xml
+!toolchains.xml
 !src/**
 !target/*.war
 !conf/**
