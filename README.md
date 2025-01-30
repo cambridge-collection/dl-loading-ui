@@ -199,55 +199,12 @@ The repository contains a Docker Compose file which will run a suitable database
 
 Run `$ docker-compose --env-file example.env up --build` in the repository to start the services with appropriate values set in the example.env
 
-## Deployment
+### Build and Publish to Docker Images AWS ECR Repository
 
 First build the project if you have not already.
-`$ mvn clean package`
+    mvn clean package
 
-Enable the library VPN
-
-To deploy to remote host set the DOCKER_HOST variable.
-`export DOCKER_HOST="ssh://digilib@dev.loader.cudl.link"`
-
-then run the docker commands as you would the local version.
-You **will need to be on the library VPN to connect.**
-Add the -d flag to the up command for Detached mode: Run containers in the background.
-
-e.g.
-
-    docker-compose --env-file cudl-dev.env down
-    docker image rm camdl/dl-loading-ui
-    docker-compose --env-file cudl-dev.env up --build -d
-
-NOTE: This can be *very slow* at the moment to start up.
-
-Note that you will need to copy your key to the servers manually to deploy remotely using the command:
-e.g. for dev: `ssh-copy-id -i ~/.ssh/mykey digilib@dev.loader.cudl.link`
-passwords for the digilib account can be found on keepass.
-
-You can then unset the DOCKER_HOST variable to work locally again
-
-`unset DOCKER_HOST`
-
-
-## Restart running container on dev
-
-    export DOCKER_HOST="ssh://digilib@dev.loader.cudl.link"
-
-Get container id using:
-
-    docker container ls
-
-the restart using:
-
-    docker container restart [CONTAINERID]
-
-Alternatively, after setting the DOCKER_HOST you can run:
-
-    docker container restart
-
-# Publish to Docker Images AWS ECR Repository
-
+Then publish to ECR
     source <env file>
     cd docker/dl-loading-db
 
@@ -258,3 +215,6 @@ substituting build command for: `docker image build --build-arg LOADING_DB_PASSW
 
 follow push commands at: https://eu-west-1.console.aws.amazon.com/ecr/repositories/private/563181399728/dl-loader-ui?region=eu-west-1
 substituting build command for: `docker image build --network=host --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui . `
+
+Then use the repository 'cudl-terraform' to update the ECR image used and deploy the new version by using the new image sha.
+*Note at the moment it can be very slow to deploy*
