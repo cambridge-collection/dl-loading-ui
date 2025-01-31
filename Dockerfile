@@ -19,7 +19,7 @@ RUN ./aws/install
 # install the s3 mountpoint.
 # See https://docs.aws.amazon.com/AmazonS3/latest/userguide/mountpoint-installation.html
 #COPY ./docker/mountpoint-s3/mount-s3.deb mount-s3.deb
-RUN wget https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.deb
-RUN apt-get install ./mount-s3.deb -y
+RUN wget https://s3.amazonaws.com/mountpoint-s3-release/1.10.0/x86_64/mount-s3-1.10.0-x86_64.deb
+RUN apt-get install ./mount-s3-1.10.0-x86_64.deb -y
 
 CMD java -jar -debug /usr/local/dl-loading-ui.war --spring.config.additional-location=/etc/dl-loading-ui/
