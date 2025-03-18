@@ -206,15 +206,37 @@ First build the project if you have not already.
 
 Then publish to ECR
     source <env file>
-    cd docker/dl-loading-db
 
-follow push commands at: https://eu-west-1.console.aws.amazon.com/ecr/repositories/private/563181399728/dl-loader-db?region=eu-west-1
-substituting build command for: `docker image build --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-db .`
+Build the image and upload to sandbox:
 
-    cd ../..
+```sh
+source sandbox-cudl-loader.env
+cd docker/dl-loading-db
+docker image build --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-db .
+docker tag dl-loader-db:latest 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-db:latest
+aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 563181399728.dkr.ecr.eu-west-1.amazonaws.com
+docker push 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-db:latest
+cd ../..
+docker image build --network=host --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui .
+docker tag dl-loader-ui:latest 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-ui:latest
+docker push 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-ui:latest
+```
 
-follow push commands at: https://eu-west-1.console.aws.amazon.com/ecr/repositories/private/563181399728/dl-loader-ui?region=eu-west-1
-substituting build command for: `docker image build --network=host --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui . `
+Upload to cul-cudl account:
+```sh
+source cul-staging-cudl-staging.env
+cd docker/dl-loading-db
+docker image build --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-db .
+docker tag dl-loader-db:latest 438117829123.dkr.ecr.eu-west-1.amazonaws.com/content-loader-db:latest
+aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 438117829123.dkr.ecr.eu-west-1.amazonaws.com
+docker push 438117829123.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-db
+cd ../..
+docker image build --network=host --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui .
+docker tag dl-loader-ui:latest 438117829123.dkr.ecr.eu-west-1.amazonaws.com/content-loader-ui:latest
+docker push 438117829123.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-ui:latest
+```
+
+NOTE THE SHA VALUES WILL BE DIFFERENT ON SANDBOX AND ON STAGING
 
 Then use the repository 'cudl-terraform' to update the ECR image used and deploy the new version by using the new image sha.
 *Note at the moment it can be very slow to deploy*
