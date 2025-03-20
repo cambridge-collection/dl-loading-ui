@@ -212,27 +212,27 @@ Build the image and upload to sandbox:
 ```sh
 source sandbox-cudl-loader.env
 cd docker/dl-loading-db
-docker image build --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-db .
+docker image build --no-cache --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-db .
 docker tag dl-loader-db:latest 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-db:latest
 aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 563181399728.dkr.ecr.eu-west-1.amazonaws.com
 docker push 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-db:latest
 cd ../..
-docker image build --network=host --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui .
+docker image build --no-cache --network=host --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui .
 docker tag dl-loader-ui:latest 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-ui:latest
 docker push 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-ui:latest
 ```
 
 Upload to cul-cudl account:
 ```sh
-source cul-staging-cudl-staging.env
+source cul-staging-cudl-loader.env
 cd docker/dl-loading-db
-docker image build --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-db .
-docker tag dl-loader-db:latest 438117829123.dkr.ecr.eu-west-1.amazonaws.com/content-loader-db:latest
+docker image build --no-cache --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-db .
+docker tag dl-loader-db:latest 438117829123.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-db:latest
 aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 438117829123.dkr.ecr.eu-west-1.amazonaws.com
 docker push 438117829123.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-db
 cd ../..
-docker image build --network=host --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui .
-docker tag dl-loader-ui:latest 438117829123.dkr.ecr.eu-west-1.amazonaws.com/content-loader-ui:latest
+docker image build --no-cache --network=host --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui .
+docker tag dl-loader-ui:latest 438117829123.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-ui:latest
 docker push 438117829123.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-ui:latest
 ```
 
