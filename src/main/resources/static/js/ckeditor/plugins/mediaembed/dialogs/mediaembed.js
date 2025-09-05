@@ -2,6 +2,62 @@ CKEDITOR.dialog.add('mediaembedDialog', function (editor) {
     function getVal(dialog, id) { return dialog.getValueOf('info', id); }
     function setVal(dialog, id, v) { dialog.setValueOf('info', id, v || ''); }
 
+    var FIELD_IDS = ['itemid','playlistid','permalink','playlabel','class'];
+    var SERVICE_CONFIG = {
+        youtube:    { show: ['itemid','playlistid','class'], requireAtLeastOneOf: ['itemid','playlistid'] },
+        vimeo:      { show: ['itemid','playlistid','class'], requireAtLeastOneOf: ['itemid'] },
+        soundcloud: { show: ['itemid','permalink','class'], requireAtLeastOneOf: ['itemid'] }
+    };
+    function getConfig(service) {
+        return SERVICE_CONFIG[service] || { show: FIELD_IDS.slice(), requireAtLeastOneOf: ['itemid','playlistid'] };
+    }
+    function updateVisibility(dialog) {
+        try {
+            var service = getVal(dialog, 'service') || 'youtube';
+            var cfg = getConfig(service);
+            var touchedRows = [];
+
+            function findAncestorTag(node, tag) {
+                var n = node;
+                tag = tag.toLowerCase();
+                while (n && n.getName && n.getName()) {
+                    if (n.getName().toLowerCase() === tag) return n;
+                    n = n.getParent && n.getParent();
+                }
+                return null;
+            }
+
+            FIELD_IDS.forEach(function(id) {
+                var ui = dialog.getContentElement('info', id);
+                if (!ui || !ui.getElement) return;
+                var elem = ui.getElement();
+                var td = findAncestorTag(elem, 'td');
+                var tr = findAncestorTag(elem, 'tr');
+                var visible = cfg.show.indexOf(id) !== -1;
+
+                if (td) td.setStyle('display', visible ? '' : 'none');
+                else if (tr) tr.setStyle('display', visible ? '' : 'none');
+
+                if (!visible) { ui.setValue(''); }
+
+                if (tr) touchedRows.push(tr);
+            });
+
+            // After toggling cells, hide a row only if all its cells are hidden
+            touchedRows.forEach(function(tr) {
+                try {
+                    var tds = tr.find('td');
+                    var anyVisible = false;
+                    for (var i = 0; i < tds.count(); i++) {
+                        var td = tds.getItem(i);
+                        if (td.getStyle('display') !== 'none') { anyVisible = true; break; }
+                    }
+                    tr.setStyle('display', anyVisible ? '' : 'none');
+                } catch (_) { /* no-op */ }
+            });
+        } catch (e) { /* no-op */ }
+    }
+
     return {
         title: 'Insert/Edit Media Embed',
         minWidth: 400,
@@ -15,7 +71,8 @@ CKEDITOR.dialog.add('mediaembedDialog', function (editor) {
                         type: 'select', id: 'service', label: 'Service', required: true,
                         items: [ ['YouTube','youtube'], ['Vimeo','vimeo'], ['SoundCloud','soundcloud'] ],
                         setup: function (widget) { this.setValue(widget.data.service || 'youtube'); },
-                        commit: function (widget) { widget.setData('service', this.getValue()); }
+                        commit: function (widget) { widget.setData('service', this.getValue()); },
+                        onChange: function() { updateVisibility(this.getDialog()); }
                     },
                     {
                         type: 'text', id: 'title', label: 'Title', required: true,
@@ -50,6 +107,9 @@ CKEDITOR.dialog.add('mediaembedDialog', function (editor) {
                 ]
             }
         ],
+        onLoad: function() {
+            updateVisibility(this);
+        },
         onShow: function () {
             var ed = this._.editor;
             var widget = ed.widgets && ed.widgets.focused;
@@ -89,9 +149,10 @@ CKEDITOR.dialog.add('mediaembedDialog', function (editor) {
                 setVal(this, 'playlabel', '');
                 setVal(this, 'class', '');
             }
+            updateVisibility(this);
         },
         onOk: function () {
-            // Cross-field validation: service+title required; one of itemid or playlistid required;
+            // Cross-field validation: service+title required; service-specific rules
             var title = getVal(this, 'title');
             var service = getVal(this, 'service');
             var itemid = getVal(this, 'itemid');
@@ -105,9 +166,16 @@ CKEDITOR.dialog.add('mediaembedDialog', function (editor) {
                 alert('Title is required.');
                 return false;
             }
-            if (!itemid && !playlistid) {
-                alert('You must enter either an Item ID or a Playlist ID.');
-                return false;
+            var cfg = getConfig(service);
+            if (cfg && cfg.requireAtLeastOneOf) {
+                var hasOne = cfg.requireAtLeastOneOf.some(function(fid){
+                    var v = getVal(this, fid);
+                    return v && (''+v).trim().length > 0;
+                }, this);
+                if (!hasOne) {
+                    alert('Please provide at least one of: ' + cfg.requireAtLeastOneOf.join(', '));
+                    return false;
+                }
             }
 
             if (this.widget) {
