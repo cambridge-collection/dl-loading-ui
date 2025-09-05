@@ -1,4 +1,4 @@
-FROM postgres:12.1-alpine
+FROM --platform=linux/amd64 postgres:12.1-alpine
 
 ARG LOADING_DB_PASSWORD
 ARG LOADING_DB_USER_SETUP_SQL
