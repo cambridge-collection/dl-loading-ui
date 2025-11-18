@@ -5,6 +5,12 @@ It edits data in the cudl-data-source s3 buckets (prefixed with dev-, staging- a
 Once this data is edited it triggers processing, see https://github.com/cambridge-collection/data-lambda-transform which has
 details on how the data is processed.
 
+## Prerequisites
+
+- Java 11
+- Docker
+- Maven
+
 ## Want to just start the content loader on a folder of data?
 If you are new to the content loader, start by using the sample
 data set instead of using data ina s3 bucket. You can run the following commands to

@@ -4,6 +4,7 @@ services:
   dl-loading-ui:
     privileged: true
     image: camdl/dl-loading-ui:latest
+    platform: linux/amd64
     build:
       context: .
       network: host
@@ -33,6 +34,7 @@ services:
         POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
     restart: always
     image: camdl/dl-loading-db:latest
+    platform: linux/amd64
     volumes:
       - dl-loading-db:/var/lib/postgresql/data
     command: -p ${LOADING_DB_PORT_INT}

@@ -21,6 +21,7 @@ services:
       - /dev/fuse
     entrypoint: ["bash", "-c",  "mkdir -p /mnt/s3data/data && mount-s3 $AWS_S3_BUCKET /mnt/s3data/data && java -jar -debug /usr/local/dl-loading-ui.war --spring.config.additional-location=/etc/dl-loading-ui/"]
     image: camdl/dl-loading-ui:latest
+    platform: linux/amd64
     volumes:
       # Use exploded webapp files, instead of packaged WAR, to allow hot reloading of source JSPs etc.
       #- ./src/main/webapp/:/usr/local/tomcat/webapps/ROOT/
@@ -56,6 +57,7 @@ services:
         POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
     restart: always
     image: camdl/dl-loading-db:latest
+    platform: linux/amd64
     volumes:
       - dl-loading-db:/var/lib/postgresql/data
     command: -p ${LOADING_DB_PORT_INT}
