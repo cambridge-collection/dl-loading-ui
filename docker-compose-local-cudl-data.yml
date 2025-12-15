@@ -1,0 +1,41 @@
+version: "3.7"
+
+services:
+  dl-loading-ui:
+    image: camdl/dl-loading-ui:latest
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        LOADING_UI_HARDCODED_USERS_FILE: ${LOADING_UI_HARDCODED_USERS_FILE}
+    env_file:
+      - ${ENV_FILE}
+    ports:
+      - ${LOADING_UI_PORT_EXT}:${LOADING_UI_PORT_INT}
+    volumes:
+       - ../cudl-data-source:/mnt/s3data
+       - ./target/ui-0.1.0-SNAPSHOT.war:/usr/local/dl-loading-ui.war
+    depends_on:
+      - dl-loading-db
+
+  dl-loading-db:
+    build:
+      context: docker/dl-loading-db
+      dockerfile: Dockerfile
+      args:
+        LOADING_DB_USER_SETUP_SQL: ${LOADING_DB_USER_SETUP_SQL}
+        POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
+    restart: always
+    image: camdl/dl-loading-db:latest
+    platform: linux/amd64
+    volumes:
+      - dl-loading-db:/var/lib/postgresql/data
+    command: -p ${LOADING_DB_PORT_INT}
+    environment:
+      POSTGRES_USER: ${LOADING_DB_USER}
+      POSTGRES_DB: ${LOADING_DB_DATABASE}
+      POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
+
+volumes:
+  dl-loading-db:

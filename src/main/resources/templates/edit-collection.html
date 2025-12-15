@@ -246,8 +246,37 @@
                             </form>
                             <div class="row mt-6">
                                 <div class="col"><h4>Items</h4></div>
+                                <div class="col text-muted small"
+                                     th:if="${!newCollection && totalItemCount > 0}">
+                                    Showing
+                                    <span th:text="${currentPage * pageSize + 1}"></span>
+                                    –
+                                    <span th:text="${currentPage * pageSize + items.size()}"></span>
+                                    of
+                                    <span th:text="${totalItemCount}"></span>
+                                    items
+                                    <span th:if="${searchTerm}">
+                                        matching "<span th:text="${searchTerm}"></span>"
+                                    </span>.
+                                </div>
                             </div>
-                            <div th:if="${!newCollection}" class="row">
+                            <div th:if="${!newCollection && totalItemCount > 0}" class="row mt-2">
+                                <div class="col-6 offset-2">
+                                    <form method="get" th:action="@{/edit/collection/}">
+                                        <input type="hidden" name="collectionId" th:value="${form.collectionId}">
+                                        <input type="hidden" name="workspaceIds" th:value="${workspaceIds}">
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" class="form-control" name="search"
+                                                   placeholder="Search items by id or name"
+                                                   th:value="${searchTerm}">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary" type="submit">Search</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div th:if="${!newCollection && totalItemCount > 0}" class="row">
                                 <div class="col-2 m-2 text-right">
 
                                 </div>
@@ -269,7 +298,7 @@
                                             <span th:with="item=${items.get(i)}">
                                             <td>
                                                 <div>
-                                                    <span th:text="${i+1}"></span>
+                                                    <span th:text="${itemPositions.get(item.id()) + 1}"></span>
                                                 </div>
                                             </td>
                                             <td>
@@ -299,6 +328,32 @@
                                         </tbody>
                                     </table>
 
+                                </div>
+                            </div>
+                            <div th:if="${!newCollection && totalPages > 1}" class="row mt-2">
+                                <div class="col d-flex justify-content-end">
+                                    <nav aria-label="Items page navigation">
+                                        <ul class="pagination pagination-sm mb-0">
+                                            <li class="page-item" th:classappend="${currentPage == 0} ? ' disabled'">
+                                                <a class="page-link"
+                                                   th:href="@{/edit/collection/(collectionId=${form.collectionId},workspaceIds=${workspaceIds},page=${currentPage - 1})}">
+                                                    Previous
+                                                </a>
+                                            </li>
+                                            <li class="page-item disabled">
+                                                <span class="page-link">
+                                                    Page <span th:text="${currentPage + 1}"></span>
+                                                    of <span th:text="${totalPages}"></span>
+                                                </span>
+                                            </li>
+                                            <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? ' disabled'">
+                                                <a class="page-link"
+                                                   th:href="@{/edit/collection/(collectionId=${form.collectionId},workspaceIds=${workspaceIds},page=${currentPage + 1})}">
+                                                    Next
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
                                 </div>
                             </div>
                             <div th:if="${newCollection}" class="row">

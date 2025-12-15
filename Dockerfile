@@ -1,4 +1,5 @@
 #FROM adoptopenjdk/openjdk11:jdk-11.0.11_9
+#FROM --platform=linux/amd64 ibmjava:11-jdk
 FROM --platform=linux/amd64 ibmjava:11-jdk
 
 ARG LOADING_UI_HARDCODED_USERS_FILE

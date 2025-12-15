@@ -30,6 +30,10 @@ Then you can run the command:
 
     docker-compose  --env-file example.env --file docker-compose-sample-data.yml up
 
+or, using the Makefile helper:
+
+    make run-sample
+
 and the content loader should start on http://localhost:8081 and you will need to log in using the following:
 
     username: test-all
@@ -73,6 +77,19 @@ alternatively you can enable hot reloading (for html) using the command:
 
   `docker-compose --file docker-compose-hot.yml --env-file <your_.env_file> up`
 
+Using the Makefile helpers instead of calling Docker directly:
+
+```sh
+# Build and run against S3 using your env file
+make run ENV_FILE=<your_.env_file>
+
+# Run with hot-reload WAR against S3 (same image, no docker build on each change)
+make run-hot ENV_FILE=<your_.env_file>
+
+# Run against a local cudl-data-source checkout (requires docker-compose-local-cudl-data.yml to be configured)
+make run-local-data ENV_FILE=<your_.env_file>
+```
+
 
 4. The application will start an HTTP server listening on http://localhost:8081. (or an alternative port if config was changed)
 
@@ -108,6 +125,12 @@ are passed to the application on building and running.
 Copy the `example.env` file and make your own adjustments to the variables.
 
 This is passed into docker-compose when the application is run/
+
+The `Makefile` also uses `ENV_FILE` to locate your configuration; by default it uses `example.env`, but you can override it per-invocation, for example:
+
+```sh
+make run-hot ENV_FILE=my-local.env
+```
 
 > #### Note
 >
