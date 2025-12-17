@@ -12,8 +12,10 @@ $(document).ready(function () {
     replaceImageModal.modal({show: false});
 
     $('#dataTable').DataTable({
-        paging: true,
-        searching: true
+        paging: false,
+        searching: false,
+        info: false,
+        lengthChange: false
     });
 
     $('#collectioneditform-submit').on('click', function () {

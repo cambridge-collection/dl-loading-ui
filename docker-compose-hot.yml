@@ -23,14 +23,8 @@ services:
     image: camdl/dl-loading-ui:latest
     platform: linux/amd64
     volumes:
-      # Use exploded webapp files, instead of packaged WAR, to allow hot reloading of source JSPs etc.
-      #- ./src/main/webapp/:/usr/local/tomcat/webapps/ROOT/
-      #- ./target/ui-0.1.0-SNAPSHOT.war:/usr/local/tomcat/webapps/ROOT.war
-      - ./target/ui-0.1.0-SNAPSHOT/:/usr/local/tomcat/webapps/
-      # Classes will be reloaded only if your IDE auto re-compiles, or you run a maven build.
-      - ./target/classes/:/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/
-      - ./target/ui-0.1.0-SNAPSHOT/WEB-INF/lib/:/usr/local/tomcat/webapps/ROOT/WEB-INF/lib/
-      #- /mnt/s3data/data:/mnt/s3data/data:shared
+      # Use locally built WAR instead of rebuilding the image on every change.
+      - ./target/ui-0.1.0-SNAPSHOT.war:/usr/local/dl-loading-ui.war
 
     depends_on:
       - dl-loading-db

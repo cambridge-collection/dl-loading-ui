@@ -78,6 +78,7 @@ import static uk.cam.lib.cdl.loading.model.editor.ModelOps.ModelOps;
 @RequestMapping ("/edit")
 public class EditController {
     private static final Logger LOG = LoggerFactory.getLogger(EditController.class);
+    private static final int MAX_ITEMS_TO_DISPLAY = 100;
 
     private final EditAPI editAPI;
     private final Path pathForDataDisplay;
@@ -158,14 +159,21 @@ public class EditController {
     @GetMapping(value = {"/collection/"})
     @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication) ||" +
                 " @roleService.canEditWorkspace(#workspaceIds, authentication)")
-    public String editCollection(Model model, @RequestParam(required = false) String collectionId,
-                                 @RequestParam(required = false) List<Long> workspaceIds)
+    public String editCollection(Model model,
+                                 @RequestParam(required = false) String collectionId,
+                                 @RequestParam(required = false) List<Long> workspaceIds,
+                                 @RequestParam(defaultValue = "0") int page,
+                                 @RequestParam(required = false) String search)
         throws IOException {
 
         CollectionForm form = new CollectionForm();
         boolean newCollection = true;
         List<Item> items = ImmutableList.of();
         Map<Path,String> itemNames = new HashMap<>();
+        Map<Path,Integer> itemPositions = new HashMap<>();
+        int totalItemCount = 0;
+        int totalPages = 0;
+        int pageSize = MAX_ITEMS_TO_DISPLAY;
 
         Collection collection = null;
 
@@ -182,9 +190,56 @@ public class EditController {
         // Get Item names from Ids
         if (collection != null) {
             newCollection = false;
-            items = ModelOps().streamResolvedItemIds(collection)
+            // Load all items to support search across the whole collection,
+            // while only rendering one page of results.
+            List<Item> allItems = ModelOps().streamResolvedItemIds(collection)
                 .map(editAPI::getItem)
                 .collect(ImmutableList.toImmutableList());
+
+            totalItemCount = allItems.size();
+
+            // Record the original position of each item within the collection.
+            for (int idx = 0; idx < allItems.size(); idx++) {
+                itemPositions.put(allItems.get(idx).id(), idx);
+            }
+
+            // Apply search filter if provided.
+            List<Item> filteredItems = allItems;
+            if (!Strings.isNullOrEmpty(search)) {
+                final String searchLower = search.toLowerCase(Locale.ROOT);
+                filteredItems = allItems.stream()
+                    .filter(item -> {
+                        String idStr = item.id().toString().toLowerCase(Locale.ROOT);
+                        String nameStr = item.name() == null ? "" : item.name().toLowerCase(Locale.ROOT);
+                        return idStr.contains(searchLower) || nameStr.contains(searchLower);
+                    })
+                    .collect(ImmutableList.toImmutableList());
+            }
+
+            int filteredCount = filteredItems.size();
+
+            if (filteredCount > 0) {
+                totalPages = (int) Math.ceil(filteredCount / (double) pageSize);
+                if (totalPages < 0) {
+                    totalPages = 0;
+                }
+                if (totalPages > 0) {
+                    page = Math.max(0, Math.min(page, totalPages - 1));
+                } else {
+                    page = 0;
+                }
+            } else {
+                page = 0;
+                totalPages = 0;
+            }
+
+            int fromIndex = page * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, filteredCount);
+            if (fromIndex >= 0 && fromIndex < filteredCount) {
+                items = filteredItems.subList(fromIndex, toIndex);
+            } else {
+                items = ImmutableList.of();
+            }
 
             // Bit of a hack to workaround an thymeleaf error getting name from item
             for (Item i : items) {
@@ -210,6 +265,13 @@ public class EditController {
         model.addAttribute("form", form);
         model.addAttribute("items", items);
         model.addAttribute("itemNames", itemNames);
+        model.addAttribute("itemPositions", itemPositions);
+        model.addAttribute("totalItemCount", totalItemCount);
+        model.addAttribute("maxItemsToDisplay", MAX_ITEMS_TO_DISPLAY);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("searchTerm", search);
         model.addAttribute("dataLocalPath", editAPI.getDataLocalPath());
         model.addAttribute("pathForDataDisplay", pathForDataDisplay);
         model.addAttribute("workspaceIds", workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
