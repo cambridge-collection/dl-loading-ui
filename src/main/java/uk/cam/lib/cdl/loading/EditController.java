@@ -348,7 +348,9 @@ public class EditController {
     public RedirectView updateCollection(RedirectAttributes attributes,
                                          @RequestParam List<Long> workspaceIds,
                                          @RequestBody @Valid @org.springframework.web.bind.annotation.ModelAttribute CollectionForm collectionForm,
-                                         final BindingResult bindingResult)
+                                         final BindingResult bindingResult,
+                                         @RequestParam(required = false) Integer page,
+                                         @RequestParam(required = false) String search)
         throws Exception {
 
         if (bindingResult!=null && bindingResult.hasErrors()) {
@@ -363,6 +365,12 @@ public class EditController {
             attributes.addFlashAttribute("org.springframework.validation.BindingResult.form", bindingResult);
             attributes.addFlashAttribute("form", collectionForm);
             attributes.addAttribute("collectionId", collectionForm.getCollectionId());
+            if (page != null) {
+                attributes.addAttribute("page", page);
+            }
+            if (!Strings.isNullOrEmpty(search)) {
+                attributes.addAttribute("search", search);
+            }
 
             return new RedirectView("/edit/collection/?workspaceIds="+workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
         }
@@ -413,6 +421,12 @@ public class EditController {
         }
 
         attributes.addAttribute("collectionId", collection.getCollectionId());
+        if (page != null) {
+            attributes.addAttribute("page", page);
+        }
+        if (!Strings.isNullOrEmpty(search)) {
+            attributes.addAttribute("search", search);
+        }
         return new RedirectView("/edit/collection/?workspaceIds="+workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
     }
 
@@ -445,8 +459,11 @@ public class EditController {
 
     @PostMapping("/collection/deleteItem")
     @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication)")
-    public RedirectView deleteCollectionItem(RedirectAttributes attributes, @RequestParam String collectionId,
-                                             @RequestParam String itemId) {
+    public RedirectView deleteCollectionItem(RedirectAttributes attributes,
+                                             @RequestParam String collectionId,
+                                             @RequestParam String itemId,
+                                             @RequestParam(required = false) Integer page,
+                                             @RequestParam(required = false) String search) {
 
         Path _itemId, _collectionId;
         try {
@@ -458,6 +475,12 @@ public class EditController {
         }
 
         attributes.addAttribute("collectionId", collectionId);
+        if (page != null) {
+            attributes.addAttribute("page", page);
+        }
+        if (!Strings.isNullOrEmpty(search)) {
+            attributes.addAttribute("search", search);
+        }
 
         try {
             editAPI.enforceItemState(_itemId, SetMembership.removing(_collectionId));
@@ -469,6 +492,70 @@ public class EditController {
         }
 
         return new RedirectView("/edit/collection/");
+    }
+
+    @PostMapping("/collection/moveItem")
+    @PreAuthorize("@roleService.canEditCollection(#collectionId, authentication) ||" +
+        " @roleService.canEditWorkspace(#workspaceIds, authentication)")
+    public RedirectView moveCollectionItem(RedirectAttributes attributes,
+                                           @RequestParam String collectionId,
+                                           @RequestParam String itemId,
+                                           @RequestParam List<Long> workspaceIds,
+                                           @RequestParam(required = false) Integer page,
+                                           @RequestParam(required = false) String search,
+                                           @RequestParam String direction) throws Exception {
+
+        Path _itemId, _collectionId;
+        try {
+            _itemId = ModelOps.ModelOps().validatePathForId(Path.of(itemId));
+            _collectionId = ModelOps.ModelOps().validatePathForId(Path.of(collectionId));
+        }
+        catch (IllegalStateException e) {
+            throw new BadRequestException(e);
+        }
+
+        attributes.addAttribute("collectionId", collectionId);
+        if (page != null) {
+            attributes.addAttribute("page", page);
+        }
+        if (!Strings.isNullOrEmpty(search)) {
+            attributes.addAttribute("search", search);
+        }
+
+        Collection collection = editAPI.getCollection(collectionId);
+        List<Id> itemIds = collection.getItemIds();
+
+        Path collectionPath = collection.getIdAsPath();
+
+        int index = -1;
+        for (int i = 0; i < itemIds.size(); i++) {
+            Path resolvedItemId = ModelOps.ModelOps()
+                .resolveReferenceAsId(collectionPath, Path.of(itemIds.get(i).getId()));
+            if (resolvedItemId.equals(_itemId)) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index == -1) {
+            attributes.addFlashAttribute("error", "Item not found in collection.");
+            return new RedirectView("/edit/collection/");
+        }
+
+        if ("up".equals(direction) && index > 0) {
+            Id current = itemIds.get(index);
+            itemIds.set(index, itemIds.get(index - 1));
+            itemIds.set(index - 1, current);
+        }
+        else if ("down".equals(direction) && index < itemIds.size() - 1) {
+            Id current = itemIds.get(index);
+            itemIds.set(index, itemIds.get(index + 1));
+            itemIds.set(index + 1, current);
+        }
+
+        CollectionForm form = getCollectionForm(collection);
+
+        return updateCollection(attributes, workspaceIds, form, null, page, search);
     }
 
     static boolean isMultipartFileProvided(MultipartFile mpf) {
@@ -677,7 +764,9 @@ public class EditController {
         @Value("${data.path.items}") String itemPath,
         @RequestParam(name = "itemIds") String itemIds,
         @RequestParam(name = "collectionId") String collectionId,
-        @RequestParam(name = "workspaceIds") List<Long> workspaceIds
+        @RequestParam(name = "workspaceIds") List<Long> workspaceIds,
+        @RequestParam(required = false) Integer page,
+        @RequestParam(required = false) String search
         ) throws Exception {
 
         Collection collection = editAPI.getCollection(collectionId);
@@ -693,6 +782,12 @@ public class EditController {
             if (itemIdsInCollection.contains(new Id(inputId))) {
                 attributes.addFlashAttribute("error","Item already exists in collection.");
                 attributes.addAttribute("collectionId", collectionId);
+                if (page != null) {
+                    attributes.addAttribute("page", page);
+                }
+                if (!Strings.isNullOrEmpty(search)) {
+                    attributes.addAttribute("search", search);
+                }
                 return new RedirectView("/edit/collection/?workspaceIds="+workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
             }
 
@@ -702,6 +797,12 @@ public class EditController {
                 if (!editAPI.itemExists(Path.of(idRelToData))) {
                     attributes.addFlashAttribute("error","Item does not exist.");
                     attributes.addAttribute("collectionId", collectionId);
+                    if (page != null) {
+                        attributes.addAttribute("page", page);
+                    }
+                    if (!Strings.isNullOrEmpty(search)) {
+                        attributes.addAttribute("search", search);
+                    }
                     return new RedirectView("/edit/collection/?workspaceIds="+workspaceIds.stream().map(Object::toString).collect(Collectors.joining(",")));
                 }
             }
@@ -710,7 +811,7 @@ public class EditController {
 
         CollectionForm form = getCollectionForm(collection);
 
-        return updateCollection(attributes,workspaceIds,form,null);
+        return updateCollection(attributes,workspaceIds,form,null,page,search);
 
     }
 

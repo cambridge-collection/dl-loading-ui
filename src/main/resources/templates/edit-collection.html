@@ -60,6 +60,8 @@
                                 <input type="hidden" name="itemIds" th:value="*{ItemIds}">
                                 <input type="hidden" name="subCollectionIds" th:value="*{subCollectionIds}">
                                 <input type="hidden" name="collectionId" th:value="*{collectionId}">
+                                <input type="hidden" name="page" th:value="${currentPage}">
+                                <input type="hidden" name="search" th:value="${searchTerm}">
                                 <div class="form-group w-auto">
                                     <div class="row">
                                         <div class="col"><h4>Names</h4></div>
@@ -265,6 +267,7 @@
                                     <form method="get" th:action="@{/edit/collection/}">
                                         <input type="hidden" name="collectionId" th:value="${form.collectionId}">
                                         <input type="hidden" name="workspaceIds" th:value="${workspaceIds}">
+                                        <input type="hidden" name="page" th:value="${currentPage}">
                                         <div class="input-group input-group-sm">
                                             <input type="text" class="form-control" name="search"
                                                    placeholder="Search items by id or name"
@@ -297,8 +300,40 @@
                                         <tr th:each="i : ${#numbers.sequence( 0, items.size()-1)}">
                                             <span th:with="item=${items.get(i)}">
                                             <td>
-                                                <div>
-                                                    <span th:text="${itemPositions.get(item.id()) + 1}"></span>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="mr-2" th:text="${itemPositions.get(item.id()) + 1}"></span>
+                                                    <div class="btn-group btn-group-sm" role="group" aria-label="Reorder item">
+                                                        <form method="post"
+                                                              action="/edit/collection/moveItem"
+                                                              class="d-inline">
+                                                            <input type="hidden" name="collectionId" th:value="${form.collectionId}">
+                                                            <input type="hidden" name="workspaceIds" th:value="${workspaceIds}">
+                                                            <input type="hidden" name="page" th:value="${currentPage}">
+                                                            <input type="hidden" name="search" th:value="${searchTerm}">
+                                                            <input type="hidden" name="itemId" th:value="${item.id()}">
+                                                            <input type="hidden" name="direction" value="up">
+                                                            <button type="submit"
+                                                                    class="btn btn-link p-0"
+                                                                    th:disabled="${itemPositions.get(item.id()) == 0}">
+                                                                <i class="fas fa-arrow-up text-gray-500"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form method="post"
+                                                              action="/edit/collection/moveItem"
+                                                              class="d-inline ml-1">
+                                                            <input type="hidden" name="collectionId" th:value="${form.collectionId}">
+                                                            <input type="hidden" name="workspaceIds" th:value="${workspaceIds}">
+                                                            <input type="hidden" name="page" th:value="${currentPage}">
+                                                            <input type="hidden" name="search" th:value="${searchTerm}">
+                                                            <input type="hidden" name="itemId" th:value="${item.id()}">
+                                                            <input type="hidden" name="direction" value="down">
+                                                            <button type="submit"
+                                                                    class="btn btn-link p-0"
+                                                                    th:disabled="${itemPositions.get(item.id()) == totalItemCount - 1}">
+                                                                <i class="fas fa-arrow-down text-gray-500"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td>
@@ -316,6 +351,8 @@
                                                     method="post" th:id="'deleteItemForm_'+${item.id()}">
                                                     <input type="hidden" name="itemId" th:value="${item.id()}">
                                                     <input type="hidden" name="collectionId" th:value="${form.collectionId}">
+                                                    <input type="hidden" name="page" th:value="${currentPage}">
+                                                    <input type="hidden" name="search" th:value="${searchTerm}">
                                                     <button class="btn btn-link"
                                                             th:id="'deleteItemButton_'+${item.id()}"
                                                             onclick="return loading_ui_edit_collection.showDeleteModal(this);">
@@ -336,7 +373,7 @@
                                         <ul class="pagination pagination-sm mb-0">
                                             <li class="page-item" th:classappend="${currentPage == 0} ? ' disabled'">
                                                 <a class="page-link"
-                                                   th:href="@{/edit/collection/(collectionId=${form.collectionId},workspaceIds=${workspaceIds},page=${currentPage - 1})}">
+                                                   th:href="@{/edit/collection/(collectionId=${form.collectionId},workspaceIds=${workspaceIds},page=${currentPage - 1},search=${searchTerm})}">
                                                     Previous
                                                 </a>
                                             </li>
@@ -348,7 +385,7 @@
                                             </li>
                                             <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? ' disabled'">
                                                 <a class="page-link"
-                                                   th:href="@{/edit/collection/(collectionId=${form.collectionId},workspaceIds=${workspaceIds},page=${currentPage + 1})}">
+                                                   th:href="@{/edit/collection/(collectionId=${form.collectionId},workspaceIds=${workspaceIds},page=${currentPage + 1},search=${searchTerm})}">
                                                     Next
                                                 </a>
                                             </li>
@@ -377,6 +414,8 @@
                                     <form action="/edit/collection/addExistingItemsToCollection" method="post" >
                                         <input type="hidden" name="collectionId" th:value="${form.collectionId}">
                                         <input type="hidden" name="workspaceIds" th:value="${workspaceIds}">
+                                        <input type="hidden" name="page" th:value="${currentPage}">
+                                        <input type="hidden" name="search" th:value="${searchTerm}">
                                         <label>Item ids (comma separated) e.g. MS-ADD-03958,MS-ADD-03960,MS-ADD-03996</label>
                                         <input class="form-control" type="text" name="itemIds" size="60"
                                                id="itemIds">
