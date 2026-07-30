@@ -29,3 +29,15 @@
     }
 }
 /** End of Iframe for image select **/
+
+/** Release Status select colouring **/
+#releaseStatus.release-status-draft,
+#releaseStatus option.release-status-draft {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+#releaseStatus.release-status-released,
+#releaseStatus option.release-status-released {
+    background-color: #d4edda;
+    color: #155724;
+}

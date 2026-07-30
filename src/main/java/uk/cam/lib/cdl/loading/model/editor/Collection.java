@@ -31,6 +31,8 @@ public class Collection implements Comparable<Collection> {
     @Nullable
     private String collectionId;
     private final List<Id> subcollections;
+    private boolean isReleased = false;
+    private String status = "draft";
 
     @ConstructorProperties({"name", "description", "credit", "items", "collections"})
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
@@ -65,6 +67,8 @@ public class Collection implements Comparable<Collection> {
         );
         copy.setThumbnailURL(other.getThumbnailURL());
         copy.setCollectionId(other.getCollectionId());
+        copy.setReleased(other.isReleased());
+        copy.setStatus(other.getStatus());
         return copy;
     }
 
@@ -97,6 +101,26 @@ public class Collection implements Comparable<Collection> {
         return subcollections;
     }
 
+    @JsonProperty("isReleased")
+    public boolean isReleased() {
+        return isReleased;
+    }
+
+    @JsonProperty("isReleased")
+    public void setReleased(boolean released) {
+        this.isReleased = released;
+    }
+
+    @JsonProperty("status")
+    public String getStatus() {
+        return status;
+    }
+
+    @JsonProperty("status")
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @JsonIgnore
     @Nullable
     public String getThumbnailURL() {
@@ -126,6 +150,8 @@ public class Collection implements Comparable<Collection> {
         sb.append("    credit: ").append(toIndentedString(credit)).append("\n");
         sb.append("    items: ").append(toIndentedString(ids)).append("\n");
         sb.append("    collections: ").append(toIndentedString(subcollections)).append("\n");
+        sb.append("    isReleased: ").append(toIndentedString(isReleased)).append("\n");
+        sb.append("    status: ").append(toIndentedString(status)).append("\n");
         sb.append("}");
         return sb.toString();
     }

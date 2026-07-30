@@ -65,6 +65,24 @@
                                 <input type="hidden" name="search" th:value="${searchTerm}">
                                 <div class="form-group w-auto">
                                     <div class="row">
+                                        <div class="col"><h4>Release Status</h4></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-4 m-2 text-right">
+                                            <label for="releaseStatus">Release Status</label>
+                                        </div>
+                                        <div class="col-6 m-2">
+                                            <div class="alert-danger" th:if="${#fields.hasErrors('releaseStatus')}"
+                                                 th:errors="*{releaseStatus}"></div>
+                                            <select class="form-control" th:field="*{releaseStatus}" id="releaseStatus">
+                                                <option value="draft" class="release-status-draft">Draft (not released)</option>
+                                                <option value="released" class="release-status-released">Released</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group w-auto">
+                                    <div class="row">
                                         <div class="col"><h4>Names</h4></div>
                                     </div>
                                     <div class="row">

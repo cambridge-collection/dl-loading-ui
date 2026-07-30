@@ -1,5 +1,6 @@
 package uk.cam.lib.cdl.loading.model.editor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Truth;
 import org.junit.jupiter.api.Assertions;
@@ -85,5 +86,48 @@ public class CollectionTest {
         Truth.assertThat(colWithId.toString()).isNotEqualTo(colWithoutId.toString());
         Truth.assertThat(colWithId).isEqualTo(colWithoutId);
         Truth.assertThat(colWithId.hashCode()).isEqualTo(colWithoutId.hashCode());
+    }
+
+    private static final String MINIMAL_COLLECTION_JSON = "{"
+        + "\"name\":{\"url-slug\":\"foo\",\"sort\":\"s\",\"short\":\"s\",\"full\":\"f\"},"
+        + "\"items\":[],\"collections\":[]";
+
+    @Test
+    public void releasedFieldsDeserializeFromJson() throws Exception {
+        var json = MINIMAL_COLLECTION_JSON + ",\"isReleased\":true,\"status\":\"released\"}";
+        var col = new ObjectMapper().readValue(json, Collection.class);
+
+        Truth.assertThat(col.isReleased()).isTrue();
+        Truth.assertThat(col.getStatus()).isEqualTo("released");
+    }
+
+    @Test
+    public void draftFieldsDeserializeFromJson() throws Exception {
+        var json = MINIMAL_COLLECTION_JSON + ",\"isReleased\":false,\"status\":\"draft\"}";
+        var col = new ObjectMapper().readValue(json, Collection.class);
+
+        Truth.assertThat(col.isReleased()).isFalse();
+        Truth.assertThat(col.getStatus()).isEqualTo("draft");
+    }
+
+    @Test
+    public void missingReleaseFieldsDefaultToDraft() throws Exception {
+        var json = MINIMAL_COLLECTION_JSON + "}";
+        var col = new ObjectMapper().readValue(json, Collection.class);
+
+        Truth.assertThat(col.isReleased()).isFalse();
+        Truth.assertThat(col.getStatus()).isEqualTo("draft");
+    }
+
+    @Test
+    public void releaseFieldsSerializeToJson() throws Exception {
+        var col = Models.exampleCollection(Path.of("collections/foo.json"));
+        col.setReleased(true);
+        col.setStatus("released");
+
+        var json = new ObjectMapper().writeValueAsString(col);
+
+        Truth.assertThat(json).contains("\"isReleased\":true");
+        Truth.assertThat(json).contains("\"status\":\"released\"");
     }
 }

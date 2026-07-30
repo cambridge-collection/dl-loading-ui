@@ -61,6 +61,9 @@ public class CollectionForm {
     @NotBlank(message = "Must specify a thumbnail URL")
     private String thumbnailURL;
 
+    @NotBlank(message = "Must specify a release status")
+    private String releaseStatus = "draft";
+
     public CollectionForm(String collectionId, Collection collection, String descriptionHTML, String creditHTML,
                           UICollection uiCollection) {
         if (collectionId == null || collection == null) {
@@ -79,6 +82,7 @@ public class CollectionForm {
         this.proseCreditHTML = creditHTML;
         this.thumbnailURL = collection.getThumbnailURL();
         this.collectionType = uiCollection.getLayout();
+        this.releaseStatus = collection.isReleased() ? "released" : "draft";
 
         List<String> itemIds = new ArrayList<>();
         for (Id id : collection.getItemIds()) {
@@ -178,6 +182,8 @@ public class CollectionForm {
         Collection c = new Collection(name, description, credit, itemIds, subCollectionIds);
         c.setThumbnailURL(thumbnailURL);
         c.setCollectionId(collectionId);
+        c.setReleased("released".equals(releaseStatus));
+        c.setStatus("released".equals(releaseStatus) ? "released" : "draft");
         return c;
     }
 
@@ -266,6 +272,14 @@ public class CollectionForm {
 
     public void setThumbnailURL(String thumbnailURL) {
         this.thumbnailURL = thumbnailURL;
+    }
+
+    public String getReleaseStatus() {
+        return releaseStatus;
+    }
+
+    public void setReleaseStatus(String releaseStatus) {
+        this.releaseStatus = releaseStatus;
     }
 }
 

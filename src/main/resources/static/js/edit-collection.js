@@ -34,6 +34,15 @@ $(document).ready(function () {
         return false;
     });
 
+    function updateReleaseStatusColour() {
+        var select = $('#releaseStatus');
+        select.toggleClass('release-status-released', select.val() === 'released');
+        select.toggleClass('release-status-draft', select.val() !== 'released');
+    }
+
+    $('#releaseStatus').on('change', updateReleaseStatusColour);
+    updateReleaseStatusColour();
+
     function renumberPositions() {
         var table = $('#dataTable');
         var currentPage = parseInt(table.data('current-page') || 0, 10);
