@@ -228,44 +228,59 @@ The repository contains a Docker Compose file which will run a suitable database
 
 Run `$ docker-compose --env-file example.env up --build` in the repository to start the services with appropriate values set in the example.env
 
-### Build and Publish to Docker Images AWS ECR Repository
+### Build and Publish Docker Images to AWS ECR
 
-First build the project if you have not already.
-    mvn clean package
+Images are built once and deployed to any environment without rebuilding. The database
+password and other secrets are injected at runtime from AWS SSM Parameter Store — they
+are not baked into the image.
 
-Then publish to ECR
-    source <env file>
-
-Build the image and upload to sandbox:
+#### 1. Build the Maven artifact
 
 ```sh
-source sandbox-cudl-loader.env
-cd docker/dl-loading-db
-docker image build --no-cache --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-db .
-docker tag dl-loader-db:latest 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-db:latest
-aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 563181399728.dkr.ecr.eu-west-1.amazonaws.com
-docker push 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-db:latest
-cd ../..
-docker image build --no-cache --network=host --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui .
-docker tag dl-loader-ui:latest 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-ui:latest
-docker push 563181399728.dkr.ecr.eu-west-1.amazonaws.com/dl-loader-ui:latest
+mvn clean package
 ```
 
-Upload to cul-cudl account:
+#### 2. Build both images
+
 ```sh
-source cul-staging-cudl-loader.env
+# DB image — only the init SQL file selection is a build-time concern
 cd docker/dl-loading-db
-docker image build --no-cache --build-arg LOADING_DB_PASSWORD=$LOADING_DB_PASSWORD --build-arg LOADING_DB_USER_SETUP_SQL=$LOADING_DB_USER_SETUP_SQL -t dl-loader-db .
-docker tag dl-loader-db:latest 438117829123.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-db:latest
-aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 438117829123.dkr.ecr.eu-west-1.amazonaws.com
-docker push 438117829123.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-db
+docker image build \
+  --build-arg LOADING_DB_USER_SETUP_SQL=example_user_data.sql \
+  -t cudl/content-loader-db .
 cd ../..
-docker image build --no-cache --network=host --build-arg LOADING_UI_HARDCODED_USERS_FILE=$LOADING_UI_HARDCODED_USERS_FILE -t dl-loader-ui .
-docker tag dl-loader-ui:latest 438117829123.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-ui:latest
-docker push 438117829123.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-ui:latest
+
+# UI image
+docker image build --network=host \
+  --build-arg LOADING_UI_HARDCODED_USERS_FILE=conf/EXAMPLE-users.properties \
+  -t cudl/content-loader-ui .
 ```
 
-NOTE THE SHA VALUES WILL BE DIFFERENT ON SANDBOX AND ON STAGING
+#### 3. Push to ECR
 
-Then use the repository 'cudl-terraform' to update the ECR image used and deploy the new version by using the new image sha.
-*Note at the moment it can be very slow to deploy*
+Log in to the target account, then tag and push both images. Replace `<ACCOUNT_ID>` with your AWS account ID.
+
+```sh
+aws ecr get-login-password --region eu-west-1 \
+  | docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.eu-west-1.amazonaws.com
+
+docker tag cudl/content-loader-db:latest \
+  <ACCOUNT_ID>.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-db:latest
+docker push <ACCOUNT_ID>.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-db:latest
+
+docker tag cudl/content-loader-ui:latest \
+  <ACCOUNT_ID>.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-ui:latest
+docker push <ACCOUNT_ID>.dkr.ecr.eu-west-1.amazonaws.com/cudl/content-loader-ui:latest
+```
+
+#### 4. Update the image digest in Terraform
+
+After pushing, get the new digest and update `institution.auto.tfvars` in the relevant
+environment directory:
+
+```sh
+cd ../cudl-terraform/cul-<env>
+./scripts/update-ecr-digests.sh
+```
+
+Then run `terraform apply` to deploy the new image.

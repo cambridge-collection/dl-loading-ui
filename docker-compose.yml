@@ -31,7 +31,6 @@ services:
       dockerfile: Dockerfile
       args:
         LOADING_DB_USER_SETUP_SQL: ${LOADING_DB_USER_SETUP_SQL}
-        POSTGRES_PASSWORD: ${LOADING_DB_PASSWORD}
     restart: always
     image: camdl/dl-loading-db:latest
     platform: linux/amd64

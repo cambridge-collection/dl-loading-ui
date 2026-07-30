@@ -27,7 +27,6 @@ public class DeploymentHelper {
         Process returnOK = s3Helper.syncBucketData(sourceBucket,destBucket, true);
 
         logger.info("Waiting for items to be copied to production S3..");
-        // Wait for data s3 transfer to complete before s3 to efs transfer (via datasync)
         returnOK.waitFor();
         logger.info("Deploy complete");
 

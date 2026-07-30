@@ -34,6 +34,93 @@ $(document).ready(function () {
         return false;
     });
 
+    function renumberPositions() {
+        var table = $('#dataTable');
+        var currentPage = parseInt(table.data('current-page') || 0, 10);
+        var pageSize = parseInt(table.data('page-size') || 0, 10);
+        table.find('tbody tr').each(function (index) {
+            var position = (currentPage * pageSize) + index + 1;
+            $(this).find('.item-position').text(position);
+        });
+    }
+
+    function updateReorderButtons() {
+        var table = $('#dataTable');
+        var rows = table.find('tbody tr');
+        rows.find('.move-up').prop('disabled', false);
+        rows.find('.move-down').prop('disabled', false);
+        rows.first().find('.move-up').prop('disabled', true);
+        rows.last().find('.move-down').prop('disabled', true);
+    }
+
+    loading_ui_edit_collection.moveItem = function (button, direction) {
+        var $button = $(button);
+        var row = $button.closest('tr');
+        var tbody = row.closest('tbody');
+        var target = direction === 'up' ? row.prev('tr') : row.next('tr');
+
+        if (target.length === 0) {
+            return false;
+        }
+
+        // Reorder rows in the DOM
+        if (direction === 'up') {
+            row.insertBefore(target);
+        } else {
+            row.insertAfter(target);
+        }
+
+        // Update item order hidden field for items on this page
+        var orderInput = $('#collectionItemOrder');
+        if (orderInput.length) {
+            var current = orderInput.val() || '';
+            if (current.length > 0) {
+                var order = current.split(',');
+
+                // Map from id -> index in global order
+                var indexById = {};
+                for (var i = 0; i < order.length; i++) {
+                    indexById[order[i]] = i;
+                }
+
+                // IDs in this page in new DOM order
+                var pageIds = [];
+                tbody.find('tr').each(function () {
+                    pageIds.push($(this).data('item-id'));
+                });
+
+                // Corresponding indices in global order, sorted so we keep the same positions
+                var indices = pageIds.map(function (id) {
+                    return indexById[id];
+                }).sort(function (a, b) { return a - b; });
+
+                for (var j = 0; j < indices.length; j++) {
+                    order[indices[j]] = pageIds[j];
+                }
+
+                orderInput.val(order.join(','));
+            }
+        }
+
+        renumberPositions();
+        updateReorderButtons();
+
+        // Show one-time hint that Update is needed to save
+        var hint = $('#reorder-hint');
+        if (hint.length && hint.hasClass('d-none')) {
+            hint.removeClass('d-none');
+        }
+        return false;
+    };
+
+    $('#dataTable').on('click', '.move-up', function () {
+        return loading_ui_edit_collection.moveItem(this, 'up');
+    });
+
+    $('#dataTable').on('click', '.move-down', function () {
+        return loading_ui_edit_collection.moveItem(this, 'down');
+    });
+
     loading_ui_edit_collection.showDeleteModal = function (button) {
         deleteItemModal.modal('show');
         let form = button.form;
@@ -166,4 +253,8 @@ $(document).ready(function () {
     });
 
     CKEDITOR.config.allowedContent=true;
+
+    // Initialise reorder UI
+    renumberPositions();
+    updateReorderButtons();
 });

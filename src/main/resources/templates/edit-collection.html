@@ -57,7 +57,9 @@
                             <form method="post" id="collectioneditform"
                                   th:action="@{'/edit/collection/update?workspaceIds='+${workspaceIds}}"
                                   th:object="${form}">
-                                <input type="hidden" name="itemIds" th:value="*{ItemIds}">
+                                <input type="hidden" id="collectionItemIds" name="itemIds" th:value="*{ItemIds}">
+                                <input type="hidden" id="collectionItemOrder" name="itemOrder"
+                                       th:value="${form.itemIds} != null ? ${#strings.listJoin(form.itemIds, ',')} : ''">
                                 <input type="hidden" name="subCollectionIds" th:value="*{subCollectionIds}">
                                 <input type="hidden" name="collectionId" th:value="*{collectionId}">
                                 <input type="hidden" name="page" th:value="${currentPage}">
@@ -247,7 +249,13 @@
 
                             </form>
                             <div class="row mt-6">
-                                <div class="col"><h4>Items</h4></div>
+                                <div class="col d-flex align-items-center">
+                                    <h4 class="mb-0 mr-2">Items</h4>
+                                    <span id="reorder-hint"
+                                          class="badge badge-warning text-dark d-none">
+                                        Order changed – click "Update" to save changes.
+                                    </span>
+                                </div>
                                 <div class="col text-muted small"
                                      th:if="${!newCollection && totalItemCount > 0}">
                                     Showing
@@ -287,7 +295,8 @@
 
                                     <table class="table table-hover table-bordered" id="dataTable"
                                            width="100%"
-                                           cellspacing="0">
+                                           cellspacing="0"
+                                           th:attr="data-current-page=${currentPage},data-page-size=${pageSize}">
                                         <thead>
                                         <tr>
                                             <th>Position</th>
@@ -297,42 +306,22 @@
                                         </thead>
                                         <tbody th:if="${items.size()>0}">
 
-                                        <tr th:each="i : ${#numbers.sequence( 0, items.size()-1)}">
-                                            <span th:with="item=${items.get(i)}">
+                                        <tr th:each="i : ${#numbers.sequence( 0, items.size()-1)}"
+                                            th:with="item=${items.get(i)}"
+                                            th:attr="data-item-id=${item.id()}">
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <span class="mr-2" th:text="${itemPositions.get(item.id()) + 1}"></span>
+                                                    <span class="mr-2 item-position"
+                                                          th:text="${currentPage * pageSize + i + 1}"></span>
                                                     <div class="btn-group btn-group-sm" role="group" aria-label="Reorder item">
-                                                        <form method="post"
-                                                              action="/edit/collection/moveItem"
-                                                              class="d-inline">
-                                                            <input type="hidden" name="collectionId" th:value="${form.collectionId}">
-                                                            <input type="hidden" name="workspaceIds" th:value="${workspaceIds}">
-                                                            <input type="hidden" name="page" th:value="${currentPage}">
-                                                            <input type="hidden" name="search" th:value="${searchTerm}">
-                                                            <input type="hidden" name="itemId" th:value="${item.id()}">
-                                                            <input type="hidden" name="direction" value="up">
-                                                            <button type="submit"
-                                                                    class="btn btn-link p-0"
-                                                                    th:disabled="${itemPositions.get(item.id()) == 0}">
-                                                                <i class="fas fa-arrow-up text-gray-500"></i>
-                                                            </button>
-                                                        </form>
-                                                        <form method="post"
-                                                              action="/edit/collection/moveItem"
-                                                              class="d-inline ml-1">
-                                                            <input type="hidden" name="collectionId" th:value="${form.collectionId}">
-                                                            <input type="hidden" name="workspaceIds" th:value="${workspaceIds}">
-                                                            <input type="hidden" name="page" th:value="${currentPage}">
-                                                            <input type="hidden" name="search" th:value="${searchTerm}">
-                                                            <input type="hidden" name="itemId" th:value="${item.id()}">
-                                                            <input type="hidden" name="direction" value="down">
-                                                            <button type="submit"
-                                                                    class="btn btn-link p-0"
-                                                                    th:disabled="${itemPositions.get(item.id()) == totalItemCount - 1}">
-                                                                <i class="fas fa-arrow-down text-gray-500"></i>
-                                                            </button>
-                                                        </form>
+                                                        <button type="button"
+                                                                class="btn btn-link p-0 move-up">
+                                                            <i class="fas fa-arrow-up text-gray-500"></i>
+                                                        </button>
+                                                        <button type="button"
+                                                                class="btn btn-link p-0 ml-1 move-down">
+                                                            <i class="fas fa-arrow-down text-gray-500"></i>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </td>
@@ -360,7 +349,6 @@
                                                     </button>
                                                 </form>
                                             </td>
-                                            </span>
                                         </tr>
                                         </tbody>
                                     </table>
