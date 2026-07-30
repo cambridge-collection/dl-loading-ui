@@ -71,7 +71,7 @@ $(document).ready(function () {
         }
 
         // Update item order hidden field for items on this page
-        var orderInput = $('#collectionItemOrder');
+        var orderInput = $('#collectionItemIds');
         if (orderInput.length) {
             var current = orderInput.val() || '';
             if (current.length > 0) {

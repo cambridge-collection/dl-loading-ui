@@ -38,6 +38,8 @@ public class S3Helper {
         if (deleteIfNotAtSource) {
             params += " --delete ";
         }
+        // Content under the root-level "unreleased" folder should never be published to another bucket.
+        params += " --exclude \"unreleased/*\" ";
 
         final String command = "aws s3 sync "+params+" s3://"+sourceBucket+" s3://"+destBucket;
         logger.info("running command: "+command);
