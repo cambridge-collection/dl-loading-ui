@@ -49,4 +49,23 @@ public class S3Helper {
 
     }
 
+    @PreAuthorize("@roleService.canDeploySites(authentication)")
+    public Process removeUnreleasedFolder(String bucket) throws IOException {
+
+        if (!s3.doesBucketExistV2(bucket)) {
+            logger.error("Failed to remove unreleased folder because bucket does not exist: "+bucket);
+            return null;
+        }
+
+        logger.info("Removing unreleased folder from bucket: "+bucket);
+
+        // aws s3 rm is a no-op if the unreleased folder does not exist, so no separate existence check is required.
+        final String command = "aws s3 rm s3://"+bucket+"/unreleased --recursive";
+        logger.info("running command: "+command);
+
+        ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", command);
+        return builder.inheritIO().start();
+
+    }
+
 }

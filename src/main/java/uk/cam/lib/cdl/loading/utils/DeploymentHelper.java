@@ -30,6 +30,15 @@ public class DeploymentHelper {
         returnOK.waitFor();
         logger.info("Deploy complete");
 
+        // The unreleased folder should never be synced to production, but remove it in case it was
+        // already present there from before this exclusion was in place.
+        Process removeUnreleased = s3Helper.removeUnreleasedFolder(destBucket);
+        if (removeUnreleased != null) {
+            logger.info("Waiting for unreleased folder to be removed from production S3..");
+            removeUnreleased.waitFor();
+            logger.info("Removal of unreleased folder from production S3 complete");
+        }
+
         return true;
     }
 
