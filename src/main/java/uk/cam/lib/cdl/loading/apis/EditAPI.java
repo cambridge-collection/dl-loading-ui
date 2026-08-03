@@ -24,9 +24,11 @@ import uk.cam.lib.cdl.loading.utils.sets.SetMembershipTransformation;
 import javax.validation.constraints.NotNull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -118,34 +120,18 @@ public class EditAPI {
         Map<String, Path> newCollectionFilepaths = Collections.synchronizedMap(new HashMap<>());
         Map<String, Item> newItemMap = Collections.synchronizedMap(new HashMap<>());
 
-        // Setup collections
-        for (Id id : dataset.getCollections()) {
-
-            try {
-                //var collectionFile = datasetFile.resolveSibling(id.getId()).normalize();
-                //Preconditions.checkState(collectionFile.startsWith(dataPath), "Collection '%s' is not under dataPath", id.getId());
-                var collectionFile = getFullPathForId(id.getId());
-                String collectionId = dataPath.relativize(collectionFile).toString();
-
-                Collection c = mapper.readValue(collectionFile.toFile(), Collection.class);
-                c.setCollectionId(collectionId);
-
-                // Setup collection maps
-                newCollectionMap.put(collectionId, c);
-                newCollectionFilepaths.put(collectionId, collectionFile);
-
-                for (Id relativeItemId : c.getItemIds()) {
-                    try {
-                        var itemFile = collectionFile.resolveSibling(relativeItemId.getId());
-                        var itemId = dataPath.relativize(itemFile);
-                        newItemMap.put(itemId.toString(), ImmutableItem.of(itemId));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        // Setup collections. Loading is dominated by file-read latency (the data directory may be
+        // an S3 FUSE mount), so collections are loaded concurrently rather than one at a time.
+        ExecutorService executor = Executors.newFixedThreadPool(32);
+        try {
+            List<CompletableFuture<Void>> futures = dataset.getCollections().stream()
+                .map(id -> CompletableFuture.runAsync(
+                    () -> loadCollection(id, mapper, newCollectionMap, newCollectionFilepaths, newItemMap),
+                    executor))
+                .collect(toImmutableList());
+            futures.forEach(CompletableFuture::join);
+        } finally {
+            executor.shutdown();
         }
 
         this.collectionMap = newCollectionMap;
@@ -154,6 +140,35 @@ public class EditAPI {
 
         _updateModelFromUIFile(mapper);
         System.out.println("done update model.");
+    }
+
+    private void loadCollection(Id id, ObjectMapper mapper,
+                                 Map<String, Collection> newCollectionMap,
+                                 Map<String, Path> newCollectionFilepaths,
+                                 Map<String, Item> newItemMap) {
+        try {
+            var collectionFile = getFullPathForId(id.getId());
+            String collectionId = dataPath.relativize(collectionFile).toString();
+
+            Collection c = mapper.readValue(collectionFile.toFile(), Collection.class);
+            c.setCollectionId(collectionId);
+
+            // Setup collection maps
+            newCollectionMap.put(collectionId, c);
+            newCollectionFilepaths.put(collectionId, collectionFile);
+
+            for (Id relativeItemId : c.getItemIds()) {
+                try {
+                    var itemFile = collectionFile.resolveSibling(relativeItemId.getId());
+                    var itemId = dataPath.relativize(itemFile);
+                    newItemMap.put(itemId.toString(), ImmutableItem.of(itemId));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private synchronized void _updateModelFromUIFile(ObjectMapper mapper) throws IOException{
@@ -486,9 +501,6 @@ public class EditAPI {
     public Path getFullPathForId(String id) throws FileNotFoundException {
         var path = datasetFile.resolveSibling(id).normalize();
         Preconditions.checkState(path.startsWith(dataPath), "File '%s' is not under dataPath", id);
-        if (!Files.exists(path)) {
-            throw new FileNotFoundException("File cannot be found at: " + path);
-        }
         return path;
     }
 }
