@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static uk.cam.lib.cdl.loading.utils.XML.elementIsNamed;
 
@@ -41,15 +42,20 @@ public class TEIPageInserter {
         assert elementIsNamed(XMLNS_TEI, "TEI", teiEl);
         var facsimileEl = getOrCreateFacsimileInsertionPoint(tei);
 
-        // A single thumbnail is created from the first page
+        var surfaceEls = pages.stream().map(page -> createSurface(tei, page))
+            .collect(Collectors.toList());
+
+        // A single thumbnail is created from the first page, mirroring its orientation
         var thumbnailGraphicEl = XML.appendChild(facsimileEl, XMLNS_TEI, "graphic");
-        // The original code set rend="portrait" but I don't think it's used, and we don't have access to the
-        // actual aspect ratio of the image to know what it should be.
         thumbnailGraphicEl.setAttribute("decls", "#document-thumbnail");
         thumbnailGraphicEl.setAttribute("url", pages.get(0).page().image().toString());
+        var firstPageGraphicEl = (Element) surfaceEls.get(0).getElementsByTagNameNS(XMLNS_TEI, "graphic").item(0);
+        var firstPageRend = firstPageGraphicEl.getAttribute("rend");
+        if (!firstPageRend.isEmpty()) {
+            thumbnailGraphicEl.setAttribute("rend", firstPageRend);
+        }
 
-        pages.stream().map(page -> createSurface(tei, page))
-            .forEach(facsimileEl::appendChild);
+        surfaceEls.forEach(facsimileEl::appendChild);
     }
 
     private Element getOrCreateFacsimileInsertionPoint(Document doc) {
