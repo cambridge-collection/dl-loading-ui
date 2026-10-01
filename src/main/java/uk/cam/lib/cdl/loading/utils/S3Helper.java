@@ -25,6 +25,15 @@ public class S3Helper {
 
     @PreAuthorize("@roleService.canDeploySites(authentication)")
     public Process syncBucketData(String sourceBucket, String destBucket, boolean deleteIfNotAtSource) throws IOException {
+        return syncBucketData(sourceBucket, destBucket, "", deleteIfNotAtSource);
+    }
+
+    /**
+     * Sync only the given path (e.g. "collections") within the source bucket to the same path in the dest bucket.
+     * An empty path syncs the whole bucket.
+     */
+    @PreAuthorize("@roleService.canDeploySites(authentication)")
+    public Process syncBucketData(String sourceBucket, String destBucket, String path, boolean deleteIfNotAtSource) throws IOException {
 
         // Check buckets exist
         if (!s3.doesBucketExistV2(sourceBucket) || !s3.doesBucketExistV2(destBucket)) {
@@ -32,16 +41,21 @@ public class S3Helper {
             return null;
         }
 
-        logger.info("Starting sync process between: "+sourceBucket+" and "+destBucket);
+        final String pathSuffix = path.isEmpty() ? "" : "/"+path;
+
+        logger.info("Starting sync process between: "+sourceBucket+pathSuffix+" and "+destBucket+pathSuffix);
 
         String params = " ";
         if (deleteIfNotAtSource) {
             params += " --delete ";
         }
         // Content under the root-level "unreleased" folder should never be published to another bucket.
-        params += " --exclude \"unreleased/*\" ";
+        // Only relevant when syncing from the bucket root.
+        if (path.isEmpty()) {
+            params += " --exclude \"unreleased/*\" ";
+        }
 
-        final String command = "aws s3 sync "+params+" s3://"+sourceBucket+" s3://"+destBucket;
+        final String command = "aws s3 sync "+params+" s3://"+sourceBucket+pathSuffix+" s3://"+destBucket+pathSuffix;
         logger.info("running command: "+command);
 
         ProcessBuilder builder = new ProcessBuilder("/bin/bash", "-c", command);
