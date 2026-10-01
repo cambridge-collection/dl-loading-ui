@@ -24,6 +24,13 @@ public class DeploymentHelper {
 
     @PreAuthorize("@roleService.canDeploySites(authentication)")
     public boolean deploy() throws IOException, InterruptedException {
+        // Sync the collections directory first, then everything else.
+        Process collectionsSync = s3Helper.syncBucketData(sourceBucket,destBucket, "collections", true);
+
+        logger.info("Waiting for collections to be copied to production S3..");
+        collectionsSync.waitFor();
+        logger.info("Collections sync complete");
+
         Process returnOK = s3Helper.syncBucketData(sourceBucket,destBucket, true);
 
         logger.info("Waiting for items to be copied to production S3..");
